@@ -20,31 +20,33 @@
  *  Jeremy Wootten <jeremwootten@gmail.com>
  */
 
-public class Gnonogram_view : Gtk.Window {
+namespace Gnonograms {
+public class View : Gtk.Window {
     Gtk.Box info_box;
     Gtk.Label name_label;
     
-    public Gnonogram_view () {
-        name_label =  new Label ("Test Label");
+    public View () {
+        name_label =  new Gtk.Label ("Test Gtk.Label");
         name_label.set_alignment ((float)0.0, (float)0.5);
 
-        var name_fr = new Frame (null);
+        var name_fr = new Gtk.Frame (null);
         name_fr.add (name_label);
 
-        info_box = new Box (Gtk.Orientation.HORIZONTAL, 0);
+        info_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
         info_box.set_homogeneous (false);
         info_box.add (name_fr);
 
-        var info_frame = new Frame (null);
+        var info_frame = new Gtk.Frame (null);
         info_frame.add (info_box);
 
-        var vbox = new Box (Gtk.Orientation.VERTICAL, 0);
+        var vbox = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
         vbox.set_homogeneous (false);
         vbox.pack_start (info_frame, true, true, 0);
         add (vbox);
 
         this.title = _("Gnonograms3");
-        this.set_position (WindowPosition.CENTER);
+        this.set_position (Gtk.WindowPosition.CENTER);
         this.resizable = false;
     }
+}
 }

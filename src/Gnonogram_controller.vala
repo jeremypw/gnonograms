@@ -18,18 +18,33 @@
  *  Author:
  *  Jeremy Wootten <jeremwootten@gmail.com>
  */
+namespace Gnonograms {
+public class Controller : GLib.Object {
+    private View gnonogram_view;
+    public string game_path {get; set;}
 
-public class Gnonogram_controller : GLib.Object {
-    public Gnonogram_view gnonogram_view { get; private set; }
+    public Gtk.Window window {
+        get {
+            return (Gtk.Window)gnonogram_view;
+        }
+    }
 
-
-    public Gnonogram_controller(string game_path) {
+    public Controller(string game_path) {
         Object (game_path: game_path);
         create_view();
     }
 
     private void create_view() {
-        gnonogram_view = new Gnonogram_view (null, null, null);
+        gnonogram_view = new Gnonograms.View ();
         gnonogram_view.show_all();
     }
+
+    private void save_state () {
+
+    }
+
+    public void quit () {
+        save_state ();
+    }
+}
 }

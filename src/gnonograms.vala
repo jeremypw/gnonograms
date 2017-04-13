@@ -80,7 +80,7 @@ public struct Cell {
     }
 
     public string to_string () {
-        return "Row %s, Col %s,  State %s").printf (row, col, state);
+        return "Row %i, Col %i,  State %s".printf (row, col, state.to_string ());
     }
 }
 
@@ -120,10 +120,10 @@ public class App : Granite.Application {
         SimpleAction quit_action = new SimpleAction ("quit", null);
         quit_action.activate.connect (() => {
             if (controller != null) {
-                controller.save_state ();
-                controller.quit ();
+                controller.quit (); /* Will save state */
             }
         });
+
         add_action (quit_action);
         add_accelerator ("<Control>q", "app.quit", null);
 
@@ -149,6 +149,7 @@ public class App : Granite.Application {
         controller = new Controller (game_name);
         this.add_window (controller.window);
     }
+}
 }   
 
 public static int main (string[] args) {
