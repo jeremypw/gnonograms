@@ -1,5 +1,5 @@
-/* Main function for gnonograms-elementary
- * Initialises environment and launches game
+/* Entry point for gnonograms-elementary
+ * Initialises application and launches game
  * Copyright (C) 2010-2011  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
@@ -19,6 +19,8 @@
  *  Jeremy Wootten <jeremyw@elementaryos.org>
  */
 
+namespace Gnonograms {
+/*TODO - move enum and struct definitions elsewhere */
 public enum GameState {
     SETTING,
     SOLVING;
@@ -87,30 +89,71 @@ public struct Move {
     public Cell replacement;
 }
 
-Gnonogram_controller controller;
+public class App : Granite.Application {
+    public Controller controller;
+    private string game_name;
 
-public static int main (string[] args) {
-    string game_filename = "";
-    string package_name = Resource.APP_GETTEXT_PACKAGE;
+    construct {
+        application_id = "com.github.jeremypw.gnonograms-elementary";
+        flags = ApplicationFlags.HANDLES_OPEN;
 
-    if (args.length >= 2) { //a filename has been provided
-        game_filename = args[1];
+        program_name = _("Gnonograms");
+        app_years = "2010-2017";
+        app_icon = "gnonograms-3";
 
-        if (!game_filename.has_suffix (".pattern") && !game_filename.has_suffix(".gno")) {
-            game_filename = "";
-        }
+        build_data_dir = Build.DATADIR;
+        build_pkg_data_dir = Build.PKGDATADIR;
+        build_release_name = Build.RELEASE_NAME;
+        build_version = Build.VERSION;
+        build_version_info = Build.VERSION_INFO;
+
+        app_launcher = "com.github.jeremypw.gnonograms-elementary.desktop";
+        main_url = "https://github.com/jeremypw/gnonograms-elementary";
+        bug_url = "https://github.com/jeremypw/gnonograms-elementary/issues";
+        help_url = ""; 
+        translate_url = "";
+        about_authors = { "Jeremy Wootten <jeremywootten@gmail.com" };
+        about_comments = "";
+        about_translators = _("translator-credits");
+        about_license_type = Gtk.License.GPL_3_0;
+        
+        SimpleAction quit_action = new SimpleAction ("quit", null);
+        quit_action.activate.connect (() => {
+            if (controller != null) {
+                controller.save_state ();
+                controller.quit ();
+            }
+        });
+        add_action (quit_action);
+        add_accelerator ("<Control>q", "app.quit", null);
+
+        game_name = "";
     }
 
-    Gtk.init (ref args);
-    Resource.init (args[0]);
-    Intl.bindtextdomain (package_name, Resource.locale_dir);
-    Intl.bind_textdomain_codeset (package_name, "UTF-8");
-    Intl.textdomain (package_name);
+    public override void open (File[] files, string hint) {
+        /* Only one game can be played at a time */
+        var file = files[0];
+        if (file == null) {
+            return;
+        }
 
-    controller = new Gnonogram_controller (game_filename);
+        var fname = file.get_basename ();
+        if (fname.has_suffix (".gno") || fname.has_suffix (".pattern")) {
+            game_name = fname;
+        }
 
-    Gtk.main ();
-    return 0;
+        activate ();
+    }
+
+    public override void activate () {
+        controller = new Controller (game_name);
+        this.add_window (controller.window);
+    }
+}   
+
+public static int main (string[] args) {
+    var app = new Gnonograms.App ();
+    return app.run (args);
 }
 
 
