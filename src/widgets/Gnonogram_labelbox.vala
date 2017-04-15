@@ -31,6 +31,12 @@ public class LabelBox : Gtk.Frame
     private string _attribend;
     private double _fontheight;
 
+    construct {
+        _attribstart="<span size='10'>";
+        _attribend="</span>";
+        _fontheight = 24;
+    }
+
     public LabelBox(int size, int other_size, bool is_col)
     {
         _is_column=is_col;
@@ -56,12 +62,15 @@ public class LabelBox : Gtk.Frame
         }
         _size=0; //ensures 'size' no labels are added to box
         resize(size, other_size);
+        set_font_height (24.0);
+        set_all_to_string ("1,4,2,1");
         add(_box);
+        show_all ();
     }
 
     public void resize(int new_size, int other_size)
     {
-        //stdout.printf("Resize label box %s\n", new_size.to_string());
+        stdout.printf("Resize label box %s\n", new_size.to_string());
         unhighlight_all();
         if (new_size!=_size)
         {
@@ -128,7 +137,7 @@ public class LabelBox : Gtk.Frame
 
     public string get_label_text(int idx)
     {
-        return _labels[idx].get_text();
+        return _labels[idx].text;
     }
 
     public string to_string()
@@ -147,14 +156,13 @@ public class LabelBox : Gtk.Frame
     private void set_attribs(double fontheight)
     {
          int fontsize=1024*(int)(fontheight);
-//~         _attribstart=@"<span font_desc='$(Resource.font_desc)' size='$fontsize'>";
-        _attribstart=@"<span size='$fontsize'>";
+        _attribstart=@"<span size='$fontsize' weight='bold'>";
         _attribend="</span>";
     }
 
-    public void set_all_to_zero()
+    public void set_all_to_string (string txt)
     {
-        for(int l=0;l<_size;l++) update_label(l,"0");
+        for(int l=0;l<_size;l++) update_label(l,txt);
     }
 }
 }

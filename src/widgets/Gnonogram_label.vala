@@ -29,6 +29,15 @@ class Label : Gtk.EventBox
     private int blockextent;
     private int size;
     private bool is_column;
+    public string text {
+        get {
+            return clue;
+        }
+
+        set {
+            l.label = value;
+        }
+    }
 
     public Label(string label_text, bool is_column)
     {
@@ -39,13 +48,15 @@ class Label : Gtk.EventBox
         if (is_column)
         {
             l.set_alignment((float)0.5,(float)1.0);
-            //l.set_padding(6,2);
         }
         else
         {
             l.set_alignment((float)1.0, (float)0.5);
         }
         add(l);
+
+        set_size (10, 10);
+        show ();
     }
 
     public void highlight(bool is_highlight)
@@ -66,26 +77,22 @@ class Label : Gtk.EventBox
     public void set_size(int s, double fontheight)
     {
         size=s;
-        if (is_column){
-            this.set_size_request((int)(fontheight*2), -1);
-        }
-        else{
-            this.set_size_request(-1,(int)(fontheight*2));
+        if (is_column) {
+            set_size_request ((int)(fontheight * 2), -1);
+        } else {
+            set_size_request (-1, (int)(fontheight * 2));
         }
         l.set_tooltip_markup(attrib_start+ _("Freedom=")+(size-blockextent).to_string()+attrib_end);
-    }
-
-    public string get_text()
-    {
-        return clue;
     }
 
   private string verticalString (string s){
     string[] sa=s.split_set(", ");
     StringBuilder sb=new StringBuilder("");
     foreach (string ss in sa){
-      sb.append(ss);
-      sb.append("\n");
+        if (ss != "") {
+          sb.append(ss);
+          sb.append("\n");
+        }
     }
     sb.truncate(sb.len -1);
     return sb.str;

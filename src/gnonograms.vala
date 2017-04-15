@@ -154,6 +154,9 @@ public class App : Granite.Application {
     }
 
     public override void activate () {
+        if (Granite.Services.Logger.DisplayLevel != Granite.Services.LogLevel.DEBUG) {
+            Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.INFO;
+        }
         controller = new Controller (game_name);
         this.add_window (controller.window);
     }
