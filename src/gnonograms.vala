@@ -89,6 +89,14 @@ public struct Move {
     public Cell replacement;
 }
 
+public static int MAXSIZE = 200; // max number rows or columns
+public static int MINSIZE = 5;
+public static double MINFONTSIZE=3.0;
+public static double MAXFONTSIZE=72.0;
+public static double CELLOFFSET_NOGRID=0.0;
+public static double CELLOFFSET_WITHGRID=3.0;
+public const string BLOCKSEPARATOR=",";
+
 public class App : Granite.Application {
     public Controller controller;
     private string game_name;

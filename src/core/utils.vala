@@ -22,7 +22,7 @@
  using Gtk;
  using GLib;
 
-namespace Utils
+namespace Gnonograms.Utils
 {
     public static string get_stripped_basename(string path, string? ext)
     {
@@ -57,123 +57,123 @@ namespace Utils
         return fn;
     }
 
-    public static string get_file_path(FileChooserAction action, string dialogname, string[]? filternames, string[]? filters, string? start_path=null)
-    {
-        if (filternames!=null) assert(filternames.length==filters.length);
-        string button="Error";
-        switch (action)
-        {
-            case FileChooserAction.OPEN:
-                button=Gtk.Stock.OPEN;
-                break;
+//~     public static string get_file_path(FileChooserAction action, string dialogname, string[]? filternames, string[]? filters, string? start_path=null)
+//~     {
+//~         if (filternames!=null) assert(filternames.length==filters.length);
+//~         string button="Error";
+//~         switch (action)
+//~         {
+//~             case FileChooserAction.OPEN:
+//~                 button=Gtk.Stock.OPEN;
+//~                 break;
 
-            case FileChooserAction.SAVE:
-                button=Gtk.Stock.SAVE;
-                break;
-            case FileChooserAction.SELECT_FOLDER:
-                button=Gtk.Stock.APPLY;
-                break;
-            default :
-                break;
-        }
+//~             case FileChooserAction.SAVE:
+//~                 button=Gtk.Stock.SAVE;
+//~                 break;
+//~             case FileChooserAction.SELECT_FOLDER:
+//~                 button=Gtk.Stock.APPLY;
+//~                 break;
+//~             default :
+//~                 break;
+//~         }
 
-        var dialog=new Gtk.FileChooserDialog(
-            dialogname,
-            null,
-            action,
-            Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
-            button, Gtk.ResponseType.ACCEPT,
-            null);
+//~         var dialog=new Gtk.FileChooserDialog(
+//~             dialogname,
+//~             null,
+//~             action,
+//~             Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
+//~             button, Gtk.ResponseType.ACCEPT,
+//~             null);
 
-        if (filternames!=null)
-        {
-            for (int i=0; i<filternames.length; i++)
-            {
-                var fc=new Gtk.FileFilter();
-                fc.set_filter_name(filternames[i]);
-                fc.add_pattern(filters[i]);
-                dialog.add_filter(fc);
-            }
-        }
+//~         if (filternames!=null)
+//~         {
+//~             for (int i=0; i<filternames.length; i++)
+//~             {
+//~                 var fc=new Gtk.FileFilter();
+//~                 fc.set_filter_name(filternames[i]);
+//~                 fc.add_pattern(filters[i]);
+//~                 dialog.add_filter(fc);
+//~             }
+//~         }
 
-        if (start_path!=null)
-        {
-            var start=File.new_for_path(start_path);
-            if (start.query_file_type(FileQueryInfoFlags.NONE,null)==FileType.DIRECTORY)
-            {
-                Environment.set_current_dir(start_path);
-                dialog.set_current_folder(start_path); //so Recently used folder not displayed
-            }
-        }
-        //only need access to built-in puzzle directory if loading a .gno puzzle
-        if (action==FileChooserAction.OPEN && filters!=null && filters[0]=="*.gno")
-        {
-             dialog.add_button(_("Built in puzzles"),Gtk.ResponseType.NONE);
-        }
+//~         if (start_path!=null)
+//~         {
+//~             var start=File.new_for_path(start_path);
+//~             if (start.query_file_type(FileQueryInfoFlags.NONE,null)==FileType.DIRECTORY)
+//~             {
+//~                 Environment.set_current_dir(start_path);
+//~                 dialog.set_current_folder(start_path); //so Recently used folder not displayed
+//~             }
+//~         }
+//~         //only need access to built-in puzzle directory if loading a .gno puzzle
+//~         if (action==FileChooserAction.OPEN && filters!=null && filters[0]=="*.gno")
+//~         {
+//~              dialog.add_button(_("Built in puzzles"),Gtk.ResponseType.NONE);
+//~         }
 
-        int response;
-        while(true)
-        {
-            response = dialog.run();
-            if(response==Gtk.ResponseType.NONE)
-            {
-                dialog.set_current_folder(Resource.resource_dir+"/games");
-            }
-            else break;
-        }
+//~         int response;
+//~         while(true)
+//~         {
+//~             response = dialog.run();
+//~             if(response==Gtk.ResponseType.NONE)
+//~             {
+//~                 dialog.set_current_folder(Resource.resource_dir+"/games");
+//~             }
+//~             else break;
+//~         }
 
-        string fn="";
-        if (response==ResponseType.ACCEPT){
-            fn=dialog.get_filename();
-            Environment.set_current_dir(dialog.get_current_folder());
-        }
-        dialog.destroy();
+//~         string fn="";
+//~         if (response==ResponseType.ACCEPT){
+//~             fn=dialog.get_filename();
+//~             Environment.set_current_dir(dialog.get_current_folder());
+//~         }
+//~         dialog.destroy();
 
-        return fn;
-    }
+//~         return fn;
+//~     }
 
-    public bool get_dimensions(out int r, out int c, int currentr=5, int currentc=5)
-    {
-        r=currentr; c=currentc;
-        if(r<5)r=5;
-        if(c<5)c=5;
+//~     public bool get_dimensions(out int r, out int c, int currentr=5, int currentc=5)
+//~     {
+//~         r=currentr; c=currentc;
+//~         if(r<5)r=5;
+//~         if(c<5)c=5;
 
-        Gtk.Dialog dialog=new Gtk.Dialog.with_buttons(_("Adjust Size"),
-            null,
-            Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
-            Gtk.Stock.OK,
-            Gtk.ResponseType.OK,
-            Gtk.Stock.CANCEL,
-            Gtk.ResponseType.CANCEL
-            );
-        Gtk.Box hbox=new Gtk.Box(Gtk.Orientation.HORIZONTAL,6); hbox.set_homogeneous(true);
-        Gtk.Label row_label=new Gtk.Label(_("Rows"));
-        Gtk.SpinButton row_spin=new Gtk.SpinButton.with_range(1.0,Resource.MAXSIZE,5.0);
-        row_spin.set_value((double)currentr);
+//~         Gtk.Dialog dialog=new Gtk.Dialog.with_buttons(_("Adjust Size"),
+//~             null,
+//~             Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
+//~             Gtk.Stock.OK,
+//~             Gtk.ResponseType.OK,
+//~             Gtk.Stock.CANCEL,
+//~             Gtk.ResponseType.CANCEL
+//~             );
+//~         Gtk.Box hbox=new Gtk.Box(Gtk.Orientation.HORIZONTAL,6); hbox.set_homogeneous(true);
+//~         Gtk.Label row_label=new Gtk.Label(_("Rows"));
+//~         Gtk.SpinButton row_spin=new Gtk.SpinButton.with_range(1.0,Resource.MAXSIZE,5.0);
+//~         row_spin.set_value((double)currentr);
 
-        Gtk.Label col_label=new Gtk.Label(_("Columns"));
-        Gtk.SpinButton col_spin=new Gtk.SpinButton.with_range(Resource.MINSIZE,Resource.MAXSIZE,5.0);
-        col_spin.set_value((double)currentc);
+//~         Gtk.Label col_label=new Gtk.Label(_("Columns"));
+//~         Gtk.SpinButton col_spin=new Gtk.SpinButton.with_range(Resource.MINSIZE,Resource.MAXSIZE,5.0);
+//~         col_spin.set_value((double)currentc);
 
-        hbox.add(row_label); hbox.add(row_spin);
-        hbox.add(col_label); hbox.add(col_spin);
+//~         hbox.add(row_label); hbox.add(row_spin);
+//~         hbox.add(col_label); hbox.add(col_spin);
 
-        Gtk.Box vbox=dialog.get_content_area();
-        vbox.add(hbox);
-        dialog.set_default_response(Gtk.ResponseType.OK);
-        dialog.show_all();
+//~         Gtk.Box vbox=dialog.get_content_area();
+//~         vbox.add(hbox);
+//~         dialog.set_default_response(Gtk.ResponseType.OK);
+//~         dialog.show_all();
 
-        bool success=false;
-        int response=dialog.run();
+//~         bool success=false;
+//~         int response=dialog.run();
 
-        if (response==(int)Gtk.ResponseType.OK) {
-            r=int.max(1,row_spin.get_value_as_int());
-            c=int.max(1,col_spin.get_value_as_int());
-            success=true;
-        }
-        dialog.destroy();
-        return success;
-    }
+//~         if (response==(int)Gtk.ResponseType.OK) {
+//~             r=int.max(1,row_spin.get_value_as_int());
+//~             c=int.max(1,col_spin.get_value_as_int());
+//~             success=true;
+//~         }
+//~         dialog.destroy();
+//~         return success;
+//~     }
 
     public static  int show_dlg(string msg, Gtk.MessageType type, Gtk.ButtonsType buttons)
     {
@@ -393,7 +393,7 @@ namespace Utils
             {
                 if (counting)
                 {
-                    sb.append(count.to_string()+Resource.BLOCKSEPARATOR);
+                    sb.append(count.to_string()+BLOCKSEPARATOR);
                     counting=false;
                     count=0;
                     blocks++;
@@ -412,7 +412,7 @@ namespace Utils
         }
         if (counting)
         {
-            sb.append(count.to_string()+Resource.BLOCKSEPARATOR);
+            sb.append(count.to_string()+BLOCKSEPARATOR);
             blocks++;
         }
         if (blocks==0) sb.append("0");
@@ -440,7 +440,7 @@ namespace Utils
         foreach(int block in b)
         {
             sb.append(block.to_string());
-            sb.append(Resource.BLOCKSEPARATOR);
+            sb.append(BLOCKSEPARATOR);
         }
         sb.truncate(sb.len -1);
         return sb.str;

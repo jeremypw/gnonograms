@@ -19,10 +19,8 @@
  *  Jeremy Wootten <jeremwootten@gmail.com>
  */
 
-using Gtk;
-using Gdk;
-
-class Gnonogram_label : Gtk.EventBox
+namespace Gnonograms {
+class Label : Gtk.EventBox
 {
     private Gtk.Label l;
     private string attrib_start;
@@ -32,7 +30,7 @@ class Gnonogram_label : Gtk.EventBox
     private int size;
     private bool is_column;
 
-    public Gnonogram_label(string label_text, bool is_column)
+    public Label(string label_text, bool is_column)
     {
         this.is_column=is_column;
         l=new Gtk.Label(label_text);
@@ -93,4 +91,5 @@ class Gnonogram_label : Gtk.EventBox
     return sb.str;
   }
 
+}
 }

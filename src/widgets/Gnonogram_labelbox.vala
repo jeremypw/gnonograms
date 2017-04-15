@@ -19,42 +19,39 @@
  *  Jeremy Wootten <jeremwootten@gmail.com>
  */
 
-using Gtk;
-
-public class Gnonogram_LabelBox : Frame
+namespace Gnonograms {
+public class LabelBox : Gtk.Frame
 {
     private bool _is_column; //true if contains column labels(i.e. HBox)
     private int _size; //no of labels in box
     private int _other_size; //possible length of label text (size of other box)
-    private Gnonogram_label[] _labels;
-    private Box _box;
+    private Gnonograms.Label[] _labels;
+    private Gtk.Box _box;
     private string _attribstart;
     private string _attribend;
     private double _fontheight;
 
-    public Gnonogram_LabelBox(int size, int other_size, bool is_col)
+    public LabelBox(int size, int other_size, bool is_col)
     {
         _is_column=is_col;
         this.set_shadow_type(Gtk.ShadowType.NONE);
         Gtk.Orientation o;
         if (_is_column)
         {
-             //_box = new HBox(true,0) as Container;
              o=Gtk.Orientation.HORIZONTAL;
         }
         else
         {
-            //_box = new VBox(true,0) as Container;
             o=Gtk.Orientation.VERTICAL;
         }
 
-        _box = new Box(o,0); //as Container;
+        _box = new Gtk.Box(o,0); //as Container;
         _box.set_homogeneous(true);
-        _labels=new Gnonogram_label[Resource.MAXSIZE];
+        _labels=new Gnonograms.Label[MAXSIZE];
 
         for (var i=0;i<_labels.length;i++)
         {
-            Gnonogram_label l=new Gnonogram_label("", is_col);
+            var l=new Gnonograms.Label("", is_col);
             _labels[i]=l;
         }
         _size=0; //ensures 'size' no labels are added to box
@@ -103,7 +100,7 @@ public class Gnonogram_LabelBox : Frame
 
     public void set_font_height(double fontheight)
     {
-        _fontheight=fontheight.clamp(Resource.MINFONTSIZE, Resource.MAXFONTSIZE);
+        _fontheight=fontheight.clamp(Gnonograms.MINFONTSIZE, Gnonograms.MAXFONTSIZE);
         set_attribs(_fontheight);
         for (int i=0; i<_size;i++) update_label(i,get_label_text(i));
     }
@@ -150,7 +147,8 @@ public class Gnonogram_LabelBox : Frame
     private void set_attribs(double fontheight)
     {
          int fontsize=1024*(int)(fontheight);
-        _attribstart=@"<span font_desc='$(Resource.font_desc)' size='$fontsize'>";
+//~         _attribstart=@"<span font_desc='$(Resource.font_desc)' size='$fontsize'>";
+        _attribstart=@"<span size='$fontsize'>";
         _attribend="</span>";
     }
 
@@ -158,4 +156,5 @@ public class Gnonogram_LabelBox : Frame
     {
         for(int l=0;l<_size;l++) update_label(l,"0");
     }
+}
 }

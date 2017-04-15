@@ -35,7 +35,7 @@ public class Controller : GLib.Object {
     }
 
     private void create_view() {
-        gnonogram_view = new Gnonograms.View ();
+        gnonogram_view = new Gnonograms.View (new LabelBox (10, 10, false), new LabelBox (10, 10, true), new CellGrid (10, 10));
         gnonogram_view.show_all();
     }
 

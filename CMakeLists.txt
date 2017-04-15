@@ -38,6 +38,10 @@ vala_precompile(VALA_C
     src/gnonograms.vala
     src/Gnonogram_controller.vala
     src/Gnonogram_view.vala
+    src/widgets/Gnonogram_labelbox.vala
+    src/widgets/Gnonogram_label.vala
+    src/widgets/Gnonogram_cellgrid.vala
+    src/core/utils.vala
 
 PACKAGES
     gtk+-3.0
