@@ -19,41 +19,45 @@
  *  Author:
  *  Jeremy Wootten <jeremwootten@gmail.com>
  */
- using Gtk;
- using GLib;
 
 namespace Gnonograms.Utils
 {
-    public static string[] remove_blank_lines(string[] sa)
-    {
+    public static string[] remove_blank_lines (string[] sa) {
         string[] result = {};
-        for (int i=0; i<sa.length; i++)
-        {
-            if (sa[i]==null) continue;
-            string s=sa[i].strip();
-            if (s=="") continue;
-            result+=s;
+
+        foreach (string s in sa) {
+            string ss = s.strip ();
+            if (ss != "") {
+                result += ss;
+            }
         }
+
         return result;
     }
 
-    public int[] block_array_from_clue(string s)
-    {
-        string[] clues=remove_blank_lines(s.split_set(", "));
+    public int[] block_array_from_clue (string s) {
+        string[] clues = remove_blank_lines (s.split_set (", "));
 
-        if(clues.length==0) clues={"0"};
-        int[] blocks=new int[clues.length];
+        if (clues.length == 0) {
+            return {0};
+        } else {
+            int[] blocks = new int[clues.length];
+            int index = 0;
+            foreach (string clue in clues) {
+                blocks[index++] = int.parse (clue);
+            }
 
-        for (int i=0;i<clues.length;i++) blocks[i]=int.parse(clues[i]);
-
-        return blocks;
+            return blocks;
+        }
     }
 
-    public int blockextent_from_clue(string s)
-    {
-        int[] blocks = block_array_from_clue(s);
-        int extent=0;
-        foreach(int block in blocks) extent+=(block+1);
+    public int blockextent_from_clue (string s) {
+        int[] blocks = block_array_from_clue (s);
+        int extent = 0;
+
+        foreach (int block in blocks) {
+            extent += block + 1;
+        }
         extent--;
         return extent;
     }
