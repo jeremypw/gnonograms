@@ -35,7 +35,12 @@ public class Controller : GLib.Object {
     }
 
     private void create_view() {
-        gnonogram_view = new Gnonograms.View (new LabelBox (10, 10, false), new LabelBox (10, 10, true), new CellGrid (10, 10));
+        Dimensions dimensions = {13, 13};
+        var row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL, dimensions);
+        var column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL, dimensions);
+
+        gnonogram_view = new Gnonograms.View (row_clue_box, column_clue_box,
+                                              new CellGrid (dimensions));
         gnonogram_view.show_all();
     }
 

@@ -38,8 +38,8 @@ public class View : Gtk.Window {
                 cells: cg);
 
         var grid = new Gtk.Grid ();
-        grid.attach (column_box, 1, 0, 2, 1);
-        grid.attach (row_box, 0, 1, 1, 2);
+        grid.attach (row_box, 0, 1, 1, 2); /* Clues for rows */
+        grid.attach (column_box, 1, 0, 2, 1); /* Clues for columns */
         grid.attach (cells, 1, 1, 2, 2);
 
         add (grid);

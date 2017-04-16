@@ -73,10 +73,10 @@ public class CellGrid : Gtk.DrawingArea
         MINORGRIDDASH = {3.0, 3.0};
     }
 
-    public CellGrid(int r, int c)
+    public CellGrid(Dimensions dimensions)
     {
-        _rows=r;
-        _cols=c;
+        _rows=dimensions.height;
+        _cols=dimensions.width;
 
         _current_col=-1;
         _current_row=-1;
@@ -124,9 +124,6 @@ public class CellGrid : Gtk.DrawingArea
         _wd=(_aw-2)/(double)_cols;
         _ht=(_ah-2)/(double)_rows;
 
-//~         var fill_color=colors[(int)gs,(int)CellState.FILLED];
-//~         var empty_color=colors[(int)gs,(int)CellState.EMPTY];
-//~         var unknown_color=colors[(int)gs,(int)CellState.UNKNOWN];
         var fill_color=colors[0, 0];
         var empty_color=colors[0, 1];
         var unknown_color=colors[0, 2];
