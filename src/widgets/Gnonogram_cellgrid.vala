@@ -73,10 +73,10 @@ public class CellGrid : Gtk.DrawingArea
         MINORGRIDDASH = {3.0, 3.0};
     }
 
-    public CellGrid(int r, int c)
+    public CellGrid(Dimensions dimensions)
     {
-        _rows=r;
-        _cols=c;
+        _rows=dimensions.height;
+        _cols=dimensions.width;
 
         _current_col=-1;
         _current_row=-1;

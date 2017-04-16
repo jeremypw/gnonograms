@@ -20,149 +20,146 @@
  */
 
 namespace Gnonograms {
-public class LabelBox : Gtk.Frame
-{
-    private bool _is_column; //true if contains column labels(i.e. HBox)
-    private int _size; //no of labels in box
-    private int _other_size; //possible length of label text (size of other box)
-    private Gnonograms.Label[] _labels;
-    private Gtk.Box _box;
-    private string _attribstart;
-    private string _attribend;
-    private double _fontheight;
 
-    construct {
-        _attribstart="<span size='10'>";
-        _attribend="</span>";
-        _fontheight = 24;
+public class LabelBox : Gtk.Box {
+    private bool is_column; /* true if contains column labels(i.e. HBox) */
+
+    private Dimensions _dimensions;
+    public Dimensions dimensions {
+        get {
+            return _dimensions;
+        }
+
+        set {
+            _dimensions = value;
+            resize();
+        }
     }
 
-    public LabelBox(int size, int other_size, bool is_col)
-    {
-        _is_column=is_col;
-        this.set_shadow_type(Gtk.ShadowType.NONE);
-        Gtk.Orientation o;
-        if (_is_column)
-        {
-             o=Gtk.Orientation.HORIZONTAL;
+    private int size { /* no of labels in box */
+        get {
+            return is_column ? dimensions.height : dimensions.width;
         }
-        else
-        {
-            o=Gtk.Orientation.VERTICAL;
+    }
+
+    private int othersize { /* size of other label box */
+        get {
+            return is_column ? dimensions.width : dimensions.height;
+        }
+    }
+
+    private double _fontheight;
+    public double fontheight {
+        get {
+            return _fontheight;
         }
 
-        _box = new Gtk.Box(o,0); //as Container;
-        _box.set_homogeneous(true);
-        _labels=new Gnonograms.Label[MAXSIZE];
+        set {
+            _fontheight = value.clamp(Gnonograms.MINFONTSIZE, Gnonograms.MAXFONTSIZE);
 
-        for (var i=0;i<_labels.length;i++)
-        {
-            var l=new Gnonograms.Label("", is_col);
-            _labels[i]=l;
+            foreach (Gtk.Widget l in get_children ()) {
+                ((Label)l).fontheight = _fontheight;
+            }
         }
-        _size=0; //ensures 'size' no labels are added to box
-        resize(size, other_size);
-        set_font_height (24.0);
+    }
+
+    public LabelBox (Gtk.Orientation orientation, Dimensions dimensions) {
+        Object (orientation: orientation,
+                spacing: 0);
+
+        is_column = (orientation == Gtk.Orientation.HORIZONTAL);
+        set_homogeneous (true);
+
+        this.dimensions = dimensions;
         set_all_to_string ("1,4,2,1");
-        add(_box);
+        fontheight = 24.0;
         show_all ();
     }
 
-    public void resize(int new_size, int other_size)
-    {
-        stdout.printf("Resize label box %s\n", new_size.to_string());
+    public void resize () {
         unhighlight_all();
-        if (new_size!=_size)
-        {
-            int diff=(new_size-_size);
-            if (diff>0)
-            {
-                for (int i=0; i<diff; i++)
-                {
-                _box.add(_labels[_size]);
-                _size++;
-                }
-            }
-            else
-            {
-            GLib.List<weak Gtk.Widget> l=_box.get_children();
-            uint length=l.length();
-                for (int i=-1; i>=diff; i--)
-                {
-                    //stdout.printf("remove label\n");
-                    _box.remove(l.nth_data(length+(uint)i));
-                    _size--;
-                }
-            }
-            if (_size!=new_size) stdout.printf("Error adding or removing labels");
-            this.show_all();
+
+        GLib.List<weak Gtk.Widget> children = get_children ();
+        var current_size = children.length ();
+        int current_other_size;
+
+        if (current_size > 0) {
+            current_other_size = ((Label)(children.first ().data)).size;
+        } else {
+            current_other_size = othersize;
         }
-        _other_size=other_size;
+
+        if (current_other_size != othersize) {
+            update_label_size ();
+        }
+
+        while (current_size < size) {
+            var label = new Label ("0", is_column);
+            label.size = othersize;
+            add (label);
+
+            current_size++;
+        }
+        while (current_size > size) {
+            remove (children.last ().data);
+            current_size--;
+        }
+
+        fontheight = fontheight;
+        show_all ();
     }
 
-    public void change_font_height(bool increase)
-    {
-        if (increase) _fontheight+=1.0;
-        else _fontheight-=1.0;
-        set_font_height(_fontheight);
+    public void change_font_height(bool increase) {
+        if (increase) {
+            fontheight += 1.0;
+        } else {
+            fontheight -= 1.0;
+        }
     }
 
-    public void set_font_height(double fontheight)
-    {
-        _fontheight=fontheight.clamp(Gnonograms.MINFONTSIZE, Gnonograms.MAXFONTSIZE);
-        set_attribs(_fontheight);
-        for (int i=0; i<_size;i++) update_label(i,get_label_text(i));
+    public void highlight (uint idx, bool is_highlight) {
+        if (idx >= size) {
+            return;
+        }
+
+        ((Label)get_children ().nth_data (idx)).highlight (is_highlight);
     }
 
-    public void highlight(int idx, bool is_highlight)
-    {
-        //stdout.printf(@"highlight $idx $is_highlight \n");
-        if (idx>=_size||idx<0) return;
-        _labels[idx].highlight(is_highlight);
+    private void unhighlight_all() {
+        foreach (Gtk.Widget l in get_children ()) {
+            ((Label)l).highlight (false);
+        }
     }
 
-    private void unhighlight_all()
-    {
-        //stdout.printf("Unhighlight all\n");
-        for (int i=0;i<_size;i++) {highlight(i,false);}
+    public void update_label_txt (int idx, string? txt) {
+        if (txt == null) {
+            txt = "?";
+        }
+
+        ((Label)(get_children ().nth_data (idx))).clue = txt;
     }
 
-    public void update_label(int idx, string? txt)
-    {
-        //stdout.printf("Idx %d Label txt %s\n",idx,txt);
-        if (txt==null) txt="?";
-        _labels[idx].set_markup(_attribstart,txt,_attribend);
-        _labels[idx].set_size(_other_size, _fontheight);
+    public void update_label_size () {
+        foreach (Gtk.Widget l in get_children ()) {
+            ((Label)l).size = size;
+        }
     }
 
-    public string get_label_text(int idx)
-    {
-        return _labels[idx].text;
-    }
-
-    public string to_string()
-    {
+    public string to_string() {
         StringBuilder sb=new StringBuilder();
 
-        for (int i=0; i<_size;i++)
-        {
-            sb.append(get_label_text(i));
-            sb.append("\n");
+        foreach (Gtk.Widget l in get_children ()) {
+            sb.append (((Label)l).label);
+            sb.append ("\n");
         }
 
         return sb.str;
     }
 
-    private void set_attribs(double fontheight)
-    {
-         int fontsize=1024*(int)(fontheight);
-        _attribstart=@"<span size='$fontsize' weight='bold'>";
-        _attribend="</span>";
-    }
-
-    public void set_all_to_string (string txt)
-    {
-        for(int l=0;l<_size;l++) update_label(l,txt);
+    public void set_all_to_string (string txt) {
+        foreach (Gtk.Widget l in get_children ()) {
+            ((Label)l).clue = txt;
+        }
     }
 }
 }

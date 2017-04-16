@@ -89,6 +89,11 @@ public struct Move {
     public Cell replacement;
 }
 
+public struct Dimensions {
+    int width;
+    int height;
+}
+
 public static int MAXSIZE = 200; // max number rows or columns
 public static int MINSIZE = 5;
 public static double MINFONTSIZE=3.0;

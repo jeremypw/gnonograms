@@ -20,83 +20,116 @@
  */
 
 namespace Gnonograms {
-class Label : Gtk.EventBox
-{
-    private Gtk.Label l;
+
+class Label : Gtk.Label {
     private string attrib_start;
-    private string attrib_end;
-    private string clue;
+    private string displayed_text; /* text of clue in final form */
+    private string _clue; /* text of clue in horizontal form */
     private int blockextent;
-    private int size;
-    private bool is_column;
-    public string text {
+
+    private int _size;
+    public int size { /* total number of cells in the row/column to which this label is attached */
+        set {
+            _size = value;
+            update_tooltip ();
+        }
+
         get {
-            return clue;
+            return _size;
+        }
+    }
+
+    public bool is_column {get; construct;} /* true if clue for column */
+
+    public double fontheight {
+        set {
+            var fontsize = (int)(1024 * (value));
+            attrib_start = "<span size='%i' weight='bold'>".printf (fontsize);
+
+            if (is_column) {
+                set_size_request ((int)(value * 2), -1);
+            } else {
+                set_size_request (-1, (int)(value * 2));
+
+            }
+
+            update_markup ();
+        }
+    }
+
+    public string clue {
+        get {
+            return _clue;
         }
 
         set {
-            l.label = value;
+            _clue = value;
+            displayed_text = is_column ? vertical_string (_clue) : _clue;
+            blockextent = Utils.blockextent_from_clue (_clue);
+            update_markup ();
         }
     }
 
-    public Label(string label_text, bool is_column)
-    {
-        this.is_column=is_column;
-        l=new Gtk.Label(label_text);
-        l.has_tooltip=true;
-
-        if (is_column)
-        {
-            l.set_alignment((float)0.5,(float)1.0);
-        }
-        else
-        {
-            l.set_alignment((float)1.0, (float)0.5);
-        }
-        add(l);
-
-        set_size (10, 10);
-        show ();
+    construct {
+        attrib_start = "<span>";
+        size = -1;
     }
 
-    public void highlight(bool is_highlight)
-    {
-        if (is_highlight) set_state(Gtk.StateType.SELECTED);
-        else set_state(Gtk.StateType.NORMAL);
-    }
+    public Label (string label_text, bool is_column) {
+        Object (is_column: is_column,
+                has_tooltip: true,
+                use_markup: true);
 
-    public void set_markup(string start, string text, string end)
-    {
-        attrib_start=start; attrib_end=end; clue=text;
-        blockextent=Utils.blockextent_from_clue(clue);
-        if (is_column) l.set_markup(attrib_start+verticalString(clue)+attrib_end);
-        else l.set_markup(attrib_start+clue+attrib_end);
-
-    }
-
-    public void set_size(int s, double fontheight)
-    {
-        size=s;
         if (is_column) {
-            set_size_request ((int)(fontheight * 2), -1);
+            set_alignment((float)0.5,(float)1.0);
         } else {
-            set_size_request (-1, (int)(fontheight * 2));
+            set_alignment((float)1.0, (float)0.5);
         }
-        l.set_tooltip_markup(attrib_start+ _("Freedom=")+(size-blockextent).to_string()+attrib_end);
+
+        if (label_text != "") {
+            clue = label_text;
+        }
+
+        show_all ();
     }
 
-  private string verticalString (string s){
-    string[] sa=s.split_set(", ");
-    StringBuilder sb=new StringBuilder("");
-    foreach (string ss in sa){
-        if (ss != "") {
-          sb.append(ss);
-          sb.append("\n");
+    public void highlight (bool is_highlight) {
+        if (is_highlight) {
+            set_state(Gtk.StateType.SELECTED);
+        } else {
+            set_state(Gtk.StateType.NORMAL);
         }
     }
-    sb.truncate(sb.len -1);
-    return sb.str;
-  }
 
+    private void update_markup () {
+        var markup = attrib_start + displayed_text + "</span>";
+        set_markup (markup);
+        update_tooltip ();
+    }
+
+    private void update_tooltip () {
+        var freedom = size - blockextent;
+        if (freedom >= 0) {
+            has_tooltip = true;
+            set_tooltip_markup (attrib_start + _("Freedom = %i").printf(freedom) + "</span>");
+        } else {
+            has_tooltip = false;
+        }
+    }
+
+    private string vertical_string (string s) {
+        string[] sa = s.split_set (", ");
+        StringBuilder sb = new StringBuilder ("");
+
+        foreach (string ss in sa) {
+            if (ss != "") {
+              sb.append (ss);
+              sb.append ("\n");
+            }
+        }
+        sb.truncate (sb.len - 1);
+
+        return sb.str;
+    }
 }
 }
