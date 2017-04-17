@@ -129,7 +129,7 @@ public class Controller : GLib.Object {
 
     private void restore_settings () {
         game_state = GameState.SETTING;
-        dimensions = {15, 15}; /* TODO implement saving and restoring settings */
+        dimensions = {10, 15}; /* TODO implement saving and restoring settings */
     }
 
     private bool load_game (File game) {

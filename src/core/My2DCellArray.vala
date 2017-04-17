@@ -24,13 +24,13 @@ public class My2DCellArray  : GLib.Object {
     public Gnonograms.Dimensions dimensions {get; set;}
     private int rows {
         get {
-            return dimensions.width;    
+            return dimensions.height;    
         }
     }
 
     private int cols {
         get {
-            return dimensions.height;
+            return dimensions.width;
         }
     }
 
