@@ -81,7 +81,7 @@ public class CellGrid : Gtk.DrawingArea {
     construct {
         colors = new Gdk.RGBA[2, 4];
         set_colors ();
-        MINORGRIDDASH = {3.0, 3.0};
+        MINORGRIDDASH = {1.0, 5.0};
         current_col = -1;
         cell_offset = -1;
 
