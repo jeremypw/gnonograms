@@ -126,7 +126,7 @@ public class LabelBox : Gtk.Box {
 
     public void update_label_txt (int idx, string? txt) {
         if (txt == null) {
-            txt = "?";
+            txt = BLANKLABELTEXT;
         }
 
         ((Label)(get_children ().nth_data (idx))).clue = txt;
@@ -157,7 +157,7 @@ public class LabelBox : Gtk.Box {
 
     public void update_label (int idx, string? txt) {
         if (txt == null) {
-            txt = "?";
+            txt = BLANKLABELTEXT;
         }
 
         var label = (Label)(get_children ().nth_data ((uint)idx));

@@ -153,10 +153,10 @@ public class Controller : GLib.Object {
 
     private void blank_labels () {
         for (int r = 0; r < rows; r++) {
-            row_clue_box.update_label (r, "---");
+            row_clue_box.update_label (r, BLANKLABELTEXT);
         }
         for (int c = 0; c < cols; c++) {
-            column_clue_box.update_label (c, "---");
+            column_clue_box.update_label (c, BLANKLABELTEXT);
         }
     }
 

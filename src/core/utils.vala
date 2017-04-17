@@ -91,7 +91,7 @@ namespace Gnonograms.Utils
         if (blocks == 0) {
             sb.append ("0");
         } else {
-            sb.truncate (sb.len - 1);
+            sb.truncate (sb.len - BLOCKSEPARATOR.length);
         }
 
         return sb.str;
@@ -99,7 +99,7 @@ namespace Gnonograms.Utils
 
     public CellState[] cellstate_array_from_string (string s) {
         CellState[] cs = {};
-        string[] data = remove_blank_lines (s.split_set (", "));
+        string[] data = remove_blank_lines (s.split_set (BLOCKSEPARATOR));
 
         for (int i = 0; i < data.length; i++) {
             cs += (CellState)(int.parse (data[i]).clamp (0, 6));
