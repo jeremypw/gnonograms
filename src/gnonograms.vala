@@ -1,6 +1,6 @@
 /* Entry point for gnonograms-elementary
  * Initialises application and launches game
- * Copyright (C) 2010-2011  Jeremy Wootten
+ * Copyright (C) 2010-2017  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -113,7 +113,7 @@ public class App : Granite.Application {
         flags = ApplicationFlags.HANDLES_OPEN;
 
         program_name = _("Gnonograms");
-        app_years = "2010-2017";
+        app_years = "display_working";
         app_icon = "gnonograms-3";
 
         build_data_dir = Build.DATADIR;

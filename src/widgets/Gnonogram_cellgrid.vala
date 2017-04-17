@@ -1,5 +1,5 @@
 /* Draws grid of cells and detects pointer motion over it.
- * Copyright (C) 2010-2011  Jeremy Wootten
+ * Copyright (C) 2010-2017  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -119,7 +119,7 @@ public class CellGrid : Gtk.DrawingArea {
         prepare_to_redraw_cells (cr);
 
         if (array != null) {
-            foreach (Cell c in array) {
+            foreach (Cell c in array) { /* Note, even tho' array holds CellStates, its iterator returns Cells */
                 draw_cell (cr, c);
             }
         }

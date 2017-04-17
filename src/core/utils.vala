@@ -1,10 +1,10 @@
-/* Utility functions for Gnonograms3
+/* Utility functions for gnonograms-elementary
  * Dialogs, conversions etc
- * Copyright (C) 2010-2011  Jeremy Wootten
+ * Copyright (C) 2010-2017  Jeremy Wootten
  *
-    This program is free software; you can redistribute it and/or modify
+    This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
+    the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -12,14 +12,12 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License along
-    with this program; if not, write to the Free Software Foundation, Inc.,
-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *  Author:
- *  Jeremy Wootten <jeremwootten@gmail.com>
+ *  Jeremy Wootten <jeremyw@elementaryos.org>
  */
-
 namespace Gnonograms.Utils
 {
     public static string[] remove_blank_lines (string[] sa) {
@@ -58,6 +56,7 @@ namespace Gnonograms.Utils
         foreach (int block in blocks) {
             extent += block + 1;
         }
+
         extent--;
         return extent;
     }
@@ -67,81 +66,82 @@ namespace Gnonograms.Utils
         int count = 0, blocks = 0;
         bool counting = false;
 
-        for (int i = 0; i < cs.length; i++)
-        {
-            if (cs[i] == CellState.EMPTY)
-            {
-                if (counting)
-                {
+        for (int i = 0; i < cs.length; i++) {
+            if (cs[i] == CellState.EMPTY) {
+                if (counting) {
                     sb.append (count.to_string() + BLOCKSEPARATOR);
                     counting = false;
                     count = 0;
                     blocks++;
                 }
-            }
-            else if (cs[i] == CellState.FILLED)
-            {
+            } else if (cs[i] == CellState.FILLED) {
                 counting = true;
                 count++;
-            }
-            else
-            {
+            } else {
                 critical ("Error in block string from cellstate array - Cellstate UNKNOWN OR IN ERROR\n");
                 break;
             }
         }
-        if (counting)
-        {
+
+        if (counting) {
             sb.append (count.to_string () + BLOCKSEPARATOR);
             blocks++;
         }
-        if (blocks == 0) sb.append ("0");
-        else sb.truncate (sb.len - 1);
+
+        if (blocks == 0) {
+            sb.append ("0");
+        } else {
+            sb.truncate (sb.len - 1);
+        }
 
         return sb.str;
     }
 
-    public CellState[] cellstate_array_from_string (string s)
-    {
+    public CellState[] cellstate_array_from_string (string s) {
         CellState[] cs = {};
         string[] data = remove_blank_lines (s.split_set (", "));
-        for (int i = 0; i < data.length; i++) cs += (CellState)(int.parse (data[i]).clamp (0, 6));
+
+        for (int i = 0; i < data.length; i++) {
+            cs += (CellState)(int.parse (data[i]).clamp (0, 6));
+        }
+
         return cs;
     }
 
-    public string string_from_cellstate_array (CellState[] cs)
-    {
-        if (cs == null) return "";
+    public string string_from_cellstate_array (CellState[] cs) {
+        if (cs == null) {
+            return "";
+        }
+
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < cs.length; i++)
-        {
+
+        for (int i = 0; i < cs.length; i++) {
             sb.append (((int)cs[i]).to_string ());
             sb.append (" ");
         }
+
         return sb.str;
     }
 
-    public string hex_string_from_cellstate_array (CellState[] sa)
-    {
-        StringBuilder sb = new StringBuilder("");
+    public string hex_string_from_cellstate_array (CellState[] sa) {
+        StringBuilder sb = new StringBuilder ("");
         int length = sa.length;
         int e = 0, m = 1, count = 0;
-        for(int i = length - 1; i >= 0; i--)
-        {
+
+        for (int i = length - 1; i >= 0; i--) {
             count++;
             e += ((int)(sa[i]) - 1) * m;
             m = m * 2;
-            if (count == 4 || i == 0)
-            {
+            if (count == 4 || i == 0) {
                 sb.prepend (int2hex (e));
                 count = 0; m = 1; e = 0;
             }
         }
+
         return sb.str;
     }
 
-    private string int2hex (int i)
-    {
+    private string int2hex (int i) {
         if (i <= 9) return i.to_string ();
         if (i > 15) return "X";
         i = i - 10;
