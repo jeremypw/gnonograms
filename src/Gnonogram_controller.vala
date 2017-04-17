@@ -28,8 +28,21 @@ public class Controller : GLib.Object {
     private Cell current_cell;
     private Cell previous_cell;
 
-    public string game_path {get; set;}
+    public File? game {get; set;}
     public Dimensions dimensions {get; set;}
+
+    private double _fontheight;
+    public double fontheight {
+        set {
+            _fontheight = value;
+            row_clue_box.fontheight = value;
+            column_clue_box.fontheight = value;
+        }
+
+        get {
+            return _fontheight;
+        }
+    }
 
     public Gtk.Window window {
         get {
@@ -38,22 +51,30 @@ public class Controller : GLib.Object {
     }
 
     construct {
+        if (Granite.Services.Logger.DisplayLevel != Granite.Services.LogLevel.DEBUG) {
+            Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.INFO;
+        }
+
         initialize_cursor ();
     }
 
-    public Controller (Dimensions dimensions) {
-        Object (dimensions: dimensions);
+    public Controller (File? game = null) {
+        Object (game: game);
 
+        restore_settings ();
+        model = new Model (dimensions);
         create_view (dimensions);
-        reset_all_to_default ();
-        new_game ();
+
+        if (game == null || !load_game (game)) {
+            new_game ();
+        }
     }
 
     private void create_view (Dimensions dimensions) {
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL, dimensions);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL, dimensions);
         cell_grid = new CellGrid (dimensions);
-        model = new Model (dimensions);
+
         gnonogram_view = new Gnonograms.View (row_clue_box, column_clue_box, cell_grid);
         gnonogram_view.show_all();
     }
@@ -62,11 +83,12 @@ public class Controller : GLib.Object {
         model.fill_random (7);
         initialize_view ();
         /* For testing */
-        change_game_state (GameState.SETTING);
+        change_game_state (game_state);
     }
 
     private void initialize_view () {
         initialize_cursor ();
+        set_fontheight_from_dimensions (dimensions);
     }
 
     private void initialize_cursor () {
@@ -87,10 +109,33 @@ public class Controller : GLib.Object {
         cell_grid.array = model.display_data;
     }
 
+    private void set_fontheight_from_dimensions (Dimensions dimensions) {
+        assert (row_clue_box != null && column_clue_box != null);
+
+        double max_h, max_w;
+        var scr = Gdk.Screen.get_default();
+
+        max_h = (double)(scr.get_height()) / ((double)(dimensions.height));
+        max_w = (double)(scr.get_width()) / ((double)(dimensions.width));
+
+        fontheight = double.min (max_h, max_w) / 4;
+    }
+
     private void reset_all_to_default () {
     }
 
     private void save_game_state () {
+    }
+
+    private void restore_settings () {
+        game_state = GameState.SETTING;
+        dimensions = {15, 15}; /* TODO implement saving and restoring settings */
+    }
+
+    private bool load_game (File game) {
+        game_state = GameState.SOLVING;
+        dimensions = {10, 15}; /* TODO implement saving and restoring settings */
+        return true;
     }
 
     public void quit () {

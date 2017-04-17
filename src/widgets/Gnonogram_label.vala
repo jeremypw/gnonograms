@@ -38,18 +38,17 @@ class Label : Gtk.Label {
         }
     }
 
-    public bool is_column {get; construct;} /* true if clue for column */
+    public bool vertical_text {get; set;} /* true if clue for column */
 
     public double fontheight {
         set {
             var fontsize = (int)(1024 * (value));
             attrib_start = "<span size='%i' weight='bold'>".printf (fontsize);
 
-            if (is_column) {
+            if (vertical_text) {
                 set_size_request ((int)(value * 2), -1);
             } else {
                 set_size_request (-1, (int)(value * 2));
-
             }
 
             update_markup ();
@@ -63,7 +62,7 @@ class Label : Gtk.Label {
 
         set {
             _clue = value;
-            displayed_text = is_column ? vertical_string (_clue) : _clue;
+            displayed_text = vertical_text ? vertical_string (_clue) : _clue;
             blockextent = Utils.blockextent_from_clue (_clue);
             update_markup ();
         }
@@ -74,12 +73,12 @@ class Label : Gtk.Label {
         size = -1;
     }
 
-    public Label (string label_text, bool is_column) {
-        Object (is_column: is_column,
+    public Label (bool vertical_text, string label_text = "") {
+        Object (vertical_text: vertical_text,
                 has_tooltip: true,
                 use_markup: true);
 
-        if (is_column) {
+        if (vertical_text) {
             set_alignment((float)0.5,(float)1.0);
         } else {
             set_alignment((float)1.0, (float)0.5);
@@ -87,9 +86,9 @@ class Label : Gtk.Label {
 
         if (label_text != "") {
             clue = label_text;
+        } else {
+            clue = "?,?,?";
         }
-
-        show_all ();
     }
 
     public void highlight (bool is_highlight) {

@@ -157,16 +157,19 @@ public class App : Granite.Application {
         if (fname.has_suffix (".gno") || fname.has_suffix (".pattern")) {
             game_name = fname;
             /* TODO retrieve data from game */
+            open_file (file);
+        } else {
+            activate ();
         }
+    }
 
-        activate ();
+    public void open_file (File game) {
+        controller = new Controller (game);
+        this.add_window (controller.window);
     }
 
     public override void activate () {
-        if (Granite.Services.Logger.DisplayLevel != Granite.Services.LogLevel.DEBUG) {
-            Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.INFO;
-        }
-        controller = new Controller (dimensions);
+        controller = new Controller ();
         this.add_window (controller.window);
     }
 }

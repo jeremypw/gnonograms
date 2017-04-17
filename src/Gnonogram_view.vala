@@ -26,7 +26,7 @@ public class View : Gtk.Window {
     public Gnonograms.CellGrid cells {get; construct;}
 
     construct {
-        title = _("Gnonograms3");
+        title = _("Gnonograms for Elementary");
         set_position (Gtk.WindowPosition.CENTER);
         resizable = false;
     }

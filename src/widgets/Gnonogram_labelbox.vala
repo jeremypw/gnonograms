@@ -21,8 +21,6 @@
 namespace Gnonograms {
 
 public class LabelBox : Gtk.Box {
-    private bool is_column; /* true if contains column labels(i.e. HBox) */
-
     private Dimensions _dimensions;
     public Dimensions dimensions {
         get {
@@ -37,13 +35,13 @@ public class LabelBox : Gtk.Box {
 
     private int size { /* no of labels in box */
         get {
-            return is_column ? dimensions.height : dimensions.width;
+            return vertical_labels ? dimensions.width : dimensions.height;
         }
     }
 
-    private int othersize { /* size of other label box */
+    private int other_size { /* size of other label box */
         get {
-            return is_column ? dimensions.width : dimensions.height;
+            return vertical_labels ? dimensions.height : dimensions.width;
         }
     }
 
@@ -62,17 +60,15 @@ public class LabelBox : Gtk.Box {
         }
     }
 
+    private bool vertical_labels; /* true if contains column labels(i.e. HBox) */
+
     public LabelBox (Gtk.Orientation orientation, Dimensions dimensions) {
         Object (orientation: orientation,
+                homogeneous: true,
                 spacing: 0);
 
-        is_column = (orientation == Gtk.Orientation.HORIZONTAL);
-        set_homogeneous (true);
-
-        this.dimensions = dimensions;
-        set_all_to_string ("1,4,2,1");
-        fontheight = 24.0;
-        show_all ();
+        vertical_labels = orientation == Gtk.Orientation.HORIZONTAL;
+        this.dimensions = dimensions; /* Cannot set this in object */
     }
 
     public void resize () {
@@ -85,27 +81,25 @@ public class LabelBox : Gtk.Box {
         if (current_size > 0) {
             current_other_size = ((Label)(children.first ().data)).size;
         } else {
-            current_other_size = othersize;
+            current_other_size = other_size;
         }
 
-        if (current_other_size != othersize) {
+        if (current_other_size != other_size) {
             update_label_size ();
         }
 
         while (current_size < size) {
-            var label = new Label ("0", is_column);
-            label.size = othersize;
+            var label = new Label (vertical_labels);
+            label.size = other_size;
             add (label);
 
             current_size++;
         }
+
         while (current_size > size) {
             remove (children.last ().data);
             current_size--;
         }
-
-        fontheight = fontheight;
-        show_all ();
     }
 
     public void change_font_height(bool increase) {
