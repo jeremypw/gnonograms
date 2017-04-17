@@ -154,5 +154,14 @@ public class LabelBox : Gtk.Box {
             ((Label)l).clue = txt;
         }
     }
+
+    public void update_label (int idx, string? txt) {
+        if (txt == null) {
+            txt = "?";
+        }
+
+        var label = (Label)(get_children ().nth_data ((uint)idx));
+        label.clue = txt;
+    }
 }
 }

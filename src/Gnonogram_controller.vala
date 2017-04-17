@@ -30,6 +30,8 @@ public class Controller : GLib.Object {
 
     public File? game {get; set;}
     public Dimensions dimensions {get; set;}
+    private int rows {get { return dimensions.height; }}
+    private int cols {get { return dimensions.width; }}
 
     private double _fontheight;
     public double fontheight {
@@ -82,6 +84,7 @@ public class Controller : GLib.Object {
     public void new_game () {
         model.fill_random (7);
         initialize_view ();
+        update_labels_from_model ();
         /* For testing */
         change_game_state (game_state);
     }
@@ -134,8 +137,27 @@ public class Controller : GLib.Object {
 
     private bool load_game (File game) {
         game_state = GameState.SOLVING;
-        dimensions = {10, 15}; /* TODO implement saving and restoring settings */
+        new_game ();  /* TODO implement saving and restoring settings */
         return true;
+    }
+
+    private void update_labels_from_model () {
+        for (int r = 0; r < rows; r++) {
+            row_clue_box.update_label (r, model.get_label_text (r, false));
+        }
+
+        for (int c = 0; c < cols; c++) {
+            column_clue_box.update_label (c, model.get_label_text (c, true));
+        }
+    }
+
+    private void blank_labels () {
+        for (int r = 0; r < rows; r++) {
+            row_clue_box.update_label (r, "---");
+        }
+        for (int c = 0; c < cols; c++) {
+            column_clue_box.update_label (c, "---");
+        }
     }
 
     public void quit () {
