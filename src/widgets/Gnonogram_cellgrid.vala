@@ -22,8 +22,8 @@ namespace Gnonograms {
 public class CellGrid : Gtk.DrawingArea {
     public signal void cursor_moved (int r, int c);
 
-    private int rows;
-    private int cols;
+    private int rows {get { return dimensions.height; }}
+    private int cols {get { return dimensions.width; }}
     private int current_col;
     private double _aw;
     private double _ah;
@@ -37,36 +37,50 @@ public class CellGrid : Gtk.DrawingArea {
     private CellPattern filled_cell_pattern;
     private CellPattern empty_cell_pattern;
     private CellPattern unknown_cell_pattern;
-    private CellPattern cell_pattern;
+
+    public CellPatternType cell_pattern_type { /* Do we need more than one pattern? */
+        set {
+            switch (value) {
+                case CellPatternType.RADIAL:
+                    filled_cell_pattern = new CellPattern.radial (cell_body_width, cell_body_height, fill_color);
+                    empty_cell_pattern = new CellPattern.radial (cell_body_width, cell_body_height, empty_color);
+                    unknown_cell_pattern = new CellPattern.gdk_rgba (unknown_color);
+                    break;
+
+                default:
+                    filled_cell_pattern = new CellPattern.gdk_rgba (fill_color);
+                    empty_cell_pattern = new CellPattern.gdk_rgba (empty_color);
+                    unknown_cell_pattern = new CellPattern.gdk_rgba (unknown_color);
+                    break;
+            }
+        }
+    }
 
     private Cairo.Matrix pattern_matrix;
 
     private Gdk.RGBA[, ] colors;
-    private Gdk.RGBA default_filled_setting; 
-    private Gdk.RGBA default_empty_setting;
-    private Gdk.RGBA default_empty_solving;
-    private Gdk.RGBA default_filled_solving;
+
+    private Gdk.RGBA fill_color;
+    private Gdk.RGBA empty_color;
+    private Gdk.RGBA unknown_color;
 
     private double[] MINORGRIDDASH;
 
-    construct { /* TODO simplify by having same colors for setting and solving, derived from theme */
+    public My2DCellArray array {get; set;}
+
+    public GameState game_state  { /* Do we need different colors for game state? */
+        set {
+            unknown_color = colors[(int)value, (int)CellState.UNKNOWN];
+            fill_color = colors[(int)value, (int)CellState.FILLED];
+            empty_color = colors[(int)value, (int)CellState.EMPTY];
+        }
+    }
+
+    public Dimensions dimensions {get; set;}
+
+    construct {
         colors = new Gdk.RGBA[2, 4];
-        int setting = (int)GameState.SETTING;
-        colors[setting, (int)CellState.UNKNOWN].parse ("GREY");
-        colors[setting, (int)CellState.EMPTY].parse ("WHITE");
-        default_empty_setting = colors[setting, (int)CellState.EMPTY];
-        colors[setting, (int)CellState.FILLED].parse ("BLACK");
-        default_filled_setting = colors[setting, (int)CellState.FILLED];
-        colors[setting, (int)CellState.ERROR].parse ("RED");
-
-        int solving = (int)GameState.SOLVING;
-        colors[solving, (int)CellState.UNKNOWN].parse ("GREY");
-        colors[solving, (int)CellState.EMPTY].parse ("YELLOW");
-        default_empty_solving = colors[solving, (int)CellState.EMPTY];
-        colors[solving, (int)CellState.FILLED].parse ("BLUE");
-        default_filled_solving = colors[solving, (int)CellState.FILLED];
-        colors[solving, (int)CellState.ERROR].parse ("RED");
-
+        set_colors ();
         MINORGRIDDASH = {3.0, 3.0};
         current_col = -1;
         cell_offset = -1;
@@ -83,110 +97,82 @@ public class CellGrid : Gtk.DrawingArea {
         motion_notify_event.connect (pointer_moved);
         leave_notify_event.connect (leave_grid);
 
+        draw.connect (on_draw_event);
+
         grid_color.parse ("BLACK");
+
+        game_state = GameState.SETTING;
+        cell_pattern_type = CellPatternType.NONE;
     }
 
     public CellGrid (Dimensions dimensions) {
-        rows = dimensions.height;
-        cols = dimensions.width;
+        Object (dimensions: dimensions);
     }
 
-    public void resize (int r, int c) {
-        rows = r;
-        cols = c;
+
+    public bool on_draw_event (Cairo.Context cr) {
+        redraw_all (cr);
+        return true;
     }
 
-    public void force_repaint () {
-        Gtk.Allocation allocation;
-        get_allocation (out allocation);
-        queue_draw_area (0, 0, allocation.width, allocation.height);
-    }
+    private void redraw_all (Cairo.Context cr) {
+        prepare_to_redraw_cells (cr);
 
-    public void prepare_to_redraw_cells (GameState gs,
-                                         bool show_grid,
-                                         CellPatternType patterntype = CellPatternType.NONE) {
-
-        var win = get_window ();
-        if (win == null) {
-            return;
+        if (array != null) {
+            foreach (Cell c in array) {
+                draw_cell (cr, c);
+            }
         }
 
+        draw_grid (cr);
+    }
+
+    public void prepare_to_redraw_cells (Cairo.Context cr) {
         Gtk.Allocation allocation;
         get_allocation (out allocation);
         _aw =  (double)allocation.width;
         _ah =  (double)allocation.height;
         _wd =  (_aw - 2) / (double)cols;
         _ht =  (_ah - 2) / (double)rows;
-
-        var cr = Gdk.cairo_create (win);
-        cr.set_antialias (Cairo.Antialias.NONE);
-        cr.set_operator (Cairo.Operator.SOURCE);
-
-        var fill_color = colors[0, 0];
-        var empty_color = colors[0, 1];
-        var unknown_color = colors[0, 2];
-
-        cell_offset = show_grid ? CELLOFFSET_WITHGRID : CELLOFFSET_NOGRID;
-        cell_body_width = _wd - cell_offset - 1.0;
-        cell_body_height = _ht - cell_offset - 1.0;
-
-        switch (patterntype) {
-            case CellPatternType.RADIAL:
-                filled_cell_pattern = new CellPattern.radial (cell_body_width, cell_body_height, fill_color);
-                empty_cell_pattern = new CellPattern.radial (cell_body_width, cell_body_height, empty_color);
-                unknown_cell_pattern = new CellPattern.gdk_rgba (unknown_color);
-                break;
-
-            default:
-                filled_cell_pattern = new CellPattern.gdk_rgba (fill_color);
-                empty_cell_pattern = new CellPattern.gdk_rgba (empty_color);
-                unknown_cell_pattern = new CellPattern.gdk_rgba (unknown_color);
-                break;
-        }
+        cell_body_width = _wd - CELLOFFSET_WITHGRID - 1.0;
+        cell_body_height = _ht - CELLOFFSET_WITHGRID - 1.0;
     }
 
-    public void draw_cell (Cell cell, bool highlight = false, bool mark = false) {
-        var cr = Gdk.cairo_create (get_window ());
-        cr.set_antialias (Cairo.Antialias.NONE);
-        /* don't draw cell outside grid */
-        if (cell.row < 0 || cell.row >= rows || cell.col < 0 || cell.col >= cols) {
-            critical ("Attempt to draw cell outside grid");
-            return;
-        }
-
+    public void draw_cell (Cairo.Context cr, Cell cell, bool highlight = false, bool mark = false) {
         /*  Calculate coords of top left corner of filled part
          *  (excluding grid if present but including highlight line)
          */
-        double x = cell.col * _wd + cell_offset;
-        double y =  cell.row * _ht + cell_offset;
+        double x = cell.col * _wd + CELLOFFSET_WITHGRID;
+        double y =  cell.row * _ht + CELLOFFSET_WITHGRID;
         bool error = false;
+        CellPattern pattern;
 
         switch (cell.state) {
             case CellState.ERROR_EMPTY:
             case CellState.EMPTY:
-                cell_pattern = empty_cell_pattern;
+                pattern = empty_cell_pattern;
                 error = (cell.state == CellState.ERROR_EMPTY);
                 break;
 
             case CellState.ERROR_FILLED:
             case CellState.FILLED:
-                cell_pattern = filled_cell_pattern;
+                pattern = filled_cell_pattern;
                 error = (cell.state == CellState.ERROR_FILLED);
                 break;
 
             default :
-                cell_pattern = unknown_cell_pattern;
+                pattern = unknown_cell_pattern;
                 break;
         }
 
         pattern_matrix = Cairo.Matrix.identity ();
         pattern_matrix.translate (-x, -y);
-        cell_pattern.pattern.set_matrix (pattern_matrix);
+        pattern.pattern.set_matrix (pattern_matrix);
 
         /* Draw cell body */
         cr.set_line_width (0.5);
         cr.rectangle (x, y, cell_body_width, cell_body_height);
-        cr.set_source (cell_pattern.pattern);
+        cr.set_source (pattern.pattern);
         cr.fill ();
 
         if (mark) {
@@ -225,13 +211,8 @@ public class CellGrid : Gtk.DrawingArea {
         }
     }
 
-    public void draw_grid () {
+    public void draw_grid (Cairo.Context cr) {
         double x1, x2, y1, y2;
-        var cr = Gdk.cairo_create (get_window ());
-
-        if (cr == null) {
-            return;
-        }
 
         Gdk.cairo_set_source_rgba (cr, grid_color);
         cr.set_antialias (Cairo.Antialias.NONE);
@@ -259,6 +240,7 @@ public class CellGrid : Gtk.DrawingArea {
             cr.line_to (x1, y2);
             cr.stroke ();
             x1 += _wd;
+            c++;
         }
 
         //Draw major grid (solid lines)
@@ -308,6 +290,20 @@ public class CellGrid : Gtk.DrawingArea {
         }
 
         return true;
+    }
+
+    private void set_colors () {  /* TODO simplify by having same colors for setting and solving, derived from theme */
+        int setting = (int)GameState.SETTING;
+        colors[setting, (int)CellState.UNKNOWN].parse ("LIGHT GREY");
+        colors[setting, (int)CellState.EMPTY].parse ("WHITE");
+        colors[setting, (int)CellState.FILLED].parse ("BLACK");
+        colors[setting, (int)CellState.ERROR].parse ("RED");
+
+        int solving = (int)GameState.SOLVING;
+        colors[solving, (int)CellState.UNKNOWN].parse ("LIGHT GREY");
+        colors[solving, (int)CellState.EMPTY].parse ("YELLOW");
+        colors[solving, (int)CellState.FILLED].parse ("BLUE");
+        colors[solving, (int)CellState.ERROR].parse ("RED");
     }
 
     private class CellPattern {

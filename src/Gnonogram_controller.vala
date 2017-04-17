@@ -21,7 +21,16 @@
 namespace Gnonograms {
 public class Controller : GLib.Object {
     private View gnonogram_view;
+    private CellGrid cell_grid;
+    private LabelBox row_clue_box;
+    private LabelBox column_clue_box;
+    private Model model;
+    private GameState game_state;
+    private Cell current_cell;
+    private Cell previous_cell;
+
     public string game_path {get; set;}
+    public Dimensions dimensions {get; set;}
 
     public Gtk.Window window {
         get {
@@ -29,27 +38,65 @@ public class Controller : GLib.Object {
         }
     }
 
-    public Controller(string game_path) {
-        Object (game_path: game_path);
-        create_view();
+    construct {
+        initialize_cursor ();
     }
 
-    private void create_view() {
-        Dimensions dimensions = {13, 13};
-        var row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL, dimensions);
-        var column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL, dimensions);
+    public Controller (Dimensions dimensions) {
+        Object (dimensions: dimensions);
 
-        gnonogram_view = new Gnonograms.View (row_clue_box, column_clue_box,
-                                              new CellGrid (dimensions));
+        create_view (dimensions);
+        reset_all_to_default ();
+        new_game ();
+    }
+
+    private void create_view (Dimensions dimensions) {
+        row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL, dimensions);
+        column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL, dimensions);
+        cell_grid = new CellGrid (dimensions);
+        model = new Model (dimensions);
+        gnonogram_view = new Gnonograms.View (row_clue_box, column_clue_box, cell_grid);
         gnonogram_view.show_all();
     }
 
-    private void save_state () {
+    public void new_game () {
+        model.clear ();
+        model.fill_random (7);
+        initialize_view ();
+        /* For testing */
+        change_game_state (GameState.SETTING);
+    }
 
+    private void initialize_view () {
+        initialize_cursor ();
+    }
+
+    private void initialize_cursor () {
+        current_cell = { -1, -1, CellState.UNKNOWN};
+        previous_cell = { -1, -1, CellState.UNKNOWN};
+    }
+
+    private void change_game_state (GameState gs) {
+        initialize_cursor ();
+        game_state = gs;
+
+        if (gs == GameState.SETTING) {
+             model.display_solution ();
+        } else {
+            model.display_working ();
+        }
+
+        cell_grid.array = model.display_data;
+    }
+
+    private void reset_all_to_default () {
+    }
+
+    private void save_game_state () {
     }
 
     public void quit () {
-        save_state ();
+        save_game_state ();
     }
 }
 }

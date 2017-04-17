@@ -94,17 +94,19 @@ public struct Dimensions {
     int height;
 }
 
-public static int MAXSIZE = 200; // max number rows or columns
+public static int MAXSIZE = 50; // max number rows or columns
 public static int MINSIZE = 5;
 public static double MINFONTSIZE=3.0;
 public static double MAXFONTSIZE=72.0;
 public static double CELLOFFSET_NOGRID=0.0;
 public static double CELLOFFSET_WITHGRID=3.0;
 public const string BLOCKSEPARATOR=",";
+public static int MAXGRADE = 12; //max grade level
 
 public class App : Granite.Application {
     public Controller controller;
     private string game_name;
+    private Dimensions dimensions;
 
     construct {
         application_id = "com.github.jeremypw.gnonograms-elementary";
@@ -141,6 +143,7 @@ public class App : Granite.Application {
         add_accelerator ("<Control>q", "app.quit", null);
 
         game_name = "";
+        dimensions = {15, 15};
     }
 
     public override void open (File[] files, string hint) {
@@ -153,6 +156,7 @@ public class App : Granite.Application {
         var fname = file.get_basename ();
         if (fname.has_suffix (".gno") || fname.has_suffix (".pattern")) {
             game_name = fname;
+            /* TODO retrieve data from game */
         }
 
         activate ();
@@ -162,7 +166,7 @@ public class App : Granite.Application {
         if (Granite.Services.Logger.DisplayLevel != Granite.Services.LogLevel.DEBUG) {
             Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.INFO;
         }
-        controller = new Controller (game_name);
+        controller = new Controller (dimensions);
         this.add_window (controller.window);
     }
 }

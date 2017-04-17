@@ -61,4 +61,91 @@ namespace Gnonograms.Utils
         extent--;
         return extent;
     }
+
+    public string block_string_from_cellstate_array(CellState[] cs) {
+        StringBuilder sb = new StringBuilder("");
+        int count = 0, blocks = 0;
+        bool counting = false;
+
+        for (int i = 0; i < cs.length; i++)
+        {
+            if (cs[i] == CellState.EMPTY)
+            {
+                if (counting)
+                {
+                    sb.append (count.to_string() + BLOCKSEPARATOR);
+                    counting = false;
+                    count = 0;
+                    blocks++;
+                }
+            }
+            else if (cs[i] == CellState.FILLED)
+            {
+                counting = true;
+                count++;
+            }
+            else
+            {
+                critical ("Error in block string from cellstate array - Cellstate UNKNOWN OR IN ERROR\n");
+                break;
+            }
+        }
+        if (counting)
+        {
+            sb.append (count.to_string () + BLOCKSEPARATOR);
+            blocks++;
+        }
+        if (blocks == 0) sb.append ("0");
+        else sb.truncate (sb.len - 1);
+
+        return sb.str;
+    }
+
+    public CellState[] cellstate_array_from_string (string s)
+    {
+        CellState[] cs = {};
+        string[] data = remove_blank_lines (s.split_set (", "));
+        for (int i = 0; i < data.length; i++) cs += (CellState)(int.parse (data[i]).clamp (0, 6));
+        return cs;
+    }
+
+    public string string_from_cellstate_array (CellState[] cs)
+    {
+        if (cs == null) return "";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < cs.length; i++)
+        {
+            sb.append (((int)cs[i]).to_string ());
+            sb.append (" ");
+        }
+        return sb.str;
+    }
+
+    public string hex_string_from_cellstate_array (CellState[] sa)
+    {
+        StringBuilder sb = new StringBuilder("");
+        int length = sa.length;
+        int e = 0, m = 1, count = 0;
+        for(int i = length - 1; i >= 0; i--)
+        {
+            count++;
+            e += ((int)(sa[i]) - 1) * m;
+            m = m * 2;
+            if (count == 4 || i == 0)
+            {
+                sb.prepend (int2hex (e));
+                count = 0; m = 1; e = 0;
+            }
+        }
+        return sb.str;
+    }
+
+    private string int2hex (int i)
+    {
+        if (i <= 9) return i.to_string ();
+        if (i > 15) return "X";
+        i = i - 10;
+        string[] l = {"A","B","C","D","E","F"};
+        return l[i];
+    }
 }

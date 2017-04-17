@@ -42,6 +42,8 @@ vala_precompile(VALA_C
     src/widgets/Gnonogram_label.vala
     src/widgets/Gnonogram_cellgrid.vala
     src/core/utils.vala
+    src/core/Gnonogram_model.vala
+    src/core/My2DCellArray.vala
 
 PACKAGES
     gtk+-3.0
