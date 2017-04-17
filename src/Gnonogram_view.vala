@@ -20,14 +20,14 @@
  */
 
 namespace Gnonograms {
-public class View : Gtk.Window {
+public class View : Gtk.ApplicationWindow {
     public Gnonograms.LabelBox row_box {get; construct;}
     public Gnonograms.LabelBox column_box {get; construct;}
     public Gnonograms.CellGrid cells {get; construct;}
 
     construct {
         title = _("Gnonograms for Elementary");
-        set_position (Gtk.WindowPosition.CENTER);
+        window_position = Gtk.WindowPosition.CENTER_ALWAYS;
         resizable = false;
     }
 
