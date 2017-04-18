@@ -133,7 +133,7 @@ public class Controller : GLib.Object {
 
     private void restore_settings () {
         game_state = GameState.SETTING;
-        dimensions = {30, 30}; /* TODO implement saving and restoring settings */
+        dimensions = {15, 20}; /* TODO implement saving and restoring settings */
     }
 
     private bool load_game (File game) {
@@ -152,7 +152,7 @@ public class Controller : GLib.Object {
         }
     }
 
-    private void highlight_labels_and_cell(Cell c, bool is_highlight) {
+    private void highlight_labels (Cell c, bool is_highlight) {
         row_clue_box.highlight (c.row, is_highlight);
         column_clue_box.highlight (c.col, is_highlight);
     }
@@ -167,12 +167,12 @@ public class Controller : GLib.Object {
         } else {
             current_cell = model.get_cell (r, c);
         }
-        highlight_labels_and_cell (previous_cell, false);
-        highlight_labels_and_cell (current_cell, true);
+        highlight_labels (previous_cell, false);
+        highlight_labels (current_cell, true);
     }
 
     private bool on_grid_leave () {
-        highlight_labels_and_cell (current_cell, false);
+        highlight_labels (current_cell, false);
         current_cell = NULL_CELL;
         return false;
     }

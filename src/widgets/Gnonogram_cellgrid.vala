@@ -20,7 +20,8 @@
 
 namespace Gnonograms {
 public class CellGrid : Gtk.DrawingArea {
-    private const double CELL_FRAME_WIDTH = 3.0;
+    private const double CELL_FRAME_WIDTH = 2.0;
+    private const double HIGHLIGHT_WIDTH = 2.0;
     private double[] MINORGRIDDASH;
     private const double MAJOR_GRID_LINE_WIDTH = 2.0;
     private const double MINOR_GRID_LINE_WIDTH = 1.0;
@@ -32,6 +33,9 @@ public class CellGrid : Gtk.DrawingArea {
 
     private uint current_col;
     private uint current_row;
+    private uint previous_row;
+    private uint previous_col;
+
     private double alloc_width; /* Width of drawing area less frame*/
     private double alloc_height; /* Height of drawing area less frame */
     private double cell_width; /* Width of cell including frame */
@@ -74,7 +78,7 @@ public class CellGrid : Gtk.DrawingArea {
         }
     }
 
-    public signal void cursor_moved(uint r, uint c);
+    public signal void cursor_moved (uint r, uint c);
 
     construct {
         colors = new Gdk.RGBA[2, 4];
@@ -82,6 +86,8 @@ public class CellGrid : Gtk.DrawingArea {
         MINORGRIDDASH = {1.0, 5.0};
         current_col = -1;
         current_row = -1;
+        previous_col = -1;
+        previous_row = -1;
 
         this.add_events (
         Gdk.EventMask.BUTTON_PRESS_MASK|
@@ -102,6 +108,7 @@ public class CellGrid : Gtk.DrawingArea {
         cell_pattern_type = CellPatternType.NONE;
 
         size_allocate.connect (on_size_allocate);
+        leave_notify_event.connect (on_leave_notify);
     }
 
     public CellGrid (My2DCellArray array) {
@@ -119,6 +126,10 @@ public class CellGrid : Gtk.DrawingArea {
         return true;
     }
 
+    public void highlight_cell_at (uint r, uint c, bool highlight) {
+        var cr = Gdk.cairo_create (this.get_window ());
+        draw_cell (cr, array.get_cell (r, c), highlight);
+    }
     public void draw_cell (Cairo.Context cr, Cell cell, bool highlight = false, bool mark = false) {
         /*  Calculate coords of top left corner of filled part
          *  (excluding grid if present but including highlight line)
@@ -146,9 +157,9 @@ public class CellGrid : Gtk.DrawingArea {
                 break;
         }
 
-        var pattern_matrix=Cairo.Matrix.identity();
-        pattern_matrix.translate(-x,-y);
-        cell_pattern.pattern.set_matrix(pattern_matrix);
+        var pattern_matrix = Cairo.Matrix.identity();
+        pattern_matrix.translate (-x,-y);
+        cell_pattern.pattern.set_matrix (pattern_matrix);
 
         /* Draw cell body */
         cr.set_line_width (0.5);
@@ -156,37 +167,15 @@ public class CellGrid : Gtk.DrawingArea {
         cr.set_source (cell_pattern.pattern);
         cr.fill ();
 
-        if (mark) {
-            cr.set_line_width (1.0);
-            Gdk.cairo_set_source_rgba (cr, (this.get_style_context ()).get_background_color (Gtk.StateFlags.SELECTED));
-
-            cr.rectangle (x + cell_body_width / 4,
-                          y + cell_body_height / 4,
-                          cell_body_width / 2,
-                          cell_body_height / 2);
-
-            cr.fill ();
-        }
-
-        if (error) { /* TODO Simplify by not marking erroneous cells */
-            cr.set_line_width (4.0);
-            Gdk.cairo_set_source_rgba (cr, colors[0, (int) CellState.ERROR]);
-
-            cr.rectangle (x + 3,
-                          y + 3,
-                          cell_body_width - 6,
-                          cell_body_height - 6);
-
-            cr.stroke ();
-        } else if (highlight) {
-            cr.set_line_width (2.0);
+        if (highlight) {
+            cr.set_line_width (HIGHLIGHT_WIDTH);
             var sc = this.get_style_context ();
-            Gdk.cairo_set_source_rgba (cr, sc.get_background_color (Gtk.StateFlags.SELECTED));
-
-            cr.rectangle (x + 2,
-                          y + 2,
-                          cell_body_width - 4,
-                          cell_body_height - 4);
+            var color = sc.get_color (Gtk.StateFlags.PRELIGHT);
+            cr.set_source_rgba (color.red, color.green, color.blue, color.alpha);
+            cr.rectangle (x + HIGHLIGHT_WIDTH / 2.0,
+                          y + HIGHLIGHT_WIDTH / 2.0,
+                          cell_body_width - HIGHLIGHT_WIDTH,
+                          cell_body_height - HIGHLIGHT_WIDTH);
 
             cr.stroke ();
         }
@@ -267,7 +256,7 @@ public class CellGrid : Gtk.DrawingArea {
         int setting = (int)GameState.SETTING;
         colors[setting, (int)CellState.UNKNOWN].parse ("LIGHT GREY");
         colors[setting, (int)CellState.EMPTY].parse ("WHITE");
-        colors[setting, (int)CellState.FILLED].parse ("BLACK");
+        colors[setting, (int)CellState.FILLED].parse ("DARK GREY");
         colors[setting, (int)CellState.ERROR].parse ("RED");
 
         int solving = (int)GameState.SOLVING;
@@ -294,11 +283,24 @@ public class CellGrid : Gtk.DrawingArea {
 
         if (c != current_col || r != current_row) { /* only signal when cursor changes cell */
             cursor_moved (r, c); /* signal handled by Gnonograms.Controller */
+            if (current_row < rows) {
+                highlight_cell_at (current_row, current_col, false);
+            }
+            previous_row = current_row;
+            previous_col = current_col;
             current_row = r;
             current_col = c;
+            highlight_cell_at (current_row, current_col, true);
         }
 
         return true;
+    }
+
+    private bool on_leave_notify () {
+        if (current_row < rows) {
+            highlight_cell_at (current_row, current_col, false);
+        }
+        return false;
     }
 
 /*** Private classes ***/

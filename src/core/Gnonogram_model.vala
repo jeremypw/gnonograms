@@ -216,7 +216,7 @@ public class Model : GLib.Object {
             solution_data.set_row (r, data);
         }
 
-        maxb = 1 + (int)(rows * (1.0 - grade / MAXGRADE));
+        maxb = 1 + (int)((double)rows * (1.0 - rel_g));
 
         for (int c = 0; c < cols; c++) {
             solution_data.get_col (c, ref data);
