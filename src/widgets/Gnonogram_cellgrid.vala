@@ -27,10 +27,11 @@ public class CellGrid : Gtk.DrawingArea {
     private Gdk.RGBA[, ] colors;
 
     public My2DCellArray array {get; set;} /* model display data */
-    private int rows {get { return array.rows; }}
-    private int cols {get { return array.cols; }}
+    private uint rows {get { return array.rows; }}
+    private uint cols {get { return array.cols; }}
 
-    private int current_col;
+    private uint current_col;
+    private uint current_row;
     private double alloc_width; /* Width of drawing area less frame*/
     private double alloc_height; /* Height of drawing area less frame */
     private double cell_width; /* Width of cell including frame */
@@ -73,13 +74,14 @@ public class CellGrid : Gtk.DrawingArea {
         }
     }
 
-    public signal void cursor_moved(int r, int c);
+    public signal void cursor_moved(uint r, uint c);
 
     construct {
         colors = new Gdk.RGBA[2, 4];
         set_colors ();
         MINORGRIDDASH = {1.0, 5.0};
         current_col = -1;
+        current_row = -1;
 
         this.add_events (
         Gdk.EventMask.BUTTON_PRESS_MASK|
@@ -90,8 +92,7 @@ public class CellGrid : Gtk.DrawingArea {
         Gdk.EventMask.LEAVE_NOTIFY_MASK
         );
 
-        motion_notify_event.connect (pointer_moved);
-        leave_notify_event.connect (leave_grid);
+        motion_notify_event.connect (on_pointer_moved);
 
         draw.connect (on_draw_event);
 
@@ -262,26 +263,6 @@ public class CellGrid : Gtk.DrawingArea {
         }
     }
 
-    private bool pointer_moved (Gdk.EventMotion e) {
-        /* Calculate which cell the pointer is over */
-        int r =  ((int)(e.y / alloc_height * rows)).clamp (0, rows - 1); /* TODO store rows / alloc_height */
-        int c =  ((int)(e.x / alloc_width * cols)).clamp (0, cols - 1); /* TODO store cols / alloc_width */
-
-        if (c != current_col || r != CELL_FRAME_WIDTH) { /* only signal when cursor changes cell */
-            cursor_moved (r, c); /* signal handled by Gnonograms.Controller */
-        }
-
-        return true;
-    }
-
-    private bool leave_grid (Gdk.EventCrossing e) {
-        if (e.x < 0 || e.y < 0) { //ignore false leave events that sometimes occur for unknown reason
-            cursor_moved (-1, -1);
-        }
-
-        return true;
-    }
-
     private void set_colors () {  /* TODO simplify by having same colors for setting and solving, derived from theme */
         int setting = (int)GameState.SETTING;
         colors[setting, (int)CellState.UNKNOWN].parse ("LIGHT GREY");
@@ -304,8 +285,20 @@ public class CellGrid : Gtk.DrawingArea {
         cell_height = (alloc_height) / (double)rows;
         cell_body_width = cell_width - CELL_FRAME_WIDTH - MAJOR_GRID_LINE_WIDTH;
         cell_body_height = cell_height - CELL_FRAME_WIDTH  - MAJOR_GRID_LINE_WIDTH;
+    }
 
+    private bool on_pointer_moved (Gdk.EventMotion e) {
+        /* Calculate which cell the pointer is over */
+        uint r =  ((uint)(e.y / cell_width)).clamp (0, rows - 1); /* TODO store rows / alloc_height */
+        uint c =  ((uint)(e.x / cell_height)).clamp (0, cols - 1); /* TODO store cols / alloc_width */
 
+        if (c != current_col || r != current_row) { /* only signal when cursor changes cell */
+            cursor_moved (r, c); /* signal handled by Gnonograms.Controller */
+            current_row = r;
+            current_col = c;
+        }
+
+        return true;
     }
 
 /*** Private classes ***/

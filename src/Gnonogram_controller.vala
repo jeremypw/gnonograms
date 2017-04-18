@@ -30,8 +30,8 @@ public class Controller : GLib.Object {
 
     public File? game {get; set;}
     public Dimensions dimensions {get; set;}
-    private int rows {get { return dimensions.height; }}
-    private int cols {get { return dimensions.width; }}
+    private uint rows {get { return dimensions.height; }}
+    private uint cols {get { return dimensions.width; }}
 
     private double _fontheight;
     public double fontheight {
@@ -84,6 +84,7 @@ public class Controller : GLib.Object {
 
     private void connect_signals () {
         cell_grid.cursor_moved.connect (on_grid_cursor_moved);
+        cell_grid.leave_notify_event.connect (on_grid_leave);
     }
 
     private void new_game () {
@@ -100,8 +101,8 @@ public class Controller : GLib.Object {
     }
 
     private void initialize_cursor () {
-        current_cell = { -1, -1, CellState.UNKNOWN};
-        previous_cell = { -1, -1, CellState.UNKNOWN};
+        current_cell = NULL_CELL;
+        previous_cell = NULL_CELL;
     }
 
     private void change_game_state (GameState gs) {
@@ -124,7 +125,7 @@ public class Controller : GLib.Object {
         max_h = (double)(scr.get_height()) / ((double)(dimensions.height));
         max_w = (double)(scr.get_width()) / ((double)(dimensions.width));
 
-        fontheight = double.min (max_h, max_w) / 4;
+        fontheight = double.min (max_h, max_w) / 3.0;
     }
 
     private void save_game_state () {
@@ -132,7 +133,7 @@ public class Controller : GLib.Object {
 
     private void restore_settings () {
         game_state = GameState.SETTING;
-        dimensions = {30, 10}; /* TODO implement saving and restoring settings */
+        dimensions = {30, 30}; /* TODO implement saving and restoring settings */
     }
 
     private bool load_game (File game) {
@@ -151,31 +152,29 @@ public class Controller : GLib.Object {
         }
     }
 
-    private void highlight_labels_and_cell(Cell c, bool is_highlight)
-    {
+    private void highlight_labels_and_cell(Cell c, bool is_highlight) {
         row_clue_box.highlight (c.row, is_highlight);
         column_clue_box.highlight (c.col, is_highlight);
     }
 
 /*** Signal Handlers ***/
 
-    private void on_grid_cursor_moved (int r, int c) {
-        if (r<0||r>=rows||c<0||c>=cols)//pointer has left grid
-        {
-            highlight_labels_and_cell (previous_cell,false);
-            highlight_labels_and_cell (current_cell,false);
-            current_cell.row=-1;
-            return;
-        }
-
-        previous_cell.copy(current_cell);
-        if (current_cell.row != r || current_cell.col != c)
-        {
-            highlight_labels_and_cell (previous_cell, false);
-
+    private void on_grid_cursor_moved (uint r, uint c) {
+        /* Assume only called if current cell changed */
+        previous_cell.copy (current_cell);
+        if (r >= rows || c >= cols) {
+            current_cell = NULL_CELL;
+        } else {
             current_cell = model.get_cell (r, c);
-            highlight_labels_and_cell (current_cell, true);
         }
+        highlight_labels_and_cell (previous_cell, false);
+        highlight_labels_and_cell (current_cell, true);
+    }
+
+    private bool on_grid_leave () {
+        highlight_labels_and_cell (current_cell, false);
+        current_cell = NULL_CELL;
+        return false;
     }
 
     public void quit () {

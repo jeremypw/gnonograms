@@ -22,13 +22,13 @@ namespace Gnonograms {
 
 public class My2DCellArray  : GLib.Object {
     public Gnonograms.Dimensions dimensions {get; set;}
-    public int rows {
+    public uint rows {
         get {
-            return dimensions.height;    
+            return dimensions.height;
         }
     }
 
-    public int cols {
+    public uint cols {
         get {
             return dimensions.width;
         }
@@ -50,39 +50,39 @@ public class My2DCellArray  : GLib.Object {
         data[r,c] = s;
     }
 
-    public CellState get_data_from_rc (int r, int c) {
+    public CellState get_data_from_rc (uint r, uint c) {
         return data[r,c];
     }
 
-    public Cell get_cell (int r, int c) {
+    public Cell get_cell (uint r, uint c) {
         return {r, c, data[r,c]};
     }
 
-    public void get_row (int row, ref CellState[] sa, int start = 0) {
-        for (int c = start; c < start + sa.length; c++) {
+    public void get_row (uint row, ref CellState[] sa, uint start = 0) {
+        for (uint c = start; c < start + sa.length; c++) {
             sa[c] = data[row,c];
         }
     }
 
-    public void set_row (int row, CellState[] sa, int start = 0) {
-        for (int c = 0; c < sa.length; c++) {
+    public void set_row (uint row, CellState[] sa, uint start = 0) {
+        for (uint c = 0; c < sa.length; c++) {
             data[row, c + start] = sa[c];
         }
     }
 
-    public void get_col (int col, ref CellState[] sa, int start = 0) {
-        for (int r = start; r < start + sa.length; r++) {
+    public void get_col (uint col, ref CellState[] sa, uint start = 0) {
+        for (uint r = start; r < start + sa.length; r++) {
             sa[r] = data[r, col];
         }
     }
 
-    public void set_col (int col, CellState[] sa, int start = 0) {
-        for (int r = 0; r < sa.length; r++) {
+    public void set_col (uint col, CellState[] sa, uint start = 0) {
+        for (uint r = 0; r < sa.length; r++) {
             data[r + start, col] = sa[r];
         }
     }
 
-    public void get_array (int idx, bool iscolumn, ref CellState[] sa, int start = 0) {
+    public void get_array (uint idx, bool iscolumn, ref CellState[] sa, uint start = 0) {
         if (iscolumn) {
             get_col(idx, ref sa, start);
         } else {
@@ -90,7 +90,7 @@ public class My2DCellArray  : GLib.Object {
         }
     }
 
-    public void set_array (int idx, bool iscolumn, CellState[] sa, int start = 0) {
+    public void set_array (uint idx, bool iscolumn, CellState[] sa, uint start = 0) {
         if (iscolumn) {
             set_col (idx, sa, start);
         } else {
@@ -106,15 +106,15 @@ public class My2DCellArray  : GLib.Object {
         }
     }
 
-    public string data2text (int idx, int length, bool iscolumn) {
+    public string data2text (uint idx, uint length, bool iscolumn) {
         CellState[] arr = new CellState[length];
         this.get_array (idx, iscolumn, ref arr);
         return Utils.block_string_from_cellstate_array (arr);
     }
 
     public void copy (My2DCellArray ca) {
-        for (int r = 0; r < int.min (ca.rows, this.rows); r++) {
-            for (int c = 0; c < int.min (ca.cols, this.cols); c++) {
+        for (uint r = 0; r < uint.min (ca.rows, this.rows); r++) {
+            for (uint c = 0; c < uint.min (ca.cols, this.cols); c++) {
                 data[r,c] = ca.get_data_from_rc (r, c);
             }
         }
@@ -125,12 +125,12 @@ public class My2DCellArray  : GLib.Object {
     }
 
     public class Iterator {
-        private int row_limit {get; set;}
-        private int col_limit {get; set;}
+        private uint row_limit {get; set;}
+        private uint col_limit {get; set;}
         private CellState [ , ] data {get; set;}
 
-        private int row_index = 0;
-        private int col_index = 0;
+        private uint row_index = 0;
+        private uint col_index = 0;
 
         public Iterator (CellState [,] data, Dimensions dimensions) {
             this.data = data;

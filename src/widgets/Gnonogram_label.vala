@@ -26,8 +26,8 @@ class Label : Gtk.Label {
     private string _clue; /* text of clue in horizontal form */
     private int blockextent;
 
-    private int _size;
-    public int size { /* total number of cells in the row/column to which this label is attached */
+    private uint _size;
+    public uint size { /* total number of cells in the row/column to which this label is attached */
         set {
             _size = value;
             update_tooltip ();
@@ -70,7 +70,7 @@ class Label : Gtk.Label {
 
     construct {
         attrib_start = "<span>";
-        size = -1;
+        size = 0;
     }
 
     public Label (bool vertical_text, string label_text = "") {

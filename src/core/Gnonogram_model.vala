@@ -27,13 +27,13 @@ public class Model : GLib.Object {
     public  CellState[] data;
     private Rand rand_gen;
 
-    private int rows {
+    private uint rows {
         get {
             return dimensions.height;
         }
     }
 
-    private int cols {
+    private uint cols {
         get {
             return dimensions.width;
         }
@@ -133,7 +133,7 @@ public class Model : GLib.Object {
     }
 
     public string get_label_text (int idx, bool is_column, bool from_solution = true) {
-        int length = is_column ? rows : cols;
+        uint length = is_column ? rows : cols;
 
         if (from_solution) {
             return solution_data.data2text (idx, length, is_column);
@@ -142,7 +142,7 @@ public class Model : GLib.Object {
         }
     }
 
-    public Cell get_cell(int r, int c) {
+    public Cell get_cell(uint r, uint c) {
         return display_data.get_cell (r, c);
     }
 
@@ -196,22 +196,23 @@ public class Model : GLib.Object {
         return sb.str;
     }
 
-    public void fill_random (int grade) {
+    public void fill_random (uint grade) {
         clear();
-        int midcol = rows / 2;
-        int midrow = cols / 2;
-        int mincdf = 2 + (int)((rows * grade) / (MAXGRADE * 4));
-        int minrdf = 2 + (int)((cols * grade) / (MAXGRADE * 4));
+        double rel_g = (double)grade / (double)MAXGRADE;
+        int midcol = (int)rows / 2;
+        int midrow = (int)cols / 2;
+        int mincdf = 2 + (int)(((double)rows * rel_g / 4));
+        int minrdf = 2 + (int)(((double)cols * rel_g / 4));
 
-        for (int e = 0; e < data.length; e++) {
+        for (uint e = 0; e < data.length; e++) {
             data[e] = CellState.EMPTY;
         }
 
-        int maxb = 1 + (int)(cols * (1.0 - grade / MAXGRADE));
+        int maxb = 1 + (int)((double)cols * (1.0 - rel_g));
 
         for (int r = 0; r < rows; r++) {
             solution_data.get_row (r, ref data);
-            fill_region (cols, ref data, grade, (r - midcol).abs(), maxb, cols);
+            fill_region (cols, ref data, grade, (uint)((r - midcol).abs()), maxb, cols);
             solution_data.set_row (r, data);
         }
 
@@ -223,31 +224,31 @@ public class Model : GLib.Object {
             solution_data.set_col (c, data);
         }
 
-        for (int r = 0; r < rows; r++) {
+        for (uint r = 0; r < rows; r++) {
             solution_data.get_row (r, ref data);
             adjust_region (cols, ref data, minrdf);
             solution_data.set_row (r, data);
         }
 
-        for (int c = 0; c < cols; c++) {
+        for (uint c = 0; c < cols; c++) {
             solution_data.get_col (c, ref data);
             adjust_region (rows, ref data, mincdf);
             solution_data.set_col (c, data);
         }
     }
 
-    private void fill_region (int size, ref CellState[] data, int grade, int e, int maxb, int maxp) {
+    private void fill_region (uint size, ref CellState[] data, uint grade, uint e, uint maxb, uint maxp) {
         //e is larger for rows/cols further from edge
         //do not want too many edge cells filled
         //maxb is maximum size of one random block
         //maxp is range of random number generator
 
-        maxb = int.max (2, maxb);
+        maxb = uint.max (2, maxb);
 
-        int p = 0; //pointer
-        int mid = size / 2;
-        int bsize; // blocksize
-        int baseline = e + grade - 10;
+        uint p = 0; //pointer
+        int mid = (int)size / 2;
+        uint bsize; // blocksize
+        int baseline = (int)(e + grade - 10);
         // baseline relates to the probability of a filled block before
         // adjusting for distance from edge of region.
         bool fill;
@@ -255,14 +256,14 @@ public class Model : GLib.Object {
         while (p < size) {
             // random choice whether to be full or empty, weighted so
             // less likely to fill squares close to edge
-            fill = rand_gen.int_range (0, maxp) > (baseline + (p - mid).abs());
+            fill = rand_gen.int_range (0, (int)maxp) > (baseline + ((int)p - mid).abs());
 
             // random length up to remaining space but not larger than
             // maxb for filled cells or size-maxb for empty cells
             // bsize=int.min(rand_gen.int_range(0,size-p),maxb);
-            bsize = int.min (rand_gen.int_range (0, size - p), fill ? maxb : size - maxb);
+            bsize = uint.min (rand_gen.int_range (0, (int)(size - p)), fill ? maxb : size - maxb);
 
-            for (int i = 0; i < bsize; i++) {
+            for (uint i = 0; i < bsize; i++) {
                 if (fill) {
                     data[p] = CellState.FILLED;
                 }
@@ -276,16 +277,16 @@ public class Model : GLib.Object {
         }
     }
 
-    private void adjust_region (int s, ref CellState [] arr, int mindf) {
+    private void adjust_region (uint s, ref CellState [] arr, int mindf) {
         //s is size of region
         // mindf = minimum degrees of freedom
         if (s < 5) {
             return;
         }
 
-        int b = 0; // count of filled cells
-        int bc=0; // count of filled blocks
-        int df=0; // degrees of freedom
+        uint b = 0; // count of filled cells
+        uint bc = 0; // count of filled blocks
+        uint df = 0; // degrees of freedom
 
         for (int i = 0; i < s; i++) {
             if (arr[i] == CellState.FILLED) {
@@ -296,15 +297,15 @@ public class Model : GLib.Object {
             }
         }
 
-        df=s - b - bc + 1;
+        df = s - b - bc + 1;
 
         if (df > s) { //completely empty - fill one cell
-            arr[rand_gen.int_range (0,s)] = CellState.FILLED;
+            arr[rand_gen.int_range (0, (int)s)] = CellState.FILLED;
         } else {// empty cells until reach min freedom
             int count = 0;
             while (df < mindf && count < 30) {
                 count++;
-                int i = rand_gen.int_range (1, s - 1);
+                int i = rand_gen.int_range (1, (int)(s - 1));
                 if (arr[i] == CellState.FILLED) {
                     arr[i] = CellState.EMPTY;
                     df++;

@@ -33,13 +33,13 @@ public class LabelBox : Gtk.Box {
         }
     }
 
-    private int size { /* no of labels in box */
+    private uint size { /* no of labels in box */
         get {
             return vertical_labels ? dimensions.width : dimensions.height;
         }
     }
 
-    private int other_size { /* size of other label box */
+    private uint other_size { /* size of other label box */
         get {
             return vertical_labels ? dimensions.height : dimensions.width;
         }
@@ -76,7 +76,7 @@ public class LabelBox : Gtk.Box {
 
         GLib.List<weak Gtk.Widget> children = get_children ();
         var current_size = children.length ();
-        int current_other_size;
+        uint current_other_size;
 
         if (current_size > 0) {
             current_other_size = ((Label)(children.first ().data)).size;

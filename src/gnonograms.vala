@@ -53,8 +53,8 @@ public enum ButtonPress {
 }
 
 public struct Cell {
-    public int row;
-    public int col;
+    public uint row;
+    public uint col;
     public CellState state;
 
     public bool same_coords (Cell c) {
@@ -80,7 +80,7 @@ public struct Cell {
     }
 
     public string to_string () {
-        return "Row %i, Col %i,  State %s".printf (row, col, state.to_string ());
+        return "Row %u, Col %u,  State %s".printf (row, col, state.to_string ());
     }
 }
 
@@ -90,17 +90,18 @@ public struct Move {
 }
 
 public struct Dimensions {
-    int width;
-    int height;
+    uint width;
+    uint height;
 }
 
+public const Cell NULL_CELL = {uint.MAX, uint.MAX, CellState.UNDEFINED};
 public static int MAXSIZE = 50; // max number rows or columns
 public static int MINSIZE = 5;
 public static double MINFONTSIZE = 3.0;
 public static double MAXFONTSIZE = 72.0;
 public const string BLOCKSEPARATOR = ", ";
 public const string BLANKLABELTEXT = _("?");
-public static int MAXGRADE = 12; //max grade level
+public static uint MAXGRADE = 12; //max grade level
 
 private static double FRAME_WIDTH = 10.0;
 
@@ -126,13 +127,13 @@ public class App : Granite.Application {
         app_launcher = "com.github.jeremypw.gnonograms-elementary.desktop";
         main_url = "https://github.com/jeremypw/gnonograms-elementary";
         bug_url = "https://github.com/jeremypw/gnonograms-elementary/issues";
-        help_url = ""; 
+        help_url = "";
         translate_url = "";
         about_authors = { "Jeremy Wootten <jeremywootten@gmail.com" };
         about_comments = "";
         about_translators = _("translator-credits");
         about_license_type = Gtk.License.GPL_3_0;
-        
+
         SimpleAction quit_action = new SimpleAction ("quit", null);
         quit_action.activate.connect (() => {
             if (controller != null) {
@@ -174,7 +175,7 @@ public class App : Granite.Application {
         this.add_window (controller.window);
     }
 }
-}   
+}
 
 public static int main (string[] args) {
     var app = new Gnonograms.App ();
