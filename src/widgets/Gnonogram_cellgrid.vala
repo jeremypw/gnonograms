@@ -20,19 +20,28 @@
 
 namespace Gnonograms {
 public class CellGrid : Gtk.DrawingArea {
-    public signal void cursor_moved (int r, int c);
+    private const double CELL_FRAME_WIDTH = 3.0;
+    private double[] MINORGRIDDASH;
+    private const double MAJOR_GRID_LINE_WIDTH = 2.0;
+    private const double MINOR_GRID_LINE_WIDTH = 1.0;
+    private Gdk.RGBA[, ] colors;
 
-    private int rows {get { return dimensions.height; }}
-    private int cols {get { return dimensions.width; }}
+    public My2DCellArray array {get; set;} /* model display data */
+    private int rows {get { return array.rows; }}
+    private int cols {get { return array.cols; }}
+
     private int current_col;
-    private double _aw;
-    private double _ah;
-    private double _wd;
-    private double _ht;
-    private double cell_offset;
-    private double cell_body_width; /* TODO simplify by ensuring square only */
-    private double cell_body_height;
+    private double alloc_width; /* Width of drawing area less frame*/
+    private double alloc_height; /* Height of drawing area less frame */
+    private double cell_width; /* Width of cell including frame */
+    private double cell_height; /* Height of cell including frame */
+    private double cell_body_width; /* Width of cell excluding frame */
+    private double cell_body_height; /* height of cell excluding frame */
+
     private Gdk.RGBA grid_color;
+    private Gdk.RGBA fill_color;
+    private Gdk.RGBA empty_color;
+    private Gdk.RGBA unknown_color;
 
     private CellPattern filled_cell_pattern;
     private CellPattern empty_cell_pattern;
@@ -47,7 +56,7 @@ public class CellGrid : Gtk.DrawingArea {
                     unknown_cell_pattern = new CellPattern.gdk_rgba (unknown_color);
                     break;
 
-                default:
+                default: /* plain color fill */
                     filled_cell_pattern = new CellPattern.gdk_rgba (fill_color);
                     empty_cell_pattern = new CellPattern.gdk_rgba (empty_color);
                     unknown_cell_pattern = new CellPattern.gdk_rgba (unknown_color);
@@ -55,18 +64,6 @@ public class CellGrid : Gtk.DrawingArea {
             }
         }
     }
-
-    private Cairo.Matrix pattern_matrix;
-
-    private Gdk.RGBA[, ] colors;
-
-    private Gdk.RGBA fill_color;
-    private Gdk.RGBA empty_color;
-    private Gdk.RGBA unknown_color;
-
-    private double[] MINORGRIDDASH;
-
-    public My2DCellArray array {get; set;}
 
     public GameState game_state  { /* Do we need different colors for game state? */
         set {
@@ -76,14 +73,13 @@ public class CellGrid : Gtk.DrawingArea {
         }
     }
 
-    public Dimensions dimensions {get; set;}
+    public signal void cursor_moved(int r, int c);
 
     construct {
         colors = new Gdk.RGBA[2, 4];
         set_colors ();
         MINORGRIDDASH = {1.0, 5.0};
         current_col = -1;
-        cell_offset = -1;
 
         this.add_events (
         Gdk.EventMask.BUTTON_PRESS_MASK|
@@ -103,21 +99,15 @@ public class CellGrid : Gtk.DrawingArea {
 
         game_state = GameState.SETTING;
         cell_pattern_type = CellPatternType.NONE;
+
+        size_allocate.connect (on_size_allocate);
     }
 
-    public CellGrid (Dimensions dimensions) {
-        Object (dimensions: dimensions);
+    public CellGrid (My2DCellArray array) {
+        Object (array: array);
     }
-
 
     public bool on_draw_event (Cairo.Context cr) {
-        redraw_all (cr);
-        return true;
-    }
-
-    private void redraw_all (Cairo.Context cr) {
-        prepare_to_redraw_cells (cr);
-
         if (array != null) {
             foreach (Cell c in array) { /* Note, even tho' array holds CellStates, its iterator returns Cells */
                 draw_cell (cr, c);
@@ -125,54 +115,44 @@ public class CellGrid : Gtk.DrawingArea {
         }
 
         draw_grid (cr);
-    }
-
-    public void prepare_to_redraw_cells (Cairo.Context cr) {
-        Gtk.Allocation allocation;
-        get_allocation (out allocation);
-        _aw =  (double)allocation.width;
-        _ah =  (double)allocation.height;
-        _wd =  (_aw - 2) / (double)cols;
-        _ht =  (_ah - 2) / (double)rows;
-        cell_body_width = _wd - CELLOFFSET_WITHGRID - 1.0;
-        cell_body_height = _ht - CELLOFFSET_WITHGRID - 1.0;
+        return true;
     }
 
     public void draw_cell (Cairo.Context cr, Cell cell, bool highlight = false, bool mark = false) {
         /*  Calculate coords of top left corner of filled part
          *  (excluding grid if present but including highlight line)
          */
-        double x = cell.col * _wd + CELLOFFSET_WITHGRID;
-        double y =  cell.row * _ht + CELLOFFSET_WITHGRID;
+        double x = cell.col * cell_width + CELL_FRAME_WIDTH;
+        double y =  cell.row * cell_height + CELL_FRAME_WIDTH;
         bool error = false;
-        CellPattern pattern;
+        CellPattern cell_pattern;
 
         switch (cell.state) {
             case CellState.ERROR_EMPTY:
             case CellState.EMPTY:
-                pattern = empty_cell_pattern;
+                cell_pattern = empty_cell_pattern;
                 error = (cell.state == CellState.ERROR_EMPTY);
                 break;
 
             case CellState.ERROR_FILLED:
             case CellState.FILLED:
-                pattern = filled_cell_pattern;
+                cell_pattern = filled_cell_pattern;
                 error = (cell.state == CellState.ERROR_FILLED);
                 break;
 
             default :
-                pattern = unknown_cell_pattern;
+                cell_pattern = unknown_cell_pattern;
                 break;
         }
 
-        pattern_matrix = Cairo.Matrix.identity ();
-        pattern_matrix.translate (-x, -y);
-        pattern.pattern.set_matrix (pattern_matrix);
+        var pattern_matrix=Cairo.Matrix.identity();
+        pattern_matrix.translate(-x,-y);
+        cell_pattern.pattern.set_matrix(pattern_matrix);
 
         /* Draw cell body */
         cr.set_line_width (0.5);
         cr.rectangle (x, y, cell_body_width, cell_body_height);
-        cr.set_source (pattern.pattern);
+        cr.set_source (cell_pattern.pattern);
         cr.fill ();
 
         if (mark) {
@@ -219,38 +199,46 @@ public class CellGrid : Gtk.DrawingArea {
 
         //Draw minor grid (dashed lines)
         cr.set_dash (MINORGRIDDASH, 0.0);
-        cr.set_line_width (1.0);
+        cr.set_line_width (MINOR_GRID_LINE_WIDTH);
 
-        x1 = 0; x2 = _aw - 1;
-        y1 = 1.0;
+        /* Horizontal lines */
+        y1 = MINOR_GRID_LINE_WIDTH / 2;
+        x1 = 0; x2 = alloc_width;
         uint r = 0;
+        double inc = (alloc_height - MINOR_GRID_LINE_WIDTH) / (double)rows;
+
         while (r < rows) {
             cr.move_to (x1, y1);
             cr.line_to (x2, y1);
             cr.stroke ();
-            y1 += _ht;
+            y1 += inc;
             r++;
         }
 
-        y1 = 0; y2 = _ah - 1;
-        x1 = 1.0;
+        /* Vertical lines */
+        x1 = MINOR_GRID_LINE_WIDTH / 2;
+        y1 = 0; y2 = alloc_height;
         uint c = 0;
+        inc = (alloc_width - MINOR_GRID_LINE_WIDTH) / (double)cols;
+
         while (c < cols) {
             cr.move_to (x1, y1);
             cr.line_to (x1, y2);
             cr.stroke ();
-            x1 += _wd;
+            x1 += inc;
             c++;
         }
 
         //Draw major grid (solid lines)
         cr.set_dash (null, 0.0);
-        cr.set_line_width (2.0);
+        cr.set_line_width (MAJOR_GRID_LINE_WIDTH);
 
-        x1 = 0; x2 = _aw - 1;
-        y1 = 1.0;
+        /* Draw horizontal lines */
+        y1 = MAJOR_GRID_LINE_WIDTH / 2;
+        x1 = 0; x2 = alloc_width;
         r = 0;
-        double inc = 5 * _ht;
+        inc = 5.0 * ((alloc_height - MAJOR_GRID_LINE_WIDTH) / (double)rows);
+
         while (r <= rows) {
             cr.move_to (x1, y1);
             cr.line_to (x2, y1);
@@ -259,10 +247,12 @@ public class CellGrid : Gtk.DrawingArea {
             r += 5;
         }
 
-        y1 = 0; y2 = _ah - 1;
-        x1 = 1.0;
+        /* Draw vertical lines */
+        x1 = MAJOR_GRID_LINE_WIDTH / 2;
+        y1 = 0; y2 = alloc_height;
         c = 0;
-        inc = 5 * _wd;
+        inc = 5.0 * ((alloc_width - MAJOR_GRID_LINE_WIDTH) / (double)cols);
+
         while (c <= cols) {
             cr.move_to (x1, y1);
             cr.line_to (x1, y2);
@@ -274,10 +264,10 @@ public class CellGrid : Gtk.DrawingArea {
 
     private bool pointer_moved (Gdk.EventMotion e) {
         /* Calculate which cell the pointer is over */
-        int r =  ((int)(e.y / _ah * rows)).clamp (0, rows - 1); /* TODO store rows / _ah */
-        int c =  ((int)(e.x / _aw * cols)).clamp (0, cols - 1); /* TODO store cols / _aw */
+        int r =  ((int)(e.y / alloc_height * rows)).clamp (0, rows - 1); /* TODO store rows / alloc_height */
+        int c =  ((int)(e.x / alloc_width * cols)).clamp (0, cols - 1); /* TODO store cols / alloc_width */
 
-        if (c != current_col || r != cell_offset) { /* only signal when cursor changes cell */
+        if (c != current_col || r != CELL_FRAME_WIDTH) { /* only signal when cursor changes cell */
             cursor_moved (r, c); /* signal handled by Gnonograms.Controller */
         }
 
@@ -305,6 +295,20 @@ public class CellGrid : Gtk.DrawingArea {
         colors[solving, (int)CellState.FILLED].parse ("BLUE");
         colors[solving, (int)CellState.ERROR].parse ("RED");
     }
+
+/*** Signal Handlers ***/
+    public void on_size_allocate (Gtk.Allocation rect) {
+        alloc_width = (double)(rect.width);
+        alloc_height = (double)(rect.height);
+        cell_width = (alloc_width) / (double)cols;
+        cell_height = (alloc_height) / (double)rows;
+        cell_body_width = cell_width - CELL_FRAME_WIDTH - MAJOR_GRID_LINE_WIDTH;
+        cell_body_height = cell_height - CELL_FRAME_WIDTH  - MAJOR_GRID_LINE_WIDTH;
+
+
+    }
+
+/*** Private classes ***/
 
     private class CellPattern {
         public Cairo.Pattern pattern;

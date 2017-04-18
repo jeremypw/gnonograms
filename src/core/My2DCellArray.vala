@@ -22,13 +22,13 @@ namespace Gnonograms {
 
 public class My2DCellArray  : GLib.Object {
     public Gnonograms.Dimensions dimensions {get; set;}
-    private int rows {
+    public int rows {
         get {
             return dimensions.height;    
         }
     }
 
-    private int cols {
+    public int cols {
         get {
             return dimensions.width;
         }
