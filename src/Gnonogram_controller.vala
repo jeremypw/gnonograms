@@ -67,6 +67,7 @@ public class Controller : GLib.Object {
         model = new Model (dimensions);
         create_view (dimensions);
         connect_signals ();
+        initialize_view ();
 
         if (game == null || !load_game (game)) {
             new_game ();
@@ -144,11 +145,11 @@ public class Controller : GLib.Object {
 
     private void update_labels_from_model () {
         for (int r = 0; r < rows; r++) {
-            row_clue_box.update_label (r, model.get_label_text (r, false));
+            row_clue_box.update_label_text (r, model.get_label_text (r, false));
         }
 
         for (int c = 0; c < cols; c++) {
-            column_clue_box.update_label (c, model.get_label_text (c, true));
+            column_clue_box.update_label_text (c, model.get_label_text (c, true));
         }
     }
 

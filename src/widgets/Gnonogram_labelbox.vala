@@ -20,18 +20,11 @@
 
 namespace Gnonograms {
 
-public class LabelBox : Gtk.Box {
-    private Dimensions _dimensions;
-    public Dimensions dimensions {
-        get {
-            return _dimensions;
-        }
-
-        set {
-            _dimensions = value;
-            resize();
-        }
-    }
+public class LabelBox : Gtk.Grid {
+    private Dimensions dimensions;
+    private Label[] labels;
+    private int current_size = 0;
+    private bool vertical_labels; /* true if contains column labels */
 
     private uint size { /* no of labels in box */
         get {
@@ -42,6 +35,12 @@ public class LabelBox : Gtk.Box {
     private uint other_size { /* size of other label box */
         get {
             return vertical_labels ? dimensions.height : dimensions.width;
+        }
+    }
+
+    private Gtk.PositionType attach_position {
+        get {
+            return vertical_labels ? Gtk.PositionType.RIGHT : Gtk.PositionType.BOTTOM;
         }
     }
 
@@ -60,44 +59,55 @@ public class LabelBox : Gtk.Box {
         }
     }
 
-    private bool vertical_labels; /* true if contains column labels(i.e. HBox) */
 
-    public LabelBox (Gtk.Orientation orientation, Dimensions dimensions) {
-        Object (orientation: orientation,
-                homogeneous: true,
-                spacing: 0);
-
-        vertical_labels = orientation == Gtk.Orientation.HORIZONTAL;
-        this.dimensions = dimensions; /* Cannot set this in object */
+    construct {
+        labels = new Label[MAXSIZE];
     }
 
-    public void resize () {
+    public LabelBox (Gtk.Orientation orientation, Dimensions dimensions) {
+        Object (column_homogeneous: true,
+                row_homogeneous: true,
+                column_spacing: 0,
+                row_spacing: 0);
+
+        vertical_labels = (orientation == Gtk.Orientation.HORIZONTAL);
+        this.dimensions = dimensions;
+
+        /* Must have at least one label for resize to work */
+        var label = new_label (vertical_labels, other_size);
+        attach (label, 0, 0, 1, 1);
+        resize ();
+    }
+
+    private Label new_label (bool vertical, uint size) {
+        var label = new Label (vertical);
+        label.size = size;
+        label.clue = current_size.to_string (); /* For testing */
+        labels[current_size] = label;
+        current_size++;
+        return label;
+    }
+
+    private void resize () {
+        assert (current_size > 0);
         unhighlight_all();
 
-        GLib.List<weak Gtk.Widget> children = get_children ();
-        var current_size = children.length ();
-        uint current_other_size;
-
-        if (current_size > 0) {
-            current_other_size = ((Label)(children.first ().data)).size;
-        } else {
-            current_other_size = other_size;
-        }
-
-        if (current_other_size != other_size) {
+        if (labels[0].size != other_size) {
             update_label_size ();
         }
 
         while (current_size < size) {
-            var label = new Label (vertical_labels);
-            label.size = other_size;
-            add (label);
-
-            current_size++;
+            var last_label = labels[current_size - 1];
+            attach_next_to (new_label (vertical_labels, other_size), last_label, attach_position, 1, 1);
         }
 
         while (current_size > size) {
-            remove (children.last ().data);
+            if (vertical_labels) {
+                remove_column (current_size - 1);
+            } else {
+                remove_row (current_size - 1);
+            }
+            /* No need to destroy unused labels */
             current_size--;
         }
     }
@@ -110,39 +120,44 @@ public class LabelBox : Gtk.Box {
         }
     }
 
-    public void highlight (uint idx, bool is_highlight) {
-        if (idx >= size) {
+    public void change_dimensions (Dimensions dimensions) {
+        this.dimensions = dimensions;
+        resize ();
+    }
+
+    public void highlight (uint index, bool is_highlight) {
+        if (index >= size) {
             return;
         }
 
-        ((Label)get_children ().nth_data (idx)).highlight (is_highlight);
+        labels[index].highlight (is_highlight);
     }
 
     private void unhighlight_all() {
-        foreach (Gtk.Widget l in get_children ()) {
-            ((Label)l).highlight (false);
+        for (uint index = 0; index < current_size; index++) {
+            labels[index].highlight (false);
         }
     }
 
-    public void update_label_txt (int idx, string? txt) {
+    public void update_label_text (int index, string? txt) {
         if (txt == null) {
             txt = BLANKLABELTEXT;
         }
 
-        ((Label)(get_children ().nth_data (idx))).clue = txt;
+        labels[index].clue = txt;
     }
 
     public void update_label_size () {
-        foreach (Gtk.Widget l in get_children ()) {
-            ((Label)l).size = size;
+        for (uint index = 0; index < current_size; index++) {
+            labels[index].size = size;
         }
     }
 
     public string to_string() {
         StringBuilder sb=new StringBuilder();
 
-        foreach (Gtk.Widget l in get_children ()) {
-            sb.append (((Label)l).label);
+        for (uint index = 0; index < current_size; index++) {
+            sb.append (labels[index].label);
             sb.append ("\n");
         }
 
@@ -150,18 +165,9 @@ public class LabelBox : Gtk.Box {
     }
 
     public void set_all_to_string (string txt) {
-        foreach (Gtk.Widget l in get_children ()) {
-            ((Label)l).clue = txt;
+        for (uint index = 0; index < current_size; index++) {
+            labels[index].clue = txt;
         }
-    }
-
-    public void update_label (int idx, string? txt) {
-        if (txt == null) {
-            txt = BLANKLABELTEXT;
-        }
-
-        var label = (Label)(get_children ().nth_data ((uint)idx));
-        label.clue = txt;
     }
 }
 }
