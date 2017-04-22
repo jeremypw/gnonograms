@@ -80,7 +80,7 @@ public class Model : GLib.Object {
             for (int c = 0;c < cols;c++) {
                 cs=working_data.get_data_from_rc(r,c);
 
-                if (cs != CellState.UNKNOWN && cs != solution_data.get_cell (r,c).state) {
+                if (cs != CellState.UNKNOWN && cs != solution_data.get_data_from_rc (r, c)) {
                     if (cs == CellState.EMPTY) {
                         working_data.set_data_from_rc (r, c, CellState.ERROR_EMPTY);
                     } else if (cs == CellState.FILLED) {
@@ -142,15 +142,15 @@ public class Model : GLib.Object {
         }
     }
 
-    public Cell get_cell(uint r, uint c) {
-        return display_data.get_cell (r, c);
-    }
-
     public void set_data_from_cell (Cell cell) {
         display_data.set_data_from_cell (cell);
     }
 
-    public CellState get_data_from_rc(int r, int c) {
+    public CellState get_data_for_cell (Cell cell) {
+        return display_data.get_data_for_cell (cell);
+    }
+
+    public CellState get_data_from_rc (uint r, uint c) {
         return display_data.get_data_from_rc (r, c);
     }
 

@@ -19,7 +19,9 @@
  */
 
 namespace Gnonograms {
-
+/*** NOTE:  This class does not range check coordinates passed as parameters - that is the responsibility
+   *        of the calling function.
+***/
 public class My2DCellArray  : GLib.Object {
     public Gnonograms.Dimensions dimensions {get; set;}
     public uint rows {
@@ -43,19 +45,19 @@ public class My2DCellArray  : GLib.Object {
     }
 
     public void set_data_from_cell (Cell c) {
-        data[c.row,c.col] = c.state;
+        data[c.row, c.col] = c.state;
     }
 
-    public void set_data_from_rc (int r, int c, CellState s) {
-        data[r,c] = s;
+    public void set_data_from_rc (uint r, uint c, CellState s) {
+        data[r, c] = s;
+    }
+
+    public CellState get_data_for_cell (Cell cell) {
+        return data[cell.row, cell.col];
     }
 
     public CellState get_data_from_rc (uint r, uint c) {
-        return data[r,c];
-    }
-
-    public Cell get_cell (uint r, uint c) {
-        return {r, c, data[r,c]};
+        return data[r, c];
     }
 
     public void get_row (uint row, ref CellState[] sa, uint start = 0) {

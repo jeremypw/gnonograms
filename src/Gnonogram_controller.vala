@@ -86,6 +86,8 @@ public class Controller : GLib.Object {
     private void connect_signals () {
         cell_grid.cursor_moved.connect (on_grid_cursor_moved);
         cell_grid.leave_notify_event.connect (on_grid_leave);
+
+        gnonogram_view.key_press_event.connect(on_view_key_press_event);
     }
 
     private void new_game () {
@@ -160,14 +162,15 @@ public class Controller : GLib.Object {
 
 /*** Signal Handlers ***/
 
-    private void on_grid_cursor_moved (uint r, uint c) {
+    private void on_grid_cursor_moved (Cell cell) {
         /* Assume only called if current cell changed */
         previous_cell.copy (current_cell);
-        if (r >= rows || c >= cols) {
-            current_cell = NULL_CELL;
-        } else {
-            current_cell = model.get_cell (r, c);
+        current_cell.copy (cell); /* copy needed ?*/
+
+        if (current_cell != NULL_CELL) {
+            current_cell.state = model.get_data_for_cell (current_cell);
         }
+
         highlight_labels (previous_cell, false);
         highlight_labels (current_cell, true);
     }
@@ -176,6 +179,42 @@ public class Controller : GLib.Object {
         highlight_labels (current_cell, false);
         current_cell = NULL_CELL;
         return false;
+    }
+
+    private bool on_view_key_press_event (Gdk.EventKey e) {
+        string name = (Gdk.keyval_name (e.keyval)).up();
+        int r = 0; int c = 0;
+
+        if (current_cell != NULL_CELL) {
+            r = (int)current_cell.row;
+            c = (int)current_cell.col;
+        }
+
+        switch (name) {
+            case "UP":
+                    r -= 1;
+                    break;
+            case "DOWN":
+                    r += 1;
+                    break;
+            case "LEFT":
+                    c -= 1;
+                    break;
+            case "RIGHT":
+                    c += 1;
+                    break;
+
+            default:
+                    return false;
+        }
+
+        /* Confine cursor to grid when moving with arrow keys */
+        r = r.clamp (0, (int)rows - 1 );
+        c = c.clamp (0, (int)cols - 1 );
+
+        cell_grid.move_cursor_to ({(uint)r, (uint)c, CellState.UNDEFINED});
+
+        return true;
     }
 
     public void quit () {

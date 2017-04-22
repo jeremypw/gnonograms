@@ -31,10 +31,8 @@ public class CellGrid : Gtk.DrawingArea {
     private uint rows {get { return array.rows; }}
     private uint cols {get { return array.cols; }}
 
-    private uint current_col;
-    private uint current_row;
-    private uint previous_row;
-    private uint previous_col;
+    private Cell current_cell;
+    private Cell previous_cell;
 
     private double alloc_width; /* Width of drawing area less frame*/
     private double alloc_height; /* Height of drawing area less frame */
@@ -78,16 +76,14 @@ public class CellGrid : Gtk.DrawingArea {
         }
     }
 
-    public signal void cursor_moved (uint r, uint c);
+    public signal void cursor_moved (Cell destination);
 
     construct {
         colors = new Gdk.RGBA[2, 4];
         set_colors ();
         MINORGRIDDASH = {1.0, 5.0};
-        current_col = -1;
-        current_row = -1;
-        previous_col = -1;
-        previous_row = -1;
+
+        current_cell = NULL_CELL;
 
         this.add_events (
         Gdk.EventMask.BUTTON_PRESS_MASK|
@@ -126,9 +122,14 @@ public class CellGrid : Gtk.DrawingArea {
         return true;
     }
 
-    public void highlight_cell_at (uint r, uint c, bool highlight) {
+    public void highlight_cell (Cell cell, bool highlight) {
+        if (cell == NULL_CELL) {
+            return;
+        }
+
         var cr = Gdk.cairo_create (this.get_window ());
-        draw_cell (cr, array.get_cell (r, c), highlight);
+        cell.state = array.get_data_from_rc (cell.row, cell.col);
+        draw_cell (cr, cell, highlight);
     }
     public void draw_cell (Cairo.Context cr, Cell cell, bool highlight = false, bool mark = false) {
         /*  Calculate coords of top left corner of filled part
@@ -278,28 +279,28 @@ public class CellGrid : Gtk.DrawingArea {
 
     private bool on_pointer_moved (Gdk.EventMotion e) {
         /* Calculate which cell the pointer is over */
-        uint r =  ((uint)(e.y / cell_width)).clamp (0, rows - 1); /* TODO store rows / alloc_height */
-        uint c =  ((uint)(e.x / cell_height)).clamp (0, cols - 1); /* TODO store cols / alloc_width */
-
-        if (c != current_col || r != current_row) { /* only signal when cursor changes cell */
-            cursor_moved (r, c); /* signal handled by Gnonograms.Controller */
-            if (current_row < rows) {
-                highlight_cell_at (current_row, current_col, false);
-            }
-            previous_row = current_row;
-            previous_col = current_col;
-            current_row = r;
-            current_col = c;
-            highlight_cell_at (current_row, current_col, true);
-        }
-
+        uint r =  ((uint)(e.y / cell_width));
+        uint c =  ((uint)(e.x / cell_height));
+        move_cursor_to ({r, c, CellState.UNDEFINED});
         return true;
     }
 
-    private bool on_leave_notify () {
-        if (current_row < rows) {
-            highlight_cell_at (current_row, current_col, false);
+    public void move_cursor_to (Cell target) {
+        if (target.row >= rows || target.col >= cols) {
+            target = NULL_CELL;
         }
+
+        if (target != current_cell) { /* only signal when cursor changes cell */
+            highlight_cell (current_cell, false);
+            current_cell.copy (target);
+            cursor_moved (current_cell);
+            highlight_cell (current_cell, true);
+        }
+    }
+
+    private bool on_leave_notify () {
+        highlight_cell (current_cell, false);
+        current_cell = NULL_CELL;
         return false;
     }
 
