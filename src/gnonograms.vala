@@ -23,7 +23,8 @@ namespace Gnonograms {
 /*TODO - move enum and struct definitions elsewhere */
 public enum GameState {
     SETTING,
-    SOLVING;
+    SOLVING,
+    UNDEFINED;
 }
 
 public enum CellState {

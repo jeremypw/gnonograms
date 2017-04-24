@@ -20,15 +20,51 @@
 namespace Gnonograms {
 public class Controller : GLib.Object {
     private View gnonogram_view;
+    private Gtk.HeaderBar? header_bar;
+
     private CellGrid cell_grid;
     private LabelBox row_clue_box;
     private LabelBox column_clue_box;
-    private Model model;
-    private GameState game_state;
+    private Model? model;
+    private GameState _game_state;
+    public GameState game_state {
+        get {
+            return _game_state;
+        }
+
+        private set {
+            if (_game_state != value) {
+                _game_state = value;
+
+                initialize_cursor ();
+                if (model != null && header_bar != null) {
+                    if (value == GameState.SETTING) {
+                        model.display_solution ();
+                        header_bar.subtitle = _("Setting");
+                    } else {
+                        model.display_working ();
+                        header_bar.subtitle = _("Solving");
+                    }
+                }
+            }
+        }
+    }
     private Cell current_cell;
     private Cell previous_cell;
 
-    public File? game {get; set;}
+    private File? _game;
+    public File? game {
+        get {
+            return _game;
+        }
+
+        set {
+            _game = value;
+            if (value != null && header_bar != null) {
+                header_bar.title = value.get_uri ();
+            }
+        }
+    }
     public Dimensions dimensions {get; set;}
     private uint rows {get { return dimensions.height; }}
     private uint cols {get { return dimensions.width; }}
@@ -57,15 +93,18 @@ public class Controller : GLib.Object {
             Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.INFO;
         }
 
-        initialize_cursor ();
+        header_bar = new Gtk.HeaderBar ();
+        header_bar.set_has_subtitle (true);
+        header_bar.set_show_close_button (true);
+
+        game_state = GameState.UNDEFINED;
     }
 
     public Controller (File? game = null) {
         Object (game: game);
 
         restore_settings ();
-        model = new Model (dimensions);
-        create_view (dimensions);
+        create_view_and_model (dimensions);
         connect_signals ();
         initialize_view ();
 
@@ -74,12 +113,15 @@ public class Controller : GLib.Object {
         }
     }
 
-    private void create_view (Dimensions dimensions) {
+    private void create_view_and_model (Dimensions dimensions) {
+        model = new Model (dimensions);
+
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL, dimensions);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL, dimensions);
         cell_grid = new CellGrid (model.display_data);
 
         gnonogram_view = new Gnonograms.View (row_clue_box, column_clue_box, cell_grid);
+        gnonogram_view.set_titlebar (header_bar);
         gnonogram_view.show_all();
     }
 
@@ -92,10 +134,10 @@ public class Controller : GLib.Object {
 
     private void new_game () {
         model.fill_random (7);
+        header_bar.set_title (_("Random game"));
         initialize_view ();
         update_labels_from_model ();
-        /* For testing */
-        change_game_state (game_state);
+        game_state = GameState.SOLVING;
     }
 
     private void initialize_view () {
@@ -106,17 +148,6 @@ public class Controller : GLib.Object {
     private void initialize_cursor () {
         current_cell = NULL_CELL;
         previous_cell = NULL_CELL;
-    }
-
-    private void change_game_state (GameState gs) {
-        initialize_cursor ();
-        game_state = gs;
-
-        if (gs == GameState.SETTING) {
-             model.display_solution ();
-        } else {
-            model.display_working ();
-        }
     }
 
     private void set_fontheight_from_dimensions (Dimensions dimensions) {
@@ -135,12 +166,10 @@ public class Controller : GLib.Object {
     }
 
     private void restore_settings () {
-        game_state = GameState.SETTING;
         dimensions = {15, 20}; /* TODO implement saving and restoring settings */
     }
 
     private bool load_game (File game) {
-        game_state = GameState.SOLVING;
         new_game ();  /* TODO implement saving and restoring settings */
         return true;
     }
