@@ -21,6 +21,7 @@ namespace Gnonograms {
 public class Controller : GLib.Object {
     private View gnonogram_view;
     private Gtk.HeaderBar? header_bar;
+    private Granite.Widgets.ModeButton mode_switch;
 
     private CellGrid cell_grid;
     private LabelBox row_clue_box;
@@ -96,6 +97,15 @@ public class Controller : GLib.Object {
         header_bar = new Gtk.HeaderBar ();
         header_bar.set_has_subtitle (true);
         header_bar.set_show_close_button (true);
+
+        mode_switch = new Granite.Widgets.ModeButton ();
+        var setting_icon = new Gtk.Image.from_icon_name ("edit-symbolic", Gtk.IconSize.MENU); /* provisional only */
+        var solving_icon = new Gtk.Image.from_icon_name ("process-working-symbolic", Gtk.IconSize.MENU);  /* provisional only */
+
+        mode_switch.append (setting_icon);
+        mode_switch.append (solving_icon);
+
+        header_bar.pack_start (mode_switch);
 
         game_state = GameState.UNDEFINED;
     }
