@@ -39,7 +39,9 @@ public class Controller : GLib.Object {
             if (_game_state != value) {
                 _game_state = value;
 
+                set_mode_switch (value);
                 initialize_cursor ();
+
                 if (model != null && header_bar != null) {
                     if (value == GameState.SETTING) {
                         model.display_solution ();
@@ -154,7 +156,7 @@ public class Controller : GLib.Object {
         header_bar.set_title (_("Random game"));
         initialize_view ();
         update_labels_from_model ();
-        set_mode_switch (GameState.SOLVING);
+        game_state = GameState.SOLVING;
     }
 
     private void initialize_view () {
@@ -272,8 +274,7 @@ public class Controller : GLib.Object {
     }
 
     private void on_mode_switch_changed (Gtk.Widget widget) {
-        GameState data = widget.get_data ("mode");
-        game_state = data;
+        game_state = widget.get_data ("mode");
     }
 
     public void quit () {
