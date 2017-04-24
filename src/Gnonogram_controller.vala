@@ -22,6 +22,8 @@ public class Controller : GLib.Object {
     private View gnonogram_view;
     private Gtk.HeaderBar? header_bar;
     private Granite.Widgets.ModeButton mode_switch;
+    private int setting_index;
+    private int solving_index;
 
     private CellGrid cell_grid;
     private LabelBox row_clue_box;
@@ -102,8 +104,11 @@ public class Controller : GLib.Object {
         var setting_icon = new Gtk.Image.from_icon_name ("edit-symbolic", Gtk.IconSize.MENU); /* provisional only */
         var solving_icon = new Gtk.Image.from_icon_name ("process-working-symbolic", Gtk.IconSize.MENU);  /* provisional only */
 
-        mode_switch.append (setting_icon);
-        mode_switch.append (solving_icon);
+        setting_icon.set_data ("mode", GameState.SETTING);
+        solving_icon.set_data ("mode", GameState.SOLVING);
+
+        setting_index = mode_switch.append (setting_icon);
+        solving_index = mode_switch.append (solving_icon);
 
         header_bar.pack_start (mode_switch);
 
@@ -139,6 +144,8 @@ public class Controller : GLib.Object {
         cell_grid.cursor_moved.connect (on_grid_cursor_moved);
         cell_grid.leave_notify_event.connect (on_grid_leave);
 
+        mode_switch.mode_changed.connect (on_mode_switch_changed);
+
         gnonogram_view.key_press_event.connect(on_view_key_press_event);
     }
 
@@ -147,7 +154,7 @@ public class Controller : GLib.Object {
         header_bar.set_title (_("Random game"));
         initialize_view ();
         update_labels_from_model ();
-        game_state = GameState.SOLVING;
+        set_mode_switch (GameState.SOLVING);
     }
 
     private void initialize_view () {
@@ -197,6 +204,14 @@ public class Controller : GLib.Object {
     private void highlight_labels (Cell c, bool is_highlight) {
         row_clue_box.highlight (c.row, is_highlight);
         column_clue_box.highlight (c.col, is_highlight);
+    }
+
+    private void set_mode_switch (GameState gs) {
+        if (gs == GameState.SETTING) {
+            mode_switch.set_active (setting_index);
+        } else {
+            mode_switch.set_active (solving_index);
+        }
     }
 
 /*** Signal Handlers ***/
@@ -254,6 +269,11 @@ public class Controller : GLib.Object {
         cell_grid.move_cursor_to ({(uint)r, (uint)c, CellState.UNDEFINED});
 
         return true;
+    }
+
+    private void on_mode_switch_changed (Gtk.Widget widget) {
+        GameState data = widget.get_data ("mode");
+        game_state = data;
     }
 
     public void quit () {
