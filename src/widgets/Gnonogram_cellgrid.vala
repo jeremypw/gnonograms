@@ -50,20 +50,30 @@ public class CellGrid : Gtk.DrawingArea {
     private CellPattern empty_cell_pattern;
     private CellPattern unknown_cell_pattern;
 
+    private CellPatternType _cell_pattern_type;
     public CellPatternType cell_pattern_type { /* Do we need more than one pattern? */
         set {
             switch (value) {
-                case CellPatternType.RADIAL:
+                case CellPatternType.RADIAL: /* Circular fill */
                     filled_cell_pattern = new CellPattern.radial (cell_body_width, cell_body_height, fill_color);
                     empty_cell_pattern = new CellPattern.radial (cell_body_width, cell_body_height, empty_color);
                     unknown_cell_pattern = new CellPattern.gdk_rgba (unknown_color);
+                    _cell_pattern_type = value;
                     break;
 
-                default: /* plain color fill */
+                    case CellPatternType.NONE: /* plain color fill */
                     filled_cell_pattern = new CellPattern.gdk_rgba (fill_color);
                     empty_cell_pattern = new CellPattern.gdk_rgba (empty_color);
                     unknown_cell_pattern = new CellPattern.gdk_rgba (unknown_color);
+                    _cell_pattern_type = value;
                     break;
+
+                    default:
+                        /* Refresh colors of existing pattern */
+                        if (_cell_pattern_type != CellPatternType.UNDEFINED) {
+                            cell_pattern_type = _cell_pattern_type;
+                        }
+                        break;
             }
         }
     }
@@ -73,6 +83,9 @@ public class CellGrid : Gtk.DrawingArea {
             unknown_color = colors[(int)value, (int)CellState.UNKNOWN];
             fill_color = colors[(int)value, (int)CellState.FILLED];
             empty_color = colors[(int)value, (int)CellState.EMPTY];
+            cell_pattern_type = CellPatternType.UNDEFINED; /* Causes refresh of existing pattern */
+
+            queue_draw ();
         }
     }
 

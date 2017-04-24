@@ -42,7 +42,8 @@ public class Controller : GLib.Object {
                 set_mode_switch (value);
                 initialize_cursor ();
 
-                if (model != null && header_bar != null) {
+                if (model != null && header_bar != null && cell_grid != null) {
+                    cell_grid.game_state = value;
                     if (value == GameState.SETTING) {
                         model.display_solution ();
                         header_bar.subtitle = _("Setting");

@@ -40,7 +40,8 @@ public enum CellState {
 
 public enum CellPatternType {
     NONE,
-    RADIAL
+    RADIAL,
+    UNDEFINED
 }
 
 public enum ButtonPress {
