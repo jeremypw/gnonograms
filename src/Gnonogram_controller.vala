@@ -237,8 +237,18 @@ public class Controller : GLib.Object {
         return false;
     }
 
-    private bool on_view_key_press_event (Gdk.EventKey e) {
-        string name = (Gdk.keyval_name (e.keyval)).up();
+    private bool on_view_key_press_event (Gdk.EventKey event) {
+        if (event.is_modifier == 1) {
+            return true;
+        }
+
+        var name = (Gdk.keyval_name (event.keyval)).up();
+        var mods = (event.state & Gtk.accelerator_get_default_mod_mask ());
+
+        if (mods != 0) {
+            return handle_modified_keys (name, mods);
+        }
+
         int r = 0; int c = 0;
 
         if (current_cell != NULL_CELL) {
@@ -269,6 +279,27 @@ public class Controller : GLib.Object {
         c = c.clamp (0, (int)cols - 1 );
 
         cell_grid.move_cursor_to ({(uint)r, (uint)c, CellState.UNDEFINED});
+
+        return true;
+    }
+
+    private bool handle_modified_keys (string name, uint mods) {
+        bool control_pressed = ((mods & Gdk.ModifierType.CONTROL_MASK) != 0);
+        bool other_mod_pressed = (((mods & ~Gdk.ModifierType.SHIFT_MASK) & ~Gdk.ModifierType.CONTROL_MASK) != 0);
+        bool only_control_pressed = control_pressed && !other_mod_pressed; /* Shift can be pressed */
+
+        if (only_control_pressed) {
+            switch (name) {
+                case "1":
+                    game_state = GameState.SETTING;
+                    break;
+                case "2":
+                    game_state = GameState.SOLVING;
+                    break;
+                default:
+                    return false;
+            }
+        }
 
         return true;
     }
