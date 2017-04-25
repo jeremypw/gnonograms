@@ -37,7 +37,6 @@ public class CellGrid : Gtk.DrawingArea {
     private uint cols {get { return array.cols; }}
 
     private Cell current_cell;
-    private Cell previous_cell;
 
     private double alloc_width; /* Width of drawing area less frame*/
     private double alloc_height; /* Height of drawing area less frame */

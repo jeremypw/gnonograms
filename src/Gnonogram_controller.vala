@@ -357,11 +357,6 @@ public class Controller : GLib.Object {
     }
 
     private bool on_grid_button_press (Gdk.EventButton event) {
-        var mods = (event.state & Gtk.accelerator_get_default_mod_mask ());
-        bool control_pressed = ((mods & Gdk.ModifierType.CONTROL_MASK) != 0);
-        bool other_mod_pressed = (((mods & ~Gdk.ModifierType.SHIFT_MASK) & ~Gdk.ModifierType.CONTROL_MASK) != 0);
-        bool only_control_pressed = control_pressed && !other_mod_pressed; /* Shift can be pressed */
-
         switch (event.button) {
             case Gdk.BUTTON_PRIMARY:
                 drawing_with_state = CellState.FILLED;
@@ -374,8 +369,6 @@ public class Controller : GLib.Object {
                 } else {
                     return true;
                 }
-
-                break;
 
             case Gdk.BUTTON_SECONDARY:
                 drawing_with_state = CellState.EMPTY;
