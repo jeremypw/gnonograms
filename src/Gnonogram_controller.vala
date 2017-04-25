@@ -94,7 +94,7 @@ public class Controller : GLib.Object {
         }
     }
 
-    private bool is_button_down;
+    private CellState drawing_with_state;
 
     construct {
         if (Granite.Services.Logger.DisplayLevel != Granite.Services.LogLevel.DEBUG) {
@@ -118,7 +118,7 @@ public class Controller : GLib.Object {
         header_bar.pack_start (mode_switch);
 
         game_state = GameState.UNDEFINED;
-        is_button_down = false;
+        drawing_with_state = CellState.UNDEFINED;
     }
 
     public Controller (File? game = null) {
@@ -154,7 +154,8 @@ public class Controller : GLib.Object {
 
         mode_switch.mode_changed.connect (on_mode_switch_changed);
 
-        gnonogram_view.key_press_event.connect(on_view_key_press_event);
+        gnonogram_view.key_press_event.connect (on_view_key_press_event);
+        gnonogram_view.key_release_event.connect (on_view_key_release_event);
     }
 
     private void new_game () {
@@ -222,40 +223,60 @@ public class Controller : GLib.Object {
         }
     }
 
-    private void move_cursor (string keyname, uint mods) {
+    private void handle_arrow_keys (string keyname, uint mods) {
         int r = 0; int c = 0;
-        if (current_cell != NULL_CELL) {
-            r = (int)current_cell.row;
-            c = (int)current_cell.col;
-        }
-
         switch (keyname) {
             case "UP":
-                    r -= 1;
+                    r = -1;
                     break;
             case "DOWN":
-                    r += 1;
+                    r = 1;
                     break;
             case "LEFT":
-                    c -= 1;
+                    c = -1;
                     break;
             case "RIGHT":
-                    c += 1;
+                    c = 1;
                     break;
 
             default:
-                    break;
+                    return;
         }
 
-        /* Confine cursor to grid when moving with arrow keys */
-        r = r.clamp (0, (int)rows - 1 );
-        c = c.clamp (0, (int)cols - 1 );
+        cell_grid.move_cursor_relative (r, c);
+    }
 
-        cell_grid.move_cursor_to ({(uint)r, (uint)c, CellState.UNDEFINED});
+    private void handle_pen_keys (string keyname, uint mods) {
+        if (mods > 0) {
+            return;
+        }
+
+        switch (keyname) {
+            case "F":
+                drawing_with_state = CellState.FILLED;
+                break;
+
+            case "E":
+                drawing_with_state = CellState.EMPTY;
+                break;
+
+            case "X":
+                if (game_state == GameState.SOLVING) {
+                    drawing_with_state = CellState.UNKNOWN;
+                    break;
+                } else {
+                    return;
+                }
+
+            default:
+                    return;
+        }
+
+        mark_current_cell (drawing_with_state);
     }
 
     private void mark_current_cell (CellState state) {
-        if (current_cell != NULL_CELL) {
+        if (current_cell != NULL_CELL && current_cell.state != state) {
             current_cell.state = state;
             model.set_data_from_cell (current_cell);
             cell_grid.queue_draw ();
@@ -265,16 +286,12 @@ public class Controller : GLib.Object {
 /*** Signal Handlers ***/
 
     private void on_grid_cursor_moved (Cell cell) {
-        /* Assume only called if current cell changed */
-        previous_cell.copy (current_cell);
-        current_cell.copy (cell); /* copy needed ?*/
-
-        if (current_cell != NULL_CELL) {
-            current_cell.state = model.get_data_for_cell (current_cell);
+        highlight_labels (current_cell, false);
+        highlight_labels (cell, true);
+        current_cell.copy (cell);
+        if (drawing_with_state != CellState.UNDEFINED) {
+            mark_current_cell (drawing_with_state);
         }
-
-        highlight_labels (previous_cell, false);
-        highlight_labels (current_cell, true);
     }
 
     private bool on_grid_leave () {
@@ -299,7 +316,13 @@ public class Controller : GLib.Object {
             case "DOWN":
             case "LEFT":
             case "RIGHT":
-                move_cursor (name, mods);
+                handle_arrow_keys (name, mods);
+                break;
+
+            case "F":
+            case "E":
+            case "X":
+                handle_pen_keys (name, mods);
                 break;
 
             case "1":
@@ -307,25 +330,29 @@ public class Controller : GLib.Object {
                 if (only_control_pressed) {
                     game_state = name == "1" ? GameState.SETTING : GameState.SOLVING;
                 }
-                break;
 
-            case "F":
-                mark_current_cell (CellState.FILLED);
-                break;
-
-            case "E":
-                mark_current_cell (CellState.EMPTY);
-                break;
-
-            case "X":
-                if (game_state == GameState.SOLVING) {
-                    mark_current_cell (CellState.UNKNOWN);
-                }
                 break;
 
             default:
                 return false;
         }
+        return true;
+    }
+
+    private bool on_view_key_release_event (Gdk.EventKey event) {
+        var name = (Gdk.keyval_name (event.keyval)).up();
+
+        switch (name) {
+            case "F":
+            case "E":
+            case "X":
+                drawing_with_state = CellState.UNDEFINED;
+                break;
+
+            default:
+                return false;
+        }
+
         return true;
     }
 
@@ -335,32 +362,35 @@ public class Controller : GLib.Object {
         bool other_mod_pressed = (((mods & ~Gdk.ModifierType.SHIFT_MASK) & ~Gdk.ModifierType.CONTROL_MASK) != 0);
         bool only_control_pressed = control_pressed && !other_mod_pressed; /* Shift can be pressed */
 
-        is_button_down = true;
-
         switch (event.button) {
             case Gdk.BUTTON_PRIMARY:
-                mark_current_cell (CellState.FILLED);
+                drawing_with_state = CellState.FILLED;
                 break;
 
             case Gdk.BUTTON_MIDDLE:
                 if (game_state == GameState.SOLVING) {
-                    mark_current_cell (CellState.UNKNOWN);
+                    drawing_with_state = CellState.UNKNOWN;
+                    break;
+                } else {
+                    return true;
                 }
+
                 break;
 
             case Gdk.BUTTON_SECONDARY:
-                mark_current_cell (CellState.EMPTY);
+                drawing_with_state = CellState.EMPTY;
                 break;
 
             default:
                 return false;
         }
 
+        mark_current_cell (drawing_with_state);
         return true;
     }
 
     private bool on_grid_button_release () {
-        is_button_down = false;
+        drawing_with_state = CellState.UNDEFINED;
         return true;
     }
 

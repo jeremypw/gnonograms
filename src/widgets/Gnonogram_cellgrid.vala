@@ -316,6 +316,24 @@ public class CellGrid : Gtk.DrawingArea {
         }
     }
 
+    public void move_cursor_relative (int row_delta, int col_delta) {
+        if (current_cell == NULL_CELL) {
+            return;
+        }
+
+        if (row_delta != 0 || col_delta != 0) {
+            Cell target = {current_cell.row + row_delta,
+                           current_cell.col + col_delta,
+                           CellState.UNDEFINED};
+
+            if (target.row >= rows || target.col >= cols) {
+                target = NULL_CELL;
+            }
+
+            move_cursor_to (target);
+        }
+    }
+
     private bool on_leave_notify () {
         highlight_cell (current_cell, false);
         current_cell = NULL_CELL;
