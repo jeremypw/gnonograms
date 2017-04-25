@@ -29,6 +29,7 @@ public class Controller : GLib.Object {
     private LabelBox row_clue_box;
     private LabelBox column_clue_box;
     private Model? model;
+
     private GameState _game_state;
     public GameState game_state {
         get {
@@ -93,6 +94,8 @@ public class Controller : GLib.Object {
         }
     }
 
+    private bool is_button_down;
+
     construct {
         if (Granite.Services.Logger.DisplayLevel != Granite.Services.LogLevel.DEBUG) {
             Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.INFO;
@@ -115,6 +118,7 @@ public class Controller : GLib.Object {
         header_bar.pack_start (mode_switch);
 
         game_state = GameState.UNDEFINED;
+        is_button_down = false;
     }
 
     public Controller (File? game = null) {
@@ -145,6 +149,8 @@ public class Controller : GLib.Object {
     private void connect_signals () {
         cell_grid.cursor_moved.connect (on_grid_cursor_moved);
         cell_grid.leave_notify_event.connect (on_grid_leave);
+        cell_grid.button_press_event.connect (on_grid_button_press);
+        cell_grid.button_release_event.connect (on_grid_button_release);
 
         mode_switch.mode_changed.connect (on_mode_switch_changed);
 
@@ -320,6 +326,41 @@ public class Controller : GLib.Object {
             default:
                 return false;
         }
+        return true;
+    }
+
+    private bool on_grid_button_press (Gdk.EventButton event) {
+        var mods = (event.state & Gtk.accelerator_get_default_mod_mask ());
+        bool control_pressed = ((mods & Gdk.ModifierType.CONTROL_MASK) != 0);
+        bool other_mod_pressed = (((mods & ~Gdk.ModifierType.SHIFT_MASK) & ~Gdk.ModifierType.CONTROL_MASK) != 0);
+        bool only_control_pressed = control_pressed && !other_mod_pressed; /* Shift can be pressed */
+
+        is_button_down = true;
+
+        switch (event.button) {
+            case Gdk.BUTTON_PRIMARY:
+                mark_current_cell (CellState.FILLED);
+                break;
+
+            case Gdk.BUTTON_MIDDLE:
+                if (game_state == GameState.SOLVING) {
+                    mark_current_cell (CellState.UNKNOWN);
+                }
+                break;
+
+            case Gdk.BUTTON_SECONDARY:
+                mark_current_cell (CellState.EMPTY);
+                break;
+
+            default:
+                return false;
+        }
+
+        return true;
+    }
+
+    private bool on_grid_button_release () {
+        is_button_down = false;
         return true;
     }
 
