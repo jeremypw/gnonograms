@@ -327,7 +327,7 @@ public class CellGrid : Gtk.DrawingArea {
                            CellState.UNDEFINED};
 
             if (target.row >= rows || target.col >= cols) {
-                target = NULL_CELL;
+                return;
             }
 
             move_cursor_to (target);
