@@ -21,7 +21,16 @@ namespace Gnonograms {
 
 public class Model : GLib.Object {
     public Dimensions dimensions {get; set;}
-    public My2DCellArray display_data  {get; private set;}  //points to grid being displayed
+    public GameState game_state {get; set;}
+    public My2DCellArray display_data  {
+        get {
+            if (game_state == GameState.SETTING) {
+                return solution_data;
+            } else {
+                return working_data;
+            }
+        }
+    }//points to grid being displayed
     private My2DCellArray solution_data; //display when setting
     private My2DCellArray working_data; //display when solving
     public  CellState[] data;
@@ -48,7 +57,6 @@ public class Model : GLib.Object {
         solution_data = new My2DCellArray (dimensions, CellState.EMPTY);
         working_data = new My2DCellArray (dimensions, CellState.UNKNOWN);
         data = new CellState[MAXSIZE];
-        display_data = solution_data;
     }
 
     public void clear_errors() {
@@ -122,14 +130,6 @@ public class Model : GLib.Object {
 
     public void blank_working () {
         working_data.set_all (CellState.UNKNOWN);
-    }
-
-    public void display_working() {
-        display_data = working_data;
-    }
-
-    public void display_solution() {
-        display_data = solution_data;
     }
 
     public string get_label_text (int idx, bool is_column, bool from_solution = true) {

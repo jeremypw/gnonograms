@@ -27,7 +27,12 @@ public class CellGrid : Gtk.DrawingArea {
     private const double MINOR_GRID_LINE_WIDTH = 1.0;
     private Gdk.RGBA[, ] colors;
 
-    public My2DCellArray array {get; set;} /* model display data */
+    public Model model {get; set;}
+    public My2DCellArray array {
+        get {
+            return model.display_data;
+        }
+    } /* model display data */
     private uint rows {get { return array.rows; }}
     private uint cols {get { return array.cols; }}
 
@@ -120,8 +125,8 @@ public class CellGrid : Gtk.DrawingArea {
         leave_notify_event.connect (on_leave_notify);
     }
 
-    public CellGrid (My2DCellArray array) {
-        Object (array: array);
+    public CellGrid (Model model) {
+        Object (model: model);
     }
 
     public bool on_draw_event (Cairo.Context cr) {

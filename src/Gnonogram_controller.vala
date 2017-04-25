@@ -44,11 +44,10 @@ public class Controller : GLib.Object {
 
                 if (model != null && header_bar != null && cell_grid != null) {
                     cell_grid.game_state = value;
+                    model.game_state = value;
                     if (value == GameState.SETTING) {
-                        model.display_solution ();
                         header_bar.subtitle = _("Setting");
                     } else {
-                        model.display_working ();
                         header_bar.subtitle = _("Solving");
                     }
                 }
@@ -136,7 +135,7 @@ public class Controller : GLib.Object {
 
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL, dimensions);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL, dimensions);
-        cell_grid = new CellGrid (model.display_data);
+        cell_grid = new CellGrid (model);
 
         gnonogram_view = new Gnonograms.View (row_clue_box, column_clue_box, cell_grid);
         gnonogram_view.set_titlebar (header_bar);
@@ -153,11 +152,11 @@ public class Controller : GLib.Object {
     }
 
     private void new_game () {
+        game_state = GameState.SOLVING;
         model.fill_random (7);
         header_bar.set_title (_("Random game"));
         initialize_view ();
         update_labels_from_model ();
-        game_state = GameState.SOLVING;
     }
 
     private void initialize_view () {
@@ -217,6 +216,46 @@ public class Controller : GLib.Object {
         }
     }
 
+    private void move_cursor (string keyname, uint mods) {
+        int r = 0; int c = 0;
+        if (current_cell != NULL_CELL) {
+            r = (int)current_cell.row;
+            c = (int)current_cell.col;
+        }
+
+        switch (keyname) {
+            case "UP":
+                    r -= 1;
+                    break;
+            case "DOWN":
+                    r += 1;
+                    break;
+            case "LEFT":
+                    c -= 1;
+                    break;
+            case "RIGHT":
+                    c += 1;
+                    break;
+
+            default:
+                    break;
+        }
+
+        /* Confine cursor to grid when moving with arrow keys */
+        r = r.clamp (0, (int)rows - 1 );
+        c = c.clamp (0, (int)cols - 1 );
+
+        cell_grid.move_cursor_to ({(uint)r, (uint)c, CellState.UNDEFINED});
+    }
+
+    private void mark_current_cell (CellState state) {
+        if (current_cell != NULL_CELL) {
+            current_cell.state = state;
+            model.set_data_from_cell (current_cell);
+            cell_grid.queue_draw ();
+        }
+    }
+
 /*** Signal Handlers ***/
 
     private void on_grid_cursor_moved (Cell cell) {
@@ -245,63 +284,42 @@ public class Controller : GLib.Object {
 
         var name = (Gdk.keyval_name (event.keyval)).up();
         var mods = (event.state & Gtk.accelerator_get_default_mod_mask ());
-
-        if (mods != 0) {
-            return handle_modified_keys (name, mods);
-        }
-
-        int r = 0; int c = 0;
-
-        if (current_cell != NULL_CELL) {
-            r = (int)current_cell.row;
-            c = (int)current_cell.col;
-        }
-
-        switch (name) {
-            case "UP":
-                    r -= 1;
-                    break;
-            case "DOWN":
-                    r += 1;
-                    break;
-            case "LEFT":
-                    c -= 1;
-                    break;
-            case "RIGHT":
-                    c += 1;
-                    break;
-
-            default:
-                    return false;
-        }
-
-        /* Confine cursor to grid when moving with arrow keys */
-        r = r.clamp (0, (int)rows - 1 );
-        c = c.clamp (0, (int)cols - 1 );
-
-        cell_grid.move_cursor_to ({(uint)r, (uint)c, CellState.UNDEFINED});
-
-        return true;
-    }
-
-    private bool handle_modified_keys (string name, uint mods) {
         bool control_pressed = ((mods & Gdk.ModifierType.CONTROL_MASK) != 0);
         bool other_mod_pressed = (((mods & ~Gdk.ModifierType.SHIFT_MASK) & ~Gdk.ModifierType.CONTROL_MASK) != 0);
         bool only_control_pressed = control_pressed && !other_mod_pressed; /* Shift can be pressed */
 
-        if (only_control_pressed) {
-            switch (name) {
-                case "1":
-                    game_state = GameState.SETTING;
-                    break;
-                case "2":
-                    game_state = GameState.SOLVING;
-                    break;
-                default:
-                    return false;
-            }
-        }
+        switch (name) {
+            case "UP":
+            case "DOWN":
+            case "LEFT":
+            case "RIGHT":
+                move_cursor (name, mods);
+                break;
 
+            case "1":
+            case "2":
+                if (only_control_pressed) {
+                    game_state = name == "1" ? GameState.SETTING : GameState.SOLVING;
+                }
+                break;
+
+            case "F":
+                mark_current_cell (CellState.FILLED);
+                break;
+
+            case "E":
+                mark_current_cell (CellState.EMPTY);
+                break;
+
+            case "X":
+                if (game_state == GameState.SOLVING) {
+                    mark_current_cell (CellState.UNKNOWN);
+                }
+                break;
+
+            default:
+                return false;
+        }
         return true;
     }
 
