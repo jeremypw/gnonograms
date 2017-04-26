@@ -83,8 +83,10 @@ public class LabelBox : Gtk.Grid {
         var label = new Label (vertical);
         label.size = size;
         label.clue = current_size.to_string (); /* For testing */
+        label.fontheight = fontheight;
         labels[current_size] = label;
         current_size++;
+        label.show_all ();
         return label;
     }
 
@@ -110,6 +112,8 @@ public class LabelBox : Gtk.Grid {
             /* No need to destroy unused labels */
             current_size--;
         }
+
+        queue_draw ();
     }
 
     public void change_font_height(bool increase) {

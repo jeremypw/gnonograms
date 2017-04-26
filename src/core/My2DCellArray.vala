@@ -23,7 +23,14 @@ namespace Gnonograms {
    *        of the calling function.
 ***/
 public class My2DCellArray  : GLib.Object {
-    public Gnonograms.Dimensions dimensions {get; set;}
+    private Model model;
+
+    private Dimensions dimensions {
+        get {
+            return model.dimensions;
+        }
+    }
+
     public uint rows {
         get {
             return dimensions.height;
@@ -38,9 +45,12 @@ public class My2DCellArray  : GLib.Object {
 
     private CellState[,] data;
 
-    public My2DCellArray (Dimensions dimensions, CellState init) {
-        Object (dimensions: dimensions);
-        data = new CellState[rows, cols];
+    construct {
+        data = new CellState[MAXSIZE, MAXSIZE];
+    }
+
+    public My2DCellArray (Model model, CellState init) {
+        this.model = model;
         set_all (init);
     }
 

@@ -78,8 +78,7 @@ namespace Gnonograms.Utils
                 counting = true;
                 count++;
             } else {
-                critical ("Error in block string from cellstate array - Cellstate UNKNOWN OR IN ERROR\n");
-                break;
+                return "?";
             }
         }
 

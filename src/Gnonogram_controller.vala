@@ -22,6 +22,8 @@ public class Controller : GLib.Object {
     private View gnonogram_view;
     private Gtk.HeaderBar? header_bar;
     private Granite.Widgets.ModeButton mode_switch;
+    private DimensionControl size_changer;
+
     private int setting_index;
     private int solving_index;
 
@@ -140,6 +142,8 @@ public class Controller : GLib.Object {
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL, dimensions);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL, dimensions);
         cell_grid = new CellGrid (model);
+        size_changer = new DimensionControl (dimensions);
+        header_bar.pack_end (size_changer);
 
         gnonogram_view = new Gnonograms.View (row_clue_box, column_clue_box, cell_grid);
         gnonogram_view.set_titlebar (header_bar);
@@ -153,6 +157,8 @@ public class Controller : GLib.Object {
         cell_grid.button_release_event.connect (on_grid_button_release);
 
         mode_switch.mode_changed.connect (on_mode_switch_changed);
+
+        size_changer.changed.connect (on_size_changer_changed);
 
         gnonogram_view.key_press_event.connect (on_view_key_press_event);
         gnonogram_view.key_release_event.connect (on_view_key_release_event);
@@ -293,6 +299,16 @@ public class Controller : GLib.Object {
         }
     }
 
+    private void resize_to (Dimensions new_dim) {
+        dimensions = new_dim;
+        row_clue_box.change_dimensions (new_dim);
+        column_clue_box.change_dimensions (new_dim);
+        model.dimensions = new_dim;
+        model.clear ();
+        update_labels_from_model ();
+        game_state = GameState.SETTING;
+    }
+
 /*** Signal Handlers ***/
 
     private void on_grid_cursor_moved (Cell cell) {
@@ -399,6 +415,12 @@ public class Controller : GLib.Object {
 
     private void on_mode_switch_changed (Gtk.Widget widget) {
         game_state = widget.get_data ("mode");
+    }
+
+    private void on_size_changer_changed (Dimensions dim) {
+        if (dim != dimensions) {
+            resize_to (dim);
+        }
     }
 
     public void quit () {
