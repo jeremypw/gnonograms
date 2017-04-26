@@ -21,11 +21,12 @@
 namespace Gnonograms {
 
 class DimensionControl : Gtk.Button {
+    private const double STEP = 5.0;
     private Gtk.Popover popover;
     private Gtk.Scale rows;
     private Gtk.Scale cols;
 
-    public signal void changed (uint rows, uint cols);
+    public signal void changed (Dimensions dim);
 
     construct {
         popover = new Gtk.Popover (this);
@@ -33,8 +34,8 @@ class DimensionControl : Gtk.Button {
         popover.add (grid);
         popover.set_size_request (200, -1);
 
-        rows = new Gtk.HScale.with_range (5.0, MAXSIZE, 5.0);
-        cols = new Gtk.HScale.with_range (5.0, MAXSIZE, 5.0);
+        rows = new Gtk.HScale.with_range (STEP, MAXSIZE, STEP);
+        cols = new Gtk.HScale.with_range (STEP, MAXSIZE, STEP);
 
         configure_scale (rows);
         configure_scale (cols);
@@ -68,15 +69,15 @@ class DimensionControl : Gtk.Button {
     }
 
     private void on_popover_closed () {
-        /* Constrain size changes to multiples of 5 */
-        var row_val = rows.get_value () / 5.0;
-        var col_val = cols.get_value () / 5.0;
+        /* Constrain size changes to multiples of STEP */
+        var row_val = rows.get_value () / STEP;
+        var col_val = cols.get_value () / STEP;
 
         if ((uint)row_val != row_val || (uint)col_val != col_val) {
             return;
         }
 
-        changed ((uint)row_val * 5, (uint)col_val * 5);
+        changed ({(uint)(col_val * STEP), (uint)(row_val * STEP)});
     }
 
     private void configure_scale (Gtk.Scale scale) {
@@ -90,6 +91,12 @@ class DimensionControl : Gtk.Button {
         scale.hexpand = true;
         scale.draw_value = true;
         scale.value_pos = Gtk.PositionType.LEFT;
+        /* Stop scroll events changing value as this results in values that
+         * are not multiples of STEP.
+         */
+        scale.scroll_event.connect (() => {
+            return true;
+        });
     }
 }
 }

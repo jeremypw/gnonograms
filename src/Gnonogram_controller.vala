@@ -289,6 +289,16 @@ public class Controller : GLib.Object {
         }
     }
 
+    private void resize_to (Dimensions new_dim) {
+        dimensions = new_dim;
+        row_clue_box.change_dimensions (new_dim);
+        column_clue_box.change_dimensions (new_dim);
+        model.dimensions = new_dim;
+        model.clear ();
+        update_labels_from_model ();
+        game_state = GameState.SETTING;
+    }
+
 /*** Signal Handlers ***/
 
     private void on_grid_cursor_moved (Cell cell) {
@@ -397,8 +407,10 @@ public class Controller : GLib.Object {
         game_state = widget.get_data ("mode");
     }
 
-    private void on_size_changer_changed (uint r, uint c) {
-        debug ("change size to %u,  %u", r, c);
+    private void on_size_changer_changed (Dimensions dim) {
+        if (dim != dimensions) {
+            resize_to (dim);
+        }
     }
 
     public void quit () {

@@ -21,6 +21,7 @@ namespace Gnonograms {
 
 public class Model : GLib.Object {
     public Dimensions dimensions {get; set;}
+
     public GameState game_state {get; set;}
     public My2DCellArray display_data  {
         get {
@@ -31,6 +32,7 @@ public class Model : GLib.Object {
             }
         }
     }//points to grid being displayed
+
     private My2DCellArray solution_data; //display when setting
     private My2DCellArray working_data; //display when solving
     public  CellState[] data;
@@ -54,8 +56,10 @@ public class Model : GLib.Object {
 
     public Model (Dimensions dimensions) {
         Object (dimensions: dimensions);
-        solution_data = new My2DCellArray (dimensions, CellState.EMPTY);
-        working_data = new My2DCellArray (dimensions, CellState.UNKNOWN);
+
+        solution_data = new My2DCellArray (this, CellState.EMPTY);
+        working_data = new My2DCellArray (this, CellState.UNKNOWN);
+
         data = new CellState[MAXSIZE];
     }
 
