@@ -1,4 +1,4 @@
-/* Controller class for gnonograms-elementary
+/* Controller class for gnonograms-elementary - creates model and view, handles user input and settings.
  * Copyright (C) 2010-2017  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *  Author:
- *  Jeremy Wootten <jeremyw@elementaryos.org>
+ *  Jeremy Wootten <jeremy@elementaryos.org>
  */
 namespace Gnonograms {
 public class Controller : GLib.Object {
@@ -73,6 +73,7 @@ public class Controller : GLib.Object {
             }
         }
     }
+
     public Dimensions dimensions {get; set;}
     private uint rows {get { return dimensions.height; }}
     private uint cols {get { return dimensions.width; }}

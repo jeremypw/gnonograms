@@ -1,5 +1,4 @@
-/* Viewer class for gnonograms-elementary
- * Handles user interface
+/* View class for gnonograms-elementary - displays user interface
  * Copyright (C) 2010-2017  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
@@ -16,7 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *  Author:
- *  Jeremy Wootten <jeremyw@elementaryos.org>
+ *  Jeremy Wootten <jeremy@elementaryos.org>
  */
 
 namespace Gnonograms {
