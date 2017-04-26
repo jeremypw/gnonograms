@@ -1,5 +1,4 @@
 /* Utility functions for gnonograms-elementary
- * Dialogs, conversions etc
  * Copyright (C) 2010-2017  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
@@ -16,10 +15,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *  Author:
- *  Jeremy Wootten <jeremyw@elementaryos.org>
+ *  Jeremy Wootten <jeremy@elementaryos.org>
  */
-namespace Gnonograms.Utils
-{
+namespace Gnonograms.Utils {
     public static string[] remove_blank_lines (string[] sa) {
         string[] result = {};
 
@@ -141,11 +139,14 @@ namespace Gnonograms.Utils
         return sb.str;
     }
 
+    private const string[] letters = {"A","B","C","D","E","F"};
     private string int2hex (int i) {
-        if (i <= 9) return i.to_string ();
-        if (i > 15) return "X";
-        i = i - 10;
-        string[] l = {"A","B","C","D","E","F"};
-        return l[i];
+        if (i > 15 || i < 0) {
+            return "X";
+        } else if (i <= 9) {
+            return i.to_string ();
+        } else {
+            return letters[i - 10];
+        }
     }
 }
