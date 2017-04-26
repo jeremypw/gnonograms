@@ -132,7 +132,7 @@ public class Model : GLib.Object {
         working_data.set_all (CellState.UNKNOWN);
     }
 
-    public string get_label_text (int idx, bool is_column, bool from_solution = true) {
+    public string get_label_text (uint idx, bool is_column, bool from_solution = true) {
         uint length = is_column ? rows : cols;
 
         if (from_solution) {

@@ -162,6 +162,9 @@ public class Controller : GLib.Object {
         game_state = GameState.SOLVING;
         model.fill_random (7);
         header_bar.set_title (_("Random game"));
+        game_state = GameState.SETTING;
+        model.blank_solution ();
+        header_bar.set_title (_("Blank sheet"));
         initialize_view ();
         update_labels_from_model ();
     }
@@ -208,6 +211,11 @@ public class Controller : GLib.Object {
         for (int c = 0; c < cols; c++) {
             column_clue_box.update_label_text (c, model.get_label_text (c, true));
         }
+    }
+
+    private void update_labels_for_cell (Cell cell) {
+        row_clue_box.update_label_text (cell.row, model.get_label_text (cell.row, false));
+        column_clue_box.update_label_text (cell.col, model.get_label_text (cell.col, true));
     }
 
     private void highlight_labels (Cell c, bool is_highlight) {
@@ -280,6 +288,11 @@ public class Controller : GLib.Object {
             current_cell.state = state;
             model.set_data_from_cell (current_cell);
             cell_grid.queue_draw ();
+
+
+            if (game_state == GameState.SETTING) {
+                update_labels_for_cell (current_cell);
+            }
         }
     }
 

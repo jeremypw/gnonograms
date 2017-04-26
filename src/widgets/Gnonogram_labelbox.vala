@@ -139,7 +139,7 @@ public class LabelBox : Gtk.Grid {
         }
     }
 
-    public void update_label_text (int index, string? txt) {
+    public void update_label_text (uint index, string? txt) {
         if (txt == null) {
             txt = BLANKLABELTEXT;
         }
