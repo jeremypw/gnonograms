@@ -159,9 +159,6 @@ public class Controller : GLib.Object {
     }
 
     private void new_game () {
-        game_state = GameState.SOLVING;
-        model.fill_random (7);
-        header_bar.set_title (_("Random game"));
         game_state = GameState.SETTING;
         model.blank_solution ();
         header_bar.set_title (_("Blank sheet"));
