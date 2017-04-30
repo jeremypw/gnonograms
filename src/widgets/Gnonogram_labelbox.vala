@@ -56,6 +56,8 @@ public class LabelBox : Gtk.Grid {
             foreach (Gtk.Widget l in get_children ()) {
                 ((Label)l).fontheight = _fontheight;
             }
+
+            update_size_request ();
         }
     }
 
@@ -76,6 +78,11 @@ public class LabelBox : Gtk.Grid {
         /* Must have at least one label for resize to work */
         var label = new_label (vertical_labels, other_size);
         attach (label, 0, 0, 1, 1);
+        if (vertical_labels) {
+            vexpand = true;
+        } else {
+            hexpand = true;
+        }
         resize ();
     }
 
@@ -113,6 +120,7 @@ public class LabelBox : Gtk.Grid {
             current_size--;
         }
 
+        update_size_request ();
         queue_draw ();
     }
 
@@ -155,6 +163,16 @@ public class LabelBox : Gtk.Grid {
         for (uint index = 0; index < current_size; index++) {
             labels[index].size = size;
         }
+    }
+
+    private void update_size_request () {
+        if (vertical_labels) {
+            set_size_request(-1, (int)(fontheight * other_size));
+        } else {
+            set_size_request((int)(fontheight * other_size * 0.75), -1);
+        }
+
+
     }
 
     public string to_string() {

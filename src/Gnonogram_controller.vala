@@ -189,17 +189,17 @@ public class Controller : GLib.Object {
         double max_h, max_w;
         var scr = Gdk.Screen.get_default();
 
-        max_h = (double)(scr.get_height()) / ((double)(dimensions.height));
-        max_w = (double)(scr.get_width()) / ((double)(dimensions.width));
+        max_h = (double)(scr.get_height()) / ((double)(dimensions.height * 2));
+        max_w = (double)(scr.get_width()) / ((double)(dimensions.width * 2));
 
-        fontheight = double.min (max_h, max_w) / 3.0;
+        fontheight = double.min (max_h, max_w) / 2.5;
     }
 
     private void save_game_state () {
     }
 
     private void restore_settings () {
-        dimensions = {15, 20}; /* TODO implement saving and restoring settings */
+        dimensions = {25, 15}; /* TODO implement saving and restoring settings */
     }
 
     private bool load_game (File game) {
