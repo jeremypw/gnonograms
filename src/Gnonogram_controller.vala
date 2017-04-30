@@ -153,6 +153,7 @@ public class Controller : GLib.Object {
         create_view_and_model (dimensions);
         connect_signals ();
         initialize_view ();
+        fontheight = get_default_fontheight_from_dimensions (dimensions);
 
         if (game == null || !load_game (game)) {
             new_game ();
@@ -195,9 +196,17 @@ public class Controller : GLib.Object {
         update_labels_from_model ();
     }
 
+    private void new_random_game () {
+        /* TODO  Check/confirm overwriting existing game */
+        game_state = GameState.SOLVING;
+        model.fill_random (4);
+        header_bar.set_title (_("Random game"));
+        initialize_view ();
+        update_labels_from_model ();
+    }
+
     private void initialize_view () {
         initialize_cursor ();
-        fontheight = get_default_fontheight_from_dimensions (dimensions);
     }
 
     private void initialize_cursor () {
@@ -323,7 +332,6 @@ public class Controller : GLib.Object {
     }
 
     private void resize_to (Dimensions new_dim) {
-
         /* Reduce font size if new grid would not fit on screen */
         var fh = get_default_fontheight_from_dimensions (dimensions);
         if (fh < fontheight) {
@@ -394,6 +402,13 @@ public class Controller : GLib.Object {
                     } else {
                         fontheight += 1.0;
                     }
+                }
+
+                break;
+
+            case "R":
+                if (only_control_pressed) {
+                    new_random_game ();
                 }
 
                 break;
