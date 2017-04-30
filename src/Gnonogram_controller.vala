@@ -175,7 +175,7 @@ public class Controller : GLib.Object {
 
     private void initialize_view () {
         initialize_cursor ();
-        set_fontheight_from_dimensions (dimensions);
+        fontheight = get_default_fontheight_from_dimensions (dimensions);
     }
 
     private void initialize_cursor () {
@@ -183,7 +183,7 @@ public class Controller : GLib.Object {
         previous_cell = NULL_CELL;
     }
 
-    private void set_fontheight_from_dimensions (Dimensions dimensions) {
+    private double get_default_fontheight_from_dimensions (Dimensions dimensions) {
         assert (row_clue_box != null && column_clue_box != null);
 
         double max_h, max_w;
@@ -192,7 +192,7 @@ public class Controller : GLib.Object {
         max_h = (double)(scr.get_height()) / ((double)(dimensions.height * 2));
         max_w = (double)(scr.get_width()) / ((double)(dimensions.width * 2));
 
-        fontheight = double.min (max_h, max_w) / 2.5;
+        return double.min (max_h, max_w) / 2.5;
     }
 
     private void save_game_state () {
@@ -302,6 +302,12 @@ public class Controller : GLib.Object {
 
     private void resize_to (Dimensions new_dim) {
         dimensions = new_dim;
+        /* Reduce font size if new grid would not fit on screen */
+        var fh = get_default_fontheight_from_dimensions (dimensions);
+        if (fh < fontheight) {
+            fontheight = fh;
+        }
+
         row_clue_box.change_dimensions (new_dim);
         column_clue_box.change_dimensions (new_dim);
         model.dimensions = new_dim;
