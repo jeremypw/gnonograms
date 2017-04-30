@@ -74,7 +74,29 @@ public class Controller : GLib.Object {
         }
     }
 
-    public Dimensions dimensions {get; set;}
+    private Dimensions _dimensions;
+    public Dimensions dimensions {
+        get {
+            return _dimensions;
+        }
+
+        set {
+            if (value != _dimensions) {
+                _dimensions = value;
+
+                /* Do not update during construction */
+                if (row_clue_box != null) {
+                    row_clue_box.dimensions = dimensions;
+                    column_clue_box.dimensions = dimensions;
+                }
+
+                if (model != null) {
+                    model.dimensions = dimensions;
+                }
+            }
+        }
+    }
+
     private uint rows {get { return dimensions.height; }}
     private uint cols {get { return dimensions.width; }}
 
@@ -301,16 +323,14 @@ public class Controller : GLib.Object {
     }
 
     private void resize_to (Dimensions new_dim) {
-        dimensions = new_dim;
+
         /* Reduce font size if new grid would not fit on screen */
         var fh = get_default_fontheight_from_dimensions (dimensions);
         if (fh < fontheight) {
             fontheight = fh;
         }
 
-        row_clue_box.change_dimensions (new_dim);
-        column_clue_box.change_dimensions (new_dim);
-        model.dimensions = new_dim;
+        dimensions = new_dim;
         model.clear ();
         update_labels_from_model ();
         game_state = GameState.SETTING;
@@ -343,7 +363,6 @@ public class Controller : GLib.Object {
         bool control_pressed = ((mods & Gdk.ModifierType.CONTROL_MASK) != 0);
         bool other_mod_pressed = (((mods & ~Gdk.ModifierType.SHIFT_MASK) & ~Gdk.ModifierType.CONTROL_MASK) != 0);
         bool only_control_pressed = control_pressed && !other_mod_pressed; /* Shift can be pressed */
-
         switch (name) {
             case "UP":
             case "DOWN":
@@ -362,6 +381,19 @@ public class Controller : GLib.Object {
             case "2":
                 if (only_control_pressed) {
                     game_state = name == "1" ? GameState.SETTING : GameState.SOLVING;
+                }
+
+                break;
+
+            case "MINUS":
+            case "EQUAL":
+            case "PLUS":
+                if (only_control_pressed) {
+                    if (name == "MINUS") {
+                        fontheight -= 1.0;
+                    } else {
+                        fontheight += 1.0;
+                    }
                 }
 
                 break;

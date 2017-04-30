@@ -21,7 +21,24 @@
 namespace Gnonograms {
 
 public class LabelBox : Gtk.Grid {
-    private Dimensions dimensions;
+    private Dimensions _dimensions;
+    public Dimensions dimensions {
+        get {
+            return _dimensions;
+        }
+
+        set {
+            if (value != _dimensions) {
+                _dimensions = value;
+
+                /* Do not update during construction */
+                if (current_size > 0) {
+                    resize ();
+                }
+            }
+        }
+    }
+
     private Label[] labels;
     private int current_size = 0;
     private bool vertical_labels; /* true if contains column labels */
@@ -122,19 +139,6 @@ public class LabelBox : Gtk.Grid {
 
         update_size_request ();
         queue_draw ();
-    }
-
-    public void change_font_height(bool increase) {
-        if (increase) {
-            fontheight += 1.0;
-        } else {
-            fontheight -= 1.0;
-        }
-    }
-
-    public void change_dimensions (Dimensions dimensions) {
-        this.dimensions = dimensions;
-        resize ();
     }
 
     public void highlight (uint index, bool is_highlight) {
