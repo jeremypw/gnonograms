@@ -298,7 +298,7 @@ public class CellGrid : Gtk.DrawingArea {
         /* Calculate which cell the pointer is over */
         uint r =  ((uint)(e.y / cell_width));
         uint c =  ((uint)(e.x / cell_height));
-        move_cursor_to ({r, c, CellState.UNDEFINED});
+        move_cursor_to ({r, c, array.get_data_from_rc (r, c)});
         return true;
     }
 

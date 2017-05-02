@@ -119,6 +119,10 @@ private class Move {
         this.cell.copy (m.cell);
         this.previous_state = m.previous_state;
     }
+
+    public string to_string () {
+        return cell.to_string () + " Previous state %s".printf (previous_state.to_string ());
+    }
 }
 
 public const Cell NULL_CELL = {uint.MAX, uint.MAX, CellState.UNDEFINED};

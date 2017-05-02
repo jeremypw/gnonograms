@@ -112,7 +112,7 @@ public class My2DCellArray  : GLib.Object {
 
     public void set_all (CellState s) {
         for (int r = 0; r < rows; r++) {
-            for (int c = 0;c < cols; c++) {
+            for (int c = 0; c < cols; c++) {
                 data[r,c] = s;
             }
         }

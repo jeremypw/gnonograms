@@ -188,6 +188,9 @@ public class Controller : GLib.Object {
 
         size_changer.changed.connect (on_size_changer_changed);
 
+        history.go_back.connect (on_history_go_back);
+        history.go_forward.connect (on_history_go_forward);
+
         gnonogram_view.key_press_event.connect (on_view_key_press_event);
         gnonogram_view.key_release_event.connect (on_view_key_release_event);
     }
@@ -323,9 +326,14 @@ public class Controller : GLib.Object {
     }
 
     private void mark_current_cell (CellState state) {
-        if (current_cell != NULL_CELL && current_cell.state != state) {
+        assert (current_cell.state != CellState.UNDEFINED);
+        if (current_cell.state != state) {
+            var prev_state = current_cell.state;
             current_cell.state = state;
+            history.record_move (current_cell, prev_state);
+
             model.set_data_from_cell (current_cell);
+
             cell_grid.queue_draw ();
 
 
@@ -479,6 +487,12 @@ public class Controller : GLib.Object {
         if (dim != dimensions) {
             resize_to (dim);
         }
+    }
+
+    private void on_history_go_back (Move m) {
+    }
+
+    private void on_history_go_forward (Move m) {
     }
 
     public void quit () {

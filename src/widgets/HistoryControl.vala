@@ -39,34 +39,27 @@ class HistoryControl : Gtk.Box {
         back_stack = new Stack<Move> ();
         forward_stack = new Stack<Move> ();
 
-        button_back = new Gtk.Button.from_icon_name ("go-previous-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
-        button_forward = new Gtk.Button.from_icon_name ("go-next-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
-        button_back.tooltip_text = _("Previous");
-        button_back.show_all ();
-        pack_start (button_back);
+        button_back = new HistoryButton ("go-previous-symbolic", Gtk.IconSize.LARGE_TOOLBAR, _("Previous"));
+        button_forward = new HistoryButton ("go-next-symbolic", Gtk.IconSize.LARGE_TOOLBAR, _("Next"));
 
-        button_forward.tooltip_text = _("Next");
-        button_forward.show_all ();
+        pack_start (button_back);
         pack_start (button_forward);
 
         button_forward.clicked.connect (on_button_forward_clicked);
         button_back.clicked.connect (on_button_back_clicked);
     }
 
-    public HistoryControl () {
-        var style = get_style_context ();
-        style.add_class (Gtk.STYLE_CLASS_LINKED);
-        style.add_class ("raised"); // needed for toolbars
-    }
-
     public void record_move (Cell cell, CellState previous_state) {
+
         var new_move = new Move (cell, previous_state);
+
         if (current_move != null) {
             if (new_move.cell.state != CellState.UNDEFINED) {
-                if (current_move != new_move) {
-                    forward_stack.clear ();
-                    back_stack.push (current_move);
+                if (current_move == new_move) {
+                    return;
                 }
+                forward_stack.clear ();
+                button_forward.sensitive = false;
             } else { /* If current move is not valid remember previous uri anyway so that back button works */
                 back_stack.push (current_move);
             }
@@ -75,18 +68,43 @@ class HistoryControl : Gtk.Box {
         } else {
             current_move = new_move;
         }
+
+        back_stack.push (current_move);
+        button_back.sensitive = true;
     }
 
     private void on_button_forward_clicked () {
-message ("Forward");
+        if (forward_stack.size > 0) {
+            Move mv = forward_stack.pop ();
+            back_stack.push (current_move);
+            current_move = mv;
+            go_forward (mv);
+        }
+
+        button_back.sensitive = back_stack.size > 0;
+        button_forward.sensitive = forward_stack.size > 0;
     }
 
     private void on_button_back_clicked () {
-message ("Back");
+        if (back_stack.size > 0) {
+            Move mv = back_stack.pop ();
+            forward_stack.push (current_move);
+            current_move = mv;
+            go_back (mv);
+        }
+        button_back.sensitive = back_stack.size > 0;
+        button_forward.sensitive = forward_stack.size > 0;
+
     }
 
     private class Stack<G> {
         private Gee.LinkedList<G> list;
+
+        public int size {
+            get {
+                return list.size;
+            }
+        }
 
         public Stack () {
             list = new Gee.LinkedList<G> ();
@@ -101,25 +119,20 @@ message ("Back");
             return list.poll_head ();
         }
 
-        public G peek () {
-            return list.peek_head ();
-        }
-
-        public int size () {
-            return list.size;
-        }
-
         public void clear () {
             list.clear ();
         }
+    }
 
-        public bool is_empty () {
-            return size () == 0;
+    private class HistoryButton : Gtk.Button {
+        public HistoryButton (string icon_name,  Gtk.IconSize icon_size, string tip) {
+            Object (image: new Gtk.Image.from_icon_name (icon_name, icon_size));
+
+            tooltip_text = tip;
+            show_all ();
+            sensitive = false;
         }
 
-        public Gee.List<G>? slice_head (int amount) {
-            return list.slice (0, int.min (size (), amount));
-        }
     }
 } /* End: Browser class */
 }
