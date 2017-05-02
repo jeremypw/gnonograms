@@ -23,6 +23,7 @@ public class Controller : GLib.Object {
     private Gtk.HeaderBar? header_bar;
     private Granite.Widgets.ModeButton mode_switch;
     private DimensionControl size_changer;
+    private HistoryControl history;
 
     private int setting_index;
     private int solving_index;
@@ -129,6 +130,9 @@ public class Controller : GLib.Object {
         header_bar = new Gtk.HeaderBar ();
         header_bar.set_has_subtitle (true);
         header_bar.set_show_close_button (true);
+
+        history = new HistoryControl ();
+        header_bar.pack_start (history);
 
         mode_switch = new Granite.Widgets.ModeButton ();
         var setting_icon = new Gtk.Image.from_icon_name ("edit-symbolic", Gtk.IconSize.MENU); /* provisional only */

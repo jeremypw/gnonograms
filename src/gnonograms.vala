@@ -68,6 +68,15 @@ public struct Cell {
         this.state = b.state;
     }
 
+    public bool equal (Cell b) {
+        return (
+            this.row == b.row &&
+            this.col == b.col &&
+            this.state == b.state
+        );
+
+    }
+
     public Cell invert() {
         Cell c = { row, col, CellState.UNKNOWN };
 
@@ -85,14 +94,31 @@ public struct Cell {
     }
 }
 
-public struct Move {
-    public Cell previous;
-    public Cell replacement;
-}
-
 public struct Dimensions {
     uint width;
     uint height;
+}
+
+
+private class Move {
+    public Cell cell;
+    public CellState previous_state;
+
+    public Move (Cell cell, CellState previous_state) {
+        this.cell.row = cell.row;
+        this.cell.col = cell.col;
+        this.cell.state = cell.state;
+        this.previous_state = previous_state;
+    }
+
+    public bool equal (Move m) {
+        return m.cell == this.cell && m.previous_state == this.previous_state;
+    }
+
+    public void copy (Move m) {
+        this.cell.copy (m.cell);
+        this.previous_state = m.previous_state;
+    }
 }
 
 public const Cell NULL_CELL = {uint.MAX, uint.MAX, CellState.UNDEFINED};
