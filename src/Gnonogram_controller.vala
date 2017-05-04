@@ -44,7 +44,6 @@ public class Controller : GLib.Object {
                 _game_state = value;
 
                 set_mode_switch (value);
-                initialize_cursor ();
 
                 if (model != null && header_bar != null && cell_grid != null) {
                     cell_grid.game_state = value;
@@ -58,8 +57,12 @@ public class Controller : GLib.Object {
             }
         }
     }
-    private Cell current_cell;
-    private Cell previous_cell;
+
+    private Cell current_cell {
+        get {
+            return cell_grid.current_cell;
+        }
+    }
 
     private File? _game;
     public File? game {
@@ -156,7 +159,6 @@ public class Controller : GLib.Object {
         restore_settings ();
         create_view_and_model (dimensions);
         connect_signals ();
-        initialize_view ();
         fontheight = get_default_fontheight_from_dimensions (dimensions);
 
         if (game == null || !load_game (game)) {
@@ -199,7 +201,6 @@ public class Controller : GLib.Object {
         game_state = GameState.SETTING;
         model.blank_solution ();
         header_bar.set_title (_("Blank sheet"));
-        initialize_view ();
         update_labels_from_model ();
     }
 
@@ -208,17 +209,7 @@ public class Controller : GLib.Object {
         game_state = GameState.SOLVING;
         model.fill_random (4);
         header_bar.set_title (_("Random game"));
-        initialize_view ();
         update_labels_from_model ();
-    }
-
-    private void initialize_view () {
-        initialize_cursor ();
-    }
-
-    private void initialize_cursor () {
-        current_cell = NULL_CELL;
-        previous_cell = NULL_CELL;
     }
 
     private double get_default_fontheight_from_dimensions (Dimensions dimensions) {
@@ -322,24 +313,30 @@ public class Controller : GLib.Object {
                     return;
         }
 
-        mark_current_cell (drawing_with_state);
+        make_move_at_current_cell (drawing_with_state);
     }
 
-    private void mark_current_cell (CellState state) {
-        assert (current_cell.state != CellState.UNDEFINED);
-        if (current_cell.state != state) {
-            var prev_state = current_cell.state;
-            current_cell.state = state;
-            history.record_move (current_cell, prev_state);
+    private void make_move_at_current_cell (CellState state) {
+        var cell = current_cell.clone ();
+        cell.state = state;
+        make_move_at_cell (cell);
+    }
 
-            model.set_data_from_cell (current_cell);
+    private void make_move_at_cell (Cell cell) {
+        var prev_state = model.get_data_for_cell (cell);
+        if (prev_state != cell.state) {
+            history.record_move (cell, prev_state);
+            mark_cell (cell);
+        }
+    }
 
-            cell_grid.queue_draw ();
+    private void mark_cell (Cell cell) {
+        assert (cell.state != CellState.UNDEFINED);
+        model.set_data_from_cell (cell);
+        cell_grid.queue_draw ();
 
-
-            if (game_state == GameState.SETTING) {
-                update_labels_for_cell (current_cell);
-            }
+        if (game_state == GameState.SETTING) {
+            update_labels_for_cell (cell);
         }
     }
 
@@ -356,20 +353,26 @@ public class Controller : GLib.Object {
         game_state = GameState.SETTING;
     }
 
+    private void move_cursor_to (Cell to) {
+        highlight_labels  (current_cell, false);
+        highlight_labels (to, true);
+        cell_grid.current_cell = to;
+    }
+
 /*** Signal Handlers ***/
 
-    private void on_grid_cursor_moved (Cell cell) {
-        highlight_labels (current_cell, false);
-        highlight_labels (cell, true);
-        current_cell.copy (cell);
+    private void on_grid_cursor_moved (Cell from, Cell to) {
+        highlight_labels (from, false);
+        highlight_labels (to, true);
         if (drawing_with_state != CellState.UNDEFINED) {
-            mark_current_cell (drawing_with_state);
+            to.state = drawing_with_state;
+            make_move_at_cell (to);
         }
     }
 
     private bool on_grid_leave () {
-        highlight_labels (current_cell, false);
-        current_cell = NULL_CELL;
+        row_clue_box.unhighlight_all ();
+        column_clue_box.unhighlight_all ();
         return false;
     }
 
@@ -470,7 +473,7 @@ public class Controller : GLib.Object {
                 return false;
         }
 
-        mark_current_cell (drawing_with_state);
+        make_move_at_current_cell (drawing_with_state);
         return true;
     }
 
@@ -490,9 +493,14 @@ public class Controller : GLib.Object {
     }
 
     private void on_history_go_back (Move m) {
+        move_cursor_to (m.cell);
+        m.cell.state = m.previous_state;
+        mark_cell (m.cell);
     }
 
     private void on_history_go_forward (Move m) {
+        move_cursor_to (m.cell);
+        mark_cell (m.cell);
     }
 
     public void quit () {

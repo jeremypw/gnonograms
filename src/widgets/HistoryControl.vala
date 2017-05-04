@@ -23,21 +23,17 @@
 namespace Gnonograms {
 
 class HistoryControl : Gtk.Box {
-    private Stack<Move> back_stack;
-    private Stack<Move> forward_stack;
+    private Gee.Deque<Move> back_stack;
+    private Gee.Deque<Move> forward_stack;
     Gtk.Button button_back;
     Gtk.Button button_forward;
-
-    Move? current_move;
 
     public signal void go_forward (Move move);
     public signal void go_back (Move move);
 
     construct {
-        current_move = null;
-
-        back_stack = new Stack<Move> ();
-        forward_stack = new Stack<Move> ();
+        back_stack = new Gee.LinkedList<Move> ();
+        forward_stack = new Gee.LinkedList<Move> ();
 
         button_back = new HistoryButton ("go-previous-symbolic", Gtk.IconSize.LARGE_TOOLBAR, _("Previous"));
         button_forward = new HistoryButton ("go-next-symbolic", Gtk.IconSize.LARGE_TOOLBAR, _("Next"));
@@ -50,78 +46,42 @@ class HistoryControl : Gtk.Box {
     }
 
     public void record_move (Cell cell, CellState previous_state) {
-
         var new_move = new Move (cell, previous_state);
 
-        if (current_move != null) {
-            if (new_move.cell.state != CellState.UNDEFINED) {
-                if (current_move == new_move) {
-                    return;
-                }
-                forward_stack.clear ();
-                button_forward.sensitive = false;
-            } else { /* If current move is not valid remember previous uri anyway so that back button works */
-                back_stack.push (current_move);
+        if (new_move.cell.state != CellState.UNDEFINED) {
+            Move? current_move = back_stack.peek_head ();
+            if (current_move != null && current_move.equal (new_move)) {
+                return;
             }
 
-            current_move.copy (new_move);
-        } else {
-            current_move = new_move;
+            forward_stack.clear ();
+            button_forward.sensitive = false;
         }
 
-        back_stack.push (current_move);
+        back_stack.offer_head (new_move);
         button_back.sensitive = true;
+    }
+
+    private void on_button_back_clicked () {
+        if (back_stack.size > 0) {
+            Move mv = back_stack.poll_head ();
+            forward_stack.offer_head (mv);
+            go_back (mv);
+        }
+
+        button_back.sensitive = !back_stack.is_empty;
+        button_forward.sensitive = !forward_stack.is_empty;
     }
 
     private void on_button_forward_clicked () {
         if (forward_stack.size > 0) {
-            Move mv = forward_stack.pop ();
-            back_stack.push (current_move);
-            current_move = mv;
+            Move mv = forward_stack.poll_head ();
+            back_stack.offer_head (mv);
             go_forward (mv);
         }
 
         button_back.sensitive = back_stack.size > 0;
         button_forward.sensitive = forward_stack.size > 0;
-    }
-
-    private void on_button_back_clicked () {
-        if (back_stack.size > 0) {
-            Move mv = back_stack.pop ();
-            forward_stack.push (current_move);
-            current_move = mv;
-            go_back (mv);
-        }
-        button_back.sensitive = back_stack.size > 0;
-        button_forward.sensitive = forward_stack.size > 0;
-
-    }
-
-    private class Stack<G> {
-        private Gee.LinkedList<G> list;
-
-        public int size {
-            get {
-                return list.size;
-            }
-        }
-
-        public Stack () {
-            list = new Gee.LinkedList<G> ();
-        }
-
-        public Stack<G> push (G element) {
-            list.offer_head (element);
-            return this;
-        }
-
-        public G pop () {
-            return list.poll_head ();
-        }
-
-        public void clear () {
-            list.clear ();
-        }
     }
 
     private class HistoryButton : Gtk.Button {
@@ -134,7 +94,7 @@ class HistoryControl : Gtk.Box {
         }
 
     }
-} /* End: Browser class */
+}
 }
 
 

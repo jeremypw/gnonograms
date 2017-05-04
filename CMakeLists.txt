@@ -50,6 +50,7 @@ vala_precompile(VALA_C
     src/core/My2DCellArray.vala
 
 PACKAGES
+    gee-0.8
     gtk+-3.0
     granite
 

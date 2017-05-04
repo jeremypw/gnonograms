@@ -36,7 +36,16 @@ public class CellGrid : Gtk.DrawingArea {
     private uint rows {get { return array.rows; }}
     private uint cols {get { return array.cols; }}
 
-    private Cell current_cell;
+    private Cell _current_cell;
+    public Cell current_cell {
+        get {
+            return _current_cell;
+        }
+
+        set {
+            _current_cell.copy (value);
+        }
+    }
 
     private double alloc_width; /* Width of drawing area less frame*/
     private double alloc_height; /* Height of drawing area less frame */
@@ -93,9 +102,10 @@ public class CellGrid : Gtk.DrawingArea {
         }
     }
 
-    public signal void cursor_moved (Cell destination);
+    public signal void cursor_moved (Cell from, Cell to);
 
     construct {
+        _current_cell = NULL_CELL;
         colors = new Gdk.RGBA[2, 4];
         set_colors ();
         MINORGRIDDASH = {1.0, 5.0};
@@ -140,7 +150,7 @@ public class CellGrid : Gtk.DrawingArea {
     }
 
     public void highlight_cell (Cell cell, bool highlight) {
-        if (cell == NULL_CELL) {
+        if (cell.equal (NULL_CELL)) {
             return;
         }
 
@@ -307,11 +317,11 @@ public class CellGrid : Gtk.DrawingArea {
             target = NULL_CELL;
         }
 
-        if (target != current_cell) { /* only signal when cursor changes cell */
+        if (!target.equal (current_cell)) { /* only signal when cursor changes cell */
             highlight_cell (current_cell, false);
-            current_cell.copy (target);
-            cursor_moved (current_cell);
-            highlight_cell (current_cell, true);
+            highlight_cell (target, true);
+            cursor_moved (current_cell, target);
+            current_cell = target;
         }
     }
 

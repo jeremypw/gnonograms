@@ -78,7 +78,7 @@ public struct Cell {
     }
 
     public Cell invert() {
-        Cell c = { row, col, CellState.UNKNOWN };
+        Cell c = {row, col, CellState.UNKNOWN };
 
         if (this.state == CellState.EMPTY) {
             c.state = CellState.FILLED;
@@ -87,6 +87,10 @@ public struct Cell {
         }
 
         return c;
+    }
+
+    public Cell clone () {
+        return {row, col, state};
     }
 
     public string to_string () {

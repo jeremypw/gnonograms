@@ -149,7 +149,7 @@ public class LabelBox : Gtk.Grid {
         labels[index].highlight (is_highlight);
     }
 
-    private void unhighlight_all() {
+    public void unhighlight_all() {
         for (uint index = 0; index < current_size; index++) {
             labels[index].highlight (false);
         }
