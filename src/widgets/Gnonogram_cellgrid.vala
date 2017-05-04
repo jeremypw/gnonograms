@@ -110,8 +110,6 @@ public class CellGrid : Gtk.DrawingArea {
         set_colors ();
         MINORGRIDDASH = {1.0, 5.0};
 
-        current_cell = NULL_CELL;
-
         this.add_events (
         Gdk.EventMask.BUTTON_PRESS_MASK|
         Gdk.EventMask.BUTTON_RELEASE_MASK|
