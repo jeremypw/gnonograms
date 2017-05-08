@@ -22,7 +22,7 @@ public class Controller : GLib.Object {
     private View gnonogram_view;
     private Gtk.HeaderBar? header_bar;
     private Granite.Widgets.ModeButton mode_switch;
-    private DimensionControl size_changer;
+    private AppMenu app_menu;
     private HistoryControl history;
 
     private int setting_index;
@@ -172,8 +172,8 @@ public class Controller : GLib.Object {
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL, dimensions);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL, dimensions);
         cell_grid = new CellGrid (model);
-        size_changer = new DimensionControl (dimensions);
-        header_bar.pack_end (size_changer);
+        app_menu = new AppMenu (dimensions);
+        header_bar.pack_end (app_menu);
 
         gnonogram_view = new Gnonograms.View (row_clue_box, column_clue_box, cell_grid);
         gnonogram_view.set_titlebar (header_bar);
@@ -188,7 +188,7 @@ public class Controller : GLib.Object {
 
         mode_switch.mode_changed.connect (on_mode_switch_changed);
 
-        size_changer.changed.connect (on_size_changer_changed);
+        app_menu.dimensions_changed.connect (on_app_menu_dimensions_changed);
 
         history.go_back.connect (on_history_go_back);
         history.go_forward.connect (on_history_go_forward);
@@ -486,7 +486,7 @@ public class Controller : GLib.Object {
         game_state = widget.get_data ("mode");
     }
 
-    private void on_size_changer_changed (Dimensions dim) {
+    private void on_app_menu_dimensions_changed (Dimensions dim) {
         if (dim != dimensions) {
             resize_to (dim);
         }

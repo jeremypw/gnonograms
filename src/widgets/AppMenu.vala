@@ -20,13 +20,13 @@
 
 namespace Gnonograms {
 
-class DimensionControl : Gtk.Button {
+class AppMenu : Gtk.Button {
     private const double STEP = 5.0;
     private Gtk.Popover popover;
     private Gtk.Scale rows;
     private Gtk.Scale cols;
 
-    public signal void changed (Dimensions dim);
+    public signal void dimensions_changed (Dimensions dim);
 
     construct {
         popover = new Gtk.Popover (this);
@@ -62,8 +62,9 @@ class DimensionControl : Gtk.Button {
         popover.closed.connect (on_popover_closed);
     }
 
-    public DimensionControl (Dimensions dimensions) {
-        set_label (_("Size of grid"));
+    public AppMenu (Dimensions dimensions) {
+        image = new Gtk.Image.from_icon_name ("open-menu", Gtk.IconSize.LARGE_TOOLBAR);
+        tooltip_text = _("Options");
         rows.set_value ((double)(dimensions.height));
         cols.set_value ((double)(dimensions.width));
     }
@@ -77,7 +78,7 @@ class DimensionControl : Gtk.Button {
             return;
         }
 
-        changed ({(uint)(col_val * STEP), (uint)(row_val * STEP)});
+        dimensions_changed ({(uint)(col_val * STEP), (uint)(row_val * STEP)});
     }
 
     private void configure_scale (Gtk.Scale scale) {
