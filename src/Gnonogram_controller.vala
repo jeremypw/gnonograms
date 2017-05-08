@@ -213,7 +213,7 @@ public class Controller : GLib.Object {
     private void new_random_game () {
         /* TODO  Check/confirm overwriting existing game */
         game_state = GameState.SOLVING;
-        model.fill_random (4);
+        model.fill_random (grade);
         header_bar.set_title (_("Random game"));
         update_labels_from_model ();
     }
