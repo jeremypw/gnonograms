@@ -101,6 +101,12 @@ public class Controller : GLib.Object {
         }
     }
 
+    private uint grade {
+        get {
+            return app_menu.grade_val;
+        }
+    }
+
     private uint rows {get { return dimensions.height; }}
     private uint cols {get { return dimensions.width; }}
 
@@ -172,7 +178,7 @@ public class Controller : GLib.Object {
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL, dimensions);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL, dimensions);
         cell_grid = new CellGrid (model);
-        app_menu = new AppMenu (dimensions);
+        app_menu = new AppMenu (dimensions, 5);
         header_bar.pack_end (app_menu);
 
         gnonogram_view = new Gnonograms.View (row_clue_box, column_clue_box, cell_grid);
@@ -188,7 +194,7 @@ public class Controller : GLib.Object {
 
         mode_switch.mode_changed.connect (on_mode_switch_changed);
 
-        app_menu.dimensions_changed.connect (on_app_menu_dimensions_changed);
+        app_menu.apply.connect (on_app_menu_apply);
 
         history.go_back.connect (on_history_go_back);
         history.go_forward.connect (on_history_go_forward);
@@ -486,9 +492,9 @@ public class Controller : GLib.Object {
         game_state = widget.get_data ("mode");
     }
 
-    private void on_app_menu_dimensions_changed (Dimensions dim) {
-        if (dim != dimensions) {
-            resize_to (dim);
+    private void on_app_menu_apply () {
+        if (app_menu.row_val != rows || app_menu.col_val != cols) {
+            resize_to ({app_menu.col_val, app_menu.row_val});
         }
     }
 

@@ -21,83 +21,191 @@
 namespace Gnonograms {
 
 class AppMenu : Gtk.Button {
-    private const double STEP = 5.0;
-    private Gtk.Popover popover;
-    private Gtk.Scale rows;
-    private Gtk.Scale cols;
+    private const uint STEP = 5;
+    private AppPopover popover;
+    private AppScale rows_scale;
+    private uint _row_val;
+    public uint row_val {
+        get {
+            return _row_val;
+        }
 
-    public signal void dimensions_changed (Dimensions dim);
+        set {
+            _row_val = value;
+            rows_scale.set_value (_row_val);
+        }
+    }
+    private AppScale cols_scale;
+    private uint _col_val;
+    public uint col_val {
+        get {
+            return _col_val;
+        }
+
+        set {
+            _col_val = value;
+            cols_scale.set_value (_col_val);
+        }
+    }
+
+    private AppScale grade_scale;
+    private uint _grade_val;
+    public uint grade_val {
+        get {
+            return _grade_val;
+        }
+
+        set {
+            _grade_val = value;
+            grade_scale.set_value (value);
+        }
+    }
+
+    public signal void apply ();
 
     construct {
-        popover = new Gtk.Popover (this);
+        popover = new AppPopover (this);
         var grid = new Gtk.Grid ();
         popover.add (grid);
         popover.set_size_request (200, -1);
 
-        rows = new Gtk.HScale.with_range (STEP, MAXSIZE, STEP);
-        cols = new Gtk.HScale.with_range (STEP, MAXSIZE, STEP);
-
-        configure_scale (rows);
-        configure_scale (cols);
+        rows_scale = new AppScale (STEP, MAXSIZE, STEP);
+        cols_scale = new AppScale (STEP, MAXSIZE, STEP);
+        grade_scale = new AppScale (1, MAXGRADE, 1);
 
         var row_label = new Gtk.Label (_("Rows"));
         var col_label = new Gtk.Label (_("Columns"));
+        var grade_label = new Gtk.Label (_("Difficulty"));
 
         row_label.xalign = 1;
         col_label.xalign = 1;
+        grade_label.xalign = 1;
 
         grid.attach (row_label, 0, 0, 1, 1);
         grid.attach (col_label, 0, 1, 1, 1);
-        grid.attach (rows, 1, 0, 1, 1);
-        grid.attach (cols, 1, 1, 1, 1);
+        grid.attach (grade_label, 0, 2, 1, 1);
+        grid.attach (rows_scale, 1, 0, 1, 1);
+        grid.attach (cols_scale, 1, 1, 1, 1);
+        grid.attach (grade_scale, 1, 2, 1, 1);
 
         grid.row_spacing = 12;
         grid.column_spacing = 6;
         grid.border_width = 12;
 
         clicked.connect (() => {
+            store_values ();
             popover.show_all ();
         });
 
-        popover.closed.connect (on_popover_closed);
+        popover.apply_settings.connect (() => {
+            store_values ();
+            apply ();
+        });
+
+        popover.cancel.connect (() => {
+            restore_values ();
+        });
     }
 
-    public AppMenu (Dimensions dimensions) {
+    public AppMenu (Dimensions dimensions, uint grade) {
         image = new Gtk.Image.from_icon_name ("open-menu", Gtk.IconSize.LARGE_TOOLBAR);
         tooltip_text = _("Options");
-        rows.set_value ((double)(dimensions.height));
-        cols.set_value ((double)(dimensions.width));
+        row_val = dimensions.height;
+        col_val = dimensions.width;
+        grade_val = grade;
     }
 
-    private void on_popover_closed () {
-        /* Constrain size changes to multiples of STEP */
-        var row_val = rows.get_value () / STEP;
-        var col_val = cols.get_value () / STEP;
-
-        if ((uint)row_val != row_val || (uint)col_val != col_val) {
-            return;
-        }
-
-        dimensions_changed ({(uint)(col_val * STEP), (uint)(row_val * STEP)});
+    private void store_values () {
+        row_val = rows_scale.get_value ();
+        col_val = cols_scale.get_value ();
+        grade_val = grade_scale.get_value ();
     }
 
-    private void configure_scale (Gtk.Scale scale) {
-        for (double val = scale.adjustment.lower;
-             val <= scale.adjustment.upper;
-             val += scale.adjustment.step_increment) {
+    private void restore_values () {
+        rows_scale.set_value (row_val);
+        cols_scale.set_value (col_val);
+        grade_scale.set_value (grade_val);
+    }
 
-            scale.add_mark (val, Gtk.PositionType.BOTTOM, null);
+    /** Popover that can be cancelled with Escape and closed by Enter **/
+    private class AppPopover : Gtk.Popover {
+        private bool cancelled = false;
+        public signal void apply_settings ();
+        public signal void cancel ();
+
+
+        construct {
+            show.connect (() => {
+                store_values ();
+            });
+
+            closed.connect (() => {
+                if (!cancelled) {
+                    apply_settings ();
+                } else {
+                    cancel ();
+                }
+                cancelled = false;
+            });
+
+            key_press_event.connect ((event) => {
+                cancelled = (event.keyval == Gdk.Key.Escape);
+
+                if (event.keyval == Gdk.Key.KP_Enter || event.keyval == Gdk.Key.Return) {
+                    hide ();
+                }
+            });
         }
 
-        scale.hexpand = true;
-        scale.draw_value = true;
-        scale.value_pos = Gtk.PositionType.LEFT;
-        /* Stop scroll events changing value as this results in values that
-         * are not multiples of STEP.
-         */
-        scale.scroll_event.connect (() => {
-            return true;
-        });
+        public AppPopover (Gtk.Widget widget) {
+            Object (relative_to: widget);
+        }
+
+        private void store_values () {
+
+        }
+    }
+
+    /** Scale limited to integral values separated by step (interface uses uint) **/
+    private class AppScale : Gtk.Grid {
+        private uint step;
+        private Gtk.HScale scale;
+        private Gtk.Label val_label;
+
+        construct {
+            scale = new Gtk.HScale (null);
+            val_label = new Gtk.Label (null);
+            attach (val_label, 0, 0, 1, 1);
+            attach (scale, 1, 0, 1, 1);
+
+            scale.value_changed.connect (() => {
+                val_label.label = get_value ().to_string ();
+            });
+        }
+
+        public AppScale (uint _start, uint _end, uint _step) {
+            var start = (double)_start / (double)_step;
+            var end = (double)_end / (double)_step + 1.0;
+            step = _step;
+            var adjustment = new Gtk.Adjustment (start, start, end, 1.0, 1.0, 1.0);
+            scale.adjustment = adjustment;
+
+            for (var val = start; val <= end; val += 1.0) {
+                scale.add_mark (val, Gtk.PositionType.BOTTOM, null);
+            }
+
+            scale.hexpand = true;
+            scale.draw_value = false;
+        }
+
+        public uint get_value () {
+            return (uint)(scale.get_value ()) * step;
+        }
+
+        public void set_value (uint val) {
+            scale.set_value ((double)val / (double)step);
+        }
+
     }
 }
 }
