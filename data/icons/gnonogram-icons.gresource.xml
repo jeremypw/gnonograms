@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/com/gnonograms/icons">
+    <file alias="gnonogram-puzzle.svg" compressed="true" preprocess="xml-stripblanks">puzzle.svg</file>
+  </gresource>
+</gresources>

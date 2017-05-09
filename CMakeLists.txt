@@ -61,7 +61,10 @@ OPTIONS
     --vapidir=${CMAKE_CURRENT_SOURCE_DIR}/vapi/
 )
 
-add_executable(${EXEC_NAME} ${VALA_C})
+include (GResource)
+glib_compile_resources (GLIB_RESOURCES_GNONOGRAMS_ICONS data/icons/gnonogram-icons.gresource.xml)
+
+add_executable(${EXEC_NAME} ${VALA_C} ${GLIB_RESOURCES_GNONOGRAMS_ICONS})
 
 install (TARGETS ${EXEC_NAME} RUNTIME DESTINATION bin)
 install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/data/com.github.yourusername.yourrepositoryname.desktop DESTINATION ${DATADIR}/applications/)

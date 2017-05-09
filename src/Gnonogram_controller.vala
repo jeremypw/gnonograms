@@ -22,6 +22,7 @@ public class Controller : GLib.Object {
     private View gnonogram_view;
     private Gtk.HeaderBar? header_bar;
     private Granite.Widgets.ModeButton mode_switch;
+    private Gtk.Button game_button;
     private AppMenu app_menu;
     private HistoryControl history;
 
@@ -136,9 +137,17 @@ public class Controller : GLib.Object {
             Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.INFO;
         }
 
+        weak Gtk.IconTheme default_theme = Gtk.IconTheme.get_default ();
+        default_theme.add_resource_path ("/com/gnonograms/icons");
+
         header_bar = new Gtk.HeaderBar ();
         header_bar.set_has_subtitle (true);
         header_bar.set_show_close_button (true);
+
+        game_button = new Gtk.Button ();
+        var img = new Gtk.Image.from_icon_name ("gnonogram-puzzle", Gtk.IconSize.MENU);
+        game_button.image = img;
+        header_bar.pack_start (game_button);
 
         history = new HistoryControl ();
         header_bar.pack_start (history);
