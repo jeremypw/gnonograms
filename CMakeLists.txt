@@ -25,6 +25,11 @@ find_package(PkgConfig)
 
 pkg_check_modules(DEPS REQUIRED gtk+-3.0 granite)
 
+pkg_check_modules(GDK322 QUIET gdk-3.0>=3.22)
+if (GDK322_FOUND)
+  set (GDK_OPTIONS --define=HAVE_GDK_3_22)
+endif ()
+
 add_definitions(${DEPS_CFLAGS})
 link_libraries(${DEPS_LIBRARIES})
 link_directories(${DEPS_LIBRARY_DIRS})
@@ -59,6 +64,7 @@ CUSTOM_VAPIS
 
 OPTIONS
     --vapidir=${CMAKE_CURRENT_SOURCE_DIR}/vapi/
+    $(GDK_OPTIONS)
 )
 
 include (GResource)
