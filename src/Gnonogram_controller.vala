@@ -145,8 +145,9 @@ public class Controller : GLib.Object {
         header_bar.set_show_close_button (true);
 
         game_button = new Gtk.Button ();
-        var img = new Gtk.Image.from_icon_name ("gnonogram-puzzle", Gtk.IconSize.MENU);
+        var img = new Gtk.Image.from_icon_name ("gnonogram-puzzle", Gtk.IconSize.LARGE_TOOLBAR);
         game_button.image = img;
+
         header_bar.pack_start (game_button);
 
         history = new HistoryControl ();
