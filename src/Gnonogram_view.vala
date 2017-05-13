@@ -106,6 +106,8 @@ public class View : Gtk.ApplicationWindow {
     public signal void new_random ();
     public signal void resized (Dimensions dim);
     public signal void moved (Cell cell);
+    public signal void game_state_changed (GameState gs);
+
     public virtual signal Move? next_move_request () {return null;}
     public virtual signal Move? previous_move_request () {return null;}
 
@@ -265,10 +267,20 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private bool on_grid_leave () {return false;}
+    private bool on_grid_leave () {
+        row_clue_box.unhighlight_all ();
+        column_clue_box.unhighlight_all ();
+        return false;
+    }
+
     private bool on_grid_button_press (Gdk.EventButton event) {return false;}
     private bool on_grid_button_release () {return false;}
-    private void on_mode_switch_changed (Gtk.Widget widget) {}
+
+    private void on_mode_switch_changed (Gtk.Widget widget) {
+        game_state = widget.get_data ("mode");
+        game_state_changed (game_state);
+    }
+
     private void on_app_menu_apply () {
         dimensions = {app_menu.col_val, app_menu.row_val};
     }

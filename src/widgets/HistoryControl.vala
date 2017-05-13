@@ -66,7 +66,6 @@ class HistoryControl : Gtk.Box {
             show_all ();
             sensitive = false;
         }
-
     }
 }
 }

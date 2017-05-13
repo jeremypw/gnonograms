@@ -88,6 +88,7 @@ public class Controller : GLib.Object {
         view.moved.connect (on_moved);
         view.next_move_request.connect (get_next_move);
         view.previous_move_request.connect (get_previous_move);
+        view.game_state_changed.connect (on_state_changed);
     }
 
     private void new_game () {
@@ -221,25 +222,12 @@ public class Controller : GLib.Object {
         model.clear ();
     }
 
+    private void on_state_changed (GameState gs) {
+        game_state = gs;
+    }
 
 
 /*** Signal Handlers ***/
-
-//~     private void on_grid_cursor_moved (Cell from, Cell to) {
-//~         highlight_labels (from, false);
-//~         highlight_labels (to, true);
-//~         if (drawing_with_state != CellState.UNDEFINED) {
-//~             to.state = drawing_with_state;
-//~             make_move_at_cell (to);
-//~         }
-//~     }
-
-//~     private bool on_grid_leave () {
-//~         row_clue_box.unhighlight_all ();
-//~         column_clue_box.unhighlight_all ();
-//~         return false;
-//~     }
-
 //~     private bool on_view_key_press_event (Gdk.EventKey event) {
 //~         if (event.is_modifier == 1) {
 //~             return true;
@@ -349,14 +337,6 @@ public class Controller : GLib.Object {
 //~     private void on_mode_switch_changed (Gtk.Widget widget) {
 //~         game_state = widget.get_data ("mode");
 //~     }
-
-//~     private void on_app_menu_apply () {
-//~         if (app_menu.row_val != rows || app_menu.col_val != cols) {
-//~             resize_to ({app_menu.col_val, app_menu.row_val});
-//~         }
-//~     }
-
-
 
     public void quit () {
         save_game_state ();
