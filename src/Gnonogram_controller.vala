@@ -57,8 +57,6 @@ public class Controller : GLib.Object {
         set {
             if (value != _dimensions) {
                 _dimensions = value;
-                view.dimensions = value;
-                model.dimensions = value;
             }
         }
     }
@@ -87,7 +85,6 @@ public class Controller : GLib.Object {
     private CellState drawing_with_state;
 
     construct {
-        game_state = GameState.UNDEFINED;
         drawing_with_state = CellState.UNDEFINED;
     }
 

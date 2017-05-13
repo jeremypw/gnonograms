@@ -104,14 +104,11 @@ public class View : Gtk.ApplicationWindow {
         if (Granite.Services.Logger.DisplayLevel != Granite.Services.LogLevel.DEBUG) {
             Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.INFO;
         }
-
         weak Gtk.IconTheme default_theme = Gtk.IconTheme.get_default ();
         default_theme.add_resource_path ("/com/gnonograms/icons");
-
         header_bar = new Gtk.HeaderBar ();
         header_bar.set_has_subtitle (true);
         header_bar.set_show_close_button (true);
-
         random_game_button = new Gtk.Button ();
         var img = new Gtk.Image.from_icon_name ("gnonogram-puzzle", Gtk.IconSize.LARGE_TOOLBAR);
         random_game_button.image = img;
@@ -121,11 +118,9 @@ public class View : Gtk.ApplicationWindow {
 
         history = new HistoryControl ();
         header_bar.pack_start (history);
-
         mode_switch = new ModeButton ();
 
         header_bar.pack_start (mode_switch);
-
         set_titlebar (header_bar);
     }
 
@@ -138,7 +133,6 @@ public class View : Gtk.ApplicationWindow {
         cell_grid = new CellGrid (model);
         app_menu = new AppMenu (dimensions, grade);
         header_bar.pack_end (app_menu);
-
         var grid = new Gtk.Grid ();
         grid.row_spacing = (int)FRAME_WIDTH;
         grid.column_spacing = (int)FRAME_WIDTH;
@@ -149,7 +143,10 @@ public class View : Gtk.ApplicationWindow {
 
         add (grid);
 
-        get_default_fontheight_from_dimensions ();
+        realize.connect (() => {
+            get_default_fontheight_from_dimensions ();
+        });
+
         show_all ();
     }
 
@@ -226,7 +223,7 @@ public class View : Gtk.ApplicationWindow {
             }
         }
 
-        construct {
+        public ModeButton () {
             var setting_icon = new Gtk.Image.from_icon_name ("edit-symbolic", Gtk.IconSize.MENU); /* provisional only */
             var solving_icon = new Gtk.Image.from_icon_name ("process-working-symbolic", Gtk.IconSize.MENU);  /* provisional only */
 
