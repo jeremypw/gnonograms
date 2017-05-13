@@ -106,7 +106,6 @@ public class LabelBox : Gtk.Grid {
     private Label new_label (bool vertical, uint size) {
         var label = new Label (vertical);
         label.size = size;
-        label.clue = current_size.to_string (); /* For testing */
         label.fontheight = fontheight;
         labels[current_size] = label;
         current_size++;

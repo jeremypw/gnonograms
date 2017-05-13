@@ -43,7 +43,8 @@ public class View : Gtk.ApplicationWindow {
                 if (row_clue_box != null) {
                     row_clue_box.dimensions = dimensions;
                     column_clue_box.dimensions = dimensions;
-                    get_default_fontheight_from_dimensions ();
+                    set_default_fontheight_from_dimensions ();
+                    resized (dimensions);
                 }
             }
         }
@@ -72,19 +73,17 @@ public class View : Gtk.ApplicationWindow {
         }
 
         set {
-            if (_game_state != value) {
-                _game_state = value;
-                mode_switch.mode = value;
-                cell_grid.game_state = value;
+            _game_state = value;
+            mode_switch.mode = value;
+            cell_grid.game_state = value;
 
-                if (value == GameState.SETTING) {
-                    header_bar.subtitle = _("Setting");
-                } else {
-                    header_bar.subtitle = _("Solving");
-                }
-
-                update_labels_from_model ();
+            if (value == GameState.SETTING) {
+                header_bar.subtitle = _("Setting");
+            } else {
+                header_bar.subtitle = _("Solving");
             }
+
+            update_labels_from_model ();
         }
     }
 
@@ -95,6 +94,7 @@ public class View : Gtk.ApplicationWindow {
     }
 
     public signal void new_random ();
+    public signal void resized (Dimensions dim);
 
     construct {
         title = _("Gnonograms for Elementary");
@@ -125,14 +125,16 @@ public class View : Gtk.ApplicationWindow {
     }
 
     public View (Dimensions dimensions, uint grade, Model model) {
-        Object (dimensions: dimensions);
-
-        this.model = model;
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL, dimensions);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL, dimensions);
         cell_grid = new CellGrid (model);
+
+        this.model = model;
+        this.dimensions = dimensions;
+
         app_menu = new AppMenu (dimensions, grade);
         header_bar.pack_end (app_menu);
+
         var grid = new Gtk.Grid ();
         grid.row_spacing = (int)FRAME_WIDTH;
         grid.column_spacing = (int)FRAME_WIDTH;
@@ -142,15 +144,16 @@ public class View : Gtk.ApplicationWindow {
         grid.attach (cell_grid, 1, 1, 2, 2);
 
         add (grid);
-
-        realize.connect (() => {
-            get_default_fontheight_from_dimensions ();
-        });
-
+        connect_signals ();
         show_all ();
     }
 
     private void connect_signals () {
+        realize.connect (() => {
+            set_default_fontheight_from_dimensions ();
+            update_labels_from_model ();
+        });
+
         cell_grid.cursor_moved.connect (on_grid_cursor_moved);
         cell_grid.leave_notify_event.connect (on_grid_leave);
         cell_grid.button_press_event.connect (on_grid_button_press);
@@ -167,9 +170,13 @@ public class View : Gtk.ApplicationWindow {
         key_release_event.connect (on_key_release_event);
     }
 
-    private double get_default_fontheight_from_dimensions () {
+    private void set_default_fontheight_from_dimensions () {
         double max_h, max_w;
         Gdk.Rectangle rect;
+
+        if (get_window () == null) {
+            return;
+        }
 #if HAVE_GDK_3_22
         var display = Gdk.Display.get_default();
         var monitor = display.get_monitor_at_window (get_window ());
@@ -182,7 +189,7 @@ public class View : Gtk.ApplicationWindow {
         max_h = (double)(rect.height) / ((double)(rows * 2));
         max_w = (double)(rect.width) / ((double)(cols * 2));
 
-        return double.min (max_h, max_w) / 2.5;
+        fontheight = double.min (max_h, max_w) / 2.5;
     }
 
     private void update_labels_from_model () {
@@ -195,6 +202,16 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
+    private void update_labels_for_cell (Cell cell) {
+        row_clue_box.update_label_text (cell.row, model.get_label_text (cell.row, false));
+        column_clue_box.update_label_text (cell.col, model.get_label_text (cell.col, true));
+    }
+
+    private void highlight_labels (Cell c, bool is_highlight) {
+        row_clue_box.highlight (c.row, is_highlight);
+        column_clue_box.highlight (c.col, is_highlight);
+    }
+
     /*** Signal handlers ***/
 
     private void on_grid_cursor_moved (Cell from, Cell to) {}
@@ -202,7 +219,10 @@ public class View : Gtk.ApplicationWindow {
     private bool on_grid_button_press (Gdk.EventButton event) {return false;}
     private bool on_grid_button_release () {return false;}
     private void on_mode_switch_changed (Gtk.Widget widget) {}
-    private void on_app_menu_apply () {}
+    private void on_app_menu_apply () {
+        dimensions = {app_menu.col_val, app_menu.row_val};
+    }
+
     private void on_history_go_back (Move m) {}
     private void on_history_go_forward (Move m) {}
     private bool on_key_press_event () {return false;}

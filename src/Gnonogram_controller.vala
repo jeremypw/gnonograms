@@ -48,33 +48,10 @@ public class Controller : GLib.Object {
         }
     }
 
-    private Dimensions _dimensions;
-    public Dimensions dimensions {
-        get {
-            return _dimensions;
-        }
-
-        set {
-            if (value != _dimensions) {
-                _dimensions = value;
-            }
-        }
-    }
-
     public uint grade {get; set;}
 
     private uint rows {get { return view.rows; }}
     private uint cols {get { return view.rows; }}
-
-//~     public double fontheight {
-//~         set {
-//~             view.fontheight = value;
-//~         }
-
-//~         get {
-//~             return view.fontheight;
-//~         }
-//~     }
 
     public Gtk.Window window {
         get {
@@ -94,15 +71,19 @@ public class Controller : GLib.Object {
         restore_settings ();
         /* Dummy pending restore settings implementation */
         grade = 4;
-        dimensions = {15, 25};
+        Dimensions dimensions = {15, 25};
 
         model = new Model (dimensions);
         view = new View (dimensions, grade, model);
-        view.show_all();
+        connect_signals ();
 
         if (game == null || !load_game (game)) {
             new_game ();
         }
+    }
+
+    private void connect_signals () {
+        view.resized.connect (on_resized);
     }
 
     private void new_game () {
@@ -122,25 +103,12 @@ public class Controller : GLib.Object {
     }
 
     private void restore_settings () {
-        dimensions = {25, 15}; /* TODO implement saving and restoring settings */
     }
 
     private bool load_game (File game) {
         new_game ();  /* TODO implement saving and restoring settings */
         return true;
     }
-
-
-
-//~     private void update_labels_for_cell (Cell cell) {
-//~         row_clue_box.update_label_text (cell.row, model.get_label_text (cell.row, false));
-//~         column_clue_box.update_label_text (cell.col, model.get_label_text (cell.col, true));
-//~     }
-
-//~     private void highlight_labels (Cell c, bool is_highlight) {
-//~         row_clue_box.highlight (c.row, is_highlight);
-//~         column_clue_box.highlight (c.col, is_highlight);
-//~     }
 
 //~     private void handle_arrow_keys (string keyname, uint mods) {
 //~         int r = 0; int c = 0;
@@ -218,10 +186,9 @@ public class Controller : GLib.Object {
 //~         }
 //~     }
 
-    private void resize_to (Dimensions new_dim) {
+    private void on_resized (Dimensions dim) {
+        model.dimensions = dim;
         model.clear ();
-        view.dimensions = new_dim;
-        view.game_state = GameState.SETTING;
     }
 
 //~     private void move_cursor_to (Cell to) {
