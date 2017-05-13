@@ -16,25 +16,30 @@
  *
  *  Author:
  *  Jeremy Wootten <jeremy@elementaryos.org>
- *
- *  Adapted from Marlin.View.Browser Author: ammonkey <am.monkeyd@gmail.com>
  */
 
 namespace Gnonograms {
 
 class HistoryControl : Gtk.Box {
-    private Gee.Deque<Move> back_stack;
-    private Gee.Deque<Move> forward_stack;
     Gtk.Button button_back;
     Gtk.Button button_forward;
 
-    public signal void go_forward (Move move);
-    public signal void go_back (Move move);
+    public bool can_go_forward {
+        set {
+            button_forward.sensitive = value;
+        }
+    }
+
+    public bool can_go_back {
+        set {
+            button_back.sensitive = value;
+        }
+    }
+
+    public signal void go_forward ();
+    public signal void go_back ();
 
     construct {
-        back_stack = new Gee.LinkedList<Move> ();
-        forward_stack = new Gee.LinkedList<Move> ();
-
         button_back = new HistoryButton ("go-previous-symbolic", Gtk.IconSize.LARGE_TOOLBAR, _("Previous"));
         button_forward = new HistoryButton ("go-next-symbolic", Gtk.IconSize.LARGE_TOOLBAR, _("Next"));
 
@@ -45,43 +50,12 @@ class HistoryControl : Gtk.Box {
         button_back.clicked.connect (on_button_back_clicked);
     }
 
-    public void record_move (Cell cell, CellState previous_state) {
-        var new_move = new Move (cell, previous_state);
-
-        if (new_move.cell.state != CellState.UNDEFINED) {
-            Move? current_move = back_stack.peek_head ();
-            if (current_move != null && current_move.equal (new_move)) {
-                return;
-            }
-
-            forward_stack.clear ();
-            button_forward.sensitive = false;
-        }
-
-        back_stack.offer_head (new_move);
-        button_back.sensitive = true;
-    }
-
     private void on_button_back_clicked () {
-        if (back_stack.size > 0) {
-            Move mv = back_stack.poll_head ();
-            forward_stack.offer_head (mv);
-            go_back (mv);
-        }
-
-        button_back.sensitive = !back_stack.is_empty;
-        button_forward.sensitive = !forward_stack.is_empty;
+        go_back ();
     }
 
     private void on_button_forward_clicked () {
-        if (forward_stack.size > 0) {
-            Move mv = forward_stack.poll_head ();
-            back_stack.offer_head (mv);
-            go_forward (mv);
-        }
-
-        button_back.sensitive = back_stack.size > 0;
-        button_forward.sensitive = forward_stack.size > 0;
+        go_forward ();
     }
 
     private class HistoryButton : Gtk.Button {

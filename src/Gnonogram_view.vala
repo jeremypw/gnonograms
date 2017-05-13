@@ -29,6 +29,7 @@ public class View : Gtk.ApplicationWindow {
     private Gtk.Button random_game_button;
     private HistoryControl history;
     private Model model {get; set;}
+    private CellState drawing_with_state;
 
     private Dimensions _dimensions;
     public Dimensions dimensions {
@@ -93,13 +94,26 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
+    private Cell current_cell {
+        get {
+            return cell_grid.current_cell;
+        }
+        set {
+            cell_grid.current_cell = value;
+        }
+    }
+
     public signal void new_random ();
     public signal void resized (Dimensions dim);
+    public signal void moved (Cell cell);
+    public virtual signal Move? next_move_request () {return null;}
+    public virtual signal Move? previous_move_request () {return null;}
 
     construct {
         title = _("Gnonograms for Elementary");
         window_position = Gtk.WindowPosition.CENTER_ALWAYS;
         resizable = false;
+        drawing_with_state = CellState.UNDEFINED;
 
         if (Granite.Services.Logger.DisplayLevel != Granite.Services.LogLevel.DEBUG) {
             Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.INFO;
@@ -212,9 +226,45 @@ public class View : Gtk.ApplicationWindow {
         column_clue_box.highlight (c.col, is_highlight);
     }
 
+    private void move_cursor_to (Cell to) {
+        highlight_labels  (current_cell, false);
+        highlight_labels (to, true);
+        current_cell = to;
+    }
+
+    private void mark_cell (Cell cell) {
+        assert (cell.state != CellState.UNDEFINED);
+        cell_grid.queue_draw ();
+
+        if (game_state == GameState.SETTING) {
+            update_labels_for_cell (cell);
+        }
+    }
+
+    private void move_backwards (Move m) {
+        move_cursor_to (m.cell);
+        m.cell.state = m.previous_state;
+        mark_cell (m.cell);
+    }
+
+    private void move_forwards (Move m) {
+        move_cursor_to (m.cell);
+        mark_cell (m.cell);
+    }
+
     /*** Signal handlers ***/
 
-    private void on_grid_cursor_moved (Cell from, Cell to) {}
+    private void on_grid_cursor_moved (Cell from, Cell to) {
+        highlight_labels (from, false);
+        highlight_labels (to, true);
+
+        if (drawing_with_state != CellState.UNDEFINED) {
+            to.state = drawing_with_state;
+            moved (to);
+            mark_cell (to);
+        }
+    }
+
     private bool on_grid_leave () {return false;}
     private bool on_grid_button_press (Gdk.EventButton event) {return false;}
     private bool on_grid_button_release () {return false;}
@@ -223,8 +273,23 @@ public class View : Gtk.ApplicationWindow {
         dimensions = {app_menu.col_val, app_menu.row_val};
     }
 
-    private void on_history_go_back (Move m) {}
-    private void on_history_go_forward (Move m) {}
+    private void on_history_go_back () {
+        var move = previous_move_request ();
+        history.can_go_back = move != null;
+
+        if (move != null) {
+            move_backwards (move);
+        }
+    }
+
+    private void on_history_go_forward () {
+        var move = next_move_request ();
+        history.can_go_forward = move != null;
+        if (move != null) {
+            move_forwards (move);
+        }
+    }
+
     private bool on_key_press_event () {return false;}
     private bool on_key_release_event () {return false;}
 

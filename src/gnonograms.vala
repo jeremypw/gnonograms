@@ -104,7 +104,7 @@ public struct Dimensions {
 }
 
 
-private class Move {
+public class Move {
     public Cell cell;
     public CellState previous_state;
 

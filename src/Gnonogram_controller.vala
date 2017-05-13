@@ -21,6 +21,8 @@ namespace Gnonograms {
 public class Controller : GLib.Object {
     private View view;
     private Model? model;
+    private Gee.Deque<Move> back_stack;
+    private Gee.Deque<Move> forward_stack;
 
     public GameState game_state {
         get {
@@ -59,10 +61,9 @@ public class Controller : GLib.Object {
         }
     }
 
-    private CellState drawing_with_state;
-
     construct {
-        drawing_with_state = CellState.UNDEFINED;
+        back_stack = new Gee.LinkedList<Move> ();
+        forward_stack = new Gee.LinkedList<Move> ();
     }
 
     public Controller (File? game = null) {
@@ -84,6 +85,9 @@ public class Controller : GLib.Object {
 
     private void connect_signals () {
         view.resized.connect (on_resized);
+        view.moved.connect (on_moved);
+        view.next_move_request.connect (get_next_move);
+        view.previous_move_request.connect (get_previous_move);
     }
 
     private void new_game () {
@@ -168,34 +172,56 @@ public class Controller : GLib.Object {
 //~         make_move_at_cell (cell);
 //~     }
 
-//~     private void make_move_at_cell (Cell cell) {
-//~         var prev_state = model.get_data_for_cell (cell);
-//~         if (prev_state != cell.state) {
-//~             history.record_move (cell, prev_state);
-//~             mark_cell (cell);
-//~         }
-//~     }
+    private void on_moved (Cell cell) {
+        var prev_state = model.get_data_for_cell (cell);
+        model.set_data_from_cell (cell);
 
-//~     private void mark_cell (Cell cell) {
-//~         assert (cell.state != CellState.UNDEFINED);
-//~         model.set_data_from_cell (cell);
-//~         cell_grid.queue_draw ();
+        if (prev_state != cell.state) {
+            record_move (cell, prev_state);
+        }
+    }
 
-//~         if (game_state == GameState.SETTING) {
-//~             update_labels_for_cell (cell);
-//~         }
-//~     }
+    public void record_move (Cell cell, CellState previous_state) {
+        var new_move = new Move (cell, previous_state);
+
+        if (new_move.cell.state != CellState.UNDEFINED) {
+            Move? current_move = back_stack.peek_head ();
+            if (current_move != null && current_move.equal (new_move)) {
+                return;
+            }
+
+            forward_stack.clear ();
+        }
+
+        back_stack.offer_head (new_move);
+    }
+
+    private Move? get_next_move () {
+        if (forward_stack.size > 0) {
+            Move mv = forward_stack.poll_head ();
+            back_stack.offer_head (mv);
+            return mv;
+        } else {
+            return null;
+        }
+    }
+
+    private Move? get_previous_move () {
+        if (back_stack.size > 0) {
+            Move mv = back_stack.poll_head ();
+            forward_stack.offer_head (mv);
+            return mv;
+        } else {
+            return null;
+        }
+    }
 
     private void on_resized (Dimensions dim) {
         model.dimensions = dim;
         model.clear ();
     }
 
-//~     private void move_cursor_to (Cell to) {
-//~         highlight_labels  (current_cell, false);
-//~         highlight_labels (to, true);
-//~         cell_grid.current_cell = to;
-//~     }
+
 
 /*** Signal Handlers ***/
 
@@ -330,16 +356,7 @@ public class Controller : GLib.Object {
 //~         }
 //~     }
 
-//~     private void on_history_go_back (Move m) {
-//~         move_cursor_to (m.cell);
-//~         m.cell.state = m.previous_state;
-//~         mark_cell (m.cell);
-//~     }
 
-//~     private void on_history_go_forward (Move m) {
-//~         move_cursor_to (m.cell);
-//~         mark_cell (m.cell);
-//~     }
 
     public void quit () {
         save_game_state ();
