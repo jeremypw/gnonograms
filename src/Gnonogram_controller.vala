@@ -89,6 +89,7 @@ public class Controller : GLib.Object {
         view.next_move_request.connect (on_next_move_request);
         view.previous_move_request.connect (on_previous_move_request);
         view.game_state_changed.connect (on_state_changed);
+        view.random_game_request.connect (new_random_game);
     }
 
     private void new_game () {

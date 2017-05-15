@@ -115,7 +115,7 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    public signal void new_random ();
+    public signal void random_game_request ();
     public signal void resized (Dimensions dim);
     public signal void moved (Cell cell);
     public signal void game_state_changed (GameState gs);
@@ -140,7 +140,7 @@ public class View : Gtk.ApplicationWindow {
         random_game_button = new Gtk.Button ();
         var img = new Gtk.Image.from_icon_name ("gnonogram-puzzle", Gtk.IconSize.LARGE_TOOLBAR);
         random_game_button.image = img;
-        random_game_button.clicked.connect (() => {new_random ();});
+        random_game_button.clicked.connect (() => {random_game_request ();});
 
         header_bar.pack_start (random_game_button);
 
