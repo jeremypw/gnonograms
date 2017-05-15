@@ -103,13 +103,25 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
+    public bool can_go_back {
+        set {
+            history.can_go_back = value;
+        }
+    }
+
+    public bool can_go_forward {
+        set {
+            history.can_go_forward = value;
+        }
+    }
+
     public signal void new_random ();
     public signal void resized (Dimensions dim);
     public signal void moved (Cell cell);
     public signal void game_state_changed (GameState gs);
 
-    public virtual signal Move? next_move_request () {return null;}
-    public virtual signal Move? previous_move_request () {return null;}
+    public signal void next_move_request ();
+    public signal void previous_move_request ();
 
     construct {
         title = _("Gnonograms for Elementary");
@@ -251,15 +263,11 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private void move_backwards (Move m) {
+    public void make_move (Move m) {
         move_cursor_to (m.cell);
-        m.cell.state = m.previous_state;
         mark_cell (m.cell);
-    }
 
-    private void move_forwards (Move m) {
-        move_cursor_to (m.cell);
-        mark_cell (m.cell);
+        queue_draw ();
     }
 
     /*** Signal handlers ***/
@@ -318,20 +326,11 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private void on_history_go_back () {
-        var move = previous_move_request ();
-        history.can_go_back = move != null;
-
-        if (move != null) {
-            move_backwards (move);
-        }
+        previous_move_request ();
     }
 
     private void on_history_go_forward () {
-        var move = next_move_request ();
-        history.can_go_forward = move != null;
-        if (move != null) {
-            move_forwards (move);
-        }
+        next_move_request ();
     }
 
     private bool on_key_press_event () {return false;}

@@ -86,8 +86,8 @@ public class Controller : GLib.Object {
     private void connect_signals () {
         view.resized.connect (on_resized);
         view.moved.connect (on_moved);
-        view.next_move_request.connect (get_next_move);
-        view.previous_move_request.connect (get_previous_move);
+        view.next_move_request.connect (on_next_move_request);
+        view.previous_move_request.connect (on_previous_move_request);
         view.game_state_changed.connect (on_state_changed);
     }
 
@@ -186,29 +186,43 @@ public class Controller : GLib.Object {
             }
 
             forward_stack.clear ();
+            view.can_go_forward = false;
         }
 
         back_stack.offer_head (new_move);
+        update_history_view ();
     }
 
-    private Move? get_next_move () {
+    private void on_next_move_request () {
         if (forward_stack.size > 0) {
             Move mv = forward_stack.poll_head ();
             back_stack.offer_head (mv);
-            return mv;
-        } else {
-            return null;
+
+            make_move (mv);
         }
     }
 
-    private Move? get_previous_move () {
+    private void on_previous_move_request () {
         if (back_stack.size > 0) {
             Move mv = back_stack.poll_head ();
-            forward_stack.offer_head (mv);
-            return mv;
-        } else {
-            return null;
+            /* Record copy otherwise it will be altered by next line*/
+            forward_stack.offer_head (mv.clone ());
+
+            mv.cell.state = mv.previous_state;
+            make_move (mv);
         }
+    }
+
+    private void make_move (Move mv) {
+        model.set_data_from_cell (mv.cell);
+
+        view.make_move (mv);
+        update_history_view ();
+    }
+
+    private void update_history_view () {
+        view.can_go_back = back_stack.size > 0;
+        view.can_go_forward = forward_stack.size > 0;
     }
 
     private void on_resized (Dimensions dim) {

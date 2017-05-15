@@ -124,6 +124,10 @@ public class Move {
         this.previous_state = m.previous_state;
     }
 
+    public Move clone () {
+        return new Move (this.cell.clone (), this.previous_state);
+    }
+
     public string to_string () {
         return cell.to_string () + " Previous state %s".printf (previous_state.to_string ());
     }
