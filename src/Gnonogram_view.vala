@@ -249,6 +249,14 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
+
+    public void make_move (Move m) {
+        move_cursor_to (m.cell);
+        mark_cell (m.cell);
+
+        queue_draw ();
+    }
+
     private void move_cursor_to (Cell to, Cell from = current_cell) {
         highlight_labels  (from, false);
         highlight_labels (to, true);
@@ -261,13 +269,6 @@ public class View : Gtk.ApplicationWindow {
         if (game_state == GameState.SETTING) {
             update_labels_for_cell (cell);
         }
-    }
-
-    public void make_move (Move m) {
-        move_cursor_to (m.cell);
-        mark_cell (m.cell);
-
-        queue_draw ();
     }
 
     private void handle_arrow_keys (string keyname, uint mods) {
@@ -369,23 +370,6 @@ public class View : Gtk.ApplicationWindow {
         return true;
     }
 
-    private void on_mode_switch_changed (Gtk.Widget widget) {
-        game_state = widget.get_data ("mode");
-        game_state_changed (game_state);
-    }
-
-    private void on_app_menu_apply () {
-        dimensions = {app_menu.col_val, app_menu.row_val};
-    }
-
-    private void on_history_go_back () {
-        previous_move_request ();
-    }
-
-    private void on_history_go_forward () {
-        next_move_request ();
-    }
-
     private bool on_key_press_event (Gdk.EventKey event) {
         /* TODO (if necessary) ignore key autorepeat */
 
@@ -462,6 +446,23 @@ public class View : Gtk.ApplicationWindow {
         }
 
         return true;
+    }
+
+    private void on_mode_switch_changed (Gtk.Widget widget) {
+        game_state = widget.get_data ("mode");
+        game_state_changed (game_state);
+    }
+
+    private void on_app_menu_apply () {
+        dimensions = {app_menu.col_val, app_menu.row_val};
+    }
+
+    private void on_history_go_back () {
+        previous_move_request ();
+    }
+
+    private void on_history_go_forward () {
+        next_move_request ();
     }
 
     /** Private classes **/

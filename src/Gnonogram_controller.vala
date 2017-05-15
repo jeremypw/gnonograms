@@ -116,15 +116,6 @@ public class Controller : GLib.Object {
         return true;
     }
 
-    private void on_moved (Cell cell) {
-        var prev_state = model.get_data_for_cell (cell);
-        model.set_data_from_cell (cell);
-
-        if (prev_state != cell.state) {
-            record_move (cell, prev_state);
-        }
-    }
-
     public void record_move (Cell cell, CellState previous_state) {
         var new_move = new Move (cell, previous_state);
 
@@ -140,6 +131,29 @@ public class Controller : GLib.Object {
 
         back_stack.offer_head (new_move);
         update_history_view ();
+    }
+
+    private void make_move (Move mv) {
+        model.set_data_from_cell (mv.cell);
+
+        view.make_move (mv);
+        update_history_view ();
+    }
+
+    private void update_history_view () {
+        view.can_go_back = back_stack.size > 0;
+        view.can_go_forward = forward_stack.size > 0;
+    }
+
+
+/*** Signal Handlers ***/
+    private void on_moved (Cell cell) {
+        var prev_state = model.get_data_for_cell (cell);
+        model.set_data_from_cell (cell);
+
+        if (prev_state != cell.state) {
+            record_move (cell, prev_state);
+        }
     }
 
     private void on_next_move_request () {
@@ -162,18 +176,6 @@ public class Controller : GLib.Object {
         }
     }
 
-    private void make_move (Move mv) {
-        model.set_data_from_cell (mv.cell);
-
-        view.make_move (mv);
-        update_history_view ();
-    }
-
-    private void update_history_view () {
-        view.can_go_back = back_stack.size > 0;
-        view.can_go_forward = forward_stack.size > 0;
-    }
-
     private void on_resized (Dimensions dim) {
         model.dimensions = dim;
         model.clear ();
@@ -183,8 +185,6 @@ public class Controller : GLib.Object {
         game_state = gs;
     }
 
-
-/*** Signal Handlers ***/
     public void quit () {
         save_game_state ();
     }
