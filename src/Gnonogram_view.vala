@@ -241,11 +241,11 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private void make_move_at_cell (CellState state = drawing_with_state, Cell target = current_cell) {
-        if (drawing_with_state != CellState.UNDEFINED) {
+        if (state != CellState.UNDEFINED) {
             Cell cell = target.clone ();
-            cell.state = drawing_with_state;
             moved (cell);
             mark_cell (cell);
+            queue_draw ();
         }
     }
 
@@ -269,6 +269,59 @@ public class View : Gtk.ApplicationWindow {
 
         queue_draw ();
     }
+
+    private void handle_arrow_keys (string keyname, uint mods) {
+        int r = 0; int c = 0;
+        switch (keyname) {
+            case "UP":
+                    r = -1;
+                    break;
+            case "DOWN":
+                    r = 1;
+                    break;
+            case "LEFT":
+                    c = -1;
+                    break;
+            case "RIGHT":
+                    c = 1;
+                    break;
+
+            default:
+                    return;
+        }
+
+        cell_grid.move_cursor_relative (r, c);
+    }
+
+    private void handle_pen_keys (string keyname, uint mods) {
+        if (mods > 0) {
+            return;
+        }
+
+        switch (keyname) {
+            case "F":
+                drawing_with_state = CellState.FILLED;
+                break;
+
+            case "E":
+                drawing_with_state = CellState.EMPTY;
+                break;
+
+            case "X":
+                if (game_state == GameState.SOLVING) {
+                    drawing_with_state = CellState.UNKNOWN;
+                    break;
+                } else {
+                    return;
+                }
+
+            default:
+                    return;
+        }
+
+        make_move_at_cell ();
+    }
+
 
     /*** Signal handlers ***/
 
@@ -333,8 +386,83 @@ public class View : Gtk.ApplicationWindow {
         next_move_request ();
     }
 
-    private bool on_key_press_event () {return false;}
-    private bool on_key_release_event () {return false;}
+    private bool on_key_press_event (Gdk.EventKey event) {
+        /* TODO (if necessary) ignore key autorepeat */
+
+        if (event.is_modifier == 1) {
+            return true;
+        }
+
+        var name = (Gdk.keyval_name (event.keyval)).up();
+        var mods = (event.state & Gtk.accelerator_get_default_mod_mask ());
+        bool control_pressed = ((mods & Gdk.ModifierType.CONTROL_MASK) != 0);
+        bool other_mod_pressed = (((mods & ~Gdk.ModifierType.SHIFT_MASK) & ~Gdk.ModifierType.CONTROL_MASK) != 0);
+        bool only_control_pressed = control_pressed && !other_mod_pressed; /* Shift can be pressed */
+
+        switch (name) {
+            case "UP":
+            case "DOWN":
+            case "LEFT":
+            case "RIGHT":
+                handle_arrow_keys (name, mods);
+                break;
+
+            case "F":
+            case "E":
+            case "X":
+                handle_pen_keys (name, mods);
+                break;
+
+            case "1":
+            case "2":
+                if (only_control_pressed) {
+                    game_state = name == "1" ? GameState.SETTING : GameState.SOLVING;
+                }
+
+                break;
+
+            case "MINUS":
+            case "EQUAL":
+            case "PLUS":
+                if (only_control_pressed) {
+                    if (name == "MINUS") {
+                        fontheight -= 1.0;
+                    } else {
+                        fontheight += 1.0;
+                    }
+                }
+
+                break;
+
+            case "R":
+                if (only_control_pressed) {
+                    random_game_request ();
+                }
+
+                break;
+
+            default:
+                return false;
+        }
+        return true;
+    }
+
+    private bool on_key_release_event (Gdk.EventKey event) {
+        var name = (Gdk.keyval_name (event.keyval)).up();
+
+        switch (name) {
+            case "F":
+            case "E":
+            case "X":
+                drawing_with_state = CellState.UNDEFINED;
+                break;
+
+            default:
+                return false;
+        }
+
+        return true;
+    }
 
     /** Private classes **/
     private class ModeButton : Granite.Widgets.ModeButton {
