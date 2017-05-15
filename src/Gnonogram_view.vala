@@ -228,15 +228,23 @@ public class View : Gtk.ApplicationWindow {
         column_clue_box.highlight (c.col, is_highlight);
     }
 
-    private void move_cursor_to (Cell to) {
-        highlight_labels  (current_cell, false);
+    private void make_move_at_cell (CellState state = drawing_with_state, Cell target = current_cell) {
+        if (drawing_with_state != CellState.UNDEFINED) {
+            Cell cell = target.clone ();
+            cell.state = drawing_with_state;
+            moved (cell);
+            mark_cell (cell);
+        }
+    }
+
+    private void move_cursor_to (Cell to, Cell from = current_cell) {
+        highlight_labels  (from, false);
         highlight_labels (to, true);
         current_cell = to;
     }
 
     private void mark_cell (Cell cell) {
         assert (cell.state != CellState.UNDEFINED);
-        cell_grid.queue_draw ();
 
         if (game_state == GameState.SETTING) {
             update_labels_for_cell (cell);
@@ -259,12 +267,8 @@ public class View : Gtk.ApplicationWindow {
     private void on_grid_cursor_moved (Cell from, Cell to) {
         highlight_labels (from, false);
         highlight_labels (to, true);
-
-        if (drawing_with_state != CellState.UNDEFINED) {
-            to.state = drawing_with_state;
-            moved (to);
-            mark_cell (to);
-        }
+        current_cell = to;
+        make_move_at_cell ();
     }
 
     private bool on_grid_leave () {
@@ -273,8 +277,36 @@ public class View : Gtk.ApplicationWindow {
         return false;
     }
 
-    private bool on_grid_button_press (Gdk.EventButton event) {return false;}
-    private bool on_grid_button_release () {return false;}
+    private bool on_grid_button_press (Gdk.EventButton event) {
+        switch (event.button) {
+            case Gdk.BUTTON_PRIMARY:
+                drawing_with_state = CellState.FILLED;
+                break;
+
+            case Gdk.BUTTON_MIDDLE:
+                if (game_state == GameState.SOLVING) {
+                    drawing_with_state = CellState.UNKNOWN;
+                    break;
+                } else {
+                    return true;
+                }
+
+            case Gdk.BUTTON_SECONDARY:
+                drawing_with_state = CellState.EMPTY;
+                break;
+
+            default:
+                return false;
+        }
+
+        make_move_at_cell ();
+        return true;
+    }
+
+    private bool on_grid_button_release () {
+        drawing_with_state = CellState.UNDEFINED;
+        return true;
+    }
 
     private void on_mode_switch_changed (Gtk.Widget widget) {
         game_state = widget.get_data ("mode");

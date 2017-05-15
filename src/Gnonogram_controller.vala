@@ -167,12 +167,6 @@ public class Controller : GLib.Object {
 //~         make_move_at_current_cell (drawing_with_state);
 //~     }
 
-//~     private void make_move_at_current_cell (CellState state) {
-//~         var cell = current_cell.clone ();
-//~         cell.state = state;
-//~         make_move_at_cell (cell);
-//~     }
-
     private void on_moved (Cell cell) {
         var prev_state = model.get_data_for_cell (cell);
         model.set_data_from_cell (cell);
@@ -303,36 +297,6 @@ public class Controller : GLib.Object {
 //~         return true;
 //~     }
 
-//~     private bool on_grid_button_press (Gdk.EventButton event) {
-//~         switch (event.button) {
-//~             case Gdk.BUTTON_PRIMARY:
-//~                 drawing_with_state = CellState.FILLED;
-//~                 break;
-
-//~             case Gdk.BUTTON_MIDDLE:
-//~                 if (game_state == GameState.SOLVING) {
-//~                     drawing_with_state = CellState.UNKNOWN;
-//~                     break;
-//~                 } else {
-//~                     return true;
-//~                 }
-
-//~             case Gdk.BUTTON_SECONDARY:
-//~                 drawing_with_state = CellState.EMPTY;
-//~                 break;
-
-//~             default:
-//~                 return false;
-//~         }
-
-//~         make_move_at_current_cell (drawing_with_state);
-//~         return true;
-//~     }
-
-//~     private bool on_grid_button_release () {
-//~         drawing_with_state = CellState.UNDEFINED;
-//~         return true;
-//~     }
 
 //~     private void on_mode_switch_changed (Gtk.Widget widget) {
 //~         game_state = widget.get_data ("mode");
