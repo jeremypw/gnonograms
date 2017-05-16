@@ -148,4 +148,45 @@ namespace Gnonograms.Utils {
             return letters[i - 10];
         }
     }
+
+    public void process_events()
+    {
+        while (Gtk.events_pending())
+        {
+            Gtk.main_iteration_do(false);
+        }
+    }
+
+    public static  int show_dlg(string msg, Gtk.MessageType type, Gtk.ButtonsType buttons)
+    {
+        //stdout.printf("Show dlg\n");
+        var dialog=new Gtk.MessageDialog(
+            null,
+            Gtk.DialogFlags.MODAL,
+            type,
+            buttons,
+            "%s",msg);
+        dialog.set_position(Gtk.WindowPosition.MOUSE);
+        int response=dialog.run();
+        dialog.destroy();
+        return response;
+
+    }
+
+    public static void show_info_dialog (string msg) {
+        show_dlg (msg, Gtk.MessageType.INFO, Gtk.ButtonsType.CLOSE);
+    }
+
+    public static void show_warning_dialog (string msg) {
+        show_dlg (msg, Gtk.MessageType.WARNING, Gtk.ButtonsType.CLOSE);
+    }
+
+    public static void show_error_dialog (string msg) {
+        show_dlg (msg, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE);
+    }
+
+    public static bool show_confirm_dialog(string msg) {
+        return show_dlg (msg ,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO)==Gtk.ResponseType.YES;
+    }
+
 }
