@@ -23,7 +23,7 @@ namespace Gnonograms {
    *        of the calling function.
 ***/
 public class My2DCellArray  : GLib.Object {
-    private Model model;
+    private Model? model;
 
     private Dimensions dimensions {
         get {
@@ -49,7 +49,7 @@ public class My2DCellArray  : GLib.Object {
         data = new CellState[MAXSIZE, MAXSIZE];
     }
 
-    public My2DCellArray (Model model, CellState init) {
+    public My2DCellArray (Model? model, CellState init) {
         this.model = model;
         set_all (init);
     }
@@ -123,6 +123,10 @@ public class My2DCellArray  : GLib.Object {
         this.get_array (idx, iscolumn, ref arr);
         return Utils.block_string_from_cellstate_array (arr);
     }
+
+//~     public Cell get_cell (uint r, uint c) {
+//~         return {r, c, data[r,c]};
+//~     }
 
     public void copy (My2DCellArray ca) {
         for (uint r = 0; r < uint.min (ca.rows, this.rows); r++) {

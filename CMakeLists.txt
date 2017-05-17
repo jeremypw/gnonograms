@@ -53,6 +53,11 @@ vala_precompile(VALA_C
     src/core/utils.vala
     src/core/Gnonogram_model.vala
     src/core/My2DCellArray.vala
+    src/core/Range.vala
+    src/core/Gnonogram_region.vala
+    src/core/Gnonogram_solver.vala
+    src/core/Gnonogram_permutor.vala
+
 
 PACKAGES
     gee-0.8

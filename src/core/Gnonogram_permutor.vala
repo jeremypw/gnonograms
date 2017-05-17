@@ -33,7 +33,7 @@ public class Permutor {
     private int[] range_end; // latest possible start point for block
     private int[] block_start; //current start point for block
 
-    public Gnonogram_permutor (int size, string clue) {
+    public Permutor (int size, string clue) {
         this.size = size;
         this.blocks = Utils.block_array_from_clue (clue);
         perm = new CellState[size];

@@ -83,22 +83,22 @@ public class Region {
     private int currentIdx;
     private int currentBlockNum;
 
-    public Gnonogram_region (My2DCellArray grid) {
-    this.grid = grid;
+    public Region (My2DCellArray grid) {
+        this.grid = grid;
 
-    int maxlen = int.max (grid.rows (), grid.cols ());
-    status = new CellState[maxlen];
-    statusStore = new CellState[maxlen];
+        uint maxlen = uint.max (grid.rows, grid.cols);
+        status = new CellState[maxlen];
+        statusStore = new CellState[maxlen];
 
-    int maxblks = maxlen/2 + 2;
-    ranges = new int[maxblks, 4 + maxblks];
-    rangesStore = new int[maxblks, 4 + maxblks];
-    myBlocks = new int[maxblks];
-    completedBlocks = new bool[maxblks];
-    completedBlocksStore = new bool[maxblks];
-    tags = new bool[maxlen, maxblks + 2];
-    tagsStore = new bool[maxlen, maxblks + 2];
-    //two extra flags for "can be empty" and "is finished".
+        uint maxblks = maxlen/2 + 2;
+        ranges = new int[maxblks, 4 + maxblks];
+        rangesStore = new int[maxblks, 4 + maxblks];
+        myBlocks = new int[maxblks];
+        completedBlocks = new bool[maxblks];
+        completedBlocksStore = new bool[maxblks];
+        tags = new bool[maxlen, maxblks + 2];
+        tagsStore = new bool[maxlen, maxblks + 2];
+        //two extra flags for "can be empty" and "is finished".
     }
 
     public void initialize (int index, bool isColumn, int nCells, string clue) {
@@ -497,8 +497,8 @@ public class Region {
                     int ptr = idx;
 
                     //left -hand region
-                    while (ptr> = 0 && !tags[ptr, isFinishedPointer]) {
-                        ptr --;
+                    while (ptr >= 0 && !tags[ptr, isFinishedPointer]) {
+                        ptr--;
                         lengthLeft++;
                     }
 
@@ -565,7 +565,7 @@ public class Region {
                         changed = setRangeOwner (owner, cell1, idx - cell1 + 1, true, false) || changed;
                     }
 
-                    idx - -;
+                    idx--;
                 }
             }
         }
@@ -719,7 +719,7 @@ public class Region {
                 length = myBlocks[owner];
                 //remove this block from earlier cells our of range
                 start = i -length;
-                if (start> = 0) {
+                if (start >= 0) {
                     removeBlockFromCellToEnd (owner, start,  -1);
                 }
 
@@ -951,7 +951,7 @@ public class Region {
             //look for collision with filled cell
             ptr = ranges[rng, 0] + ranges[rng, 1] - (offset + length) - 1;  //cell before beginning of block
 
-            while (ptr> = 0 && !tags[ptr, canBeEmptyPointer]) {
+            while (ptr >= 0 && !tags[ptr, canBeEmptyPointer]) {
                 ptr --; offset++;
             }
 
@@ -1022,7 +1022,7 @@ public class Region {
                         count++;
                         if (myBlocks[b] != length) {
                             tags[idx, b] = false;
-                            count - -;
+                            count--;
                         }
                     }
                 }
@@ -1184,9 +1184,9 @@ public class Region {
             return 0;
         }
 
-        if ((direction == Gnonogram_region.FORWARDS) && idx >= limit)  {
+        if ((direction == Region.FORWARDS) && idx >= limit)  {
             return limit;
-        } else if ((direction == Gnonogram_region.BACKWARDS) && (idx <= limit)) {
+        } else if ((direction == Region.BACKWARDS) && (idx <= limit)) {
             return limit;
         }
 
@@ -1205,13 +1205,13 @@ public class Region {
 
         int count = 0;
 
-        if (forwards && idx> = 0) {
+        if (forwards && idx >= 0) {
             while (idx < nCells && status[idx] == cs) {
                 count++;  idx++;
             }
         } else if (!forwards && idx < nCells) {
-            while (idx> = 0 && status[idx] == cs) {
-                count++;  idx - -;
+            while (idx >= 0 && status[idx] == cs) {
+                count++;  idx--;
             }
         } else {
             inError = true;
@@ -1226,7 +1226,7 @@ public class Region {
 
         int count = 0;
 
-        if (idx> = 0) {
+        if (idx >= 0) {
             while (idx < nCells && tags[idx, owner] && !tags[idx, isFinishedPointer]) {
                 count++;  idx++;
             }
@@ -1406,7 +1406,7 @@ public class Region {
         int count = 0, owner =  -1;
         bool tmp;
 
-        if (cell1 < 0 || cell1> = nCells || cell2 < 0 || cell2> = nCells) {
+        if (cell1 < 0 || cell1 >= nCells || cell2 < 0 || cell2 >= nCells) {
             inError = true;
         } else {
             for (int i = 0;  i < nBlocks;  i++) {
@@ -1721,7 +1721,7 @@ public class Region {
                 length < 0 ||
                 start + length > nCells ||
                 block < 0 ||
-                block> = nBlocks);
+                block >= nBlocks);
     }
 
     private bool cellFilled (int cell) {
@@ -1988,7 +1988,7 @@ public class Region {
         return pvalue;
     }
 
-    public Gnonogram_permutor? get_permutor (out int start) {
+    public Permutor? get_permutor (out int start) {
         string clue = "";  start = 0;
         int[] ablocks = countBlocksAvailable ();
 
@@ -2002,7 +2002,7 @@ public class Region {
         }
 
         start = ranges[0, 0];
-        var p = new Gnonogram_permutor (ranges[0, 1], clue);
+        var p = new Permutor (ranges[0, 1], clue);
         return p;
     }
 

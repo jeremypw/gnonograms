@@ -1,5 +1,5 @@
-/* Range class for Gnonograms3
- * Finds solution for a set of clues
+/* Range class for gnonograms_elementary
+ *
  * Copyright (C) 2010-2011  Jeremy Wootten
  *
     This program is free software; you can redistribute it and/or modify
@@ -20,17 +20,23 @@
  *  Jeremy Wootten <jeremwootten@gmail.com>
  */
 
-  public class Range {  //can use for filled subregions or ranges of filled and unknown cells
+namespace Gnonograms {
+
+public class Range {  //can use for filled subregions or ranges of filled and unknown cells
     public int start;
     public int end;
     public int filled;
     public int unknown;
 
-    public Range(int start, int end, int filled, int unknown){
-      this.start=start; //first cell in range
-      this.end=end; // last cell in range
-      this.filled=filled;
-      this.unknown=unknown;
+    public Range (int start, int end, int filled, int unknown) {
+      this.start = start; //first cell in range
+      this.end = end; // last cell in range
+      this.filled = filled;
+      this.unknown = unknown;
     }
-    public int length (){return end-start+1;}
-  }
+
+    public int length () {
+        return end - start + 1;
+    }
+}
+}

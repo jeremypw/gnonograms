@@ -30,8 +30,7 @@ namespace Gnonograms {
     private int rows;
     private int cols;
     private int regionCount;
-    private Gnonogram_controller control;
-    private Gnonogram_region[] regions;
+    private Region[] regions;
     private Cell trialCell;
     private int rdir;
     private int cdir;
@@ -46,20 +45,23 @@ namespace Gnonograms {
     public signal void showsolvergrid ();
     public signal void showprogress (int guesses);
 
-    public Solver (Gnonogram_controller control) {
-        this.control = control;
-    }
+//~     public Solver (Controller control) {
+//~         this.control = control;
+//~     }
+//~     public Solver (Model model) {
+//~         this.model = model;
+//~     }
 
-    public void set_dimensions (int r, int c) {
-        rows = r; cols = c; regionCount = r + c;
-        grid = new My2DCellArray (r, c);
-        solution = new My2DCellArray (r, c);
-        regions = new Gnonogram_region[regionCount];
+//~     public void set_dimensions (int r, int c) {
+//~         rows = r; cols = c; regionCount = r + c;
+//~         grid = new My2DCellArray (r, c);
+//~         solution = new My2DCellArray (r, c);
+//~         regions = new Region[regionCount];
 
-        for (int i = 0; i < regionCount; i++ ) {
-            regions[i] = new Gnonogram_region (grid);
-        }
-    }
+//~         for (int i = 0; i < regionCount; i++ ) {
+//~             regions[i] = new Region (grid);
+//~         }
+//~     }
 
     public bool initialize (string[] rowclues, string[] colclues,
                             My2DCellArray? startgrid, My2DCellArray? solutiongrid) {
@@ -94,7 +96,7 @@ namespace Gnonograms {
     }
 
     public bool valid () {
-        foreach (Gnonogram_region r in regions) {
+        foreach (Region r in regions) {
             if (r.inError) {
                 return false;
             }
@@ -184,7 +186,7 @@ namespace Gnonograms {
         while (changed && pass < 1000) {
             //keep cycling through regions while at least one of them is changing
             changed = false;
-            foreach (Gnonogram_region r in regions) {
+            foreach (Region r in regions) {
                 if (r.isCompleted) {
                     continue;
                 }
@@ -229,7 +231,7 @@ namespace Gnonograms {
     }
 
     public bool solved () {
-        foreach (Gnonogram_region r in regions) {
+        foreach (Region r in regions) {
             if (!r.isCompleted) {
                 return false;
             }
@@ -238,7 +240,7 @@ namespace Gnonograms {
         return true;
     }
 
-    private bool differsFromSolution (Gnonogram_region r) {
+    private bool differsFromSolution (Region r) {
         //use for debugging
         bool isColumn = r.isColumn;
         int index = r.index;
@@ -252,7 +254,8 @@ namespace Gnonograms {
                 continue;
             }
 
-            solutionState = (solution.get_cell (isColumn ? i : index, isColumn ? index : i)) .state;
+//~             solutionState = (solution.get_cell (isColumn ? i : index, isColumn ? index : i)) .state;
+            solutionState = solution.get_data_from_rc (isColumn ? i : index, isColumn ? index : i);
 
             if (solutionState == CellState.EMPTY) {
                 if (regionState == CellState.EMPTY) {
@@ -393,8 +396,8 @@ namespace Gnonograms {
     private Cell makeguess (Cell cell) {
         //Scan in spiral pattern from edges.  Critical cells most likely in this region
 
-        int r = cell.row;
-        int c = cell.col;
+        uint r = cell.row;
+        uint c = cell.col;
 
         while (true) {
             r += rdir; c += cdir; //only one changes at any one time
@@ -424,9 +427,9 @@ namespace Gnonograms {
         return cell;
     }
 
-    public Cell get_cell (int r, int c) {
-        return grid.get_cell (r, c);
-    }
+//~     public Cell get_cell (int r, int c) {
+//~         return grid.get_cell (r, c);
+//~     }
 
 
     private int ultimate_solver(CellState[] grid_store, int guesses) {
