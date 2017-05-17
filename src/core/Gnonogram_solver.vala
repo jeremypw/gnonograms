@@ -27,17 +27,44 @@ namespace Gnonograms {
     public My2DCellArray grid;
     public My2DCellArray solution;
 
-    private int rows;
-    private int cols;
-    private int regionCount;
+    private Dimensions _dimensions;
+    private Dimensions dimensions {
+        get {
+            return _dimensions;
+        }
+
+        set {
+            _dimensions = value;
+            grid = new My2DCellArray.from_dimensions (_dimensions);
+            solution = new My2DCellArray.from_dimensions (_dimensions);
+            regions = new Region[_dimensions.height + _dimensions.width];
+
+            for (int i = 0; i < regionCount; i++ ) {
+                regions[i] = new Region (grid);
+            }
+        }
+    }
+
+    private uint rows {
+        get {return dimensions.height;}
+    }
+
+    private uint cols {
+        get {return dimensions.width;}
+    }
+
     private Region[] regions;
+    private int regionCount  {
+        get {return regions.length;}
+    }
+
     private Cell trialCell;
     private int rdir;
     private int cdir;
     private int rlim;
     private int clim;
     private int turn;
-    private int maxTurns;
+    private uint maxTurns;
     private bool checksolution;
 
     static int GUESSESBEFOREASK  =  1000000;
@@ -51,17 +78,9 @@ namespace Gnonograms {
 //~     public Solver (Model model) {
 //~         this.model = model;
 //~     }
-
-//~     public void set_dimensions (int r, int c) {
-//~         rows = r; cols = c; regionCount = r + c;
-//~         grid = new My2DCellArray (r, c);
-//~         solution = new My2DCellArray (r, c);
-//~         regions = new Region[regionCount];
-
-//~         for (int i = 0; i < regionCount; i++ ) {
-//~             regions[i] = new Region (grid);
-//~         }
-//~     }
+    public Solver (Dimensions dimensions) {
+        this.dimensions = dimensions;
+    }
 
     public bool initialize (string[] rowclues, string[] colclues,
                             My2DCellArray? startgrid, My2DCellArray? solutiongrid) {
@@ -243,11 +262,11 @@ namespace Gnonograms {
     private bool differsFromSolution (Region r) {
         //use for debugging
         bool isColumn = r.isColumn;
-        int index = r.index;
+        uint index = r.index;
         int nCells = r.nCells;
         int solutionState, regionState;
 
-        for (int i = 0; i < nCells; i++ ) {
+        for (uint i = 0; i < nCells; i++ ) {
             regionState = r.status[i];
 
             if (regionState == CellState.UNKNOWN) {
@@ -290,10 +309,10 @@ namespace Gnonograms {
         int guesses = 0;
         bool changed = false;
         int countChanged = 0;
-        int initialmaxTurns = 3; //stay near edges until no more changes
+        uint initialmaxTurns = 3; //stay near edges until no more changes
         CellState initialcellstate = CellState.FILLED;
 
-        rdir = 0; cdir = 1; rlim = rows; clim = cols;
+        rdir = 0; cdir = 1; rlim = (int)rows; clim = (int)cols;
         turn = 0; maxTurns = initialmaxTurns; guesses = 0;
         trialCell = {0, - 1, initialcellstate};
 
@@ -310,7 +329,7 @@ namespace Gnonograms {
                         return 0;
                     }
                 } else if (maxTurns == initialmaxTurns) {
-                    maxTurns = (int.min (rows, cols)) / 2 + 2; //ensure full coverage
+                    maxTurns = (uint.min (rows, cols)) / 2 + 2; //ensure full coverage
                 } else if (trialCell.state == initialcellstate) {
                     trialCell = trialCell.invert (); //start making opposite guesses
                     maxTurns = initialmaxTurns; wraps = 0;
@@ -318,7 +337,7 @@ namespace Gnonograms {
                     break; //cant make progress
                 }
 
-                rdir = 0; cdir = 1; rlim = rows; clim = cols; turn = 0;
+                rdir = 0; cdir = 1; rlim = (int)rows; clim = (int)cols; turn = 0;
                 changed = false;
                 wraps++;
                 continue;
@@ -434,7 +453,9 @@ namespace Gnonograms {
 
     private int ultimate_solver(CellState[] grid_store, int guesses) {
         //stdout.printf("Ultimate solver\n");
-        int perm_reg = -1, max_value = 999999, advanced_result = -99, simple_result = -99;
+        int advanced_result = -99, simple_result = -99;
+        uint max_value = 999999, perm_reg = 0;
+
         int limit = GUESSESBEFOREASK + guesses;
 
         loadposition (grid_store); //return to last valid state
@@ -471,7 +492,7 @@ namespace Gnonograms {
             }
 
             bool isColumn = regions[perm_reg].isColumn;
-            int idx = regions[perm_reg].index;
+            uint idx = regions[perm_reg].index;
 
             //try advanced solver with every possible pattern in this range.
 
@@ -529,10 +550,11 @@ namespace Gnonograms {
         return 0;
     }
 
-    private int choose_permute_region (ref int max_value) {
-        int best_value = -1, current_value, perm_reg = -1, edg;
+    private uint choose_permute_region (ref uint max_value) {
+        uint best_value = 0, perm_reg = 0;
+        uint edg, current_value;
 
-        for (int r = 0; r < regionCount; r++ ) {
+        for (uint r = 0; r < regionCount; r++ ) {
             current_value = regions[r].value_as_permute_region ();
             //weight towards edge regions
 
@@ -541,9 +563,9 @@ namespace Gnonograms {
             }
 
             if (r < rows) {
-                edg = int.min (r, rows - 1 - r);
+                edg = uint.min (r, rows - 1 - r);
             } else {
-                edg = int.min (r - rows, rows + cols - r - 1);
+                edg = uint.min (r - rows, rows + cols - r - 1);
             }
 
             edg += 1;

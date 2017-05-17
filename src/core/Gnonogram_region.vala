@@ -46,7 +46,7 @@ public class Region {
     public bool inError;
     public bool isCompleted = false;
 
-    public int index;
+    public uint index;
     public int nCells;
     public int blockTotal;  //total cells to be filled
 
@@ -101,10 +101,10 @@ public class Region {
         //two extra flags for "can be empty" and "is finished".
     }
 
-    public void initialize (int index, bool isColumn, int nCells, string clue) {
+    public void initialize (uint index, bool isColumn, uint nCells, string clue) {
         this.index = index;
         this.isColumn = isColumn;
-        this.nCells = nCells;
+        this.nCells = (int)nCells;
         this.clue = clue;
 
         if (nCells == 1) {
@@ -197,7 +197,7 @@ public class Region {
             }
 
             if (freedom < myBlocks[i]) {
-                setRangeOwner (i, start + freedom, myBlocks[i] -freedom, true, false);
+                setRangeOwner (i, start + freedom, myBlocks[i] - freedom, true, false);
             }
 
             start = start + myBlocks[i] + 1;  //leave a gap between blocks
@@ -267,6 +267,7 @@ public class Region {
 
             if (totalsChanged ()) {
                 made_changes = true;
+
                 if (inError) {
                     break;
                 }
@@ -1959,7 +1960,7 @@ public class Region {
         return sb.str;
     }
 
-    public int value_as_permute_region () {
+    public uint value_as_permute_region () {
         if (isCompleted) {
             return 0;
         }

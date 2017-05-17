@@ -21,6 +21,8 @@ namespace Gnonograms {
 public class Controller : GLib.Object {
     private View view;
     private Model? model;
+    private Solver solver;
+
     private Gee.Deque<Move> back_stack;
     private Gee.Deque<Move> forward_stack;
 
@@ -76,6 +78,8 @@ public class Controller : GLib.Object {
 
         model = new Model (dimensions);
         view = new View (dimensions, grade, model);
+        solver = new Solver (dimensions);
+
         connect_signals ();
 
         if (game == null || !load_game (game)) {
@@ -90,6 +94,8 @@ public class Controller : GLib.Object {
         view.previous_move_request.connect (on_previous_move_request);
         view.game_state_changed.connect (on_state_changed);
         view.random_game_request.connect (new_random_game);
+
+        solver.showsolvergrid.connect (on_show_solver_grid);
     }
 
     private void new_game () {
@@ -147,6 +153,10 @@ public class Controller : GLib.Object {
 
 
 /*** Signal Handlers ***/
+    private void on_show_solver_grid () {
+
+    }
+
     private void on_moved (Cell cell) {
         var prev_state = model.get_data_for_cell (cell);
         model.set_data_from_cell (cell);
