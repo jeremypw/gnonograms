@@ -46,10 +46,13 @@ public class View : Gtk.ApplicationWindow {
                     column_clue_box.dimensions = dimensions;
                     set_default_fontheight_from_dimensions ();
                     resized (dimensions);
+                    queue_draw ();
                 }
             }
         }
     }
+
+    public uint grade {get {return app_menu.grade_val;}}
 
     public uint rows {get { return dimensions.height; }}
     public uint cols {get { return dimensions.width; }}
@@ -176,6 +179,19 @@ public class View : Gtk.ApplicationWindow {
         show_all ();
     }
 
+    public void blank_labels () {
+        row_clue_box.blank_labels ();
+        column_clue_box.blank_labels ();
+    }
+
+    public string[] get_row_clues () {
+        return row_clue_box.get_labels ();
+    }
+
+    public string[] get_col_clues () {
+        return column_clue_box.get_labels ();
+    }
+
     private void connect_signals () {
         realize.connect (() => {
             set_default_fontheight_from_dimensions ();
@@ -243,12 +259,12 @@ public class View : Gtk.ApplicationWindow {
     private void make_move_at_cell (CellState state = drawing_with_state, Cell target = current_cell) {
         if (state != CellState.UNDEFINED) {
             Cell cell = target.clone ();
+            cell.state = state;
             moved (cell);
             mark_cell (cell);
             queue_draw ();
         }
     }
-
 
     public void make_move (Move m) {
         move_cursor_to (m.cell);

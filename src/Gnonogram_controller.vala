@@ -19,6 +19,7 @@
  */
 namespace Gnonograms {
 public class Controller : GLib.Object {
+    private const int MAXTRIES = 500;
     private View view;
     private Model? model;
     private Solver solver;
@@ -52,8 +53,11 @@ public class Controller : GLib.Object {
         }
     }
 
-    public uint grade {get; set;}
+    public uint grade {
+        get {return view.grade;}
+    }
 
+    private Dimensions dimensions {get {return view.dimensions;}}
     private uint rows {get { return view.rows; }}
     private uint cols {get { return view.rows; }}
 
@@ -73,9 +77,10 @@ public class Controller : GLib.Object {
 
         restore_settings ();
         /* Dummy pending restore settings implementation */
-        grade = 4;
-        Dimensions dimensions = {15, 25};
 
+        Dimensions dimensions = {5, 5};
+
+        var grade = 4;
         model = new Model (dimensions);
         view = new View (dimensions, grade, model);
         solver = new Solver (dimensions);
@@ -88,7 +93,7 @@ public class Controller : GLib.Object {
     }
 
     private void connect_signals () {
-        view.resized.connect (on_resized);
+        view.resized.connect (on_view_resized);
         view.moved.connect (on_moved);
         view.next_move_request.connect (on_next_move_request);
         view.previous_move_request.connect (on_previous_move_request);
@@ -100,16 +105,79 @@ public class Controller : GLib.Object {
 
     private void new_game () {
         model.blank_solution ();
-        view.game_state = GameState.SETTING;
+        game_state = GameState.SETTING;
         view.header_title = _("Blank sheet");
     }
 
-    private void new_random_game () {
-        /* TODO  Check/confirm overwriting existing game */
-        model.fill_random (grade);
-        view.game_state = GameState.SOLVING;
-        view.header_title = _("Random game");
+//~     private void new_random_game () {
+//~         /* TODO  Check/confirm overwriting existing game */
+//~         model.fill_random (grade);
+//~         view.game_state = GameState.SOLVING;
+//~         view.header_title = _("Random game");
+//~     }
+
+    public void new_random_game() {
+warning ("new random");
+        view.blank_labels ();
+//~         model.use_solution ();
+        game_state = GameState.SETTING;
+//~         model.game_state = GameState.SETTING;
+
+//~         have_solution = true;
+        int passes = 0, count = 0;
+        uint grd = grade; //grd may be reduced but this.grade always matches spin setting
+
+        while (count < 100) {
+            count++;
+            passes = generate_simple_game (grd); //tries max tries times
+
+            if (passes > grd || passes < 0) {
+                break;
+            }
+
+            if (passes == 0 && grd > 1) {
+                grd--;
+            }
+
+            //no simple game generated with this setting -
+            //reduce complexity setting (relationship between complexity setting
+            //and ease of solution not simple - depends also on grid size)
+        }
+warning ("count %i,", count);
+        if (passes >= 0) {
+warning ("passes was %u", passes);
+//~              model.use_solution();
+//~             model.game_state = GameState.SETTING;
+            game_state = GameState.SOLVING;
+        } else {
+            Utils.show_warning_dialog(_("Error occurred in solver"));
+//~             change_state (GameState.SETTING);
+            game_state = GameState.SETTING;
+        }
     }
+
+    private int generate_simple_game (uint grd) {
+
+        /* returns 0 - failed to generate solvable game
+         * returns value>1 - generated game took value passes to solve
+         * returns -1 - an error occurred in the solver
+        */
+        uint tries = 0;
+        int passes = 0;
+
+        while (passes == 0 && tries <= MAXTRIES) {
+            tries++;
+            passes = generate_game (grd);
+        }
+warning ("generate simple passes %i", passes);
+        return passes;
+    }
+
+    private int generate_game (uint grd) {
+        model.fill_random (grd); //fills solution grid
+        return solve_game (false, false, false, false, false); // no start grid, dont use labels, no advanced
+    }
+
 
     private void save_game_state () {
     }
@@ -151,6 +219,65 @@ public class Controller : GLib.Object {
         view.can_go_forward = forward_stack.size > 0;
     }
 
+    /*** Solver related functions ***/
+
+    private int solve_game (bool use_startgrid,
+                            bool use_labels,
+                            bool use_advanced,
+                            bool use_ultimate,
+                            bool unique_only) {
+
+        prepare_to_solve (use_startgrid, use_labels);
+        int passes = 0; //assume debug mode for single row
+        passes = solver.solve_it (rows == 1, use_advanced, use_ultimate, unique_only);
+        return passes;
+    }
+
+    private void prepare_to_solve (bool use_startgrid, bool use_labels) {
+//~         row_clues = new string [rows];
+//~         col_clues = new string [cols];
+
+        My2DCellArray startgrid;
+
+        if (use_startgrid) {
+            startgrid = new My2DCellArray (dimensions, CellState.UNKNOWN);
+
+            for (int r = 0; r < rows; r++) {
+                for (int c = 0; c < cols; c++) {
+                    startgrid.set_data_from_rc (r, c, model.get_data_from_rc (r, c));
+                }
+            }
+        } else {
+            startgrid = null;
+        }
+
+//        if (use_labels) {
+////~             for (int i = 0; i < rows; i++) {
+////~                 row_clues[i] = rowbox.get_label_text (i);
+////~             }
+//            row_clues = view.get_row_clues ();
+
+////~             for (int i = 0; i < cols; i++) {
+////~                 col_clues[i] = colbox.get_label_text (i);
+////~             }
+//            row_clues = view.get_col_clues ();
+
+//        } else {
+//            for (int i = 0; i < rows; i++) {
+//                row_clues[i] = model.get_label_text (i, false);
+//            }
+
+//            for (int i = 0; i < cols; i++) {
+//                col_clues[i] = model.get_label_text (i, true);
+//            }
+//        }
+
+//~         solver.initialize (row_clues, col_clues, startgrid, null);
+        solver.initialize (view.get_row_clues (), view.get_col_clues (), startgrid, null);
+    }
+
+
+
 
 /*** Signal Handlers ***/
     private void on_show_solver_grid () {
@@ -186,9 +313,13 @@ public class Controller : GLib.Object {
         }
     }
 
-    private void on_resized (Dimensions dim) {
-        model.dimensions = dim;
+    private void on_view_resized () {
+warning ("resized %u, %u", dimensions.height, dimensions.width);
+        model.dimensions = dimensions;
+        solver.dimensions = dimensions;
+
         model.clear ();
+warning ("model dimensions now %u, %u", model.dimensions.height, model.dimensions.width);
     }
 
     private void on_state_changed (GameState gs) {

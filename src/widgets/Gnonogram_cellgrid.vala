@@ -33,8 +33,8 @@ public class CellGrid : Gtk.DrawingArea {
             return model.display_data;
         }
     } /* model display data */
-    private uint rows {get { return array.rows; }}
-    private uint cols {get { return array.cols; }}
+    private uint rows {get { return model.rows; }}
+    private uint cols {get { return model.cols; }}
 
     private Cell _current_cell;
     public Cell current_cell {
@@ -156,6 +156,7 @@ public class CellGrid : Gtk.DrawingArea {
         cell.state = array.get_data_from_rc (cell.row, cell.col);
         draw_cell (cr, cell, highlight);
     }
+
     public void draw_cell (Cairo.Context cr, Cell cell, bool highlight = false, bool mark = false) {
         /*  Calculate coords of top left corner of filled part
          *  (excluding grid if present but including highlight line)

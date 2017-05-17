@@ -20,7 +20,18 @@
 namespace Gnonograms {
 
 public class Model : GLib.Object {
-    public Dimensions dimensions {get; set;}
+    private Dimensions _dimensions;
+    public Dimensions dimensions {
+        get {
+            return _dimensions;
+        }
+
+        set {
+            _dimensions = value;
+            solution_data.dimensions = _dimensions;
+            working_data.dimensions = _dimensions;
+        }
+    }
 
     public GameState game_state {get; set;}
     public My2DCellArray display_data  {
@@ -38,13 +49,13 @@ public class Model : GLib.Object {
     public  CellState[] data;
     private Rand rand_gen;
 
-    private uint rows {
+    public uint rows {
         get {
             return dimensions.height;
         }
     }
 
-    private uint cols {
+    public uint cols {
         get {
             return dimensions.width;
         }
@@ -52,15 +63,13 @@ public class Model : GLib.Object {
 
     construct {
         rand_gen = new Rand();
+        solution_data = new My2DCellArray ({MAXSIZE, MAXSIZE}, CellState.EMPTY);
+        working_data = new My2DCellArray ({MAXSIZE, MAXSIZE}, CellState.UNKNOWN);
+        data = new CellState[MAXSIZE];
     }
 
     public Model (Dimensions dimensions) {
         Object (dimensions: dimensions);
-
-        solution_data = new My2DCellArray (this, CellState.EMPTY);
-        working_data = new My2DCellArray (this, CellState.UNKNOWN);
-
-        data = new CellState[MAXSIZE];
     }
 
     public void clear_errors() {

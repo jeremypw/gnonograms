@@ -28,15 +28,15 @@ namespace Gnonograms {
     public My2DCellArray solution;
 
     private Dimensions _dimensions;
-    private Dimensions dimensions {
-        get {
+    public Dimensions dimensions {
+        private get {
             return _dimensions;
         }
 
         set {
             _dimensions = value;
-            grid = new My2DCellArray.from_dimensions (_dimensions);
-            solution = new My2DCellArray.from_dimensions (_dimensions);
+            grid = new My2DCellArray (_dimensions);
+            solution = new My2DCellArray (_dimensions);
             regions = new Region[_dimensions.height + _dimensions.width];
 
             for (int i = 0; i < regionCount; i++ ) {
@@ -85,6 +85,7 @@ namespace Gnonograms {
     public bool initialize (string[] rowclues, string[] colclues,
                             My2DCellArray? startgrid, My2DCellArray? solutiongrid) {
 
+//~ warning ("solver init");
         if (rowclues.length != rows || colclues.length != cols) {
             warning ("row/col size mismatch");
             return false;
@@ -136,14 +137,16 @@ namespace Gnonograms {
     }
 
     public int solve_it (bool debug,
-                         bool use_advanced,
-                         bool use_ultimate = true,
-                         bool uniqueOnly = false,
-                         bool stepwise = false) {
+                          bool use_advanced,
+                          bool use_ultimate = true,
+                          bool uniqueOnly = false,
+                          bool stepwise = false) {
 
+//~ warning ("solve it");
         int simpleresult = simplesolver (debug, true, checksolution, stepwise); //debug, log errors, check solution, step through solution one pass at a time
-
+//~ warning ("simple result %u", simpleresult);
         if (simpleresult == 0 && use_advanced) {
+//~ warning ("using advanced");
             CellState[] gridstore =  new CellState[rows*cols];
             return advancedsolver (gridstore, debug, 9999, uniqueOnly, use_ultimate);
         }
@@ -194,10 +197,11 @@ namespace Gnonograms {
         return false;
     }
 
+    /*** Returns -1 to indicate an error - TODO use throw error instead ***/
     private int simplesolver (bool debug,
-                              bool logerror,
-                              bool checksolution,
-                              bool stepwise) {
+                               bool logerror,
+                               bool checksolution,
+                               bool stepwise) {
 
         bool changed = true;
         int pass = 1;
@@ -205,6 +209,7 @@ namespace Gnonograms {
         while (changed && pass < 1000) {
             //keep cycling through regions while at least one of them is changing
             changed = false;
+
             foreach (Region r in regions) {
                 if (r.isCompleted) {
                     continue;
@@ -218,12 +223,12 @@ namespace Gnonograms {
                     if (debug) {
                         stdout.printf ("::" + r.message);
                     }
-                    return  - 1;
+                    return  -1;
                 }
 
                 if (checksolution && differsFromSolution (r)) {
                     stdout.printf (r.to_string ());
-                    return  - 1;
+                    return  -1;
                 }
 
                 if (debug) {

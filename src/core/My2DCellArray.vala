@@ -25,7 +25,7 @@ namespace Gnonograms {
 public class My2DCellArray  : GLib.Object {
 //~     private Model? model;
 
-    private Dimensions dimensions;
+    public Dimensions dimensions;
 
     public uint rows {
         get {
@@ -45,12 +45,12 @@ public class My2DCellArray  : GLib.Object {
         data = new CellState[MAXSIZE, MAXSIZE];
     }
 
-    public My2DCellArray (Model? model, CellState init) {
-        this.dimensions = model.dimensions;
-        set_all (init);
-    }
+//~     public My2DCellArray (Model? model, CellState init) {
+//~         this.dimensions = model.dimensions;
+//~         set_all (init);
+//~     }
 
-    public My2DCellArray.from_dimensions (Dimensions dimensions, CellState init = CellState.UNDEFINED) {
+    public My2DCellArray (Dimensions dimensions, CellState init = CellState.EMPTY) {
         this.dimensions = dimensions;
         set_all (init);
     }
