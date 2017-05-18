@@ -147,7 +147,6 @@ private static double FRAME_WIDTH = 10.0;
 public class App : Granite.Application {
     public Controller controller;
     private string game_name;
-    private Dimensions dimensions;
 
     construct {
         application_id = "com.github.jeremypw.gnonograms-elementary";

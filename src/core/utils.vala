@@ -59,8 +59,8 @@ namespace Gnonograms.Utils {
         return extent;
     }
 
-    public string block_string_from_cellstate_array(CellState[] cs) {
-        StringBuilder sb = new StringBuilder("");
+    public string block_string_from_cellstate_array (CellState[] cs) {
+        StringBuilder sb = new StringBuilder ("");
         int count = 0, blocks = 0;
         bool counting = false;
 
@@ -76,7 +76,7 @@ namespace Gnonograms.Utils {
                 counting = true;
                 count++;
             } else {
-                return "?";
+                return BLANKLABELTEXT;
             }
         }
 
@@ -149,28 +149,17 @@ namespace Gnonograms.Utils {
         }
     }
 
-    public void process_events()
-    {
-        while (Gtk.events_pending())
-        {
-            Gtk.main_iteration_do(false);
-        }
-    }
+    public static  int show_dlg (string msg, Gtk.MessageType type, Gtk.ButtonsType buttons) {
+        var dialog = new Gtk.MessageDialog (null,
+                                            Gtk.DialogFlags.MODAL,
+                                            type,
+                                            buttons,
+                                            "%s", msg);
 
-    public static  int show_dlg(string msg, Gtk.MessageType type, Gtk.ButtonsType buttons)
-    {
-        //stdout.printf("Show dlg\n");
-        var dialog=new Gtk.MessageDialog(
-            null,
-            Gtk.DialogFlags.MODAL,
-            type,
-            buttons,
-            "%s",msg);
-        dialog.set_position(Gtk.WindowPosition.MOUSE);
-        int response=dialog.run();
-        dialog.destroy();
+        dialog.set_position (Gtk.WindowPosition.MOUSE);
+        int response = dialog.run ();
+        dialog.destroy ();
         return response;
-
     }
 
     public static void show_info_dialog (string msg) {
