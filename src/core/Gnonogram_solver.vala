@@ -23,13 +23,13 @@
 
 namespace Gnonograms {
 
- public class Solver {
+ public class Solver : GLib.Object {
     public My2DCellArray grid;
     public My2DCellArray solution;
 
     private Dimensions _dimensions;
     public Dimensions dimensions {
-        private get {
+        public get {
             return _dimensions;
         }
 
@@ -72,20 +72,13 @@ namespace Gnonograms {
     public signal void showsolvergrid ();
     public signal void showprogress (int guesses);
 
-//~     public Solver (Controller control) {
-//~         this.control = control;
-//~     }
-//~     public Solver (Model model) {
-//~         this.model = model;
-//~     }
     public Solver (Dimensions dimensions) {
-        this.dimensions = dimensions;
+        Object (dimensions: dimensions);
     }
 
     public bool initialize (string[] rowclues, string[] colclues,
                             My2DCellArray? startgrid, My2DCellArray? solutiongrid) {
 
-//~ warning ("solver init");
         if (rowclues.length != rows || colclues.length != cols) {
             warning ("row/col size mismatch");
             return false;
@@ -142,13 +135,14 @@ namespace Gnonograms {
                           bool uniqueOnly = false,
                           bool stepwise = false) {
 
-//~ warning ("solve it");
         int simpleresult = simplesolver (debug, true, checksolution, stepwise); //debug, log errors, check solution, step through solution one pass at a time
-//~ warning ("simple result %u", simpleresult);
+
         if (simpleresult == 0 && use_advanced) {
-//~ warning ("using advanced");
             CellState[] gridstore =  new CellState[rows*cols];
+warning ("using advanced");
             return advancedsolver (gridstore, debug, 9999, uniqueOnly, use_ultimate);
+        } else {
+warning ("Simple result is %i", simpleresult);
         }
 
         if (rows == 1) {
@@ -158,9 +152,8 @@ namespace Gnonograms {
         return simpleresult;
     }
 
+    /** Solver must be initialised with current state of puzzle before calling. **/
     public bool get_hint () {
-        //Solver must be initialised with current state of puzzle before calling.
-
         int pass = 1;
 
         while (pass <= 30) {
@@ -197,7 +190,7 @@ namespace Gnonograms {
         return false;
     }
 
-    /*** Returns -1 to indicate an error - TODO use throw error instead ***/
+    /** Returns -1 to indicate an error - TODO use throw error instead **/
     private int simplesolver (bool debug,
                                bool logerror,
                                bool checksolution,
@@ -216,17 +209,24 @@ namespace Gnonograms {
                 }
 
                 if (r.solve (debug, false)) {
+//~ warning ("changed - now complete %s", r.isCompleted.to_string ());
                     changed = true; //no hinting
+                    if (r.isCompleted) {
+                        warning ("Now completed %s", r.to_string ());
+                    }
                 }
 
                 if (r.inError) {
-                    if (debug) {
+//~                     if (debug) {
+warning ("region in error");
                         stdout.printf ("::" + r.message);
-                    }
+warning ("Error region is %s", r.to_string ());
+//~                     }
                     return  -1;
                 }
 
                 if (checksolution && differsFromSolution (r)) {
+warning ("check solution differs");
                     stdout.printf (r.to_string ());
                     return  -1;
                 }
@@ -244,6 +244,7 @@ namespace Gnonograms {
         }
 
         if (solved ()) {
+warning ("solved");
             return pass;
         }
 

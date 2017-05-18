@@ -189,10 +189,10 @@ public class LabelBox : Gtk.Grid {
 //~         return sb.str;
 //~     }
 
-    public string[] get_labels () {
+    public string[] get_clues () {
         var texts = new string [current_size];
         for (uint index = 0; index < current_size; index++) {
-            texts[index] = labels[index].label;
+            texts[index] = labels[index].clue;
         }
 
         return texts;

@@ -185,11 +185,11 @@ public class View : Gtk.ApplicationWindow {
     }
 
     public string[] get_row_clues () {
-        return row_clue_box.get_labels ();
+        return row_clue_box.get_clues ();
     }
 
     public string[] get_col_clues () {
-        return column_clue_box.get_labels ();
+        return column_clue_box.get_clues ();
     }
 
     private void connect_signals () {

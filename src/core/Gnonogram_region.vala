@@ -90,7 +90,7 @@ public class Region {
         status = new CellState[maxlen];
         statusStore = new CellState[maxlen];
 
-        uint maxblks = maxlen/2 + 2;
+        uint maxblks = maxlen / 2 + 2;
         ranges = new int[maxblks, 4 + maxblks];
         rangesStore = new int[maxblks, 4 + maxblks];
         myBlocks = new int[maxblks];
@@ -99,6 +99,8 @@ public class Region {
         tags = new bool[maxlen, maxblks + 2];
         tagsStore = new bool[maxlen, maxblks + 2];
         //two extra flags for "can be empty" and "is finished".
+
+//~ warning ("New region %s", this.to_string ());
     }
 
     public void initialize (uint index, bool isColumn, uint nCells, string clue) {
@@ -127,6 +129,9 @@ public class Region {
 
         blockExtent = blockTotal + nBlocks - 1;  //minimum space needed for blocks
         initialstate ();
+
+//~ warning ("New region initialized %s", this.to_string ());
+
     }
 
     public void initialstate () {
@@ -204,6 +209,7 @@ public class Region {
         }
 
         if (freedom == 0) {
+//~ warning ("no freedom");
             isCompleted = true;
         }
     }
@@ -230,6 +236,7 @@ public class Region {
         this.debug = debug;
 
         if (isCompleted) {
+//~ warning ("Region completed before solve");
             return false;
         }
 
@@ -285,6 +292,7 @@ public class Region {
             warning ("Excessive looping in region %s", index.to_string ());
         }
 
+//~ warning ("Region returning made changes %s", made_changes.to_string ());
         return made_changes;
     }
 
@@ -1029,6 +1037,7 @@ public class Region {
                 }
 
                 if (count == 0) {
+warning ("cappedvrange start %i, length %i, no owner - clue %s", start, length, clue);
                     recordError ("capped range audit", "filled cell with no owners", false);
                     return false;
                 }

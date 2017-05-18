@@ -150,9 +150,12 @@ warning ("passes was %u", passes);
 //~             model.game_state = GameState.SETTING;
             game_state = GameState.SOLVING;
         } else {
-            Utils.show_warning_dialog(_("Error occurred in solver"));
+//            Utils.show_warning_dialog(_("Error occurred in solver"));
+////~             change_state (GameState.SETTING);
+//            game_state = GameState.SETTING;
+//~             Utils.show_warning_dialog(_("Error occurred in solver"));
 //~             change_state (GameState.SETTING);
-            game_state = GameState.SETTING;
+            game_state = GameState.SOLVING;
         }
     }
 
@@ -273,7 +276,22 @@ warning ("generate simple passes %i", passes);
 //        }
 
 //~         solver.initialize (row_clues, col_clues, startgrid, null);
-        solver.initialize (view.get_row_clues (), view.get_col_clues (), startgrid, null);
+        if (use_labels) {
+            solver.initialize (view.get_row_clues (), view.get_col_clues (), startgrid, null);
+        } else {
+            var row_clues = new string [rows];
+            var col_clues = new string [cols];
+
+            for (int i = 0; i < rows; i++) {
+                row_clues[i] = model.get_label_text (i, false);
+            }
+
+            for (int i = 0; i < cols; i++) {
+                col_clues[i] = model.get_label_text (i, true);
+            }
+
+            solver.initialize (row_clues, row_clues, startgrid, null);
+        }
     }
 
 
