@@ -67,7 +67,6 @@ class AppMenu : Gtk.Button {
         popover = new AppPopover (this);
         var grid = new Gtk.Grid ();
         popover.add (grid);
-        popover.set_size_request (200, -1);
 
         rows_scale = new AppScale (STEP, MAXSIZE, STEP);
         cols_scale = new AppScale (STEP, MAXSIZE, STEP);
@@ -175,8 +174,14 @@ class AppMenu : Gtk.Button {
         construct {
             scale = new Gtk.HScale (null);
             val_label = new Gtk.Label (null);
+            val_label.xalign = 1;
+
             attach (val_label, 0, 0, 1, 1);
             attach (scale, 1, 0, 1, 1);
+
+            row_spacing = 12;
+            column_spacing = 6;
+            border_width = 12;
 
             scale.value_changed.connect (() => {
                 val_label.label = get_value ().to_string ();
@@ -196,6 +201,8 @@ class AppMenu : Gtk.Button {
 
             scale.hexpand = true;
             scale.draw_value = false;
+
+            set_size_request ((int)(end - start) * 20, -1);
         }
 
         public uint get_value () {
@@ -204,6 +211,7 @@ class AppMenu : Gtk.Button {
 
         public void set_value (uint val) {
             scale.set_value ((double)val / (double)step);
+            scale.value_changed ();
         }
 
     }

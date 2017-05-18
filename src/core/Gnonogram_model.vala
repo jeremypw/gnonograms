@@ -132,9 +132,9 @@ public class Model : GLib.Object {
         return count;
     }
 
-    public void clear() {
-        blank_solution();
-        blank_working();
+    public void clear () {
+        blank_solution ();
+        blank_working ();
     }
 
     public void blank_solution () {

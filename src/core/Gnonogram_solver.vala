@@ -316,7 +316,6 @@ warning ("solved");
         this.saveposition (gridstore);
 
         while (true) {
-            Utils.process_events ();
             trialCell = makeguess (trialCell); guesses++;
 
             if (trialCell.col == -1) { //run out of guesses
@@ -464,19 +463,18 @@ warning ("solved");
             return 999999;
         }
 
-        Utils.process_events();
         CellState[] grid_store2 = new CellState[rows * cols];
         CellState[] guess = {};
 
         while (true) {
             perm_reg = choose_permute_region (ref max_value);
             if (perm_reg < 0) {
-                stdout.printf("No perm region found\n");
+                stdout.printf ("No perm region found\n");
                 break;
             }
 
             int start;
-            var p = regions[perm_reg].get_permutor(out start);
+            var p = regions[perm_reg].get_permutor (out start);
 
             if (p == null || p.valid == false) {
                 stdout.printf ("No valid permutator generated\n");
@@ -489,23 +487,21 @@ warning ("solved");
             //try advanced solver with every possible pattern in this range.
 
             for (int i = 0; i < regionCount; i++) {
-                regions[i].initialstate();
+                regions[i].initialstate ();
             }
 
-            saveposition(grid_store2);
+            saveposition (grid_store2);
 
-            p.initialise();
+            p.initialise ();
+
             while (p.next()) {
-                Utils.process_events(); //keep display from freezing
                 guesses++;
                 if (guesses > limit) {
-                    if (Utils.show_confirm_dialog(_("This is taking a long time!")+"\n"+_("Keep trying?"))) {
-                        limit+=GUESSESBEFOREASK;
+                    if (Utils.show_confirm_dialog (_("This is taking a long time!")+"\n"+_("Keep trying?"))) {
+                        limit += GUESSESBEFOREASK;
                     } else {
                         return 999999;
                     }
-
-                    Utils.process_events();
                 }
 
                 guess=p.get();

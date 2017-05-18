@@ -115,6 +115,7 @@ public class Controller : GLib.Object {
         /* One row used to debug */
         var limit = rows == 1 ? 1 : 100;
 
+        view.header_title = _("Random pattern");
         view.blank_labels ();
         game_state = GameState.SETTING;
 
@@ -304,6 +305,7 @@ public class Controller : GLib.Object {
         solver.dimensions = dimensions;
 
         model.clear ();
+        game_state = GameState.SETTING;
     }
 
     private void on_state_changed (GameState gs) {
