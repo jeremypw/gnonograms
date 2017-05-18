@@ -99,8 +99,6 @@ public class Region {
         tags = new bool[maxlen, maxblks + 2];
         tagsStore = new bool[maxlen, maxblks + 2];
         //two extra flags for "can be empty" and "is finished".
-
-//~ warning ("New region %s", this.to_string ());
     }
 
     public void initialize (uint index, bool isColumn, uint nCells, string clue) {
@@ -108,11 +106,6 @@ public class Region {
         this.isColumn = isColumn;
         this.nCells = (int)nCells;
         this.clue = clue;
-
-        if (nCells == 1) {
-            this.isCompleted = true;
-            return;
-        }
 
         tempStatus = new CellState[nCells];
         tempStatus2 = new CellState[nCells];
@@ -130,8 +123,9 @@ public class Region {
         blockExtent = blockTotal + nBlocks - 1;  //minimum space needed for blocks
         initialstate ();
 
-//~ warning ("New region initialized %s", this.to_string ());
-
+        if (nCells == 1) { /* Ignore single cell regions (for debugging) */
+            this.isCompleted = true;
+        }
     }
 
     public void initialstate () {
@@ -209,7 +203,6 @@ public class Region {
         }
 
         if (freedom == 0) {
-//~ warning ("no freedom");
             isCompleted = true;
         }
     }
@@ -236,7 +229,6 @@ public class Region {
         this.debug = debug;
 
         if (isCompleted) {
-//~ warning ("Region completed before solve");
             return false;
         }
 
@@ -292,7 +284,6 @@ public class Region {
             warning ("Excessive looping in region %s", index.to_string ());
         }
 
-//~ warning ("Region returning made changes %s", made_changes.to_string ());
         return made_changes;
     }
 
@@ -1037,7 +1028,6 @@ public class Region {
                 }
 
                 if (count == 0) {
-warning ("cappedvrange start %i, length %i, no owner - clue %s", start, length, clue);
                     recordError ("capped range audit", "filled cell with no owners", false);
                     return false;
                 }
@@ -1935,23 +1925,23 @@ warning ("cappedvrange start %i, length %i, no owner - clue %s", start, length, 
     public string to_string ()  {
         var sb =  new StringBuilder ("");
         sb.append (this.getID ());
-        sb.append ("\n status before:\n");
+        sb.append ("\n\r status before:\n\r");
 
         for (int i = 0;  i < nCells;  i++ ) {
-            sb.append ((tempStatus[i].to_string ()));
+            sb.append ((tempStatus[i].to_string () + "\n\r"));
         }
 
-        sb.append ("\n status now:\n");
+        sb.append ("\n\r status now:\n\r");
 
         for (int i = 0;  i < nCells;  i++ ) {
-            sb.append ((status[i].to_string ()));
+            sb.append ((status[i].to_string () + "\n\r"));
         }
 
-        sb.append ("\nCell Status and Tags:\n");
+        sb.append ("\n\rCell Status and Tags:\n\r");
 
         for (int i = 0;  i < nCells;  i++) {
             sb.append ("Cell " + i.to_string () + " Status: ");
-            sb.append (status[i].to_string () + " ");
+            sb.append (status[i].to_string () + "\n\r");
 
             for (int j = 0;  j < nBlocks;  j++ ) {
                 sb.append (tags[i, j] ? "t" :"f");
@@ -1963,7 +1953,7 @@ warning ("cappedvrange start %i, length %i, no owner - clue %s", start, length, 
                 sb.append (tags[i, j] ? "t" :"f");
             }
 
-            sb.append ("\n");
+            sb.append ("\n\r");
         }
 
         return sb.str;
@@ -2015,6 +2005,5 @@ warning ("cappedvrange start %i, length %i, no owner - clue %s", start, length, 
         var p = new Permutor (ranges[0, 1], clue);
         return p;
     }
-
 }
 }

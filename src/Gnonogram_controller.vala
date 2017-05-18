@@ -19,7 +19,7 @@
  */
 namespace Gnonograms {
 public class Controller : GLib.Object {
-    private const int MAXTRIES = 500;
+    private const int MAXTRIES = 5;
     private View view;
     private Model? model;
     private Solver solver;
@@ -59,7 +59,7 @@ public class Controller : GLib.Object {
 
     private Dimensions dimensions {get {return view.dimensions;}}
     private uint rows {get { return view.rows; }}
-    private uint cols {get { return view.rows; }}
+    private uint cols {get { return view.cols; }}
 
     public Gtk.Window window {
         get {
@@ -109,25 +109,16 @@ public class Controller : GLib.Object {
         view.header_title = _("Blank sheet");
     }
 
-//~     private void new_random_game () {
-//~         /* TODO  Check/confirm overwriting existing game */
-//~         model.fill_random (grade);
-//~         view.game_state = GameState.SOLVING;
-//~         view.header_title = _("Random game");
-//~     }
-
     public void new_random_game() {
-warning ("new random");
-        view.blank_labels ();
-//~         model.use_solution ();
-        game_state = GameState.SETTING;
-//~         model.game_state = GameState.SETTING;
-
-//~         have_solution = true;
         int passes = 0, count = 0;
         uint grd = grade; //grd may be reduced but this.grade always matches spin setting
+        /* One row used to debug */
+        var limit = rows == 1 ? 1 : 100;
 
-        while (count < 100) {
+        view.blank_labels ();
+        game_state = GameState.SETTING;
+
+        while (count < limit) {
             count++;
             passes = generate_simple_game (grd); //tries max tries times
 
@@ -143,42 +134,42 @@ warning ("new random");
             //reduce complexity setting (relationship between complexity setting
             //and ease of solution not simple - depends also on grid size)
         }
-warning ("count %i,", count);
-        if (passes >= 0) {
-warning ("passes was %u", passes);
-//~              model.use_solution();
-//~             model.game_state = GameState.SETTING;
+
+        if (passes >= 0 && rows > 1) {
             game_state = GameState.SOLVING;
         } else {
-//            Utils.show_warning_dialog(_("Error occurred in solver"));
-////~             change_state (GameState.SETTING);
-//            game_state = GameState.SETTING;
-//~             Utils.show_warning_dialog(_("Error occurred in solver"));
-//~             change_state (GameState.SETTING);
+            Utils.show_warning_dialog(_("Error occurred in solver"));
             game_state = GameState.SOLVING;
+            for (int r = 0; r < rows; r++) {
+                for (int c = 0; c < cols; c++) {
+                    model.set_data_from_rc (r, c, solver.grid.get_data_from_rc (r, c));
+                }
+            }
         }
     }
 
     private int generate_simple_game (uint grd) {
-
         /* returns 0 - failed to generate solvable game
-         * returns value>1 - generated game took value passes to solve
+         * returns value > 1 - generated game took value passes to solve
          * returns -1 - an error occurred in the solver
         */
         uint tries = 0;
         int passes = 0;
 
-        while (passes == 0 && tries <= MAXTRIES) {
+        uint limit = rows == 1 ? 1 : MAXTRIES;
+
+        while (passes == 0 && tries <= limit) {
             tries++;
             passes = generate_game (grd);
         }
-warning ("generate simple passes %i", passes);
+
         return passes;
     }
 
     private int generate_game (uint grd) {
         model.fill_random (grd); //fills solution grid
-        return solve_game (false, false, false, false, false); // no start grid, dont use labels, no advanced
+        /* Currently only want simple and unique solutions */
+        return solve_game (false, false, false, false, true); // no start grid, dont use labels, no advanced
     }
 
 
@@ -230,17 +221,17 @@ warning ("generate simple passes %i", passes);
                             bool use_ultimate,
                             bool unique_only) {
 
-        prepare_to_solve (use_startgrid, use_labels);
-        int passes = 0; //assume debug mode for single row
-        passes = solver.solve_it (rows == 1, use_advanced, use_ultimate, unique_only);
+        int passes = -1; //indicates error - TODO use throw error
+
+        if (prepare_to_solve (use_startgrid, use_labels)) {
+            passes = solver.solve_it (rows == 1, use_advanced, use_ultimate, unique_only);
+        }
+
         return passes;
     }
 
-    private void prepare_to_solve (bool use_startgrid, bool use_labels) {
-//~         row_clues = new string [rows];
-//~         col_clues = new string [cols];
-
-        My2DCellArray startgrid;
+    private bool prepare_to_solve (bool use_startgrid, bool use_labels) {
+        My2DCellArray? startgrid = null;
 
         if (use_startgrid) {
             startgrid = new My2DCellArray (dimensions, CellState.UNKNOWN);
@@ -250,34 +241,11 @@ warning ("generate simple passes %i", passes);
                     startgrid.set_data_from_rc (r, c, model.get_data_from_rc (r, c));
                 }
             }
-        } else {
-            startgrid = null;
         }
 
-//        if (use_labels) {
-////~             for (int i = 0; i < rows; i++) {
-////~                 row_clues[i] = rowbox.get_label_text (i);
-////~             }
-//            row_clues = view.get_row_clues ();
-
-////~             for (int i = 0; i < cols; i++) {
-////~                 col_clues[i] = colbox.get_label_text (i);
-////~             }
-//            row_clues = view.get_col_clues ();
-
-//        } else {
-//            for (int i = 0; i < rows; i++) {
-//                row_clues[i] = model.get_label_text (i, false);
-//            }
-
-//            for (int i = 0; i < cols; i++) {
-//                col_clues[i] = model.get_label_text (i, true);
-//            }
-//        }
-
-//~         solver.initialize (row_clues, col_clues, startgrid, null);
+        bool res;
         if (use_labels) {
-            solver.initialize (view.get_row_clues (), view.get_col_clues (), startgrid, null);
+            res = solver.initialize (view.get_row_clues (), view.get_col_clues (), startgrid, null);
         } else {
             var row_clues = new string [rows];
             var col_clues = new string [cols];
@@ -290,11 +258,11 @@ warning ("generate simple passes %i", passes);
                 col_clues[i] = model.get_label_text (i, true);
             }
 
-            solver.initialize (row_clues, row_clues, startgrid, null);
+            res = solver.initialize (row_clues, col_clues, startgrid, null);
         }
+
+        return res;
     }
-
-
 
 
 /*** Signal Handlers ***/
@@ -332,12 +300,10 @@ warning ("generate simple passes %i", passes);
     }
 
     private void on_view_resized () {
-warning ("resized %u, %u", dimensions.height, dimensions.width);
         model.dimensions = dimensions;
         solver.dimensions = dimensions;
 
         model.clear ();
-warning ("model dimensions now %u, %u", model.dimensions.height, model.dimensions.width);
     }
 
     private void on_state_changed (GameState gs) {

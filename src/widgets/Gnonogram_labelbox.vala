@@ -178,17 +178,6 @@ public class LabelBox : Gtk.Grid {
 
     }
 
-//~     public string to_string() {
-//~         StringBuilder sb = new StringBuilder();
-
-//~         for (uint index = 0; index < current_size; index++) {
-//~             sb.append (labels[index].label);
-//~             sb.append ("\n");
-//~         }
-
-//~         return sb.str;
-//~     }
-
     public string[] get_clues () {
         var texts = new string [current_size];
         for (uint index = 0; index < current_size; index++) {

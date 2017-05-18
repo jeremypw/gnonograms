@@ -80,7 +80,7 @@ namespace Gnonograms {
                             My2DCellArray? startgrid, My2DCellArray? solutiongrid) {
 
         if (rowclues.length != rows || colclues.length != cols) {
-            warning ("row/col size mismatch");
+            warning ("row/col size mismatch clues length %u, rows %u, col clues length %u, cols %u", rowclues.length, rows, colclues.length, cols );
             return false;
         }
 
@@ -139,10 +139,7 @@ namespace Gnonograms {
 
         if (simpleresult == 0 && use_advanced) {
             CellState[] gridstore =  new CellState[rows*cols];
-warning ("using advanced");
             return advancedsolver (gridstore, debug, 9999, uniqueOnly, use_ultimate);
-        } else {
-warning ("Simple result is %i", simpleresult);
         }
 
         if (rows == 1) {
@@ -199,7 +196,7 @@ warning ("Simple result is %i", simpleresult);
         bool changed = true;
         int pass = 1;
 
-        while (changed && pass < 1000) {
+        while (changed && pass < 100) {
             //keep cycling through regions while at least one of them is changing
             changed = false;
 
@@ -209,24 +206,19 @@ warning ("Simple result is %i", simpleresult);
                 }
 
                 if (r.solve (debug, false)) {
-//~ warning ("changed - now complete %s", r.isCompleted.to_string ());
                     changed = true; //no hinting
-                    if (r.isCompleted) {
-                        warning ("Now completed %s", r.to_string ());
-                    }
                 }
 
                 if (r.inError) {
-//~                     if (debug) {
-warning ("region in error");
+                    if (debug) {
                         stdout.printf ("::" + r.message);
-warning ("Error region is %s", r.to_string ());
-//~                     }
+                        stdout.printf (r.to_string ());
+                    }
+
                     return  -1;
                 }
 
                 if (checksolution && differsFromSolution (r)) {
-warning ("check solution differs");
                     stdout.printf (r.to_string ());
                     return  -1;
                 }
@@ -279,7 +271,6 @@ warning ("solved");
                 continue;
             }
 
-//~             solutionState = (solution.get_cell (isColumn ? i : index, isColumn ? index : i)) .state;
             solutionState = solution.get_data_from_rc (isColumn ? i : index, isColumn ? index : i);
 
             if (solutionState == CellState.EMPTY) {
@@ -451,11 +442,6 @@ warning ("solved");
 
         return cell;
     }
-
-//~     public Cell get_cell (int r, int c) {
-//~         return grid.get_cell (r, c);
-//~     }
-
 
     private int ultimate_solver(CellState[] grid_store, int guesses) {
         //stdout.printf("Ultimate solver\n");

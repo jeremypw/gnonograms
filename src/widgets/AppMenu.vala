@@ -21,7 +21,7 @@
 namespace Gnonograms {
 
 class AppMenu : Gtk.Button {
-    private const uint STEP = 5;
+    private const uint STEP = 5; //Change to 1 when debugging
     private AppPopover popover;
     private AppScale rows_scale;
     private uint _row_val;

@@ -159,6 +159,10 @@ public class Model : GLib.Object {
         display_data.set_data_from_cell (cell);
     }
 
+    public void set_data_from_rc (uint r, uint c, CellState state) {
+        display_data.set_data_from_rc (r, c, state);
+    }
+
     public CellState get_data_for_cell (Cell cell) {
         return display_data.get_data_for_cell (cell);
     }
