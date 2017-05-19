@@ -23,6 +23,8 @@ public class View : Gtk.ApplicationWindow {
     private Gnonograms.LabelBox row_clue_box;
     private Gnonograms.LabelBox column_clue_box;
     private CellGrid cell_grid;
+    private ResizeWidget row_resizer;
+    private ResizeWidget col_resizer;
     private Gtk.HeaderBar header_bar;
     private AppMenu app_menu;
     private ModeButton mode_switch;
@@ -45,6 +47,8 @@ public class View : Gtk.ApplicationWindow {
                     row_clue_box.dimensions = dimensions;
                     column_clue_box.dimensions = dimensions;
                     set_default_fontheight_from_dimensions ();
+                    row_resizer.set_value (dimensions.height);
+                    col_resizer.set_value (dimensions.width);
                     resized (dimensions);
                     queue_draw ();
                 }
@@ -135,6 +139,7 @@ public class View : Gtk.ApplicationWindow {
         if (Granite.Services.Logger.DisplayLevel != Granite.Services.LogLevel.DEBUG) {
             Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.INFO;
         }
+
         weak Gtk.IconTheme default_theme = Gtk.IconTheme.get_default ();
         default_theme.add_resource_path ("/com/gnonograms/icons");
         header_bar = new Gtk.HeaderBar ();
@@ -153,12 +158,18 @@ public class View : Gtk.ApplicationWindow {
 
         header_bar.pack_start (mode_switch);
         set_titlebar (header_bar);
+
+        row_resizer = new ResizeWidget (Gtk.Orientation.VERTICAL);
+        col_resizer = new ResizeWidget (Gtk.Orientation.HORIZONTAL);
     }
 
     public View (Dimensions dimensions, uint grade, Model model) {
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL, dimensions);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL, dimensions);
         cell_grid = new CellGrid (model);
+        cell_grid.margin_start = 10;
+        cell_grid.margin_top = 10;
+
 
         this.model = model;
         this.dimensions = dimensions;
@@ -167,12 +178,16 @@ public class View : Gtk.ApplicationWindow {
         header_bar.pack_end (app_menu);
 
         var grid = new Gtk.Grid ();
-        grid.row_spacing = (int)FRAME_WIDTH;
-        grid.column_spacing = (int)FRAME_WIDTH;
-        grid.border_width = (int)FRAME_WIDTH;
-        grid.attach (row_clue_box, 0, 1, 1, 2); /* Clues for rows */
-        grid.attach (column_clue_box, 1, 0, 2, 1); /* Clues for columns */
-        grid.attach (cell_grid, 1, 1, 2, 2);
+        grid.row_spacing = 0;
+        grid.column_spacing = 0;
+        grid.row_spacing = 0;
+        grid.border_width = 0;
+        grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for rows */
+        grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
+        grid.attach (cell_grid, 1, 1, 1, 1);
+
+        grid.attach (col_resizer, 1, 2, 1, 1);
+        grid.attach (row_resizer, 2, 1, 1, 1);
 
         add (grid);
         connect_signals ();
@@ -205,13 +220,14 @@ public class View : Gtk.ApplicationWindow {
 
         mode_switch.mode_changed.connect (on_mode_switch_changed);
 
-        app_menu.apply.connect (on_app_menu_apply);
-
         history.go_back.connect (on_history_go_back);
         history.go_forward.connect (on_history_go_forward);
 
         key_press_event.connect (on_key_press_event);
         key_release_event.connect (on_key_release_event);
+
+        row_resizer.changed.connect (on_dimensions_changed);
+        col_resizer.changed.connect (on_dimensions_changed);
     }
 
     private void set_default_fontheight_from_dimensions () {
@@ -341,7 +357,6 @@ public class View : Gtk.ApplicationWindow {
 
 
     /*** Signal handlers ***/
-
     private void on_grid_cursor_moved (Cell from, Cell to) {
         highlight_labels (from, false);
         highlight_labels (to, true);
@@ -469,8 +484,8 @@ public class View : Gtk.ApplicationWindow {
         game_state_changed (game_state);
     }
 
-    private void on_app_menu_apply () {
-        dimensions = {app_menu.col_val, app_menu.row_val};
+    private void on_dimensions_changed () {
+        dimensions = {col_resizer.get_value (), row_resizer.get_value ()};
     }
 
     private void on_history_go_back () {
@@ -505,6 +520,165 @@ public class View : Gtk.ApplicationWindow {
 
             setting_index = append (setting_icon);
             solving_index = append (solving_icon);
+        }
+    }
+
+/** Scale limited to integral values separated by step (interface uses uint) **/
+    private class ResizeScale : Gtk.Grid {
+        private uint step;
+        private Gtk.Scale scale;
+        private Gtk.Label val_label;
+
+        construct {
+            val_label = new Gtk.Label ("0");
+            val_label.show_all ();
+
+            row_spacing = 12;
+            column_spacing = 6;
+            border_width = 12;
+        }
+
+        public ResizeScale (Gtk.Orientation orientation, uint _start, uint _end, uint _step) {
+            scale = new Gtk.Scale (orientation, null);
+
+            var start = (double)_start / (double)_step;
+            var end = (double)_end / (double)_step + 1.0;
+            step = _step;
+            var adjustment = new Gtk.Adjustment (start, start, end, 1.0, 1.0, 1.0);
+            scale.adjustment = adjustment;
+
+            for (var val = start; val <= end; val += 1.0) {
+                scale.add_mark (val, Gtk.PositionType.BOTTOM, null);
+            }
+
+            scale.draw_value = false;
+
+            scale.value_changed.connect (() => {
+                val_label.label = get_value ().to_string ();
+            });
+
+            if (orientation == Gtk.Orientation.HORIZONTAL) {
+                scale.hexpand = true;
+                val_label.xalign = 1;
+                attach (val_label, 0, 0, 1, 1);
+                attach (scale, 1, 0, 1, 1);
+            } else {
+                scale.vexpand = true;
+                val_label.yalign = 1;
+                attach (val_label, 0, 0, 1, 1);
+                attach (scale, 0, 1, 1, 1);
+            }
+        }
+
+        public uint get_value () {
+            return (uint)(scale.get_value ()) * step;
+        }
+
+        public void set_value (uint val) {
+            scale.set_value ((double)val / (double)step);
+            scale.value_changed ();
+        }
+    }
+
+    private class ResizeWidget : Gtk.EventBox {
+        private Gtk.Grid grid;
+        private Gtk.Revealer scale_revealer;
+        private Gtk.Revealer image_revealer;
+        private ResizeScale scale;
+
+        private Gtk.Image image1;
+        private Gtk.Image image2;
+
+        private uint last_value = 0;
+
+        public signal void changed (uint val);
+
+        construct {
+            scale_revealer = new Gtk.Revealer ();
+            image_revealer = new Gtk.Revealer ();
+
+            grid = new Gtk.Grid ();
+            grid.set_border_width (0);
+            add (grid);
+
+            enter_notify_event.connect (on_enter);
+            leave_notify_event.connect (on_leave);
+        }
+
+        public ResizeWidget (Gtk.Orientation orientation) {
+            scale = new ResizeScale (orientation, 5, 50, 5);
+            scale_revealer.add (scale);
+
+            Gtk.Box image_box = new Gtk.Box (orientation, 0);
+
+            if (orientation == Gtk.Orientation.HORIZONTAL) {
+                image1 = new Gtk.Image.from_icon_name ("pan-start-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
+                image2 = new Gtk.Image.from_icon_name ("pan-end-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
+
+            } else {
+                image1 = new Gtk.Image.from_icon_name ("pan-up-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
+                image2 = new Gtk.Image.from_icon_name ("pan-down-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
+            }
+
+            image_box.pack_start (image1, false, false, 0);
+            image_box.pack_end (image2, false, false, 0);
+            image_revealer.add (image_box);
+
+            if (orientation == Gtk.Orientation.HORIZONTAL) {
+            scale_revealer.transition_type = Gtk.RevealerTransitionType.SLIDE_DOWN;
+            image_revealer.transition_type = Gtk.RevealerTransitionType.SLIDE_UP;
+                grid.attach (scale_revealer, 0, 0, 1, 1);
+                grid.attach (image_revealer, 0, 1, 1, 1);
+            } else {
+            scale_revealer.transition_type = Gtk.RevealerTransitionType.SLIDE_RIGHT;
+            image_revealer.transition_type = Gtk.RevealerTransitionType.SLIDE_LEFT;
+                grid.attach (scale_revealer, 0, 0, 1, 1);
+                grid.attach (image_revealer, 1, 0, 1, 1);
+            }
+
+            show_scale (false);
+        }
+
+        private uint reveal_timeout_id = 0;
+        private const uint REVEAL_DELAY_MSEC = 200;
+        public void show_scale (bool show) {
+            if (reveal_timeout_id > 0) {
+                Source.remove (reveal_timeout_id);
+                reveal_timeout_id = 0;
+            } else {
+                reveal_timeout_id = Timeout.add (REVEAL_DELAY_MSEC, () => {
+                    scale_revealer.set_reveal_child (show);
+                    image_revealer.set_reveal_child (!show);
+                    reveal_timeout_id = 0;
+                    return false;
+                });
+            }
+        }
+
+        public void set_value (uint val) {
+            scale.set_value (val);
+            last_value = scale.get_value ();
+        }
+
+        public uint get_value () {
+            return scale.get_value ();
+        }
+
+        private bool on_enter () {
+            show_scale (true);
+            last_value = scale.get_value ();
+            return false;
+        }
+
+        private bool on_leave () {
+            show_scale (false);
+            var val = scale.get_value ();
+            if (last_value != val) {
+                last_value = val;
+                changed (val);
+            }
+
+            return false;
         }
     }
 }

@@ -21,34 +21,9 @@
 namespace Gnonograms {
 
 class AppMenu : Gtk.Button {
-    private const uint STEP = 5; //Change to 1 when debugging
     private AppPopover popover;
-    private AppScale rows_scale;
-    private uint _row_val;
-    public uint row_val {
-        get {
-            return _row_val;
-        }
-
-        set {
-            _row_val = value;
-            rows_scale.set_value (_row_val);
-        }
-    }
-    private AppScale cols_scale;
-    private uint _col_val;
-    public uint col_val {
-        get {
-            return _col_val;
-        }
-
-        set {
-            _col_val = value;
-            cols_scale.set_value (_col_val);
-        }
-    }
-
     private AppScale grade_scale;
+
     private uint _grade_val;
     public uint grade_val {
         get {
@@ -67,25 +42,12 @@ class AppMenu : Gtk.Button {
         popover = new AppPopover (this);
         var grid = new Gtk.Grid ();
         popover.add (grid);
-
-        rows_scale = new AppScale (STEP, MAXSIZE, STEP);
-        cols_scale = new AppScale (STEP, MAXSIZE, STEP);
         grade_scale = new AppScale (1, MAXGRADE, 1);
-
-        var row_label = new Gtk.Label (_("Rows"));
-        var col_label = new Gtk.Label (_("Columns"));
         var grade_label = new Gtk.Label (_("Difficulty"));
-
-        row_label.xalign = 1;
-        col_label.xalign = 1;
         grade_label.xalign = 1;
 
-        grid.attach (row_label, 0, 0, 1, 1);
-        grid.attach (col_label, 0, 1, 1, 1);
-        grid.attach (grade_label, 0, 2, 1, 1);
-        grid.attach (rows_scale, 1, 0, 1, 1);
-        grid.attach (cols_scale, 1, 1, 1, 1);
-        grid.attach (grade_scale, 1, 2, 1, 1);
+        grid.attach (grade_label, 0, 0, 1, 1);
+        grid.attach (grade_scale, 1, 0, 1, 1);
 
         grid.row_spacing = 12;
         grid.column_spacing = 6;
@@ -109,20 +71,14 @@ class AppMenu : Gtk.Button {
     public AppMenu (Dimensions dimensions, uint grade) {
         image = new Gtk.Image.from_icon_name ("open-menu", Gtk.IconSize.LARGE_TOOLBAR);
         tooltip_text = _("Options");
-        row_val = dimensions.height;
-        col_val = dimensions.width;
-        grade_val = grade;
+        grade_scale.set_value (grade);
     }
 
     private void store_values () {
-        row_val = rows_scale.get_value ();
-        col_val = cols_scale.get_value ();
-        grade_val = grade_scale.get_value ();
+        grade_val = (uint)(grade_scale.get_value ());
     }
 
     private void restore_values () {
-        rows_scale.set_value (row_val);
-        cols_scale.set_value (col_val);
         grade_scale.set_value (grade_val);
     }
 
@@ -134,10 +90,6 @@ class AppMenu : Gtk.Button {
 
 
         construct {
-            show.connect (() => {
-                store_values ();
-            });
-
             closed.connect (() => {
                 if (!cancelled) {
                     apply_settings ();
@@ -158,10 +110,6 @@ class AppMenu : Gtk.Button {
 
         public AppPopover (Gtk.Widget widget) {
             Object (relative_to: widget);
-        }
-
-        private void store_values () {
-
         }
     }
 
