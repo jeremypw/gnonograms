@@ -118,7 +118,7 @@ public class LabelBox : Gtk.Grid {
         unhighlight_all();
 
         if (labels[0].size != other_size) {
-            update_label_size ();
+            update_label_size (other_size);
         }
 
         while (current_size < size) {
@@ -162,9 +162,9 @@ public class LabelBox : Gtk.Grid {
         labels[index].clue = txt;
     }
 
-    public void update_label_size () {
+    public void update_label_size (uint new_size) {
         for (uint index = 0; index < current_size; index++) {
-            labels[index].size = size;
+            labels[index].size = new_size;
         }
     }
 
