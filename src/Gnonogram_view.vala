@@ -167,9 +167,6 @@ public class View : Gtk.ApplicationWindow {
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL, dimensions);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL, dimensions);
         cell_grid = new CellGrid (model);
-        cell_grid.margin_start = 10;
-        cell_grid.margin_top = 10;
-
 
         this.model = model;
         this.dimensions = dimensions;

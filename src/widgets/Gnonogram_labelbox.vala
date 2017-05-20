@@ -74,6 +74,10 @@ public class LabelBox : Gtk.Grid {
                 ((Label)l).fontheight = _fontheight;
             }
 
+            if (!vertical_labels) {
+                margin_end = (int)_fontheight / 2; /* Match space between this and grid with vertical labels */
+            }
+
             update_size_request ();
         }
     }

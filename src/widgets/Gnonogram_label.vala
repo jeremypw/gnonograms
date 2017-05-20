@@ -80,12 +80,8 @@ class Label : Gtk.Label {
 
         if (vertical_text) {
             set_alignment((float)0.5,(float)1.0);
-            set_margin_left (6);
-            set_margin_right (6);
         } else {
             set_alignment((float)1.0, (float)0.5);
-            set_margin_top (6);
-            set_margin_bottom (6);
         }
 
         if (label_text != "") {
