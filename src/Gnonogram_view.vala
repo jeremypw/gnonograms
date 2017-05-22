@@ -246,7 +246,7 @@ public class View : Gtk.ApplicationWindow {
         max_h = (double)(rect.height) / ((double)(rows * 2));
         max_w = (double)(rect.width) / ((double)(cols * 2));
 
-        fontheight = double.min (max_h, max_w) / 2.5;
+        fontheight = double.min (max_h, max_w) / 3;
     }
 
     private void update_labels_from_model () {

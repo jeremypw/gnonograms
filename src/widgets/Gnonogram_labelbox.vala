@@ -74,10 +74,6 @@ public class LabelBox : Gtk.Grid {
                 ((Label)l).fontheight = _fontheight;
             }
 
-            if (!vertical_labels) {
-                margin_end = (int)_fontheight / 2; /* Match space between this and grid with vertical labels */
-            }
-
             update_size_request ();
         }
     }
@@ -173,13 +169,12 @@ public class LabelBox : Gtk.Grid {
     }
 
     private void update_size_request () {
+        /* Allow space for lengthening clues on game generation  (typical longest clue) */
         if (vertical_labels) {
-            set_size_request(-1, (int)(fontheight * other_size));
+            set_size_request(-1, (int)(fontheight * other_size * 0.75));
         } else {
             set_size_request((int)(fontheight * other_size * 0.75), -1);
         }
-
-
     }
 
     public string[] get_clues () {

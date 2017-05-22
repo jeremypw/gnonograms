@@ -45,10 +45,11 @@ class Label : Gtk.Label {
             var fontsize = (int)(1024 * (value));
             attrib_start = "<span size='%i' weight='bold'>".printf (fontsize);
 
+            /* Ensure grid remains square */
             if (vertical_text) {
-                set_size_request ((int)(value * 2), -1);
+                set_size_request (int.max((int)(value * 2), 24), -1);
             } else {
-                set_size_request (-1, (int)(value * 2));
+                set_size_request (-1, int.max((int)(value * 2), 24));
             }
 
             update_markup ();
@@ -63,7 +64,14 @@ class Label : Gtk.Label {
         set {
             _clue = value;
             displayed_text = vertical_text ? vertical_string (_clue) : _clue;
+
+
             blockextent = Utils.blockextent_from_clue (_clue);
+
+            if (!vertical_text) {
+                displayed_text += " ";
+            }
+
             update_markup ();
         }
     }

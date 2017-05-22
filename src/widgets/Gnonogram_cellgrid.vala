@@ -20,7 +20,7 @@
 
 namespace Gnonograms {
 public class CellGrid : Gtk.DrawingArea {
-    private const double CELL_FRAME_WIDTH = 2.0;
+    private const double CELL_FRAME_WIDTH = 0.0;
     private const double HIGHLIGHT_WIDTH = 2.0;
     private double[] MINORGRIDDASH;
     private const double MAJOR_GRID_LINE_WIDTH = 2.0;
@@ -123,7 +123,7 @@ public class CellGrid : Gtk.DrawingArea {
 
         draw.connect (on_draw_event);
 
-        grid_color.parse ("BLACK");
+        grid_color.parse ("GREY");
 
         game_state = GameState.SETTING;
         cell_pattern_type = CellPatternType.NONE;
@@ -155,14 +155,17 @@ public class CellGrid : Gtk.DrawingArea {
         var cr = Gdk.cairo_create (this.get_window ());
         cell.state = array.get_data_from_rc (cell.row, cell.col);
         draw_cell (cr, cell, highlight);
+
+        draw_grid (cr);
     }
 
     public void draw_cell (Cairo.Context cr, Cell cell, bool highlight = false, bool mark = false) {
         /*  Calculate coords of top left corner of filled part
          *  (excluding grid if present but including highlight line)
          */
-        double x = cell.col * cell_width + CELL_FRAME_WIDTH;
-        double y =  cell.row * cell_height + CELL_FRAME_WIDTH;
+        double x = cell.col * cell_width;
+        double y =  cell.row * cell_height;
+
         bool error = false;
         CellPattern cell_pattern;
 
@@ -198,7 +201,7 @@ public class CellGrid : Gtk.DrawingArea {
             cr.set_line_width (HIGHLIGHT_WIDTH);
             var sc = this.get_style_context ();
             var color = sc.get_color (Gtk.StateFlags.PRELIGHT);
-            cr.set_source_rgba (color.red, color.green, color.blue, color.alpha);
+            cr.set_source_rgba (color.red, color.green, color.blue, 0.5);
             cr.rectangle (x + HIGHLIGHT_WIDTH / 2.0,
                           y + HIGHLIGHT_WIDTH / 2.0,
                           cell_body_width - HIGHLIGHT_WIDTH,
@@ -210,41 +213,13 @@ public class CellGrid : Gtk.DrawingArea {
 
     public void draw_grid (Cairo.Context cr) {
         double x1, x2, y1, y2;
+        uint r = 0;
+        uint c = 0;
+        double inc = (alloc_height - MINOR_GRID_LINE_WIDTH) / (double)rows;
+
 
         Gdk.cairo_set_source_rgba (cr, grid_color);
         cr.set_antialias (Cairo.Antialias.NONE);
-
-        //Draw minor grid (dashed lines)
-        cr.set_dash (MINORGRIDDASH, 0.0);
-        cr.set_line_width (MINOR_GRID_LINE_WIDTH);
-
-        /* Horizontal lines */
-        y1 = MINOR_GRID_LINE_WIDTH / 2;
-        x1 = 0; x2 = alloc_width;
-        uint r = 0;
-        double inc = (alloc_height - MINOR_GRID_LINE_WIDTH) / (double)rows;
-
-        while (r < rows) {
-            cr.move_to (x1, y1);
-            cr.line_to (x2, y1);
-            cr.stroke ();
-            y1 += inc;
-            r++;
-        }
-
-        /* Vertical lines */
-        x1 = MINOR_GRID_LINE_WIDTH / 2;
-        y1 = 0; y2 = alloc_height;
-        uint c = 0;
-        inc = (alloc_width - MINOR_GRID_LINE_WIDTH) / (double)cols;
-
-        while (c < cols) {
-            cr.move_to (x1, y1);
-            cr.line_to (x1, y2);
-            cr.stroke ();
-            x1 += inc;
-            c++;
-        }
 
         //Draw major grid (solid lines)
         cr.set_dash (null, 0.0);
@@ -299,14 +274,14 @@ public class CellGrid : Gtk.DrawingArea {
         alloc_height = (double)(rect.height);
         cell_width = (alloc_width) / (double)cols;
         cell_height = (alloc_height) / (double)rows;
-        cell_body_width = cell_width - CELL_FRAME_WIDTH - MAJOR_GRID_LINE_WIDTH;
-        cell_body_height = cell_height - CELL_FRAME_WIDTH  - MAJOR_GRID_LINE_WIDTH;
+        cell_body_width = cell_width;
+        cell_body_height = cell_height;
     }
 
     private bool on_pointer_moved (Gdk.EventMotion e) {
         /* Calculate which cell the pointer is over */
-        uint r =  ((uint)(e.y / cell_width));
-        uint c =  ((uint)(e.x / cell_height));
+        uint r =  ((uint)((e.y) / cell_height));
+        uint c =  ((uint)(e.x / cell_width));
         move_cursor_to ({r, c, array.get_data_from_rc (r, c)});
         return true;
     }
@@ -320,7 +295,7 @@ public class CellGrid : Gtk.DrawingArea {
             highlight_cell (current_cell, false);
             highlight_cell (target, true);
             cursor_moved (current_cell, target);
-            current_cell = target;
+            current_cell = target.clone ();
         }
     }
 
