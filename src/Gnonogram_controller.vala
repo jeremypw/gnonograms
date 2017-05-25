@@ -20,6 +20,9 @@
 namespace Gnonograms {
 public class Controller : GLib.Object {
     private const int MAXTRIES = 5;
+
+    public GLib.Settings settings {get; construct;}
+
     private View view;
     private Model? model;
     private Solver solver;
@@ -71,6 +74,8 @@ public class Controller : GLib.Object {
     construct {
         back_stack = new Gee.LinkedList<Move> ();
         forward_stack = new Gee.LinkedList<Move> ();
+
+        settings = new Settings ("apps.gnonograms-elementary.settings");
     }
 
     public Controller (File? game = null) {

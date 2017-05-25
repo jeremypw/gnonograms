@@ -39,6 +39,8 @@ find_package(Vala REQUIRED)
 include(ValaVersion)
 ensure_vala_version("0.34" MINIMUM)
 
+add_subdirectory (data)
+
 include(ValaPrecompile)
 #~ vala_precompile(VALA_C ${EXEC_NAME}
 vala_precompile(VALA_C
@@ -58,7 +60,6 @@ vala_precompile(VALA_C
     src/core/Gnonogram_solver.vala
     src/core/Gnonogram_permutor.vala
 
-
 PACKAGES
     gee-0.8
     gtk+-3.0
@@ -77,6 +78,6 @@ glib_compile_resources (GLIB_RESOURCES_GNONOGRAMS_ICONS data/icons/gnonogram-ico
 
 add_executable(${EXEC_NAME} ${VALA_C} ${GLIB_RESOURCES_GNONOGRAMS_ICONS})
 
-install (TARGETS ${EXEC_NAME} RUNTIME DESTINATION bin)
-install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/data/com.github.yourusername.yourrepositoryname.desktop DESTINATION ${DATADIR}/applications/)
-install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/data/com.github.yourusername.yourrepositoryname.appdata.xml DESTINATION ${DATADIR}/metainfo/)
+#~ install (TARGETS ${EXEC_NAME} RUNTIME DESTINATION bin)
+#~ install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/data/com.github.yourusername.yourrepositoryname.desktop DESTINATION ${DATADIR}/applications/)
+#~ install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/data/com.github.yourusername.yourrepositoryname.appdata.xml DESTINATION ${DATADIR}/metainfo/)

@@ -20,6 +20,14 @@
 
 namespace Gnonograms {
 /*TODO - move enum and struct definitions elsewhere */
+public enum Difficulty {
+    VERY_EASY,
+    EASY,
+    MEDIUM,
+    HARD,
+    VERY_HARD;
+}
+
 public enum GameState {
     SETTING,
     SOLVING,
@@ -181,6 +189,10 @@ public class App : Granite.Application {
         add_accelerator ("<Control>q", "app.quit", null);
 
         game_name = "";
+    }
+
+    public override void startup () {
+        base.startup ();
     }
 
     public override void open (File[] files, string hint) {
