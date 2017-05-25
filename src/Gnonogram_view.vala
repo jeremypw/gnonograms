@@ -163,7 +163,7 @@ public class View : Gtk.ApplicationWindow {
         header_bar.pack_start (mode_switch);
 
         check_correct_button = new Gtk.Button ();
-        img = new Gtk.Image.from_icon_name ("tools-check-spelling", Gtk.IconSize.LARGE_TOOLBAR);
+        img = new Gtk.Image.from_icon_name ("gnonogram-check", Gtk.IconSize.LARGE_TOOLBAR);
         check_correct_button.image = img;
 
         check_correct_button.clicked.connect (() => {

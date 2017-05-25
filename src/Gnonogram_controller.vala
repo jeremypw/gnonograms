@@ -35,6 +35,7 @@ public class Controller : GLib.Object {
         set {
             view.game_state = value;
             model.game_state = value;
+            clear_history ();
         }
     }
 
@@ -118,6 +119,7 @@ public class Controller : GLib.Object {
 
         view.header_title = _("Random pattern");
         view.blank_labels ();
+        clear_history ();
         game_state = GameState.SETTING;
 
         while (count < limit) {
@@ -213,6 +215,12 @@ public class Controller : GLib.Object {
     private void update_history_view () {
         view.can_go_back = back_stack.size > 0;
         view.can_go_forward = forward_stack.size > 0;
+    }
+
+    private void clear_history () {
+        forward_stack.clear ();
+        back_stack.clear ();
+        update_history_view ();
     }
 
     /*** Solver related functions ***/
