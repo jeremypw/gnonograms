@@ -173,7 +173,7 @@ public class LabelBox : Gtk.Grid {
         if (vertical_labels) {
             set_size_request(-1, (int)(fontheight * other_size * 0.75));
         } else {
-            set_size_request((int)(fontheight * other_size * 0.75), -1);
+            set_size_request((int)(fontheight * other_size * 0.5), -1);
         }
     }
 

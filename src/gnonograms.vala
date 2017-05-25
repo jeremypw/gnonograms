@@ -38,8 +38,8 @@ public enum CellState {
 }
 
 public enum CellPatternType {
-    NONE,
-    RADIAL,
+    CELL,
+    HIGHLIGHT,
     UNDEFINED
 }
 
@@ -141,8 +141,6 @@ public static double MAXFONTSIZE = 72.0;
 public const string BLOCKSEPARATOR = ", ";
 public const string BLANKLABELTEXT = _("?");
 public static uint MAXGRADE = 12; //max grade level
-
-private static double FRAME_WIDTH = 10.0;
 
 public class App : Granite.Application {
     public Controller controller;

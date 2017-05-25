@@ -246,7 +246,7 @@ public class View : Gtk.ApplicationWindow {
         max_h = (double)(rect.height) / ((double)(rows * 2));
         max_w = (double)(rect.width) / ((double)(cols * 2));
 
-        fontheight = double.min (max_h, max_w) / 3;
+        fontheight = double.min (max_h, max_w) / 2;
     }
 
     private void update_labels_from_model () {
@@ -275,7 +275,7 @@ public class View : Gtk.ApplicationWindow {
             cell.state = state;
             moved (cell);
             mark_cell (cell);
-            queue_draw ();
+            cell_grid.highlight_cell (cell, true);
         }
     }
 

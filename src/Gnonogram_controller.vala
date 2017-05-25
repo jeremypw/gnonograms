@@ -78,7 +78,7 @@ public class Controller : GLib.Object {
         restore_settings ();
         /* Dummy pending restore settings implementation */
 
-        Dimensions dimensions = {5, 5};
+        Dimensions dimensions = {20, 15};
 
         var grade = 4;
         model = new Model (dimensions);
