@@ -99,6 +99,7 @@ public class Controller : GLib.Object {
         view.previous_move_request.connect (on_previous_move_request);
         view.game_state_changed.connect (on_state_changed);
         view.random_game_request.connect (new_random_game);
+        view.check_correct_request.connect (on_check_correct_request);
 
         solver.showsolvergrid.connect (on_show_solver_grid);
     }
@@ -267,6 +268,10 @@ public class Controller : GLib.Object {
 
 
 /*** Signal Handlers ***/
+    private bool on_check_correct_request () {
+        return model.count_errors () == 0;
+    }
+
     private void on_show_solver_grid () {
 
     }
@@ -280,16 +285,20 @@ public class Controller : GLib.Object {
         }
     }
 
-    private void on_next_move_request () {
+    private bool on_next_move_request () {
         if (forward_stack.size > 0) {
             Move mv = forward_stack.poll_head ();
             back_stack.offer_head (mv);
 
             make_move (mv);
+
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private void on_previous_move_request () {
+    private bool on_previous_move_request () {
         if (back_stack.size > 0) {
             Move mv = back_stack.poll_head ();
             /* Record copy otherwise it will be altered by next line*/
@@ -297,6 +306,10 @@ public class Controller : GLib.Object {
 
             mv.cell.state = mv.previous_state;
             make_move (mv);
+
+            return true;
+        } else {
+            return false;
         }
     }
 

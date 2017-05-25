@@ -236,7 +236,6 @@ namespace Gnonograms {
         }
 
         if (solved ()) {
-warning ("solved");
             return pass;
         }
 

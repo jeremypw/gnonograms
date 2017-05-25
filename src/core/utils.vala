@@ -149,8 +149,8 @@ namespace Gnonograms.Utils {
         }
     }
 
-    public static  int show_dlg (string msg, Gtk.MessageType type, Gtk.ButtonsType buttons) {
-        var dialog = new Gtk.MessageDialog (null,
+    public static int show_dlg (string msg, Gtk.MessageType type, Gtk.ButtonsType buttons, Gtk.Window? parent = null) {
+        var dialog = new Gtk.MessageDialog (parent,
                                             Gtk.DialogFlags.MODAL,
                                             type,
                                             buttons,
@@ -162,20 +162,20 @@ namespace Gnonograms.Utils {
         return response;
     }
 
-    public static void show_info_dialog (string msg) {
-        show_dlg (msg, Gtk.MessageType.INFO, Gtk.ButtonsType.CLOSE);
+    public static void show_info_dialog (string msg, Gtk.Window? parent = null) {
+        show_dlg (msg, Gtk.MessageType.INFO, Gtk.ButtonsType.CLOSE, parent);
     }
 
-    public static void show_warning_dialog (string msg) {
-        show_dlg (msg, Gtk.MessageType.WARNING, Gtk.ButtonsType.CLOSE);
+    public static void show_warning_dialog (string msg, Gtk.Window? parent = null) {
+        show_dlg (msg, Gtk.MessageType.WARNING, Gtk.ButtonsType.CLOSE, parent);
     }
 
-    public static void show_error_dialog (string msg) {
-        show_dlg (msg, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE);
+    public static void show_error_dialog (string msg, Gtk.Window? parent = null) {
+        show_dlg (msg, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, parent);
     }
 
-    public static bool show_confirm_dialog(string msg) {
-        return show_dlg (msg ,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO)==Gtk.ResponseType.YES;
+    public static bool show_confirm_dialog(string msg, Gtk.Window? parent = null) {
+        return show_dlg (msg ,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, parent)==Gtk.ResponseType.YES;
     }
 
 }

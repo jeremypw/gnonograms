@@ -29,6 +29,7 @@ public class View : Gtk.ApplicationWindow {
     private AppMenu app_menu;
     private ModeButton mode_switch;
     private Gtk.Button random_game_button;
+    private Gtk.Button check_correct_button;
     private HistoryControl history;
     private Model model {get; set;}
     private CellState drawing_with_state;
@@ -113,6 +114,7 @@ public class View : Gtk.ApplicationWindow {
     public bool can_go_back {
         set {
             history.can_go_back = value;
+            check_correct_button.sensitive = value && game_state == GameState.SOLVING;
         }
     }
 
@@ -123,12 +125,14 @@ public class View : Gtk.ApplicationWindow {
     }
 
     public signal void random_game_request ();
+    public signal bool check_correct_request ();
+
     public signal void resized (Dimensions dim);
     public signal void moved (Cell cell);
     public signal void game_state_changed (GameState gs);
 
-    public signal void next_move_request ();
-    public signal void previous_move_request ();
+    public signal bool next_move_request ();
+    public signal bool previous_move_request ();
 
     construct {
         title = _("Gnonograms for Elementary");
@@ -154,9 +158,27 @@ public class View : Gtk.ApplicationWindow {
 
         history = new HistoryControl ();
         header_bar.pack_start (history);
-        mode_switch = new ModeButton ();
 
+        mode_switch = new ModeButton ();
         header_bar.pack_start (mode_switch);
+
+        check_correct_button = new Gtk.Button ();
+        img = new Gtk.Image.from_icon_name ("tools-check-spelling", Gtk.IconSize.LARGE_TOOLBAR);
+        check_correct_button.image = img;
+
+        check_correct_button.clicked.connect (() => {
+            if (check_correct_request ()) {
+                Utils.show_info_dialog (_("No errors"), this);
+            } else {
+                if (Utils.show_confirm_dialog (_("Errors found - return to last correct position?"), this)) {
+                    rewind_until_correct ();
+                }
+            }
+        });
+
+        check_correct_button.sensitive = false;
+
+        header_bar.pack_start (check_correct_button);
         set_titlebar (header_bar);
 
         row_resizer = new ResizeWidget (Gtk.Orientation.VERTICAL);
@@ -491,6 +513,12 @@ public class View : Gtk.ApplicationWindow {
 
     private void on_history_go_forward () {
         next_move_request ();
+    }
+
+    private void rewind_until_correct () {
+        while (previous_move_request () && !check_correct_request ()) {
+            continue;
+        }
     }
 
     /** Private classes **/
