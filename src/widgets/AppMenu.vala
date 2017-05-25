@@ -20,8 +20,8 @@
 
 namespace Gnonograms {
 
-class AppMenu : Gtk.Button {
-    private AppPopover popover;
+class AppMenu : Gtk.MenuButton {
+    private AppPopover app_popover;
     private AppScale grade_scale;
 
     private uint _grade_val;
@@ -40,6 +40,8 @@ class AppMenu : Gtk.Button {
 
     construct {
         popover = new AppPopover (this);
+        app_popover = (AppPopover)popover;
+
         var grid = new Gtk.Grid ();
         popover.add (grid);
         grade_scale = new AppScale (1, MAXGRADE, 1);
@@ -58,20 +60,19 @@ class AppMenu : Gtk.Button {
             popover.show_all ();
         });
 
-        popover.apply_settings.connect (() => {
+        app_popover.apply_settings.connect (() => {
             store_values ();
             apply ();
         });
 
-        popover.cancel.connect (() => {
+        app_popover.cancel.connect (() => {
             restore_values ();
         });
     }
 
-    public AppMenu (Dimensions dimensions, uint grade) {
+    public AppMenu () {
         image = new Gtk.Image.from_icon_name ("open-menu", Gtk.IconSize.LARGE_TOOLBAR);
         tooltip_text = _("Options");
-        grade_scale.set_value (grade);
     }
 
     private void store_values () {

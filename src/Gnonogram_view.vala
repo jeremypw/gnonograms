@@ -20,6 +20,7 @@
 
 namespace Gnonograms {
 public class View : Gtk.ApplicationWindow {
+    private const uint NOTIFICATION_TIMEOUT_SEC = 2;
     private Gnonograms.LabelBox row_clue_box;
     private Gnonograms.LabelBox column_clue_box;
     private CellGrid cell_grid;
@@ -27,6 +28,8 @@ public class View : Gtk.ApplicationWindow {
     private ResizeWidget col_resizer;
     private Gtk.HeaderBar header_bar;
     private AppMenu app_menu;
+    private Granite.Widgets.Toast toast;
+
     private ModeButton mode_switch;
     private Gtk.Button random_game_button;
     private Gtk.Button check_correct_button;
@@ -125,7 +128,7 @@ public class View : Gtk.ApplicationWindow {
     }
 
     public signal void random_game_request ();
-    public signal bool check_correct_request ();
+    public signal uint check_errors_request ();
 
     public signal void resized (Dimensions dim);
     public signal void moved (Cell cell);
@@ -166,19 +169,16 @@ public class View : Gtk.ApplicationWindow {
         img = new Gtk.Image.from_icon_name ("gnonogram-check", Gtk.IconSize.LARGE_TOOLBAR);
         check_correct_button.image = img;
 
-        check_correct_button.clicked.connect (() => {
-            if (check_correct_request ()) {
-                Utils.show_info_dialog (_("No errors"), this);
-            } else {
-                if (Utils.show_confirm_dialog (_("Errors found - return to last correct position?"), this)) {
-                    rewind_until_correct ();
-                }
-            }
-        });
-
+        check_correct_button.clicked.connect (on_check_button_pressed);
         check_correct_button.sensitive = false;
-
         header_bar.pack_start (check_correct_button);
+
+        app_menu = new AppMenu ();
+        header_bar.pack_end (app_menu);
+
+        toast = new Granite.Widgets.Toast ("Test");
+        toast.set_default_action (null);
+
         set_titlebar (header_bar);
 
         row_resizer = new ResizeWidget (Gtk.Orientation.VERTICAL);
@@ -193,14 +193,14 @@ public class View : Gtk.ApplicationWindow {
         this.model = model;
         this.dimensions = dimensions;
 
-        app_menu = new AppMenu (dimensions, grade);
-        header_bar.pack_end (app_menu);
+        app_menu.grade_val = grade;
 
         var grid = new Gtk.Grid ();
         grid.row_spacing = 0;
         grid.column_spacing = 0;
         grid.row_spacing = 0;
         grid.border_width = 0;
+        grid.attach (toast, 0, 0, 1, 1);
         grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for rows */
         grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
         grid.attach (cell_grid, 1, 1, 1, 1);
@@ -375,6 +375,12 @@ public class View : Gtk.ApplicationWindow {
     }
 
 
+    private void rewind_until_correct () {
+        while (previous_move_request () && check_errors_request () > 0) {
+            continue;
+        }
+    }
+
     /*** Signal handlers ***/
     private void on_grid_cursor_moved (Cell from, Cell to) {
         highlight_labels (from, false);
@@ -515,10 +521,29 @@ public class View : Gtk.ApplicationWindow {
         next_move_request ();
     }
 
-    private void rewind_until_correct () {
-        while (previous_move_request () && !check_correct_request ()) {
-            continue;
+    private void on_check_button_pressed () {
+        var errors = check_errors_request ();
+
+        if (errors > 0) {
+            send_notification (
+                (ngettext (_("%u error found"), _("%u errors found"), errors)).printf (errors)
+            );
+        } else {
+            send_notification (_("No errors"));
         }
+
+        if (errors > 0) {
+            rewind_until_correct ();
+        }
+    }
+
+    private void send_notification (string text) {
+        toast.title = text;
+        toast.send_notification ();
+        Timeout.add_seconds (NOTIFICATION_TIMEOUT_SEC, () => {
+            toast.reveal_child = false;
+            return false;
+        });
     }
 
     /** Private classes **/

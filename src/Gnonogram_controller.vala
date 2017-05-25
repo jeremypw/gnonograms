@@ -100,7 +100,7 @@ public class Controller : GLib.Object {
         view.previous_move_request.connect (on_previous_move_request);
         view.game_state_changed.connect (on_state_changed);
         view.random_game_request.connect (new_random_game);
-        view.check_correct_request.connect (on_check_correct_request);
+        view.check_errors_request.connect (on_check_errors_request);
 
         solver.showsolvergrid.connect (on_show_solver_grid);
     }
@@ -276,8 +276,8 @@ public class Controller : GLib.Object {
 
 
 /*** Signal Handlers ***/
-    private bool on_check_correct_request () {
-        return model.count_errors () == 0;
+    private uint on_check_errors_request () {
+        return model.count_errors ();
     }
 
     private void on_show_solver_grid () {
