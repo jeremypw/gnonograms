@@ -112,7 +112,9 @@ public class Controller : GLib.Object {
         view.check_errors_request.connect (on_check_errors_request);
         view.delete_event.connect (on_view_deleted);
 
-        saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.SET);
+        saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
+        saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
+
         solver.showsolvergrid.connect (on_show_solver_grid);
     }
 
@@ -358,8 +360,6 @@ public class Controller : GLib.Object {
 
     private void on_state_changed (GameState gs) {
         game_state = gs;
-
-        saved_state.set_enum ("mode", gs);
     }
 
     private bool on_view_deleted () {
