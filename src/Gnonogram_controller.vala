@@ -112,6 +112,7 @@ public class Controller : GLib.Object {
         view.check_errors_request.connect (on_check_errors_request);
         view.delete_event.connect (on_view_deleted);
 
+        saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.SET);
         solver.showsolvergrid.connect (on_show_solver_grid);
     }
 

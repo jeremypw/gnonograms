@@ -68,6 +68,11 @@ public class View : Gtk.ApplicationWindow {
     private double _fontheight;
     public double fontheight {
         set {
+            if (value < 1) {
+                set_default_fontheight_from_dimensions ();
+                return;
+            }
+
             _fontheight = value;
             row_clue_box.fontheight = value;
             column_clue_box.fontheight = value;
