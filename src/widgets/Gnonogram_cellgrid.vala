@@ -291,9 +291,6 @@ public class CellGrid : Gtk.DrawingArea {
         cell_body_width = cell_width;
         cell_body_height = cell_height;
 
-//~         highlight_pattern.scale_to_size (cell_width, cell_height);
-
-//~         cell_pattern_type = CellPatternType.UNDEFINED; /* Causes refresh of existing pattern */
         highlight_pattern = new CellPattern.highlight (cell_width, cell_height); /* Causes refresh of existing pattern */
     }
 

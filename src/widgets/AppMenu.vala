@@ -23,6 +23,7 @@ namespace Gnonograms {
 class AppMenu : Gtk.MenuButton {
     private AppPopover app_popover;
     private AppScale grade_scale;
+    private Gtk.Label grade_label;
 
     private uint _grade_val;
     public uint grade_val {
@@ -33,6 +34,7 @@ class AppMenu : Gtk.MenuButton {
         set {
             _grade_val = value;
             grade_scale.set_value (value);
+            grade_label.label = Gnonograms.difficulty_to_string ((Difficulty)value);
         }
     }
 
@@ -44,9 +46,19 @@ class AppMenu : Gtk.MenuButton {
 
         var grid = new Gtk.Grid ();
         popover.add (grid);
-        grade_scale = new AppScale (1, MAXGRADE, 1);
-        var grade_label = new Gtk.Label (_("Difficulty"));
+        grade_scale = new AppScale (0, Difficulty.MAXIMUM, 1);
+
+        grade_scale.scale.value_changed.connect ((range) => {
+            var val = (uint)(range.get_value ());
+            var s = Gnonograms.difficulty_to_string ((Difficulty)(val));
+            if (s != grade_label.label) {
+                grade_label.label = s;
+            }
+        });
+
+        grade_label = new Gtk.Label ("");
         grade_label.xalign = 1;
+        grade_label.set_size_request (100, -1); /* So size does not change depending on text */
 
         grid.attach (grade_label, 0, 0, 1, 1);
         grid.attach (grade_scale, 1, 0, 1, 1);
@@ -117,7 +129,7 @@ class AppMenu : Gtk.MenuButton {
     /** Scale limited to integral values separated by step (interface uses uint) **/
     private class AppScale : Gtk.Grid {
         private uint step;
-        private Gtk.HScale scale;
+        public Gtk.HScale scale {get; private set;}
         private Gtk.Label val_label;
 
         construct {
@@ -131,10 +143,6 @@ class AppMenu : Gtk.MenuButton {
             row_spacing = 12;
             column_spacing = 6;
             border_width = 12;
-
-            scale.value_changed.connect (() => {
-                val_label.label = get_value ().to_string ();
-            });
         }
 
         public AppScale (uint _start, uint _end, uint _step) {

@@ -215,7 +215,7 @@ public class Model : GLib.Object {
 
     public void fill_random (uint grade) {
         clear();
-        double rel_g = (double)grade / (double)MAXGRADE;
+        double rel_g = (double)grade / (double)(Difficulty.MAXIMUM);
         int midcol = (int)rows / 2;
         int midrow = (int)cols / 2;
         int mincdf = 2 + (int)(((double)rows * rel_g / 4));

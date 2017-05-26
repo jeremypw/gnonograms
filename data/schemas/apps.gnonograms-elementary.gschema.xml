@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-    <enum id="difficulty">
-        <value value="0" nick="very easy"/>
+    <enum id="apps.gnonograms-elementary.difficulty">
+        <value value="0" nick="trivial"/>
         <value value="1" nick="easy"/>
         <value value="2" nick="moderate"/>
         <value value="3" nick="hard"/>
-        <value value="4" nick="very hard"/>
+        <value value="4" nick="challenging"/>
+        <value value="5" nick="maximum"/>
     </enum>
 
-    <enum id="game-state">
+    <enum id="apps.gnonograms-elementary.game-state">
         <value value="0" nick="setting"/>
         <value value="1" nick="solving"/>
     </enum>
 
     <schema path="/apps/gnonograms-elementary/settings/" id="apps.gnonograms-elementary.settings">
-        <key name="difficulty" enum="difficulty">
+        <key name="grade" enum="apps.gnonograms-elementary.difficulty">
           <default>'moderate'</default>
           <summary>difficulty of generated puzzles</summary>
           <description>
@@ -40,7 +41,7 @@
     </schema>
 
     <schema path="/apps/gnonograms-elementary/saved-state/" id="apps.gnonograms-elementary.saved-state">
-        <key name="mode" enum="game-state">
+        <key name="mode" enum="apps.gnonograms-elementary.game-state">
           <default>'solving'</default>
           <summary>setting or solving puzzles</summary>
           <description>

@@ -60,7 +60,17 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    public uint grade {get {return app_menu.grade_val;}}
+    private Difficulty _grade = 0;
+    public Difficulty grade {
+        get {
+            return _grade;
+        }
+
+        set {
+            _grade = value;
+            app_menu.grade_val = (uint)grade;
+        }
+    }
 
     public uint rows {get { return dimensions.height; }}
     public uint cols {get { return dimensions.width; }}
@@ -189,15 +199,13 @@ public class View : Gtk.ApplicationWindow {
         col_resizer = new ResizeWidget (Gtk.Orientation.HORIZONTAL);
     }
 
-    public View (Dimensions dimensions, uint grade, Model model) {
+    public View (Dimensions dimensions, Model model) {
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL, dimensions);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL, dimensions);
         cell_grid = new CellGrid (model);
 
         this.model = model;
         this.dimensions = dimensions;
-
-        app_menu.grade_val = grade;
 
         var grid = new Gtk.Grid ();
         grid.row_spacing = 0;
@@ -251,6 +259,8 @@ public class View : Gtk.ApplicationWindow {
 
         row_resizer.changed.connect (on_dimensions_changed);
         col_resizer.changed.connect (on_dimensions_changed);
+
+        app_menu.apply.connect (on_app_menu_apply);
     }
 
     private void set_default_fontheight_from_dimensions () {
@@ -384,6 +394,16 @@ public class View : Gtk.ApplicationWindow {
             continue;
         }
     }
+
+    private void send_notification (string text) {
+        toast.title = text;
+        toast.send_notification ();
+        Timeout.add_seconds (NOTIFICATION_TIMEOUT_SEC, () => {
+            toast.reveal_child = false;
+            return false;
+        });
+    }
+
 
     /*** Signal handlers ***/
     private void on_grid_cursor_moved (Cell from, Cell to) {
@@ -541,14 +561,11 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private void send_notification (string text) {
-        toast.title = text;
-        toast.send_notification ();
-        Timeout.add_seconds (NOTIFICATION_TIMEOUT_SEC, () => {
-            toast.reveal_child = false;
-            return false;
-        });
+
+    public void on_app_menu_apply () {
+        grade = (Difficulty)(app_menu.grade_val);
     }
+
 
     /** Private classes **/
     private class ModeButton : Granite.Widgets.ModeButton {

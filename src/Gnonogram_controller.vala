@@ -58,8 +58,10 @@ public class Controller : GLib.Object {
         }
     }
 
-    public uint grade {
+
+    public Difficulty grade {
         get {return view.grade;}
+        set {view.grade = value;}
     }
 
     private Dimensions dimensions {get {return view.dimensions;}}
@@ -87,15 +89,15 @@ public class Controller : GLib.Object {
 
         Dimensions dimensions = {20, 15};
 
-        var grade = 4;
 
         model = new Model (dimensions);
-        view = new View (dimensions, grade, model);
+        view = new View (dimensions, model);
         solver = new Solver (dimensions);
 
-        connect_signals ();
-
+        restore_settings ();
         restore_saved_state ();
+
+        connect_signals ();
 
         if (game == null || !load_game (game)) {
             new_game ();
@@ -114,6 +116,8 @@ public class Controller : GLib.Object {
 
         saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
         saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
+
+        settings.bind ("grade", view, "grade", SettingsBindFlags.SET);
 
         solver.showsolvergrid.connect (on_show_solver_grid);
     }
@@ -203,6 +207,10 @@ public class Controller : GLib.Object {
         y = saved_state.get_int ("window-y");
 
         window.move (x, y);
+    }
+
+    private void restore_settings () {
+        grade = (Difficulty)(settings.get_enum ("grade"));
     }
 
     private bool load_game (File game) {

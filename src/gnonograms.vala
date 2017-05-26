@@ -21,11 +21,32 @@
 namespace Gnonograms {
 /*TODO - move enum and struct definitions elsewhere */
 public enum Difficulty {
-    VERY_EASY,
+    TRIVIAL,
     EASY,
-    MEDIUM,
+    MODERATE,
     HARD,
-    VERY_HARD;
+    CHALLENGING,
+    MAXIMUM;
+}
+
+public static string difficulty_to_string (Difficulty d) {
+    switch (d) {
+        case Difficulty.TRIVIAL:
+            return _("Very Easy");
+        case Difficulty.EASY:
+            return _("Easy");
+        case Difficulty.MODERATE:
+            return _("Moderately difficult");
+        case Difficulty.HARD:
+            return _("Difficult");
+        case Difficulty.CHALLENGING:
+            return _("Very Difficult");
+        case Difficulty.MAXIMUM:
+            return _("Maximum");
+
+        default:
+            return "";
+    }
 }
 
 public enum GameState {
@@ -148,7 +169,6 @@ public static double MINFONTSIZE = 3.0;
 public static double MAXFONTSIZE = 72.0;
 public const string BLOCKSEPARATOR = ", ";
 public const string BLANKLABELTEXT = _("?");
-public static uint MAXGRADE = 12; //max grade level
 
 public class App : Granite.Application {
     public Controller controller;
