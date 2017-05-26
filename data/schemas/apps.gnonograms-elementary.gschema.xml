@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
     <enum id="difficulty">
-    <value value="0" nick="very easy"/>
-    <value value="1" nick="easy"/>
-    <value value="2" nick="moderate"/>
-    <value value="3" nick="hard"/>
-    <value value="4" nick="very hard"/>
+        <value value="0" nick="very easy"/>
+        <value value="1" nick="easy"/>
+        <value value="2" nick="moderate"/>
+        <value value="3" nick="hard"/>
+        <value value="4" nick="very hard"/>
+    </enum>
+
+    <enum id="game-state">
+        <value value="0" nick="setting"/>
+        <value value="1" nick="solving"/>
     </enum>
 
     <schema path="/apps/gnonograms-elementary/settings/" id="apps.gnonograms-elementary.settings">
@@ -14,6 +19,56 @@
           <summary>difficulty of generated puzzles</summary>
           <description>
             An approximate measure of how hard the generated random puzzles will be to solve.
+          </description>
+        </key>
+
+        <key type="i" name="rows">
+          <default>15</default>
+          <summary>number of rows in grid</summary>
+          <description>
+            The number of rows of cells in the puzzle grid.
+          </description>
+        </key>
+
+        <key type="i" name="columns">
+          <default>20</default>
+          <summary>number of columns in grid</summary>
+          <description>
+            The number of columns of cells in the puzzle grid.
+          </description>
+        </key>
+    </schema>
+
+    <schema path="/apps/gnonograms-elementary/saved-state/" id="apps.gnonograms-elementary.saved-state">
+        <key name="mode" enum="game-state">
+          <default>'solving'</default>
+          <summary>setting or solving puzzles</summary>
+          <description>
+            Whether the game is in the setting or solving mode.
+          </description>
+        </key>
+
+        <key type="i" name="window-x">
+          <default>-100</default>
+          <summary>Origin of window x coordinate</summary>
+          <description>
+            The x-coordinate of the window origin, or -100 for centre window.
+          </description>
+        </key>
+
+        <key type="i" name="window-y">
+          <default>-100</default>
+          <summary>Origin of window y coordinate</summary>
+          <description>
+            The x-coordinate of the window origin, or -100 for centre window.
+          </description>
+        </key>
+
+        <key type="i" name="font-height">
+          <default>-100</default>
+          <summary>Font height for clue labels</summary>
+          <description>
+            The height of the font used for clues, or -100 for default for screen and grid.
           </description>
         </key>
     </schema>
