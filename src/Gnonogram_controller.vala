@@ -357,6 +357,8 @@ public class Controller : GLib.Object {
 
     private void on_state_changed (GameState gs) {
         game_state = gs;
+
+        saved_state.set_enum ("mode", gs);
     }
 
     private bool on_view_deleted () {
