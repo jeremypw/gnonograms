@@ -24,7 +24,7 @@ public class Controller : GLib.Object {
     public GLib.Settings settings {get; construct;}
     public GLib.Settings saved_state {get; construct;}
 
-    private View view;
+    public View view {get; private set;}
     private Model? model;
     private Solver solver;
 
@@ -63,8 +63,8 @@ public class Controller : GLib.Object {
     }
 
     private Dimensions dimensions {get {return view.dimensions;}}
-    private uint rows {get { return view.rows; }}
-    private uint cols {get { return view.cols; }}
+    public uint rows {get { return view.rows; }}
+    public uint cols {get { return view.cols; }}
 
     public Gtk.Window window {
         get {
@@ -350,6 +350,9 @@ public class Controller : GLib.Object {
 
         model.clear ();
         game_state = GameState.SETTING;
+
+        settings.set_uint ("rows", rows);
+        settings.set_uint ("columns", cols);
     }
 
     private void on_state_changed (GameState gs) {

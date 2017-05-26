@@ -22,7 +22,7 @@
           </description>
         </key>
 
-        <key type="i" name="rows">
+        <key type="u" name="rows">
           <default>15</default>
           <summary>number of rows in grid</summary>
           <description>
@@ -30,7 +30,7 @@
           </description>
         </key>
 
-        <key type="i" name="columns">
+        <key type="u" name="columns">
           <default>20</default>
           <summary>number of columns in grid</summary>
           <description>
