@@ -83,24 +83,23 @@ public class LabelBox : Gtk.Grid {
         labels = new Label[MAXSIZE];
     }
 
-    public LabelBox (Gtk.Orientation orientation, Dimensions dimensions) {
+    public LabelBox (Gtk.Orientation orientation) {
         Object (column_homogeneous: true,
                 row_homogeneous: true,
                 column_spacing: 0,
                 row_spacing: 0);
 
         vertical_labels = (orientation == Gtk.Orientation.HORIZONTAL);
-        this.dimensions = dimensions;
 
         /* Must have at least one label for resize to work */
         var label = new_label (vertical_labels, other_size);
         attach (label, 0, 0, 1, 1);
+
         if (vertical_labels) {
             vexpand = true;
         } else {
             hexpand = true;
         }
-        resize ();
     }
 
     private Label new_label (bool vertical, uint size) {

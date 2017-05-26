@@ -68,10 +68,6 @@ public class Model : GLib.Object {
         data = new CellState[MAXSIZE];
     }
 
-    public Model (Dimensions dimensions) {
-        Object (dimensions: dimensions);
-    }
-
     public void clear_errors() {
         CellState cs;
         for (int r = 0; r < rows; r++) {

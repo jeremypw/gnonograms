@@ -72,10 +72,6 @@ namespace Gnonograms {
     public signal void showsolvergrid ();
     public signal void showprogress (int guesses);
 
-    public Solver (Dimensions dimensions) {
-        Object (dimensions: dimensions);
-    }
-
     public bool initialize (string[] rowclues, string[] colclues,
                             My2DCellArray? startgrid, My2DCellArray? solutiongrid) {
 

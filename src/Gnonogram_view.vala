@@ -199,13 +199,12 @@ public class View : Gtk.ApplicationWindow {
         col_resizer = new ResizeWidget (Gtk.Orientation.HORIZONTAL);
     }
 
-    public View (Dimensions dimensions, Model model) {
-        row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL, dimensions);
-        column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL, dimensions);
+    public View (Model model) {
+        row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL);
+        column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL);
         cell_grid = new CellGrid (model);
 
         this.model = model;
-        this.dimensions = dimensions;
 
         var grid = new Gtk.Grid ();
         grid.row_spacing = 0;
@@ -221,8 +220,8 @@ public class View : Gtk.ApplicationWindow {
         grid.attach (row_resizer, 2, 1, 1, 1);
 
         add (grid);
+
         connect_signals ();
-        show_all ();
     }
 
     public void blank_labels () {
@@ -240,7 +239,6 @@ public class View : Gtk.ApplicationWindow {
 
     private void connect_signals () {
         realize.connect (() => {
-            set_default_fontheight_from_dimensions ();
             update_labels_from_model ();
         });
 

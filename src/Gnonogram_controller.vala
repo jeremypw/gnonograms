@@ -65,8 +65,8 @@ public class Controller : GLib.Object {
     }
 
     private Dimensions dimensions {get {return view.dimensions;}}
-    public uint rows {get { return view.rows; }}
-    public uint cols {get { return view.cols; }}
+    public uint rows {get {return view.rows;}}
+    public uint cols {get {return view.cols;}}
 
     public Gtk.Window window {
         get {
@@ -87,17 +87,19 @@ public class Controller : GLib.Object {
     public Controller (File? game = null) {
         Object (game: game);
 
-        Dimensions dimensions = {20, 15};
-
-
-        model = new Model (dimensions);
-        view = new View (dimensions, model);
-        solver = new Solver (dimensions);
+        model = new Model ();
+        view = new View (model);
+        solver = new Solver ();
+        connect_signals ();
 
         restore_settings ();
         restore_saved_state ();
 
-        connect_signals ();
+        saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
+        saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
+        settings.bind ("grade", view, "grade", SettingsBindFlags.DEFAULT);
+
+        view.show_all ();
 
         if (game == null || !load_game (game)) {
             new_game ();
@@ -113,11 +115,6 @@ public class Controller : GLib.Object {
         view.random_game_request.connect (new_random_game);
         view.check_errors_request.connect (on_check_errors_request);
         view.delete_event.connect (on_view_deleted);
-
-        saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
-        saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
-
-        settings.bind ("grade", view, "grade", SettingsBindFlags.SET);
 
         solver.showsolvergrid.connect (on_show_solver_grid);
     }
@@ -210,7 +207,9 @@ public class Controller : GLib.Object {
     }
 
     private void restore_settings () {
-        grade = (Difficulty)(settings.get_enum ("grade"));
+        var rows = settings.get_uint ("rows");
+        var cols = settings.get_uint ("columns");
+        view.dimensions = {cols, rows};
     }
 
     private bool load_game (File game) {
