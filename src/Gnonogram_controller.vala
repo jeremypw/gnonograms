@@ -22,6 +22,7 @@ public class Controller : GLib.Object {
     private const int MAXTRIES = 5;
 
     public GLib.Settings settings {get; construct;}
+    public GLib.Settings saved_state {get; construct;}
 
     private View view;
     private Model? model;
@@ -71,11 +72,14 @@ public class Controller : GLib.Object {
         }
     }
 
+    public signal void quit_app ();
+
     construct {
         back_stack = new Gee.LinkedList<Move> ();
         forward_stack = new Gee.LinkedList<Move> ();
 
         settings = new Settings ("apps.gnonograms-elementary.settings");
+        saved_state = new Settings ("apps.gnonograms-elementary.saved-state");
     }
 
     public Controller (File? game = null) {
@@ -106,6 +110,7 @@ public class Controller : GLib.Object {
         view.game_state_changed.connect (on_state_changed);
         view.random_game_request.connect (new_random_game);
         view.check_errors_request.connect (on_check_errors_request);
+        view.delete_event.connect (on_view_deleted);
 
         solver.showsolvergrid.connect (on_show_solver_grid);
     }
@@ -183,6 +188,10 @@ public class Controller : GLib.Object {
 
 
     private void save_game_state () {
+        int x, y;
+        window.get_position (out x, out y);
+        saved_state.set_int ("window-x", x);
+        saved_state.set_int ("window-y", y);
     }
 
     private void restore_settings () {
@@ -279,6 +288,10 @@ public class Controller : GLib.Object {
         return res;
     }
 
+    public void quit () {
+        save_game_state ();
+        quit_app ();
+    }
 
 /*** Signal Handlers ***/
     private uint on_check_errors_request () {
@@ -338,8 +351,9 @@ public class Controller : GLib.Object {
         game_state = gs;
     }
 
-    public void quit () {
-        save_game_state ();
+    private bool on_view_deleted () {
+        quit ();
+        return false;
     }
 }
 }

@@ -49,18 +49,18 @@
         </key>
 
         <key type="i" name="window-x">
-          <default>-100</default>
+          <default>-1000</default>
           <summary>Origin of window x coordinate</summary>
           <description>
-            The x-coordinate of the window origin, or -100 for centre window.
+            The x-coordinate of the window origin, or -1000 for centre window.
           </description>
         </key>
 
         <key type="i" name="window-y">
-          <default>-100</default>
+          <default>-1000</default>
           <summary>Origin of window y coordinate</summary>
           <description>
-            The x-coordinate of the window origin, or -100 for centre window.
+            The x-coordinate of the window origin, or -1000 for centre window.
           </description>
         </key>
 

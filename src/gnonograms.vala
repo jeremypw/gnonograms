@@ -186,7 +186,7 @@ public class App : Granite.Application {
         });
 
         add_action (quit_action);
-        add_accelerator ("<Control>q", "app.quit", null);
+        add_accelerator ("<Ctrl>q", "app.quit", null);
 
         game_name = "";
     }
@@ -212,14 +212,15 @@ public class App : Granite.Application {
         }
     }
 
-    public void open_file (File game) {
+    public void open_file (File? game) {
         controller = new Controller (game);
         this.add_window (controller.window);
+
+        controller.quit_app.connect (quit);
     }
 
     public override void activate () {
-        controller = new Controller ();
-        this.add_window (controller.window);
+        open_file (null);
     }
 }
 }
