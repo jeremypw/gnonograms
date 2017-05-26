@@ -74,6 +74,11 @@ public class Controller : GLib.Object {
         }
     }
 
+    public string title {
+        get {return view.header_title;}
+        set {view.header_title = value;}
+    }
+
     public signal void quit_app ();
 
     construct {
@@ -99,11 +104,11 @@ public class Controller : GLib.Object {
         saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
         settings.bind ("grade", view, "grade", SettingsBindFlags.DEFAULT);
 
-        view.show_all ();
-
-        if (game == null || !load_game (game)) {
-            new_game ();
+        if (game_state == GameState.SOLVING && title == null) {
+            new_random_game ();
         }
+
+        view.show_all ();
     }
 
     private void connect_signals () {

@@ -115,6 +115,10 @@ public class View : Gtk.ApplicationWindow {
     }
 
     public string header_title {
+        get {
+            return header_bar.title;
+        }
+
         set {
             header_bar.title = value;
         }
