@@ -139,7 +139,6 @@ public class View : Gtk.ApplicationWindow {
 
     construct {
         title = _("Gnonograms for Elementary");
-        window_position = Gtk.WindowPosition.CENTER_ALWAYS;
         resizable = false;
         drawing_with_state = CellState.UNDEFINED;
 

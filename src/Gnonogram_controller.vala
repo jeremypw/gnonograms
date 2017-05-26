@@ -85,17 +85,17 @@ public class Controller : GLib.Object {
     public Controller (File? game = null) {
         Object (game: game);
 
-        restore_settings ();
-        /* Dummy pending restore settings implementation */
-
         Dimensions dimensions = {20, 15};
 
         var grade = 4;
+
         model = new Model (dimensions);
         view = new View (dimensions, grade, model);
         solver = new Solver (dimensions);
 
         connect_signals ();
+
+        restore_saved_state ();
 
         if (game == null || !load_game (game)) {
             new_game ();
@@ -194,7 +194,12 @@ public class Controller : GLib.Object {
         saved_state.set_int ("window-y", y);
     }
 
-    private void restore_settings () {
+    private void restore_saved_state () {
+        int x, y;
+        x = saved_state.get_int ("window-x");
+        y = saved_state.get_int ("window-y");
+
+        window.move (x, y);
     }
 
     private bool load_game (File game) {
