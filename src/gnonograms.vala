@@ -179,8 +179,8 @@ public class App : Granite.Application {
         flags = ApplicationFlags.HANDLES_OPEN;
 
         program_name = _("Gnonograms");
-        app_years = "display_working";
-        app_icon = "gnonograms-3";
+        app_years = "2017";
+        app_icon = "gnonograms-elementary";
 
         build_data_dir = Build.DATADIR;
         build_pkg_data_dir = Build.PKGDATADIR;

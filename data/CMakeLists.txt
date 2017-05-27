@@ -18,4 +18,3 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/gnonograms-elementary-96.png DES
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/gnonograms-elementary-64.png DESTINATION ${DATADIR}/icons/hicolor/64/apps)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/gnonograms-elementary-48.png DESTINATION ${DATADIR}/icons/hicolor/48/apps)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/gnonograms-elementary-32.png DESTINATION ${DATADIR}/icons/hicolor/32/apps)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/gnonograms-elementary.svg DESTINATION ${DATADIR}/icons/elementary/apps/128)
