@@ -101,9 +101,9 @@ class Label : Gtk.Label {
 
     public void highlight (bool is_highlight) {
         if (is_highlight) {
-            set_state(Gtk.StateType.SELECTED);
+            set_state_flags (Gtk.StateFlags.SELECTED, true);
         } else {
-            set_state(Gtk.StateType.NORMAL);
+            set_state_flags (Gtk.StateFlags.NORMAL, true);
         }
     }
 

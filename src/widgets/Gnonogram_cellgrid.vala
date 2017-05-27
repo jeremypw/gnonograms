@@ -150,11 +150,21 @@ public class CellGrid : Gtk.DrawingArea {
             return;
         }
 
+
+#if HAVE_GDK_3_22
+        var dc = this.window ().begin_draw_frame (new Cairo.Region ());
+        cr = dc.get_cairo_context ();
+#else
         var cr = Gdk.cairo_create (this.get_window ());
+#endif
+
         cell.state = array.get_data_from_rc (cell.row, cell.col);
         draw_cell (cr, cell, highlight);
-
         draw_grid (cr);
+
+#if HAVE_GDK_3_22
+        this.window ().end_draw_frame ();
+#endif
     }
 
     public void draw_cell (Cairo.Context cr, Cell cell, bool highlight = false, bool mark = false) {
@@ -343,20 +353,13 @@ public class CellGrid : Gtk.DrawingArea {
 
     private class CellPattern: GLib.Object {
         public Cairo.Pattern pattern;
-        private double w0 = -1;
-        private double h0 = -1;
         private double x0 = 0;
         private double y0 = 0;
-
-        private double w = 1;
-        private double h = 1;
-        private double x = 0;
-        private double y = 0;
 
         private Cairo.Matrix matrix;
 
         construct {
-            matrix = new Cairo.Matrix.identity ();
+            matrix = Cairo.Matrix.identity ();
         }
 
         public CellPattern.cell (Gdk.RGBA color) {

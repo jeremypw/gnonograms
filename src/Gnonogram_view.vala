@@ -272,6 +272,7 @@ public class View : Gtk.ApplicationWindow {
         if (get_window () == null) {
             return;
         }
+
 #if HAVE_GDK_3_22
         var display = Gdk.Display.get_default();
         var monitor = display.get_monitor_at_window (get_window ());

@@ -129,11 +129,11 @@ class AppMenu : Gtk.MenuButton {
     /** Scale limited to integral values separated by step (interface uses uint) **/
     private class AppScale : Gtk.Grid {
         private uint step;
-        public Gtk.HScale scale {get; private set;}
+        public Gtk.Scale scale {get; private set;}
         private Gtk.Label val_label;
 
         construct {
-            scale = new Gtk.HScale (null);
+            scale = new Gtk.Scale (Gtk.Orientation.HORIZONTAL, null);
             val_label = new Gtk.Label (null);
             val_label.xalign = 1;
 
