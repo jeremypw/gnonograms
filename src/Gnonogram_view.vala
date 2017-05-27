@@ -173,6 +173,7 @@ public class View : Gtk.ApplicationWindow {
         random_game_button = new Gtk.Button ();
         var img = new Gtk.Image.from_icon_name ("gnonogram-puzzle", Gtk.IconSize.LARGE_TOOLBAR);
         random_game_button.image = img;
+        random_game_button.tooltip_text = _("Generate Random Game");
         random_game_button.clicked.connect (() => {random_game_request ();});
 
         header_bar.pack_start (random_game_button);
@@ -186,7 +187,7 @@ public class View : Gtk.ApplicationWindow {
         check_correct_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("gnonogram-check", Gtk.IconSize.LARGE_TOOLBAR);
         check_correct_button.image = img;
-
+        check_correct_button.tooltip_text = _("Undo Any Errors");
         check_correct_button.clicked.connect (on_check_button_pressed);
         check_correct_button.sensitive = false;
         header_bar.pack_start (check_correct_button);
@@ -199,8 +200,8 @@ public class View : Gtk.ApplicationWindow {
 
         set_titlebar (header_bar);
 
-        row_resizer = new ResizeWidget (Gtk.Orientation.VERTICAL);
-        col_resizer = new ResizeWidget (Gtk.Orientation.HORIZONTAL);
+        row_resizer = new ResizeWidget (Gtk.Orientation.VERTICAL, _("Set Number of Rows"));
+        col_resizer = new ResizeWidget (Gtk.Orientation.HORIZONTAL, _("Set Number of Columns"));
     }
 
     public View (Model model) {
@@ -592,6 +593,9 @@ public class View : Gtk.ApplicationWindow {
             setting_icon.set_data ("mode", GameState.SETTING);
             solving_icon.set_data ("mode", GameState.SOLVING);
 
+            setting_icon.tooltip_text = _("Draw a pattern");
+            solving_icon.tooltip_text = _("Solve a puzzle");
+
             setting_index = append (setting_icon);
             solving_index = append (solving_icon);
         }
@@ -679,9 +683,14 @@ public class View : Gtk.ApplicationWindow {
             leave_notify_event.connect (on_leave);
         }
 
-        public ResizeWidget (Gtk.Orientation orientation) {
+        public ResizeWidget (Gtk.Orientation orientation, string? tip = null) {
             scale = new ResizeScale (orientation, 5, 50, 5);
             scale_revealer.add (scale);
+
+
+            if (tip != null) {
+                tooltip_text = tip;
+            }
 
             Gtk.Box image_box = new Gtk.Box (orientation, 0);
 
@@ -714,7 +723,7 @@ public class View : Gtk.ApplicationWindow {
         }
 
         private uint reveal_timeout_id = 0;
-        private const uint REVEAL_DELAY_MSEC = 200;
+        private const uint REVEAL_DELAY_MSEC = 100;
         public void show_scale (bool show) {
             if (reveal_timeout_id > 0) {
                 Source.remove (reveal_timeout_id);
