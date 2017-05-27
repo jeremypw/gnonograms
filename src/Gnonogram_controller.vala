@@ -43,6 +43,10 @@ public class Controller : GLib.Object {
         }
     }
 
+    public bool is_solving {
+        get {return game_state == GameState.SOLVING;}
+    }
+
     private File? _game;
     public File? game {
         get {
@@ -104,7 +108,7 @@ public class Controller : GLib.Object {
         saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
         settings.bind ("grade", view, "grade", SettingsBindFlags.DEFAULT);
 
-        if (game_state == GameState.SOLVING && title == null) {
+        if (is_solving && title == null) {
             new_random_game ();
         }
 
@@ -119,6 +123,7 @@ public class Controller : GLib.Object {
         view.game_state_changed.connect (on_state_changed);
         view.random_game_request.connect (new_random_game);
         view.check_errors_request.connect (on_check_errors_request);
+        view.rewind_request.connect (on_rewind_request);
         view.delete_event.connect (on_view_deleted);
 
         solver.showsolvergrid.connect (on_show_solver_grid);
@@ -237,6 +242,24 @@ public class Controller : GLib.Object {
 
         back_stack.offer_head (new_move);
         update_history_view ();
+
+        /* Check if puzzle finished */
+        if (is_solving && back_stack.size == rows * cols) {
+            var errors = model.count_errors ();
+            if (errors == 0) {
+                view.send_notification (_("Congratulations. You have solved the puzzle"));
+                game_state = GameState.SETTING;
+            } else {
+                view.send_notification (_("You have made some errors"));
+                rewind_until_correct ();
+            }
+        }
+    }
+
+    private void rewind_until_correct () {
+        while (on_previous_move_request () && model.count_errors () > 0) {
+            continue;
+        }
     }
 
     private void make_move (Move mv) {
@@ -357,6 +380,10 @@ public class Controller : GLib.Object {
         } else {
             return false;
         }
+    }
+
+    private void on_rewind_request () {
+        rewind_until_correct ();
     }
 
     private void on_view_resized () {

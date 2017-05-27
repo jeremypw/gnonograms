@@ -114,6 +114,8 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
+    private bool is_solving {get {return game_state == GameState.SOLVING;}}
+
     public string header_title {
         get {
             return header_bar.title;
@@ -136,7 +138,7 @@ public class View : Gtk.ApplicationWindow {
     public bool can_go_back {
         set {
             history.can_go_back = value;
-            check_correct_button.sensitive = value && game_state == GameState.SOLVING;
+            check_correct_button.sensitive = value && is_solving;
         }
     }
 
@@ -148,13 +150,15 @@ public class View : Gtk.ApplicationWindow {
 
     public signal void random_game_request ();
     public signal uint check_errors_request ();
+    public signal void rewind_request ();
+    public signal bool next_move_request ();
+    public signal bool previous_move_request ();
 
     public signal void resized (Dimensions dim);
     public signal void moved (Cell cell);
     public signal void game_state_changed (GameState gs);
 
-    public signal bool next_move_request ();
-    public signal bool previous_move_request ();
+
 
     construct {
         title = _("Gnonograms for Elementary");
@@ -335,7 +339,7 @@ public class View : Gtk.ApplicationWindow {
     private void mark_cell (Cell cell) {
         assert (cell.state != CellState.UNDEFINED);
 
-        if (game_state == GameState.SETTING) {
+        if (!is_solving) {
             update_labels_for_cell (cell);
         }
     }
@@ -378,7 +382,7 @@ public class View : Gtk.ApplicationWindow {
                 break;
 
             case "X":
-                if (game_state == GameState.SOLVING) {
+                if (is_solving) {
                     drawing_with_state = CellState.UNKNOWN;
                     break;
                 } else {
@@ -392,14 +396,7 @@ public class View : Gtk.ApplicationWindow {
         make_move_at_cell ();
     }
 
-
-    private void rewind_until_correct () {
-        while (previous_move_request () && check_errors_request () > 0) {
-            continue;
-        }
-    }
-
-    private void send_notification (string text) {
+    public void send_notification (string text) {
         toast.title = text;
         toast.send_notification ();
         Timeout.add_seconds (NOTIFICATION_TIMEOUT_SEC, () => {
@@ -430,7 +427,7 @@ public class View : Gtk.ApplicationWindow {
                 break;
 
             case Gdk.BUTTON_MIDDLE:
-                if (game_state == GameState.SOLVING) {
+                if (is_solving) {
                     drawing_with_state = CellState.UNKNOWN;
                     break;
                 } else {
@@ -561,7 +558,7 @@ public class View : Gtk.ApplicationWindow {
         }
 
         if (errors > 0) {
-            rewind_until_correct ();
+            rewind_request ();
         }
     }
 

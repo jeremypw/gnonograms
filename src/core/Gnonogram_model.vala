@@ -34,6 +34,7 @@ public class Model : GLib.Object {
     }
 
     public GameState game_state {get; set;}
+
     public My2DCellArray display_data  {
         get {
             if (game_state == GameState.SETTING) {
