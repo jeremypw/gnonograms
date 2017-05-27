@@ -4,7 +4,9 @@ cmake_policy (VERSION 2.6)
 
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
+set (APP_NAME "Gnonograms")
 set (EXEC_NAME "gnonograms-elementary")
+set (ICON_NAME "gnonograms-elementary")
 set (VERSION "0.1")
 set (VERSION_INFO "Initial version for elementaryos based on version 0.9.9.3 of gnonograms3-gtk")
 set (RELEASE_NAME "Create and solve gnonogram puzzles")
@@ -40,6 +42,7 @@ include(ValaVersion)
 ensure_vala_version("0.34" MINIMUM)
 
 add_subdirectory (data)
+add_subdirectory (po)
 
 include(ValaPrecompile)
 #~ vala_precompile(VALA_C ${EXEC_NAME}
@@ -78,6 +81,4 @@ glib_compile_resources (GLIB_RESOURCES_GNONOGRAMS_ICONS data/icons/gnonogram-ico
 
 add_executable(${EXEC_NAME} ${VALA_C} ${GLIB_RESOURCES_GNONOGRAMS_ICONS})
 
-#~ install (TARGETS ${EXEC_NAME} RUNTIME DESTINATION bin)
-#~ install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/data/com.github.yourusername.yourrepositoryname.desktop DESTINATION ${DATADIR}/applications/)
-#~ install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/data/com.github.yourusername.yourrepositoryname.appdata.xml DESTINATION ${DATADIR}/metainfo/)
+install (TARGETS ${EXEC_NAME} RUNTIME DESTINATION bin)

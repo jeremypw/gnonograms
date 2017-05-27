@@ -1,0 +1,19 @@
+[Desktop Entry]
+_Name=@APP_NAME@
+_Comment=@RELEASE_INFO@
+_Keywords=game;puzzle;logic;grid;pattern;
+_GenericName=Logic Game
+Exec=@EXEC_NAME@ %f
+Icon=@ICON_NAME@
+Terminal=false
+StartupNotify=true
+Type=Application
+MimeType=application/x-gnonogram-puzzle;
+Categories=GNOME;GTK;Game;
+X-GNOME-Gettext-Domain=gnonograms-elementary
+X-GNOME-UsesNotifications=false
+Actions=AboutDialog;
+
+[Desktop Action AboutDialog]
+_Name=About @APP_NAME@
+Exec=@EXEC_NAME@ --about
