@@ -487,10 +487,12 @@ public class View : Gtk.ApplicationWindow {
                 break;
 
             case "MINUS":
+            case "KP_SUBTRACT":
             case "EQUAL":
             case "PLUS":
+            case "KP_ADD":
                 if (only_control_pressed) {
-                    if (name == "MINUS") {
+                    if (name == "MINUS" || name == "KP_SUBTRACT") {
                         fontheight -= 1.0;
                     } else {
                         fontheight += 1.0;
