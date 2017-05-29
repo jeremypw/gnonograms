@@ -42,7 +42,7 @@ public static string difficulty_to_string (Difficulty d) {
         case Difficulty.CHALLENGING:
             return _("Very Difficult");
         case Difficulty.MAXIMUM:
-            return _("Maximum");
+            return _("Maximum Difficulty");
 
         default:
             return "";

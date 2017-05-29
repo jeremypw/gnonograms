@@ -237,7 +237,6 @@ public class Controller : GLib.Object {
             }
 
             forward_stack.clear ();
-            view.can_go_forward = false;
         }
 
         back_stack.offer_head (new_move);
@@ -271,7 +270,6 @@ public class Controller : GLib.Object {
 
     private void update_history_view () {
         view.can_go_back = back_stack.size > 0;
-        view.can_go_forward = forward_stack.size > 0;
     }
 
     private void clear_history () {

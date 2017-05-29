@@ -54,7 +54,6 @@ vala_precompile(VALA_C
     src/widgets/Gnonogram_label.vala
     src/widgets/Gnonogram_cellgrid.vala
     src/widgets/AppMenu.vala
-    src/widgets/HistoryControl.vala
     src/core/utils.vala
     src/core/Gnonogram_model.vala
     src/core/My2DCellArray.vala
@@ -76,9 +75,6 @@ OPTIONS
     $(GDK_OPTIONS)
 )
 
-include (GResource)
-glib_compile_resources (GLIB_RESOURCES_GNONOGRAMS_ICONS data/icons/gnonogram-icons.gresource.xml)
-
-add_executable(${EXEC_NAME} ${VALA_C} ${GLIB_RESOURCES_GNONOGRAMS_ICONS})
+add_executable(${EXEC_NAME} ${VALA_C})
 
 install (TARGETS ${EXEC_NAME} RUNTIME DESTINATION bin)

@@ -58,7 +58,7 @@ class AppMenu : Gtk.MenuButton {
 
         grade_label = new Gtk.Label ("");
         grade_label.xalign = 1;
-        grade_label.set_size_request (100, -1); /* So size does not change depending on text */
+        grade_label.set_size_request (120, -1); /* So size does not change depending on text */
 
         grid.attach (grade_label, 0, 0, 1, 1);
         grid.attach (grade_scale, 1, 0, 1, 1);

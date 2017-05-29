@@ -33,7 +33,6 @@ public class View : Gtk.ApplicationWindow {
     private ModeButton mode_switch;
     private Gtk.Button random_game_button;
     private Gtk.Button check_correct_button;
-    private HistoryControl history;
     private Model model {get; set;}
     private CellState drawing_with_state;
 
@@ -137,14 +136,7 @@ public class View : Gtk.ApplicationWindow {
 
     public bool can_go_back {
         set {
-            history.can_go_back = value;
             check_correct_button.sensitive = value && is_solving;
-        }
-    }
-
-    public bool can_go_forward {
-        set {
-            history.can_go_forward = value;
         }
     }
 
@@ -174,22 +166,16 @@ public class View : Gtk.ApplicationWindow {
         header_bar = new Gtk.HeaderBar ();
         header_bar.set_has_subtitle (true);
         header_bar.set_show_close_button (true);
-        random_game_button = new Gtk.Button ();
-        var img = new Gtk.Image.from_icon_name ("gnonogram-puzzle", Gtk.IconSize.LARGE_TOOLBAR);
-        random_game_button.image = img;
-        random_game_button.tooltip_text = _("Generate Random Game");
-        random_game_button.clicked.connect (() => {random_game_request ();});
 
+        random_game_button = new Gtk.Button ();
+        var img = new Gtk.Image.from_icon_name ("list-add-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
+        random_game_button.image = img;
+        random_game_button.tooltip_text = _("Generate a Random Game");
+        random_game_button.clicked.connect (() => {random_game_request ();});
         header_bar.pack_start (random_game_button);
 
-        history = new HistoryControl ();
-        header_bar.pack_start (history);
-
-        mode_switch = new ModeButton ();
-        header_bar.pack_start (mode_switch);
-
         check_correct_button = new Gtk.Button ();
-        img = new Gtk.Image.from_icon_name ("gnonogram-check", Gtk.IconSize.LARGE_TOOLBAR);
+        img = new Gtk.Image.from_icon_name ("media-seek-backward-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         check_correct_button.image = img;
         check_correct_button.tooltip_text = _("Undo Any Errors");
         check_correct_button.clicked.connect (on_check_button_pressed);
@@ -198,6 +184,9 @@ public class View : Gtk.ApplicationWindow {
 
         app_menu = new AppMenu ();
         header_bar.pack_end (app_menu);
+
+        mode_switch = new ModeButton ();
+        header_bar.pack_end (mode_switch);
 
         toast = new Granite.Widgets.Toast ("Test");
         toast.set_default_action (null);
@@ -257,9 +246,6 @@ public class View : Gtk.ApplicationWindow {
         cell_grid.button_release_event.connect (on_grid_button_release);
 
         mode_switch.mode_changed.connect (on_mode_switch_changed);
-
-        history.go_back.connect (on_history_go_back);
-        history.go_forward.connect (on_history_go_forward);
 
         key_press_event.connect (on_key_press_event);
         key_release_event.connect (on_key_release_event);
@@ -540,14 +526,6 @@ public class View : Gtk.ApplicationWindow {
 
     private void on_dimensions_changed () {
         dimensions = {col_resizer.get_value (), row_resizer.get_value ()};
-    }
-
-    private void on_history_go_back () {
-        previous_move_request ();
-    }
-
-    private void on_history_go_forward () {
-        next_move_request ();
     }
 
     private void on_check_button_pressed () {
