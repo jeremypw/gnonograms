@@ -423,16 +423,18 @@ public class View : Gtk.ApplicationWindow {
     private bool on_grid_button_press (Gdk.EventButton event) {
         switch (event.button) {
             case Gdk.BUTTON_PRIMARY:
-                drawing_with_state = CellState.FILLED;
-                break;
-
             case Gdk.BUTTON_MIDDLE:
-                if (is_solving) {
-                    drawing_with_state = CellState.UNKNOWN;
-                    break;
+                if (event.type == Gdk.EventType.@2BUTTON_PRESS || event.button == Gdk.BUTTON_MIDDLE) {
+                    if (is_solving) {
+                        drawing_with_state = CellState.UNKNOWN;
+                        break;
+                    } else {
+                        return true;
+                    }
                 } else {
-                    return true;
+                    drawing_with_state = CellState.FILLED;
                 }
+                break;
 
             case Gdk.BUTTON_SECONDARY:
                 drawing_with_state = CellState.EMPTY;
