@@ -17,7 +17,8 @@
  *  Author:
  *  Jeremy Wootten <jeremy@elementaryos.org>
  */
-namespace Gnonograms.Utils {
+namespace Gnonograms {
+namespace Utils {
     public static string[] remove_blank_lines (string[] sa) {
         string[] result = {};
 
@@ -178,4 +179,92 @@ namespace Gnonograms.Utils {
         return show_dlg (msg ,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, parent)==Gtk.ResponseType.YES;
     }
 
+    public static string get_file_path (Gtk.FileChooserAction action, string dialogname, string[]? filternames, string[]? filters, string? start_path = null) {
+        if (filternames!=null) {
+            assert (filternames.length == filters.length);
+        }
+        string button = "Error";
+        switch (action) {
+            case Gtk.FileChooserAction.OPEN:
+                button = Gtk.Stock.OPEN;
+                break;
+
+            case Gtk.FileChooserAction.SAVE:
+                button = Gtk.Stock.SAVE;
+                break;
+            case Gtk.FileChooserAction.SELECT_FOLDER:
+                button = Gtk.Stock.APPLY;
+                break;
+            default :
+                break;
+        }
+
+        var dialog = new Gtk.FileChooserDialog (
+            dialogname,
+            null,
+            action,
+            Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
+            button, Gtk.ResponseType.ACCEPT,
+            null
+        );
+
+        if (filternames != null) {
+            for (int i = 0; i < filternames.length; i++) {
+                var fc = new Gtk.FileFilter();
+                fc.set_filter_name (filternames[i]);
+                fc.add_pattern (filters[i]);
+                dialog.add_filter (fc);
+            }
+        }
+
+        if (start_path != null) {
+            var start = File.new_for_path (start_path);
+            if (start.query_file_type (GLib.FileQueryInfoFlags.NONE, null) == FileType.DIRECTORY) {
+                Environment.set_current_dir (start_path);
+                dialog.set_current_folder (start_path); //so Recently used folder not displayed
+            }
+        }
+        //only need access to built-in puzzle directory if loading a .gno puzzle
+        if (action == Gtk.FileChooserAction.OPEN && filters != null && filters[0] == "*.gno") {
+             dialog.add_button (_("Built in puzzles"), Gtk.ResponseType.NONE);
+        }
+
+        int response;
+        while(true) {
+            response = dialog.run ();
+            if (response==Gtk.ResponseType.NONE) {
+//~                 dialog.set_current_folder (Resource.resource_dir + "/games");
+                dialog.set_current_folder ((GLib.Application.get_default () as App).build_pkg_data_dir + "/games");
+            } else {
+                break;
+            }
+        }
+
+        string fn = "";
+        if (response == Gtk.ResponseType.ACCEPT) {
+            fn = dialog.get_filename();
+            Environment.set_current_dir (dialog.get_current_folder ());
+        }
+        dialog.destroy ();
+
+        return fn;
+    }
+
+    public DataInputStream? open_data_input_stream (string filename) {
+        DataInputStream stream;
+        var file = File.new_for_path (filename);
+        if (!file.query_exists (null)) {
+           stderr.printf ("File '%s' doesn't exist.\n", file.get_path ());
+           return null;
+        }
+
+        try {
+            stream = new DataInputStream (file.read (null));
+        } catch (Error e) {
+            Utils.show_warning_dialog (e.message);
+            return null;
+        }
+        return stream;
+    }
+}
 }

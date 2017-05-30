@@ -169,10 +169,12 @@ public static double MINFONTSIZE = 3.0;
 public static double MAXFONTSIZE = 72.0;
 public const string BLOCKSEPARATOR = ", ";
 public const string BLANKLABELTEXT = _("?");
+public const string GAMEFILEEXTENSION = ".gno";
 
 public class App : Granite.Application {
     public Controller controller;
     private string game_name;
+    public string game_dir;
 
     construct {
         application_id = "com.github.jeremypw.gnonograms-elementary";
@@ -184,6 +186,7 @@ public class App : Granite.Application {
 
         build_data_dir = Build.DATADIR;
         build_pkg_data_dir = Build.PKGDATADIR;
+        game_dir = build_pkg_data_dir + "/games";
         build_release_name = Build.RELEASE_NAME;
         build_version = Build.VERSION;
         build_version_info = Build.VERSION_INFO;
