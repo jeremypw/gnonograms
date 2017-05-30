@@ -1,5 +1,5 @@
-/* Game file reader class for Gnonograms3
- * Copyright (C) 2010-2011  Jeremy Wootten
+/* Game file reader class for gnonograms-elementary
+ * Copyright (C) 2010-2017  Jeremy Wootten
  *
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,8 +18,6 @@
  *  Author:
  *  Jeremy Wootten <jeremwootten@gmail.com>
  */
-
-using GLib;
 
 public class Gnonogram_filereader {
 
