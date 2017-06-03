@@ -20,72 +20,59 @@
  */
 
 namespace Gnonograms {
-public class Filereader {
+public class Filereader : Object {
 
-    public string game_path = "";
-    public int rows = 0;
-    public int cols = 0;
-    public string[] row_clues;
-    public string[] col_clues;
-    public string state;
-    public string name = "";
-    public string author = "";
-    public string date = "";
-    public string score = "";
-    public string license = "";
-    public bool in_error = false;
-    public bool has_dimensions = false;
-    public bool has_row_clues = false;
-    public bool has_col_clues = false;
-    public bool has_solution = false;
-    public bool has_working = false;
-    public bool has_state = false;
-    public string[] solution;
-    public string[] working;
+    public File? game_file {get; private set; default = null;}
+    public int rows {get; private set; default = 0;}
+    public int cols {get; private set; default = 0;}
+    public string[] row_clues {get; private set;}
+    public string[] col_clues {get; private set;}
+    public string[] solution {get; private set;}
+    public string[] working {get; private set;}
+    public GameState state {get; private set; default = GameState.UNDEFINED;}
+    public string name {get; private set; default = "";}
+    public string author {get; private set; default = "";}
+    public string date {get; private set; default = "";}
+    public string score {get; private set; default = "";}
+    public string license {get; private set; default = "";}
+
+    public bool has_dimensions {get; private set; default = false;}
+    public bool has_row_clues {get; private set; default = false;}
+    public bool has_col_clues {get; private set; default = false;}
+    public bool has_solution {get; private set; default = false;}
+    public bool has_working {get; private set; default = false;}
+    public bool has_state {get; private set; default = false;}
+
     public string err_msg = "";
 
-    private DataInputStream stream;
-    private bool is_game;
-    private string[] headings;
-    private string[] bodies;
-
-    public Filereader (string fname = "") {
-        if (fname == "") {
-            ask_game_path ();
-        } else {
-            game_path = fname;
-        }
-
-        is_game = true;
-    }
-
-    public void ask_game_path () {
-        game_path = Utils.get_file_path (
-            Gtk.FileChooserAction.OPEN,
-            _("Choose a puzzle"),
-            {_("Gnonogram puzzles")},
-            {"*" + Gnonograms.GAMEFILEEXTENSION},
-            (GLib.Application.get_default () as App).game_dir
-        );
-    }
-
-    public bool open_data_input_stream () {
-        stream =  Utils.open_data_input_stream (game_path);
-        if (stream == null) {
-            err_msg = _("Cannot open file");
-            return false;
-        } else {
-            return true;
+    public bool valid {
+        get {
+            return err_msg == "";
         }
     }
 
-    public bool parse_game_file () {
-        return parse_gnonogram_game_file ();
+    public Filereader (File? game) throws GLib.Error {
+        Object (game_file: game);
+
+        if (game == null) {
+            game_file = Utils.get_game_file (
+                            Gtk.FileChooserAction.OPEN,
+                            _("Choose a puzzle"),
+                            {_("Gnonogram puzzles")},
+                            {"*" + Gnonograms.GAMEFILEEXTENSION},
+                            get_app ().load_game_dir
+            );
+        }
+
+        parse_gnonogram_game_file (Utils.open_data_input_stream (game_file));
     }
 
-    private bool parse_gnonogram_game_file () {
+
+    private bool parse_gnonogram_game_file (DataInputStream stream) throws GLib.Error {
         size_t header_length, body_length;
-        try {
+        string[] headings = {};
+        string[] bodies = {};
+
             stream.read_until ("[", out header_length, null);
             while (true) {
                 headings += stream.read_until ("]", out header_length, null);
@@ -94,24 +81,25 @@ public class Filereader {
                     break;
                 }
             }
-        } catch (Error e) {
-            err_msg = e.message;
-            return false;
-        }
-        return parse_gnonogram_headings_and_bodies ();
+
+        return parse_gnonogram_headings_and_bodies (headings, bodies);
     }
 
-    private bool parse_gnonogram_headings_and_bodies () {
+    private bool parse_gnonogram_headings_and_bodies (string[] headings, string[] bodies) {
         int n = headings.length;
+        bool in_error = false;
 
         for (int i = 0; i < n; i++) {
             string heading = headings[i];
+
             if (heading == null) {
                 continue;
             }
+
             if (heading.length > 3) {
                 heading = heading.slice (0, 3);
             }
+
             switch (heading.up ()) {
                 case "DIM" :
                     in_error = !get_gnonogram_dimensions(bodies[i]); break;
@@ -134,11 +122,9 @@ public class Filereader {
                     in_error = true;
                     break;
             }
-            if (in_error) {
-                return false;
-            }
         }
-        return true;
+
+        return !in_error;
     }
 
     private bool get_gnonogram_dimensions (string? body) {
@@ -146,11 +132,13 @@ public class Filereader {
             err_msg = _("No dimensions given");
             return false;
         }
+
         string[] s = Utils.remove_blank_lines (body.split ("\n"));
         if (s.length != 2) {
             err_msg = _("Wrong number of dimensions");
             return false;
         }
+
         rows = int.parse (s[0]);
         cols = int.parse (s[1]);
         has_dimensions = true;
@@ -159,18 +147,22 @@ public class Filereader {
 
     private bool get_gnonogram_clues (string? body, bool is_column) {
         string[] arr = {};
+
         if (body == null) {
             err_msg = _("No clues given");
             return false;
         }
+
         string[] s = Utils.remove_blank_lines (body.split ("\n"));
 
         if (s == null || s.length < 1) {
             err_msg = _("Missing clues");
             return false;
         }
+
         for (int i = 0; i < s.length; i++) {
             string? clue = parse_gnonogram_clue (s[i], is_column);
+
             if (clue == null) {
                 err_msg = _("Invalid clue");
                 return false;
@@ -184,6 +176,7 @@ public class Filereader {
                 err_msg = _("Wrong number of column clues");
                 return false;
             }
+
             col_clues = arr;
             has_col_clues = true;
         } else {
@@ -191,6 +184,7 @@ public class Filereader {
                 err_msg = _("Wrong number of row clues");
                 return false;
             }
+
             row_clues = arr;
             has_row_clues = true;
         }
@@ -202,7 +196,9 @@ public class Filereader {
             err_msg = _("Solution grid or working grid missing");
             return false;
         }
+
         string[] s = Utils.remove_blank_lines (body.split ("\n"));
+
         if (s == null || s.length != rows) {
             err_msg = _("Wrong number of rows in solution or working grid");
             return false;
@@ -230,6 +226,7 @@ public class Filereader {
             working = s;
             has_working = true;
         }
+
         return true;
     }
 
@@ -238,16 +235,22 @@ public class Filereader {
             err_msg = _("Missing game state");
             return false;
         }
+
         string[] s = Utils.remove_blank_lines (body.split("\n"));
+
         if (s == null || s.length != 1) {
-            err_msg = _("Invalid game state");
+            err_msg = _("Could not determine game state in loaded game file");
             return false;
         }
-        state = s[0];
-        if (state == (GameState.SETTING).to_string () || state == (GameState.SOLVING).to_string ()) {
-            has_state = true;
+
+        var state_string = s[0];
+
+        if (state_string.up ().contains ("SETTING")) {
+            state = GameState.SETTING;
+        } else if (state_string.up ().contains ("SOLVING")) {
+            state = GameState.SOLVING;
         } else {
-            err_msg = _("Invalid game state");
+            err_msg = _("Invalid game state '%s' in loaded game file").printf (state);
             return false;
         }
 
@@ -256,20 +259,23 @@ public class Filereader {
 
     private bool get_game_description (string? body) {
         if (body == null) {
-            err_msg = _("Missing description");
-            return false;
+            return true;
         }
+
         string[] s = Utils.remove_blank_lines (body.split("\n"));
 
         if (s.length >= 1) {
             name = Uri.unescape_string (s[0]);
         }
+
         if (s.length >= 2) {
             author = Uri.unescape_string (s[1]);
         }
+
         if (s.length >= 3) {
             date = s[2];
         }
+
         if (s.length >= 4) {
             score = s[3];
         }
@@ -279,9 +285,9 @@ public class Filereader {
 
     private bool get_game_license (string? body) {
         if (body == null) {
-            err_msg = _("Missing license");
-            return false;
+            return true; /* Not mandatory */
         }
+
         string[] s = Utils.remove_blank_lines (body.split("\n"));
 
         if (s.length >= 1) {
@@ -291,6 +297,7 @@ public class Filereader {
                 license = s[0];
             }
         }
+
         return true;
     }
 
@@ -302,9 +309,11 @@ public class Filereader {
         if (s == null) {
             return null;
         }
+
         StringBuilder sb = new StringBuilder ();
         for (int i = 0; i < s.length; i++) {
             b = int.parse(s[i]);
+
             if (b < 0 || b > maxblock) {
                 return null;
             }
@@ -317,6 +326,7 @@ public class Filereader {
 
             sb.append(s[i] + Gnonograms.BLOCKSEPARATOR);
         }
+
         sb.truncate (sb.len - 1);
         return sb.str;
     }

@@ -153,7 +153,6 @@ public class View : Gtk.ApplicationWindow {
 
 
     construct {
-        title = _("Gnonograms for Elementary");
         resizable = false;
         drawing_with_state = CellState.UNDEFINED;
 
@@ -166,6 +165,8 @@ public class View : Gtk.ApplicationWindow {
         header_bar = new Gtk.HeaderBar ();
         header_bar.set_has_subtitle (true);
         header_bar.set_show_close_button (true);
+
+        title = _("Gnonograms for Elementary");
 
         random_game_button = new Gtk.Button ();
         var img = new Gtk.Image.from_icon_name ("list-add-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
@@ -286,6 +287,15 @@ public class View : Gtk.ApplicationWindow {
 
         for (int c = 0; c < cols; c++) {
             column_clue_box.update_label_text (c, model.get_label_text (c, true));
+        }
+    }
+
+    public void update_labels_from_string_array (string[] clues, bool is_column) {
+        var clue_box = is_column ? column_clue_box : row_clue_box;
+        var lim = is_column ? cols : rows;
+
+        for (int i = 0; i < lim; i++) {
+            clue_box.update_label_text (i, clues[i]);
         }
     }
 
