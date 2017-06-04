@@ -174,7 +174,7 @@ public const string GAMEFILEEXTENSION = ".gno";
 public class App : Granite.Application {
     public Controller controller;
     private string game_name;
-    public string game_dir;
+    public string load_game_dir;
 
     construct {
         application_id = "com.github.jeremypw.gnonograms-elementary";
@@ -186,7 +186,7 @@ public class App : Granite.Application {
 
         build_data_dir = Build.DATADIR;
         build_pkg_data_dir = Build.PKGDATADIR;
-        game_dir = build_pkg_data_dir + "/games";
+        load_game_dir = build_pkg_data_dir + "/games";
         build_release_name = Build.RELEASE_NAME;
         build_version = Build.VERSION;
         build_version_info = Build.VERSION_INFO;
@@ -221,12 +221,14 @@ public class App : Granite.Application {
     public override void open (File[] files, string hint) {
         /* Only one game can be played at a time */
         var file = files[0];
+
         if (file == null) {
             return;
         }
 
         var fname = file.get_basename ();
-        if (fname.has_suffix (".gno") || fname.has_suffix (".pattern")) {
+
+        if (fname.has_suffix (".gno")) {
             game_name = fname;
             /* TODO retrieve data from game */
             open_file (file);
@@ -246,11 +248,13 @@ public class App : Granite.Application {
         open_file (null);
     }
 }
+
+public static App get_app () {
+    return Application.get_default () as App;
+}
 }
 
 public static int main (string[] args) {
     var app = new Gnonograms.App ();
     return app.run (args);
 }
-
-

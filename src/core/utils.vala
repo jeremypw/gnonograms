@@ -179,11 +179,19 @@ namespace Utils {
         return show_dlg (msg ,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, parent)==Gtk.ResponseType.YES;
     }
 
-    public static string get_file_path (Gtk.FileChooserAction action, string dialogname, string[]? filternames, string[]? filters, string? start_path = null) {
+    public static File? get_game_file (Gtk.FileChooserAction action,
+                                        string dialogname,
+                                        string[]? filternames,
+                                        string[]? filters,
+                                        string? start_path = null) {
+
         if (filternames!=null) {
             assert (filternames.length == filters.length);
         }
+
+        File? game_file = null;
         string button = "Error";
+
         switch (action) {
             case Gtk.FileChooserAction.OPEN:
                 button = Gtk.Stock.OPEN;
@@ -230,29 +238,29 @@ namespace Utils {
         }
 
         int response;
+
         while(true) {
             response = dialog.run ();
             if (response==Gtk.ResponseType.NONE) {
-//~                 dialog.set_current_folder (Resource.resource_dir + "/games");
-                dialog.set_current_folder ((GLib.Application.get_default () as App).build_pkg_data_dir + "/games");
+                dialog.set_current_folder (get_app ().load_game_dir);
             } else {
                 break;
             }
         }
 
-        string fn = "";
         if (response == Gtk.ResponseType.ACCEPT) {
-            fn = dialog.get_filename();
             Environment.set_current_dir (dialog.get_current_folder ());
+            game_file = dialog.get_file ();
         }
+
+
         dialog.destroy ();
 
-        return fn;
+        return game_file;
     }
 
-    public DataInputStream? open_data_input_stream (string filename) {
+    public DataInputStream? open_data_input_stream (File file) {
         DataInputStream stream;
-        var file = File.new_for_path (filename);
         if (!file.query_exists (null)) {
            stderr.printf ("File '%s' doesn't exist.\n", file.get_path ());
            return null;

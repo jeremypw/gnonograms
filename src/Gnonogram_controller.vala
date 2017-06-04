@@ -37,7 +37,10 @@ public class Controller : GLib.Object {
         }
 
         set {
-            view.game_state = value;
+            if (view.game_state != value) {
+                view.game_state = value;
+            }
+
             model.game_state = value;
             clear_history ();
         }
@@ -46,22 +49,6 @@ public class Controller : GLib.Object {
     public bool is_solving {
         get {return game_state == GameState.SOLVING;}
     }
-
-    private File? _game;
-    public File? game {
-        get {
-            return _game;
-        }
-
-        set {
-            _game = value;
-
-            if (value != null) {
-                view.header_title = value.get_uri ();
-            }
-        }
-    }
-
 
     public Difficulty grade {
         get {return view.grade;}
@@ -85,35 +72,35 @@ public class Controller : GLib.Object {
 
     public signal void quit_app ();
 
-    construct {
-        back_stack = new Gee.LinkedList<Move> ();
-        forward_stack = new Gee.LinkedList<Move> ();
-
-        settings = new Settings ("apps.gnonograms-elementary.settings");
-        saved_state = new Settings ("apps.gnonograms-elementary.saved-state");
-    }
-
     public Controller (File? game = null) {
-        Object (game: game);
-
-        model = new Model ();
-        view = new View (model);
-        solver = new Solver ();
-        connect_signals ();
-
-        restore_settings ();
-        restore_saved_state ();
-
-        saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
-        saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
-        settings.bind ("grade", view, "grade", SettingsBindFlags.DEFAULT);
-
-        if (is_solving && title == null) {
+        if (game != null) {
+            load_game (game);
+        } else if (is_solving && title == null) {
             new_random_game ();
         }
 
         view.show_all ();
     }
+
+    construct {
+        model = new Model ();
+        view = new View (model);
+        solver = new Solver ();
+        back_stack = new Gee.LinkedList<Move> ();
+        forward_stack = new Gee.LinkedList<Move> ();
+
+        connect_signals ();
+
+        settings = new Settings ("apps.gnonograms-elementary.settings");
+        saved_state = new Settings ("apps.gnonograms-elementary.saved-state");
+        saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
+        saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
+        settings.bind ("grade", view, "grade", SettingsBindFlags.DEFAULT);
+
+        restore_settings ();
+        restore_saved_state ();
+    }
+
 
     private void connect_signals () {
         view.resized.connect (on_view_resized);
@@ -222,8 +209,102 @@ public class Controller : GLib.Object {
         view.dimensions = {cols, rows};
     }
 
-    private bool load_game (File game) {
-        new_game ();  /* TODO implement saving and restoring settings */
+    private void load_game (File game) {
+        Filereader? reader = null;
+
+        try {
+            reader = new Filereader (game);
+        } catch (GLib.Error e) {
+            if (reader != null) {
+                Utils.show_warning_dialog (reader.err_msg);
+            } else {
+                critical ("Failed to create game file reader");
+            }
+
+            return;
+        }
+
+        if (reader.valid && load_common (reader) && load_position_extra (reader)) {
+            if (reader.state != GameState.UNDEFINED) {
+                game_state = reader.state;
+            } else {
+                game_state = GameState.SOLVING;
+            }
+
+            /* At this point, we can assume game_file exists and has parent */
+            get_app ().load_game_dir = reader.game_file.get_parent ().get_uri ();
+        } else {
+            Utils.show_warning_dialog (reader.err_msg, view);
+            new_game ();
+        }
+    }
+
+    private bool load_common(Filereader reader) {
+        if (reader.has_dimensions) {
+            if (reader.rows > MAXSIZE || reader.cols > MAXSIZE){
+                reader.err_msg = (_("Dimensions too large"));
+                return false;
+            } else if (reader.rows < MINSIZE || reader.cols < MINSIZE){
+                reader.err_msg = (_("Dimensions too small"));
+                return false;
+            } else {
+                view.dimensions = {reader.cols, reader.rows};
+            }
+        } else {
+            reader.err_msg = (_("Dimensions data missing"));
+            return false;
+        }
+
+        if (reader.has_solution) {
+            model.game_state = GameState.SETTING; /* Selects the solution grid */
+
+            for (int i = 0; i < rows; i++) {
+                model.set_row_data_from_string (i, reader.solution[i]);
+            }
+        } else if (reader.has_row_clues && reader.has_col_clues) {
+            view.update_labels_from_string_array (reader.row_clues, false);
+            view.update_labels_from_string_array (reader.col_clues, true);
+
+            int passes = solve_game (false, true, true, false, false);
+
+            if (passes > 0 && passes < 999999) {
+                set_model_from_solver ();
+            } else if (passes < 0) {
+                reader.err_msg = (_("Clues contradictory"));
+                return false;
+            } else {
+                Utils.show_warning_dialog (_("Puzzle not solved by computer - may not be possible"), view);
+            }
+        } else {
+            reader.err_msg = (_("Clues and solution both missing"));
+            return false;
+        }
+
+        if (reader.name.length > 1) {
+            title = reader.name;
+        } else if (reader.game_file != null) {
+            title = reader.game_file.get_basename ();
+        }
+
+#if 0 //To be implemented (maybe)
+        view.set_source(reader.author);
+        view.set_date(reader.date);
+        view.set_license(reader.license);
+        view.set_score(reader.score);
+#endif
+
+        return true;
+    }
+
+    private bool load_position_extra (Filereader reader) {
+        if (reader.has_working) {
+            model.game_state = GameState.SOLVING; /* Selects the working grid */
+
+            for (int i = 0; i < rows; i++) {
+                model.set_row_data_from_string (i, reader.working[i]);
+            }
+        }
+
         return true;
     }
 
@@ -252,6 +333,12 @@ public class Controller : GLib.Object {
                 view.send_notification (_("You have made some errors"));
                 rewind_until_correct ();
             }
+        }
+    }
+
+    private void set_model_from_solver () {
+        foreach (Cell c in solver.solution) {
+            model.set_data_from_cell (c);
         }
     }
 

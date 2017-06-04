@@ -24,8 +24,8 @@
 namespace Gnonograms {
 
  public class Solver : GLib.Object {
-    public My2DCellArray grid;
-    public My2DCellArray solution;
+    public My2DCellArray grid {get; private set;}
+    public My2DCellArray solution {get; private set;}
 
     private Dimensions _dimensions;
     public Dimensions dimensions {
