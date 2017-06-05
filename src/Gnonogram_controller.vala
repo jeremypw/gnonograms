@@ -27,6 +27,7 @@ public class Controller : GLib.Object {
     public View view {get; private set;}
     private Model? model;
     private Solver solver;
+    private string? game_path = null;
 
     private Gee.Deque<Move> back_stack;
     private Gee.Deque<Move> forward_stack;
@@ -113,6 +114,7 @@ public class Controller : GLib.Object {
         view.rewind_request.connect (on_rewind_request);
         view.delete_event.connect (on_view_deleted);
         view.save_game_request.connect (on_save_game_request);
+        view.save_game_as_request.connect (on_save_game_as_request);
 
         solver.showsolvergrid.connect (on_show_solver_grid);
     }
@@ -234,6 +236,8 @@ public class Controller : GLib.Object {
 
             /* At this point, we can assume game_file exists and has parent */
             get_app ().load_game_dir = reader.game_file.get_parent ().get_uri ();
+
+            game_path = reader.game_file.get_path ();
         } else {
             Utils.show_warning_dialog (reader.err_msg, view);
             new_game ();
@@ -496,16 +500,22 @@ public class Controller : GLib.Object {
         Filewriter file_writer;
 
         try {
-            file_writer = new Filewriter (null, title, rows, cols,view.get_row_clues (), view.get_col_clues ());
+            file_writer = new Filewriter (game_path, title, rows, cols,view.get_row_clues (), view.get_col_clues ());
             file_writer.difficulty = grade;
             file_writer.game_state = game_state;
             file_writer.working = model.working_data;
             file_writer.solution = model.solution_data;
             file_writer.write_position_file ();
+            game_path = file_writer.game_path;
         } catch (IOError e) {
             warning ("File writer error %s", e.message);
             return;
         }
+    }
+
+    private void on_save_game_as_request () {
+        game_path = null;
+        on_save_game_request ();
     }
 }
 }
