@@ -126,6 +126,19 @@ public class My2DCellArray  : GLib.Object {
         }
     }
 
+    public string to_string () {
+        StringBuilder sb = new StringBuilder ();
+        CellState[] arr = new CellState[cols];
+
+        for (int r = 0; r < rows; r++) {
+            get_row (r, ref arr);
+            sb.append (Utils.string_from_cellstate_array (arr));
+            sb.append ("\n");
+        }
+
+        return sb.str;
+    }
+
     public Iterator iterator() {
         return new Iterator (data, dimensions);
     }

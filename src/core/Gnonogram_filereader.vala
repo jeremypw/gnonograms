@@ -55,13 +55,7 @@ public class Filereader : Object {
         Object (game_file: game);
 
         if (game == null) {
-            game_file = Utils.get_game_file (
-                            Gtk.FileChooserAction.OPEN,
-                            _("Choose a puzzle"),
-                            {_("Gnonogram puzzles")},
-                            {"*" + Gnonograms.GAMEFILEEXTENSION},
-                            get_app ().load_game_dir
-            );
+            game_file = Utils.get_load_game_file ();
         }
 
         parse_gnonogram_game_file (Utils.open_data_input_stream (game_file));

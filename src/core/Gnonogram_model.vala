@@ -45,8 +45,8 @@ public class Model : GLib.Object {
         }
     }//points to grid being displayed
 
-    private My2DCellArray solution_data; //display when setting
-    private My2DCellArray working_data; //display when solving
+    public My2DCellArray solution_data {get; private set;} //display when setting
+    public My2DCellArray working_data {get; private set;} //display when solving
     public  CellState[] data;
     private Rand rand_gen;
 
@@ -182,32 +182,6 @@ public class Model : GLib.Object {
         }
 
         return true;
-    }
-
-    public string to_string () {
-        StringBuilder sb = new StringBuilder ();
-        CellState[] arr = new CellState[cols];
-
-        for (int r = 0; r < rows; r++) {
-            display_data.get_row (r, ref arr);
-            sb.append (Utils.string_from_cellstate_array (arr));
-            sb.append ("\n");
-        }
-
-        return sb.str;
-    }
-
-    public string to_hexstring() {
-        StringBuilder sb = new StringBuilder();
-        CellState[] arr = new CellState[cols];
-
-        for (int r = 0; r < rows; r++) {
-            display_data.get_row (r, ref arr);
-            sb.append (Utils.hex_string_from_cellstate_array (arr));
-            sb.append("\n");
-        }
-
-        return sb.str;
     }
 
     public void fill_random (uint grade) {

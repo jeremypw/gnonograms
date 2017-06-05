@@ -145,6 +145,8 @@ public class View : Gtk.ApplicationWindow {
     public signal void rewind_request ();
     public signal bool next_move_request ();
     public signal bool previous_move_request ();
+    public signal void save_game_request ();
+    public signal void save_game_as_request ();
 
     public signal void resized (Dimensions dim);
     public signal void moved (Cell cell);
@@ -460,6 +462,7 @@ public class View : Gtk.ApplicationWindow {
         var mods = (event.state & Gtk.accelerator_get_default_mod_mask ());
         bool control_pressed = ((mods & Gdk.ModifierType.CONTROL_MASK) != 0);
         bool other_mod_pressed = (((mods & ~Gdk.ModifierType.SHIFT_MASK) & ~Gdk.ModifierType.CONTROL_MASK) != 0);
+        bool shift_pressed = ((mods & Gdk.ModifierType.SHIFT_MASK) != 0);
         bool only_control_pressed = control_pressed && !other_mod_pressed; /* Shift can be pressed */
 
         switch (name) {
@@ -502,6 +505,17 @@ public class View : Gtk.ApplicationWindow {
             case "R":
                 if (only_control_pressed) {
                     random_game_request ();
+                }
+
+                break;
+
+            case "S":
+                if (only_control_pressed) {
+                    if (shift_pressed) {
+                        save_game_as_request ();
+                    } else {
+                        save_game_request ();
+                    }
                 }
 
                 break;

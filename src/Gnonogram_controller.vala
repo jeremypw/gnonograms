@@ -112,6 +112,7 @@ public class Controller : GLib.Object {
         view.check_errors_request.connect (on_check_errors_request);
         view.rewind_request.connect (on_rewind_request);
         view.delete_event.connect (on_view_deleted);
+        view.save_game_request.connect (on_save_game_request);
 
         solver.showsolvergrid.connect (on_show_solver_grid);
     }
@@ -489,6 +490,22 @@ public class Controller : GLib.Object {
     private bool on_view_deleted () {
         quit ();
         return false;
+    }
+
+    private void on_save_game_request () {
+        Filewriter file_writer;
+
+        try {
+            file_writer = new Filewriter (null, title, rows, cols,view.get_row_clues (), view.get_col_clues ());
+            file_writer.difficulty = grade;
+            file_writer.game_state = game_state;
+            file_writer.working = model.working_data;
+            file_writer.solution = model.solution_data;
+            file_writer.write_position_file ();
+        } catch (IOError e) {
+            warning ("File writer error %s", e.message);
+            return;
+        }
     }
 }
 }

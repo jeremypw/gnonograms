@@ -179,17 +179,43 @@ namespace Utils {
         return show_dlg (msg ,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, parent)==Gtk.ResponseType.YES;
     }
 
-    public static File? get_game_file (Gtk.FileChooserAction action,
-                                        string dialogname,
-                                        string[]? filternames,
-                                        string[]? filters,
-                                        string? start_path = null) {
+    public static File? get_load_game_file () {
+        string path = get_file_path (
+            Gtk.FileChooserAction.OPEN,
+            _("Choose a puzzle"),
+            {_("Gnonogram puzzles")},
+            {"*" + Gnonograms.GAMEFILEEXTENSION},
+            get_app ().load_game_dir
+        );
 
-        if (filternames!=null) {
+        if (path == "") {
+            return null;
+        } else {
+            return File.new_for_path (path);
+        }
+    }
+
+    public static string get_save_file_path () {
+        return get_file_path (
+            Gtk.FileChooserAction.SAVE,
+            _("Name and save this puzzle"),
+            {_("Gnonogram puzzles")},
+            {"*" + Gnonograms.GAMEFILEEXTENSION},
+            get_app ().save_game_dir
+        );
+    }
+
+    private static string get_file_path (
+        Gtk.FileChooserAction action,
+        string dialogname,
+        string[]? filternames,
+        string[]? filters,
+        string? start_path = null) {
+
+        if (filternames != null) {
             assert (filternames.length == filters.length);
         }
 
-        File? game_file = null;
         string button = "Error";
 
         switch (action) {
@@ -200,21 +226,23 @@ namespace Utils {
             case Gtk.FileChooserAction.SAVE:
                 button = Gtk.Stock.SAVE;
                 break;
+
             case Gtk.FileChooserAction.SELECT_FOLDER:
                 button = Gtk.Stock.APPLY;
                 break;
+
             default :
                 break;
         }
 
         var dialog = new Gtk.FileChooserDialog (
-            dialogname,
-            null,
-            action,
-            Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
-            button, Gtk.ResponseType.ACCEPT,
-            null
-        );
+                        dialogname,
+                        null,
+                        action,
+                        Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
+                        button, Gtk.ResponseType.ACCEPT,
+                        null
+                    );
 
         if (filternames != null) {
             for (int i = 0; i < filternames.length; i++) {
@@ -232,6 +260,7 @@ namespace Utils {
                 dialog.set_current_folder (start_path); //so Recently used folder not displayed
             }
         }
+
         //only need access to built-in puzzle directory if loading a .gno puzzle
         if (action == Gtk.FileChooserAction.OPEN && filters != null && filters[0] == "*.gno") {
              dialog.add_button (_("Built in puzzles"), Gtk.ResponseType.NONE);
@@ -239,24 +268,29 @@ namespace Utils {
 
         int response;
 
-        while(true) {
+        while (true) {
             response = dialog.run ();
-            if (response==Gtk.ResponseType.NONE) {
+            if (response == Gtk.ResponseType.NONE) {
                 dialog.set_current_folder (get_app ().load_game_dir);
             } else {
                 break;
             }
         }
 
+        var filename = "";
+
         if (response == Gtk.ResponseType.ACCEPT) {
             Environment.set_current_dir (dialog.get_current_folder ());
-            game_file = dialog.get_file ();
+            if (action == Gtk.FileChooserAction.SAVE) {
+                filename = dialog.get_current_name ();
+            } else {
+                filename = dialog.get_filename ();
+            }
         }
-
 
         dialog.destroy ();
 
-        return game_file;
+        return filename;
     }
 
     public DataInputStream? open_data_input_stream (File file) {

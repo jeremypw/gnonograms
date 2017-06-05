@@ -62,6 +62,7 @@ vala_precompile(VALA_C
     src/core/Gnonogram_solver.vala
     src/core/Gnonogram_permutor.vala
     src/core/Gnonogram_filereader.vala
+    src/core/Gnonogram_filewriter.vala
 
 PACKAGES
     gee-0.8

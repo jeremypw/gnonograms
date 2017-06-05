@@ -26,7 +26,8 @@ public enum Difficulty {
     MODERATE,
     HARD,
     CHALLENGING,
-    MAXIMUM;
+    MAXIMUM,
+    UNDEFINED;
 }
 
 public static string difficulty_to_string (Difficulty d) {
@@ -175,6 +176,7 @@ public class App : Granite.Application {
     public Controller controller;
     private string game_name;
     public string load_game_dir;
+    public string save_game_dir;
 
     construct {
         application_id = "com.github.jeremypw.gnonograms-elementary";
@@ -187,6 +189,15 @@ public class App : Granite.Application {
         build_data_dir = Build.DATADIR;
         build_pkg_data_dir = Build.PKGDATADIR;
         load_game_dir = build_pkg_data_dir + "/games";
+        save_game_dir = Environment.get_home_dir () + "/gnonograms";
+
+        try {
+            var file = File.new_for_path (save_game_dir);
+            file.make_directory (null);
+        } catch (GLib.Error e) {
+            warning ("error making game directory %s", e.message);
+        }
+
         build_release_name = Build.RELEASE_NAME;
         build_version = Build.VERSION;
         build_version_info = Build.VERSION_INFO;

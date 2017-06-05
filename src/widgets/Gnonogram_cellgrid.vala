@@ -306,6 +306,10 @@ public class CellGrid : Gtk.DrawingArea {
 
     private bool on_pointer_moved (Gdk.EventMotion e) {
         /* Calculate which cell the pointer is over */
+        if (e.x < 0 || e.y < 0) {
+            return false;
+        }
+
         uint r =  ((uint)((e.y) / cell_height));
         uint c =  ((uint)(e.x / cell_width));
         move_cursor_to ({r, c, array.get_data_from_rc (r, c)});
