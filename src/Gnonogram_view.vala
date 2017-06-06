@@ -147,6 +147,7 @@ public class View : Gtk.ApplicationWindow {
     public signal bool previous_move_request ();
     public signal void save_game_request ();
     public signal void save_game_as_request ();
+    public signal void open_game_request ();
 
     public signal void resized (Dimensions dim);
     public signal void moved (Cell cell);
@@ -516,6 +517,13 @@ public class View : Gtk.ApplicationWindow {
                     } else {
                         save_game_request ();
                     }
+                }
+
+                break;
+
+            case "O":
+                if (only_control_pressed) {
+                    open_game_request ();
                 }
 
                 break;

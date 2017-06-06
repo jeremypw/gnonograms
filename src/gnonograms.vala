@@ -188,7 +188,6 @@ public class App : Granite.Application {
 
         build_data_dir = Build.DATADIR;
         build_pkg_data_dir = Build.PKGDATADIR;
-
         build_release_name = Build.RELEASE_NAME;
         build_version = Build.VERSION;
         build_version_info = Build.VERSION_INFO;

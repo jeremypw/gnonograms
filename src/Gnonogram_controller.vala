@@ -128,6 +128,7 @@ public class Controller : GLib.Object {
         view.delete_event.connect (on_view_deleted);
         view.save_game_request.connect (on_save_game_request);
         view.save_game_as_request.connect (on_save_game_as_request);
+        view.open_game_request.connect (on_open_game_request);
 
         solver.showsolvergrid.connect (on_show_solver_grid);
     }
@@ -224,18 +225,18 @@ public class Controller : GLib.Object {
         var cols = settings.get_uint ("columns");
         view.dimensions = {cols, rows};
 
-        var dir = settings.get_string ("load_game_dir");
+        var dir = settings.get_string ("load-game-dir");
         if (dir.length > 0) {
             load_game_dir = dir;
         }
 
-        dir = settings.get_string ("save_game_dir");
+        dir = settings.get_string ("save-game-dir");
         if (dir.length > 0) {
             save_game_dir = dir;
         }
     }
 
-    private void load_game (File game) {
+    private void load_game (File? game) {
         Filereader? reader = null;
 
         try {
@@ -267,12 +268,12 @@ public class Controller : GLib.Object {
         }
     }
 
-    private bool load_common(Filereader reader) {
+    private bool load_common (Filereader reader) {
         if (reader.has_dimensions) {
-            if (reader.rows > MAXSIZE || reader.cols > MAXSIZE){
+            if (reader.rows > MAXSIZE || reader.cols > MAXSIZE) {
                 reader.err_msg = (_("Dimensions too large"));
                 return false;
-            } else if (reader.rows < MINSIZE || reader.cols < MINSIZE){
+            } else if (reader.rows < MINSIZE || reader.cols < MINSIZE) {
                 reader.err_msg = (_("Dimensions too small"));
                 return false;
             } else {
@@ -539,6 +540,10 @@ public class Controller : GLib.Object {
     private void on_save_game_as_request () {
         game_path = null; /* Will cause Filewriter to ask for a location to save */
         on_save_game_request ();
+    }
+
+    private void on_open_game_request () {
+        load_game (null); /* Will cause Filereader to ask for a location to open */
     }
 }
 }

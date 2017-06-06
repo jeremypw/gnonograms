@@ -39,7 +39,7 @@
           </description>
         </key>
 
-        <key type="s" name="load_game_dir">
+        <key type="s" name="load-game-dir">
           <default>""</default>
           <summary>custom directory for loading</summary>
           <description>
@@ -47,7 +47,7 @@
           </description>
         </key>
 
-        <key type="s" name="save_game_dir">
+        <key type="s" name="save-game-dir">
           <default>""</default>
           <summary>custom directory for saving</summary>
           <description>
