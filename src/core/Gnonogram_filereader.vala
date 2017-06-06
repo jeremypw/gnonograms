@@ -22,7 +22,7 @@
 namespace Gnonograms {
 public class Filereader : Object {
 
-    public File? game_file {get; private set; default = null;}
+    public File? game_file {get; set; default = null;}
     public int rows {get; private set; default = 0;}
     public int cols {get; private set; default = 0;}
     public string[] row_clues {get; private set;}
@@ -51,18 +51,22 @@ public class Filereader : Object {
         }
     }
 
-    public Filereader (File? game) throws GLib.Error {
+    public Filereader ( Gtk.Window? parent, File? game) throws GLib.IOError {
         Object (game_file: game);
 
         if (game == null) {
-            game_file = Utils.get_load_game_file ();
+            game_file = Utils.get_load_game_file (parent);
+        }
+
+        if (game_file == null) {
+            throw new IOError.CANCELLED (_("Load game file dialog cancelled"));
         }
 
         parse_gnonogram_game_file (Utils.open_data_input_stream (game_file));
     }
 
 
-    private bool parse_gnonogram_game_file (DataInputStream stream) throws GLib.Error {
+    private void parse_gnonogram_game_file (DataInputStream stream) throws GLib.IOError {
         size_t header_length, body_length;
         string[] headings = {};
         string[] bodies = {};
@@ -76,7 +80,9 @@ public class Filereader : Object {
                 }
             }
 
-        return parse_gnonogram_headings_and_bodies (headings, bodies);
+        if (!parse_gnonogram_headings_and_bodies (headings, bodies)) {
+            throw new IOError.INVALID_DATA (_("Game file could not be parsed"));
+        }
     }
 
     private bool parse_gnonogram_headings_and_bodies (string[] headings, string[] bodies) {

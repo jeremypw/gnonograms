@@ -40,7 +40,8 @@ public class Filewriter : Object {
 
     private FileStream? stream;
 
-    public Filewriter (string? path,
+    public Filewriter (Gtk.Window? parent,
+                       string? path,
                        string name,
                        uint rows,
                        uint cols,

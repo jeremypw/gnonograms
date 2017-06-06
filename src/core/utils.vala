@@ -179,8 +179,8 @@ namespace Utils {
         return show_dlg (msg ,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, parent)==Gtk.ResponseType.YES;
     }
 
-    public static File? get_load_game_file () {
-        string path = get_file_path (
+    public static File? get_load_game_file (Gtk.Window? parent = null) {
+        string path = get_file_path (parent,
             Gtk.FileChooserAction.OPEN,
             _("Choose a puzzle"),
             {_("Gnonogram puzzles")},
@@ -195,8 +195,8 @@ namespace Utils {
         }
     }
 
-    public static string get_save_file_path () {
-        return get_file_path (
+    public static string get_save_file_path (Gtk.Window? parent = null) {
+        return get_file_path (parent,
             Gtk.FileChooserAction.SAVE,
             _("Name and save this puzzle"),
             {_("Gnonogram puzzles")},
@@ -205,7 +205,7 @@ namespace Utils {
         );
     }
 
-    private static string get_file_path (
+    private static string get_file_path (Gtk.Window? parent,
         Gtk.FileChooserAction action,
         string dialogname,
         string[]? filternames,
@@ -237,7 +237,7 @@ namespace Utils {
 
         var dialog = new Gtk.FileChooserDialog (
                         dialogname,
-                        null,
+                        parent,
                         action,
                         Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
                         button, Gtk.ResponseType.ACCEPT,

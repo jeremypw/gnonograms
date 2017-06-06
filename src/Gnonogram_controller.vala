@@ -240,12 +240,14 @@ public class Controller : GLib.Object {
         Filereader? reader = null;
 
         try {
-            reader = new Filereader (game);
-        } catch (GLib.Error e) {
-            if (reader != null) {
-                Utils.show_warning_dialog (reader.err_msg);
-            } else {
-                critical ("Failed to create game file reader");
+            reader = new Filereader (window, game);
+        } catch (GLib.IOError e) {
+            if (!(e is IOError.CANCELLED)) {
+                if (reader != null) {
+                    Utils.show_warning_dialog (reader.err_msg);
+                } else {
+                    critical ("Failed to create game file reader - %s", e.message);
+                }
             }
 
             return;
@@ -524,7 +526,7 @@ public class Controller : GLib.Object {
         Filewriter file_writer;
 
         try {
-            file_writer = new Filewriter (game_path, title, rows, cols,view.get_row_clues (), view.get_col_clues ());
+            file_writer = new Filewriter (window, game_path, title, rows, cols,view.get_row_clues (), view.get_col_clues ());
             file_writer.difficulty = grade;
             file_writer.game_state = game_state;
             file_writer.working = model.working_data;
