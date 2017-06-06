@@ -40,10 +40,7 @@ public class Controller : GLib.Object {
         }
 
         set {
-            if (view.game_state != value) {
-                view.game_state = value;
-            }
-
+            view.game_state = value;
             model.game_state = value;
             clear_history ();
         }

@@ -116,6 +116,7 @@ public class Filewriter : Object {
             stream.printf("%s\n", s);
         }
 
+        stream.printf("[Col clues]\n");
         foreach (string s in col_clues) {
             stream.printf("%s\n", s);
         }
