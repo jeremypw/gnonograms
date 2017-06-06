@@ -28,6 +28,8 @@ public class Controller : GLib.Object {
     private Model? model;
     private Solver solver;
     private string? game_path = null;
+    private string load_game_dir;
+    private string save_game_dir;
 
     private Gee.Deque<Move> back_stack;
     private Gee.Deque<Move> forward_stack;
@@ -98,8 +100,19 @@ public class Controller : GLib.Object {
         saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
         settings.bind ("grade", view, "grade", SettingsBindFlags.DEFAULT);
 
+        load_game_dir = get_app ().build_pkg_data_dir + "/games";
+        save_game_dir = Environment.get_home_dir () + "/gnonograms";
+
         restore_settings ();
         restore_saved_state ();
+
+        /* Ensure these directories exist */
+        try {
+            var file = File.new_for_path (save_game_dir);
+            file.make_directory (null);
+            file = File.new_for_path (load_game_dir);
+            file.make_directory (null);
+        } catch (GLib.Error e) {}
     }
 
 
@@ -210,6 +223,16 @@ public class Controller : GLib.Object {
         var rows = settings.get_uint ("rows");
         var cols = settings.get_uint ("columns");
         view.dimensions = {cols, rows};
+
+        var dir = settings.get_string ("load_game_dir");
+        if (dir.length > 0) {
+            load_game_dir = dir;
+        }
+
+        dir = settings.get_string ("save_game_dir");
+        if (dir.length > 0) {
+            save_game_dir = dir;
+        }
     }
 
     private void load_game (File game) {
@@ -235,7 +258,7 @@ public class Controller : GLib.Object {
             }
 
             /* At this point, we can assume game_file exists and has parent */
-            get_app ().load_game_dir = reader.game_file.get_parent ().get_uri ();
+            load_game_dir = reader.game_file.get_parent ().get_uri ();
 
             game_path = reader.game_file.get_path ();
         } else {
@@ -514,7 +537,7 @@ public class Controller : GLib.Object {
     }
 
     private void on_save_game_as_request () {
-        game_path = null;
+        game_path = null; /* Will cause Filewriter to ask for a location to save */
         on_save_game_request ();
     }
 }

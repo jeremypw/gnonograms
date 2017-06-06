@@ -38,6 +38,22 @@
             The number of columns of cells in the puzzle grid.
           </description>
         </key>
+
+        <key type="s" name="load_game_dir">
+          <default>""</default>
+          <summary>custom directory for loading</summary>
+          <description>
+            The directory from which to load games, if not the default location.
+          </description>
+        </key>
+
+        <key type="s" name="save_game_dir">
+          <default>""</default>
+          <summary>custom directory for saving</summary>
+          <description>
+            The directory to which to save games, if not the default location.
+          </description>
+        </key>
     </schema>
 
     <schema path="/apps/gnonograms-elementary/saved-state/" id="apps.gnonograms-elementary.saved-state">

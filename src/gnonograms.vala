@@ -188,15 +188,6 @@ public class App : Granite.Application {
 
         build_data_dir = Build.DATADIR;
         build_pkg_data_dir = Build.PKGDATADIR;
-        load_game_dir = build_pkg_data_dir + "/games";
-        save_game_dir = Environment.get_home_dir () + "/gnonograms";
-
-        try {
-            var file = File.new_for_path (save_game_dir);
-            file.make_directory (null);
-        } catch (GLib.Error e) {
-            warning ("error making game directory %s", e.message);
-        }
 
         build_release_name = Build.RELEASE_NAME;
         build_version = Build.VERSION;
