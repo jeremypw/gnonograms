@@ -116,7 +116,7 @@ public class Filewriter : Object {
             stream.printf("%s\n", s);
         }
 
-        stream.printf("[Col clues]\n");
+        stream.printf("[Column clues]\n");
         foreach (string s in col_clues) {
             stream.printf("%s\n", s);
         }
@@ -135,7 +135,7 @@ public class Filewriter : Object {
 
         write_game_file ();
 
-        stream.printf ("[Solution]\n");
+        stream.printf ("[Solution grid]\n");
         stream.printf (solution.to_string ());
         stream.printf ("[Working grid]\n");
         stream.printf (working.to_string());

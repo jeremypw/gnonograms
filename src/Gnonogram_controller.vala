@@ -130,9 +130,17 @@ public class Controller : GLib.Object {
         solver.showsolvergrid.connect (on_show_solver_grid);
     }
 
-    private void new_game () {
-        model.blank_solution ();
+    private void clear () {
+        view.blank_labels ();
+        model.clear ();
+        clear_history ();
+        game_path = "";
+
         game_state = GameState.SETTING;
+    }
+
+    private void new_game () {
+        clear ();
         view.header_title = _("Blank sheet");
     }
 
@@ -142,10 +150,8 @@ public class Controller : GLib.Object {
         /* One row used to debug */
         var limit = rows == 1 ? 1 : 100;
 
+        clear ();
         view.header_title = _("Random pattern");
-        view.blank_labels ();
-        clear_history ();
-        game_state = GameState.SETTING;
 
         while (count < limit) {
             count++;
