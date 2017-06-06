@@ -30,6 +30,7 @@ public class Controller : GLib.Object {
     private string? game_path = null;
     private string load_game_dir;
     private string save_game_dir;
+    private string data_home_folder_current;
 
     private Gee.Deque<Move> back_stack;
     private Gee.Deque<Move> forward_stack;
@@ -77,6 +78,8 @@ public class Controller : GLib.Object {
             load_game (game);
         } else if (is_solving && title == null) {
             new_random_game ();
+        } else {
+            new_game ();
         }
 
         view.show_all ();
@@ -99,17 +102,29 @@ public class Controller : GLib.Object {
 
         load_game_dir = get_app ().build_pkg_data_dir + "/games";
         save_game_dir = Environment.get_home_dir () + "/gnonograms";
+        data_home_folder_current = Path.build_path (Path.DIR_SEPARATOR_S,
+                                        Environment.get_user_data_dir (),
+                                        "gnonograms",
+                                        "unsaved"
+                                    );
 
         restore_settings ();
         restore_saved_state ();
 
         /* Ensure these directories exist */
+        File file;
         try {
-            var file = File.new_for_path (save_game_dir);
-            file.make_directory (null);
+            file = File.new_for_path (save_game_dir);
+            file.make_directory_with_parents (null);
+        } catch (GLib.Error e) {warning ("Could not make %s - %s",file.get_uri (), e.message);}
+        try {
             file = File.new_for_path (load_game_dir);
-            file.make_directory (null);
-        } catch (GLib.Error e) {}
+            file.make_directory_with_parents (null);
+        } catch (GLib.Error e) {warning ("Could not make %s - %s",file.get_uri (), e.message);}
+        try {
+            file = File.new_for_path (data_home_folder_current);
+            file.make_directory_with_parents (null);
+        } catch (GLib.Error e) {warning ("Could not make %s - %s",file.get_uri (), e.message);}
     }
 
 
@@ -141,7 +156,7 @@ public class Controller : GLib.Object {
 
     private void new_game () {
         clear ();
-        view.header_title = _("Blank sheet");
+        title = _("Blank sheet");
     }
 
     public void new_random_game() {
@@ -213,6 +228,17 @@ public class Controller : GLib.Object {
         window.get_position (out x, out y);
         saved_state.set_int ("window-x", x);
         saved_state.set_int ("window-y", y);
+
+        string current_game_path = Path.build_path (Path.DIR_SEPARATOR_S, data_home_folder_current, "Unsaved game");
+
+        try {
+            var current_game = File.new_for_path (current_game_path);
+            current_game.@delete ();
+        } catch (GLib.Error e) {
+            warning ("Error deleting current game file - %s", e.message);
+        } finally {
+            write_game (current_game_path);
+        }
     }
 
     private void restore_saved_state () {
@@ -236,6 +262,23 @@ public class Controller : GLib.Object {
         dir = settings.get_string ("save-game-dir");
         if (dir.length > 0) {
             save_game_dir = dir;
+        }
+    }
+
+    private void write_game (string? path) {
+        Filewriter file_writer;
+
+        try {
+            file_writer = new Filewriter (window, path, title, rows, cols,view.get_row_clues (), view.get_col_clues ());
+            file_writer.difficulty = grade;
+            file_writer.game_state = game_state;
+            file_writer.working = model.working_data;
+            file_writer.solution = model.solution_data;
+            file_writer.write_position_file ();
+            game_path = file_writer.game_path;
+        } catch (IOError e) {
+            warning ("File writer error %s", e.message);
+            return;
         }
     }
 
@@ -526,25 +569,11 @@ public class Controller : GLib.Object {
     }
 
     private void on_save_game_request () {
-        Filewriter file_writer;
-
-        try {
-            file_writer = new Filewriter (window, game_path, title, rows, cols,view.get_row_clues (), view.get_col_clues ());
-            file_writer.difficulty = grade;
-            file_writer.game_state = game_state;
-            file_writer.working = model.working_data;
-            file_writer.solution = model.solution_data;
-            file_writer.write_position_file ();
-            game_path = file_writer.game_path;
-        } catch (IOError e) {
-            warning ("File writer error %s", e.message);
-            return;
-        }
+        write_game (game_path);
     }
 
     private void on_save_game_as_request () {
-        game_path = null; /* Will cause Filewriter to ask for a location to save */
-        on_save_game_request ();
+        write_game (null); /* Will cause Filewriter to ask for a location to save */
     }
 
     private void on_open_game_request () {
