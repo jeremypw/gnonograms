@@ -30,7 +30,7 @@ public class Controller : GLib.Object {
     private string? game_path = null;
     private string load_game_dir;
     private string save_game_dir;
-    private string data_home_folder_current;
+    public string current_game_path {get; construct;}
 
     private Gee.Deque<Move> back_stack;
     private Gee.Deque<Move> forward_stack;
@@ -74,12 +74,20 @@ public class Controller : GLib.Object {
     public signal void quit_app ();
 
     public Controller (File? game = null) {
+        bool success = false;
+
         if (game != null) {
-            load_game (game);
-        } else if (is_solving && title == null) {
-            new_random_game ();
+            success = load_game (game);
         } else {
-            new_game ();
+            success = restore_game ();
+        }
+
+        if (!success) {
+            if (is_solving && title == null) {
+                new_random_game ();
+            } else {
+                new_game ();
+            }
         }
 
         view.show_all ();
@@ -102,11 +110,11 @@ public class Controller : GLib.Object {
 
         load_game_dir = get_app ().build_pkg_data_dir + "/games";
         save_game_dir = Environment.get_home_dir () + "/gnonograms";
-        data_home_folder_current = Path.build_path (Path.DIR_SEPARATOR_S,
-                                        Environment.get_user_data_dir (),
-                                        "gnonograms",
-                                        "unsaved"
-                                    );
+        string data_home_folder_current = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                Environment.get_user_data_dir (),
+                                                "gnonograms",
+                                                "unsaved"
+                                            );
 
         restore_settings ();
         restore_saved_state ();
@@ -125,6 +133,8 @@ public class Controller : GLib.Object {
             file = File.new_for_path (data_home_folder_current);
             file.make_directory_with_parents (null);
         } catch (GLib.Error e) {warning ("Could not make %s - %s",file.get_uri (), e.message);}
+
+        current_game_path = Path.build_path (Path.DIR_SEPARATOR_S, data_home_folder_current, Gnonograms.UNSAVED_FILENAME);
     }
 
 
@@ -229,8 +239,10 @@ public class Controller : GLib.Object {
         saved_state.set_int ("window-x", x);
         saved_state.set_int ("window-y", y);
 
-        string current_game_path = Path.build_path (Path.DIR_SEPARATOR_S, data_home_folder_current, "Unsaved game");
+        save_current_game ();
+    }
 
+    private void save_current_game () {
         try {
             var current_game = File.new_for_path (current_game_path);
             current_game.@delete ();
@@ -265,7 +277,12 @@ public class Controller : GLib.Object {
         }
     }
 
-    private void write_game (string? path) {
+    private bool restore_game () {
+        var current_game = File.new_for_path (current_game_path);
+        return load_game (current_game);
+    }
+
+    private bool write_game (string? path) {
         Filewriter file_writer;
 
         try {
@@ -277,12 +294,14 @@ public class Controller : GLib.Object {
             file_writer.write_position_file ();
             game_path = file_writer.game_path;
         } catch (IOError e) {
-            warning ("File writer error %s", e.message);
-            return;
+            debug ("File writer error %s", e.message);
+            return false;
         }
+
+        return true;
     }
 
-    private void load_game (File? game) {
+    private bool load_game (File? game) {
         Filereader? reader = null;
 
         try {
@@ -292,11 +311,11 @@ public class Controller : GLib.Object {
                 if (reader != null) {
                     Utils.show_warning_dialog (reader.err_msg);
                 } else {
-                    critical ("Failed to create game file reader - %s", e.message);
+                    debug ("Failed to create game file reader - %s", e.message);
                 }
             }
 
-            return;
+            return false;
         }
 
         if (reader.valid && load_common (reader) && load_position_extra (reader)) {
@@ -311,9 +330,12 @@ public class Controller : GLib.Object {
 
             game_path = reader.game_file.get_path ();
         } else {
+            /* There is something wrong with the file being loaded */
             Utils.show_warning_dialog (reader.err_msg, view);
-            new_game ();
+            return false;
         }
+
+        return true;
     }
 
     private bool load_common (Filereader reader) {

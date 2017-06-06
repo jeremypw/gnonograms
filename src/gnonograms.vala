@@ -171,6 +171,8 @@ public static double MAXFONTSIZE = 72.0;
 public const string BLOCKSEPARATOR = ", ";
 public const string BLANKLABELTEXT = _("?");
 public const string GAMEFILEEXTENSION = ".gno";
+public const string UNSAVED_FILENAME = "Unsaved Game" + GAMEFILEEXTENSION;
+
 
 public class App : Granite.Application {
     public Controller controller;

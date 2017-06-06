@@ -62,7 +62,13 @@ public class Filereader : Object {
             throw new IOError.CANCELLED (_("Load game file dialog cancelled"));
         }
 
-        parse_gnonogram_game_file (Utils.open_data_input_stream (game_file));
+        var stream = Utils.open_data_input_stream (game_file);
+
+        if (stream == null) {
+            throw new IOError.FAILED (_("Unable to open data stream"));
+        }
+
+        parse_gnonogram_game_file (stream);
     }
 
 

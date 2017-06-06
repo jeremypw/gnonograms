@@ -294,18 +294,11 @@ namespace Utils {
     }
 
     public DataInputStream? open_data_input_stream (File file) {
-        DataInputStream stream;
-        if (!file.query_exists (null)) {
-           stderr.printf ("File '%s' doesn't exist.\n", file.get_path ());
-           return null;
-        }
-
+        DataInputStream stream = null;
         try {
             stream = new DataInputStream (file.read (null));
-        } catch (Error e) {
-            Utils.show_warning_dialog (e.message);
-            return null;
-        }
+        } catch (Error e) {}
+
         return stream;
     }
 }
