@@ -51,11 +51,11 @@ public class Filereader : Object {
         }
     }
 
-    public Filereader ( Gtk.Window? parent, File? game) throws GLib.IOError {
+    public Filereader (Gtk.Window? parent, string? load_dir_path, File? game) throws GLib.IOError {
         Object (game_file: game);
 
         if (game == null) {
-            game_file = Utils.get_load_game_file (parent);
+            game_file = Utils.get_load_game_file (parent, load_dir_path);
         }
 
         if (game_file == null) {

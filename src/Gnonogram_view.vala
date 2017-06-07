@@ -31,6 +31,8 @@ public class View : Gtk.ApplicationWindow {
     private Granite.Widgets.Toast toast;
 
     private ModeButton mode_switch;
+    private Gtk.Button load_game_button;
+    private Gtk.Button save_game_button;
     private Gtk.Button random_game_button;
     private Gtk.Button check_correct_button;
     private Model model {get; set;}
@@ -140,6 +142,17 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
+    private bool mods {
+        get {
+            return control_pressed || other_mod_pressed;
+        }
+    }
+
+    private bool control_pressed = false;
+    private bool other_mod_pressed = false;
+    private bool shift_pressed = false;
+    private bool only_control_pressed = false;
+
     public signal void random_game_request ();
     public signal uint check_errors_request ();
     public signal void rewind_request ();
@@ -171,8 +184,22 @@ public class View : Gtk.ApplicationWindow {
 
         title = _("Gnonograms for Elementary");
 
+        load_game_button = new Gtk.Button ();
+        var img = new Gtk.Image.from_icon_name ("document-open-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
+        load_game_button.image = img;
+        load_game_button.tooltip_text = _("Load a Game from File");
+        load_game_button.clicked.connect (() => {open_game_request ();});
+        header_bar.pack_start (load_game_button);
+
+        save_game_button = new Gtk.Button ();
+        img = new Gtk.Image.from_icon_name ("document-save-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
+        save_game_button.image = img;
+        save_game_button.tooltip_text = _("Save a Game to File");
+        save_game_button.clicked.connect (() => {save_game_request ();});
+        header_bar.pack_start (save_game_button);
+
         random_game_button = new Gtk.Button ();
-        var img = new Gtk.Image.from_icon_name ("list-add-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
+        img = new Gtk.Image.from_icon_name ("list-add-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         random_game_button.image = img;
         random_game_button.tooltip_text = _("Generate a Random Game");
         random_game_button.clicked.connect (() => {random_game_request ();});
@@ -343,7 +370,7 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private void handle_arrow_keys (string keyname, uint mods) {
+    private void handle_arrow_keys (string keyname) {
         int r = 0; int c = 0;
         switch (keyname) {
             case "UP":
@@ -366,8 +393,8 @@ public class View : Gtk.ApplicationWindow {
         cell_grid.move_cursor_relative (r, c);
     }
 
-    private void handle_pen_keys (string keyname, uint mods) {
-        if (mods > 0) {
+    private void handle_pen_keys (string keyname) {
+        if (mods) {
             return;
         }
 
@@ -456,28 +483,25 @@ public class View : Gtk.ApplicationWindow {
         /* TODO (if necessary) ignore key autorepeat */
 
         if (event.is_modifier == 1) {
+            set_mods (event);
             return true;
         }
 
         var name = (Gdk.keyval_name (event.keyval)).up();
-        var mods = (event.state & Gtk.accelerator_get_default_mod_mask ());
-        bool control_pressed = ((mods & Gdk.ModifierType.CONTROL_MASK) != 0);
-        bool other_mod_pressed = (((mods & ~Gdk.ModifierType.SHIFT_MASK) & ~Gdk.ModifierType.CONTROL_MASK) != 0);
-        bool shift_pressed = ((mods & Gdk.ModifierType.SHIFT_MASK) != 0);
-        bool only_control_pressed = control_pressed && !other_mod_pressed; /* Shift can be pressed */
+
 
         switch (name) {
             case "UP":
             case "DOWN":
             case "LEFT":
             case "RIGHT":
-                handle_arrow_keys (name, mods);
+                handle_arrow_keys (name);
                 break;
 
             case "F":
             case "E":
             case "X":
-                handle_pen_keys (name, mods);
+                handle_pen_keys (name);
                 break;
 
             case "1":
@@ -537,6 +561,11 @@ public class View : Gtk.ApplicationWindow {
     private bool on_key_release_event (Gdk.EventKey event) {
         var name = (Gdk.keyval_name (event.keyval)).up();
 
+        if (event.is_modifier == 1) {
+            set_mods (event);
+            return true;
+        }
+
         switch (name) {
             case "F":
             case "E":
@@ -549,6 +578,14 @@ public class View : Gtk.ApplicationWindow {
         }
 
         return true;
+    }
+
+    private void set_mods (Gdk.EventKey event) {
+        var mods = (event.state & Gtk.accelerator_get_default_mod_mask ());
+        control_pressed = ((mods & Gdk.ModifierType.CONTROL_MASK) != 0);
+        other_mod_pressed = (((mods & ~Gdk.ModifierType.SHIFT_MASK) & ~Gdk.ModifierType.CONTROL_MASK) != 0);
+        shift_pressed = ((mods & Gdk.ModifierType.SHIFT_MASK) != 0);
+        only_control_pressed = control_pressed && !other_mod_pressed; /* Shift can be pressed */
     }
 
     private void on_mode_switch_changed (Gtk.Widget widget) {

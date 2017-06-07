@@ -179,13 +179,13 @@ namespace Utils {
         return show_dlg (msg ,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, parent)==Gtk.ResponseType.YES;
     }
 
-    public static File? get_load_game_file (Gtk.Window? parent = null) {
+    public static File? get_load_game_file (Gtk.Window? parent, string? load_dir_path) {
         string path = get_file_path (parent,
             Gtk.FileChooserAction.OPEN,
             _("Choose a puzzle"),
             {_("Gnonogram puzzles")},
             {"*" + Gnonograms.GAMEFILEEXTENSION},
-            get_app ().load_game_dir
+            load_dir_path
         );
 
         if (path == "") {
@@ -195,13 +195,13 @@ namespace Utils {
         }
     }
 
-    public static string get_save_file_path (Gtk.Window? parent = null) {
+    public static string get_save_file_path (Gtk.Window? parent, string? save_dir_path) {
         return get_file_path (parent,
             Gtk.FileChooserAction.SAVE,
             _("Name and save this puzzle"),
             {_("Gnonogram puzzles")},
             {"*" + Gnonograms.GAMEFILEEXTENSION},
-            get_app ().save_game_dir
+            save_dir_path
         );
     }
 
@@ -256,7 +256,6 @@ namespace Utils {
         if (start_path != null) {
             var start = File.new_for_path (start_path);
             if (start.query_file_type (GLib.FileQueryInfoFlags.NONE, null) == FileType.DIRECTORY) {
-                Environment.set_current_dir (start_path);
                 dialog.set_current_folder (start_path); //so Recently used folder not displayed
             }
         }

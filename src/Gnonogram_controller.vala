@@ -28,8 +28,8 @@ public class Controller : GLib.Object {
     private Model? model;
     private Solver solver;
     private string? game_path = null;
-    private string load_game_dir;
-    private string save_game_dir;
+    public string load_game_dir {get; set;}
+    public string save_game_dir {get; set;}
     public string current_game_path {get; construct;}
 
     private Gee.Deque<Move> back_stack;
@@ -77,7 +77,7 @@ public class Controller : GLib.Object {
         bool success = false;
 
         if (game != null) {
-            success = load_game (game);
+            success = load_game (game, true);
         } else {
             success = restore_game ();
         }
@@ -279,14 +279,23 @@ public class Controller : GLib.Object {
 
     private bool restore_game () {
         var current_game = File.new_for_path (current_game_path);
-        return load_game (current_game);
+        return load_game (current_game, false);
     }
 
     private bool write_game (string? path) {
         Filewriter file_writer;
 
         try {
-            file_writer = new Filewriter (window, path, title, rows, cols,view.get_row_clues (), view.get_col_clues ());
+            file_writer = new Filewriter (window,
+                                          save_game_dir,
+                                          path,
+                                          title,
+                                          rows,
+                                          cols,
+                                          view.get_row_clues (),
+                                          view.get_col_clues ()
+                            );
+
             file_writer.difficulty = grade;
             file_writer.game_state = game_state;
             file_writer.working = model.working_data;
@@ -301,11 +310,11 @@ public class Controller : GLib.Object {
         return true;
     }
 
-    private bool load_game (File? game) {
+    private bool load_game (File? game, bool update_load_dir) {
         Filereader? reader = null;
 
         try {
-            reader = new Filereader (window, game);
+            reader = new Filereader (window, load_game_dir, game);
         } catch (GLib.IOError e) {
             if (!(e is IOError.CANCELLED)) {
                 if (reader != null) {
@@ -325,10 +334,11 @@ public class Controller : GLib.Object {
                 game_state = GameState.SOLVING;
             }
 
-            /* At this point, we can assume game_file exists and has parent */
-            load_game_dir = reader.game_file.get_parent ().get_uri ();
-
-            game_path = reader.game_file.get_path ();
+            if (update_load_dir) {
+                /* At this point, we can assume game_file exists and has parent */
+                load_game_dir = reader.game_file.get_parent ().get_uri ();
+                game_path = reader.game_file.get_path ();
+            }
         } else {
             /* There is something wrong with the file being loaded */
             Utils.show_warning_dialog (reader.err_msg, view);
@@ -599,7 +609,7 @@ public class Controller : GLib.Object {
     }
 
     private void on_open_game_request () {
-        load_game (null); /* Will cause Filereader to ask for a location to open */
+        load_game (null, true); /* Will cause Filereader to ask for a location to open */
     }
 }
 }

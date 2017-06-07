@@ -41,6 +41,7 @@ public class Filewriter : Object {
     private FileStream? stream;
 
     public Filewriter (Gtk.Window? parent,
+                       string? save_dir_path,
                        string? path,
                        string name,
                        uint rows,
@@ -55,7 +56,7 @@ public class Filewriter : Object {
                 col_clues: col_clues);
 
         if (path == null || path.length <= 4) {
-            game_path = Utils.get_save_file_path ();
+            game_path = Utils.get_save_file_path (parent, save_dir_path);
         } else {
             game_path = path;
         }
