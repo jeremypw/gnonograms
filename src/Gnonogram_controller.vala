@@ -238,6 +238,7 @@ public class Controller : GLib.Object {
         window.get_position (out x, out y);
         saved_state.set_int ("window-x", x);
         saved_state.set_int ("window-y", y);
+        saved_state.set_string ("current-game-path", game_path);
 
         save_current_game ();
     }
@@ -257,6 +258,7 @@ public class Controller : GLib.Object {
         int x, y;
         x = saved_state.get_int ("window-x");
         y = saved_state.get_int ("window-y");
+        game_path = saved_state.get_string ("current-game-path");
 
         window.move (x, y);
     }
@@ -282,7 +284,7 @@ public class Controller : GLib.Object {
         return load_game (current_game, false);
     }
 
-    private bool write_game (string? path) {
+    private string? write_game (string? path) {
         Filewriter file_writer;
 
         try {
@@ -301,13 +303,12 @@ public class Controller : GLib.Object {
             file_writer.working = model.working_data;
             file_writer.solution = model.solution_data;
             file_writer.write_position_file ();
-            game_path = file_writer.game_path;
         } catch (IOError e) {
-            debug ("File writer error %s", e.message);
-            return false;
+            critical ("File writer error %s", e.message);
+            return null;
         }
 
-        return true;
+        return file_writer.game_path;
     }
 
     private bool load_game (File? game, bool update_load_dir) {
@@ -601,11 +602,19 @@ public class Controller : GLib.Object {
     }
 
     private void on_save_game_request () {
-        write_game (game_path);
+        var write_path = write_game (game_path);
+
+        if (game_path == null || game_path == "") {
+            game_path = write_path;
+        }
     }
 
     private void on_save_game_as_request () {
-        write_game (null); /* Will cause Filewriter to ask for a location to save */
+        var write_path = write_game (null); /* Will cause Filewriter to ask for a location to save */
+
+        if (write_path != null) {
+            game_path = write_path;
+        }
     }
 
     private void on_open_game_request () {

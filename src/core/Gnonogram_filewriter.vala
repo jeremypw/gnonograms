@@ -69,7 +69,7 @@ public class Filewriter : Object {
             game_path = game_path + Gnonograms.GAMEFILEEXTENSION;
         }
 
-        stream = FileStream.open (game_path, "w");
+        stream = FileStream.open (game_path, "w"); /* This requires local path, not a uri */
 
         if (stream == null) {
             throw new IOError.FAILED ("Could not open filestream to %s".printf (game_path));

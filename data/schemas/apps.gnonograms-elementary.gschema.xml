@@ -88,5 +88,13 @@
             The height of the font used for clues, or -100 for default for screen and grid.
           </description>
         </key>
+
+        <key type="s" name="current-game-path">
+          <default>''</default>
+          <summary>Path to game currently being played</summary>
+          <description>
+            The location where the current game is stored (if it is not an unsaved game).
+          </description>
+        </key>
     </schema>
 </schemalist>

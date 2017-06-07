@@ -195,7 +195,18 @@ public class View : Gtk.ApplicationWindow {
         img = new Gtk.Image.from_icon_name ("document-save-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         save_game_button.image = img;
         save_game_button.tooltip_text = _("Save a Game to File");
-        save_game_button.clicked.connect (() => {save_game_request ();});
+        save_game_button.button_release_event.connect ((event) => {
+            set_mods (event.state);
+            return false;
+        });
+
+        save_game_button.clicked.connect (() => {
+            if (shift_pressed) {
+                save_game_as_request ();
+            } else {
+                save_game_request ();
+            }
+        });
         header_bar.pack_start (save_game_button);
 
         random_game_button = new Gtk.Button ();
@@ -481,12 +492,11 @@ public class View : Gtk.ApplicationWindow {
 
     private bool on_key_press_event (Gdk.EventKey event) {
         /* TODO (if necessary) ignore key autorepeat */
-
         if (event.is_modifier == 1) {
-            set_mods (event);
             return true;
         }
 
+        set_mods (event.state);
         var name = (Gdk.keyval_name (event.keyval)).up();
 
 
@@ -561,11 +571,6 @@ public class View : Gtk.ApplicationWindow {
     private bool on_key_release_event (Gdk.EventKey event) {
         var name = (Gdk.keyval_name (event.keyval)).up();
 
-        if (event.is_modifier == 1) {
-            set_mods (event);
-            return true;
-        }
-
         switch (name) {
             case "F":
             case "E":
@@ -580,8 +585,9 @@ public class View : Gtk.ApplicationWindow {
         return true;
     }
 
-    private void set_mods (Gdk.EventKey event) {
-        var mods = (event.state & Gtk.accelerator_get_default_mod_mask ());
+    private void set_mods (uint state) {
+warning ("set mods - state %u", state);
+        var mods = (state & Gtk.accelerator_get_default_mod_mask ());
         control_pressed = ((mods & Gdk.ModifierType.CONTROL_MASK) != 0);
         other_mod_pressed = (((mods & ~Gdk.ModifierType.SHIFT_MASK) & ~Gdk.ModifierType.CONTROL_MASK) != 0);
         shift_pressed = ((mods & Gdk.ModifierType.SHIFT_MASK) != 0);

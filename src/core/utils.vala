@@ -195,7 +195,7 @@ namespace Utils {
         }
     }
 
-    public static string get_save_file_path (Gtk.Window? parent, string? save_dir_path) {
+    public static string? get_save_file_path (Gtk.Window? parent, string? save_dir_path) {
         return get_file_path (parent,
             Gtk.FileChooserAction.SAVE,
             _("Name and save this puzzle"),
@@ -205,12 +205,14 @@ namespace Utils {
         );
     }
 
-    private static string get_file_path (Gtk.Window? parent,
+    private static string? get_file_path (Gtk.Window? parent,
         Gtk.FileChooserAction action,
         string dialogname,
         string[]? filternames,
         string[]? filters,
         string? start_path = null) {
+
+        string? file_path = null;
 
         if (filternames != null) {
             assert (filternames.length == filters.length);
@@ -276,20 +278,20 @@ namespace Utils {
             }
         }
 
-        var filename = "";
-
         if (response == Gtk.ResponseType.ACCEPT) {
-            Environment.set_current_dir (dialog.get_current_folder ());
+            string filename;
             if (action == Gtk.FileChooserAction.SAVE) {
                 filename = dialog.get_current_name ();
             } else {
                 filename = dialog.get_filename ();
             }
+
+            file_path = Path.build_path (Path.DIR_SEPARATOR_S, dialog.get_current_folder (), filename);
         }
 
         dialog.destroy ();
 
-        return filename;
+        return file_path;
     }
 
     public DataInputStream? open_data_input_stream (File file) {
