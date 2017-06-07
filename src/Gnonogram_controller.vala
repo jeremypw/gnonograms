@@ -321,7 +321,7 @@ public class Controller : GLib.Object {
                 if (reader != null) {
                     Utils.show_warning_dialog (reader.err_msg);
                 } else {
-                    debug ("Failed to create game file reader - %s", e.message);
+                    critical ("Failed to create game file reader - %s", e.message);
                 }
             }
 

@@ -279,14 +279,14 @@ namespace Utils {
         }
 
         if (response == Gtk.ResponseType.ACCEPT) {
-            string filename;
             if (action == Gtk.FileChooserAction.SAVE) {
-                filename = dialog.get_current_name ();
+                file_path = Path.build_path (Path.DIR_SEPARATOR_S,
+                                             dialog.get_current_folder (),
+                                             dialog.get_current_name ();
+                            );
             } else {
-                filename = dialog.get_filename ();
+                file_path = dialog.get_filename ();
             }
-
-            file_path = Path.build_path (Path.DIR_SEPARATOR_S, dialog.get_current_folder (), filename);
         }
 
         dialog.destroy ();
@@ -298,7 +298,9 @@ namespace Utils {
         DataInputStream stream = null;
         try {
             stream = new DataInputStream (file.read (null));
-        } catch (Error e) {}
+        } catch (Error e) {
+            critical ("File %s, stream creation error %s", file.get_path (), e.message);
+        }
 
         return stream;
     }
