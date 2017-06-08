@@ -282,7 +282,7 @@ namespace Utils {
             if (action == Gtk.FileChooserAction.SAVE) {
                 file_path = Path.build_path (Path.DIR_SEPARATOR_S,
                                              dialog.get_current_folder (),
-                                             dialog.get_current_name ();
+                                             dialog.get_current_name ()
                             );
             } else {
                 file_path = dialog.get_filename ();
@@ -292,17 +292,6 @@ namespace Utils {
         dialog.destroy ();
 
         return file_path;
-    }
-
-    public DataInputStream? open_data_input_stream (File file) {
-        DataInputStream stream = null;
-        try {
-            stream = new DataInputStream (file.read (null));
-        } catch (Error e) {
-            critical ("File %s, stream creation error %s", file.get_path (), e.message);
-        }
-
-        return stream;
     }
 }
 }
