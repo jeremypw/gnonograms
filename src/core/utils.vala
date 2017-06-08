@@ -179,22 +179,6 @@ namespace Utils {
         return show_dlg (msg ,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, parent)==Gtk.ResponseType.YES;
     }
 
-    public static File? get_load_game_file (Gtk.Window? parent, string? load_dir_path) {
-        string path = get_file_path (parent,
-            Gtk.FileChooserAction.OPEN,
-            _("Choose a puzzle"),
-            {_("Gnonogram puzzles")},
-            {"*" + Gnonograms.GAMEFILEEXTENSION},
-            load_dir_path
-        );
-
-        if (path == "") {
-            return null;
-        } else {
-            return File.new_for_path (path);
-        }
-    }
-
     public static string? get_save_file_path (Gtk.Window? parent, string? save_dir_path) {
         return get_file_path (parent,
             Gtk.FileChooserAction.SAVE,

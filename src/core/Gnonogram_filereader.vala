@@ -55,7 +55,7 @@ public class Filereader : Object {
         Object (game_file: game);
 
         if (game == null) {
-            game_file = Utils.get_load_game_file (parent, load_dir_path);
+            game_file = get_load_game_file (parent, load_dir_path);
         }
 
         if (game_file == null) {
@@ -71,6 +71,22 @@ public class Filereader : Object {
         }
     }
 
+    private File? get_load_game_file (Gtk.Window? parent, string? load_dir_path) {
+        string path = Utils.get_file_path (
+                            parent,
+                            Gtk.FileChooserAction.OPEN,
+                            _("Choose a puzzle"),
+                            {_("Gnonogram puzzles")},
+                            {"*" + Gnonograms.GAMEFILEEXTENSION},
+                            load_dir_path
+                        );
+
+        if (path == "") {
+            return null;
+        } else {
+            return File.new_for_path (path);
+        }
+    }
 
     private void parse_gnonogram_game_file (DataInputStream stream) throws GLib.IOError {
         size_t header_length, body_length;
