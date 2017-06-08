@@ -179,16 +179,6 @@ namespace Utils {
         return show_dlg (msg ,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, parent)==Gtk.ResponseType.YES;
     }
 
-    public static string? get_save_file_path (Gtk.Window? parent, string? save_dir_path) {
-        return get_file_path (parent,
-            Gtk.FileChooserAction.SAVE,
-            _("Name and save this puzzle"),
-            {_("Gnonogram puzzles")},
-            {"*" + Gnonograms.GAMEFILEEXTENSION},
-            save_dir_path
-        );
-    }
-
     private static string? get_file_path (Gtk.Window? parent,
         Gtk.FileChooserAction action,
         string dialogname,

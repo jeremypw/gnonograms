@@ -56,7 +56,7 @@ public class Filewriter : Object {
                 col_clues: col_clues);
 
         if (path == null || path.length <= 4) {
-            game_path = Utils.get_save_file_path (parent, save_dir_path);
+            game_path = get_save_file_path (parent, save_dir_path);
         } else {
             game_path = path;
         }
@@ -80,6 +80,17 @@ public class Filewriter : Object {
         date = new DateTime.now_local ();
     }
 
+    private string? get_save_file_path (Gtk.Window? parent, string? save_dir_path) {
+        return Utils.get_file_path (parent,
+            Gtk.FileChooserAction.SAVE,
+            _("Name and save this puzzle"),
+            {_("Gnonogram puzzles")},
+            {"*" + Gnonograms.GAMEFILEEXTENSION},
+            save_dir_path
+        );
+    }
+
+    /*** Writes minimum information required for valid game file ***/
     public void write_game_file () throws IOError {
         if (name == null || name.length == 0) {
             throw new IOError.NOT_INITIALIZED ("No name to save");
@@ -125,6 +136,7 @@ public class Filewriter : Object {
         stream.flush();
     }
 
+    /*** Writes complete information to reload game state ***/
     public void write_position_file () throws IOError {
         if (working == null) {
             throw (new IOError.NOT_INITIALIZED ("No working grid to save"));
