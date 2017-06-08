@@ -250,7 +250,7 @@ public class Controller : GLib.Object {
         } catch (GLib.Error e) {
             warning ("Error deleting current game file - %s", e.message);
         } finally {
-            write_game (current_game_path);
+            write_game (current_game_path, true);
         }
     }
 
@@ -284,7 +284,7 @@ public class Controller : GLib.Object {
         return load_game (current_game, false);
     }
 
-    private string? write_game (string? path) {
+    private string? write_game (string? path, bool save_state = false) {
         Filewriter file_writer;
 
         try {
@@ -302,7 +302,11 @@ public class Controller : GLib.Object {
             file_writer.game_state = game_state;
             file_writer.working = model.working_data;
             file_writer.solution = model.solution_data;
-            file_writer.write_position_file ();
+            if (save_state) {
+                file_writer.write_position_file ();
+            } else {
+                file_writer.write_game_file ();
+            }
         } catch (IOError e) {
             critical ("File writer error %s", e.message);
             return null;
@@ -313,6 +317,8 @@ public class Controller : GLib.Object {
 
     private bool load_game (File? game, bool update_load_dir) {
         Filereader? reader = null;
+
+        clear ();
 
         try {
             reader = new Filereader (window, load_game_dir, game);
@@ -361,33 +367,35 @@ public class Controller : GLib.Object {
                 view.dimensions = {reader.cols, reader.rows};
             }
         } else {
-            reader.err_msg = (_("Dimensions data missing"));
+            reader.err_msg = (_("Dimensions missing"));
             return false;
         }
 
-        if (reader.has_solution) {
-            model.game_state = GameState.SETTING; /* Selects the solution grid */
+        if (reader.has_row_clues && reader.has_col_clues) {
+            view.update_labels_from_string_array (reader.row_clues, false);
+            view.update_labels_from_string_array (reader.col_clues, true);
+        } else {
+            reader.err_msg = (_("Clues missing"));
+            return false;
+        }
 
+        model.game_state = GameState.SETTING; /* Selects the solution grid */
+        if (reader.has_solution) {
             for (int i = 0; i < rows; i++) {
                 model.set_row_data_from_string (i, reader.solution[i]);
             }
-        } else if (reader.has_row_clues && reader.has_col_clues) {
-            view.update_labels_from_string_array (reader.row_clues, false);
-            view.update_labels_from_string_array (reader.col_clues, true);
-
-            int passes = solve_game (false, true, true, false, false);
+        } else {
+            int passes = solve_game (false, true, true, false, true);
 
             if (passes > 0 && passes < 999999) {
                 set_model_from_solver ();
+                view.update_labels_from_model ();
             } else if (passes < 0) {
                 reader.err_msg = (_("Clues contradictory"));
                 return false;
             } else {
                 Utils.show_warning_dialog (_("Puzzle not solved by computer - may not be possible"), view);
             }
-        } else {
-            reader.err_msg = (_("Clues and solution both missing"));
-            return false;
         }
 
         if (reader.name.length > 1) {
@@ -487,6 +495,8 @@ public class Controller : GLib.Object {
 
         if (prepare_to_solve (use_startgrid, use_labels)) {
             passes = solver.solve_it (rows == 1, use_advanced, use_ultimate, unique_only);
+        } else {
+            critical ("could not prepare solver");
         }
 
         return passes;
@@ -602,7 +612,7 @@ public class Controller : GLib.Object {
     }
 
     private void on_save_game_request () {
-        var write_path = write_game (game_path);
+        var write_path = write_game (game_path, false); /* Do not save working */
 
         if (game_path == null || game_path == "") {
             game_path = write_path;
@@ -610,7 +620,7 @@ public class Controller : GLib.Object {
     }
 
     private void on_save_game_as_request () {
-        var write_path = write_game (null); /* Will cause Filewriter to ask for a location to save */
+        var write_path = write_game (null, false); /* Will cause Filewriter to ask for a location to save */
 
         if (write_path != null) {
             game_path = write_path;

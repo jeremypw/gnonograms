@@ -107,11 +107,10 @@ public class View : Gtk.ApplicationWindow {
 
             if (value == GameState.SETTING) {
                 header_bar.subtitle = _("Setting");
+                update_labels_from_model ();
             } else {
                 header_bar.subtitle = _("Solving");
             }
-
-            update_labels_from_model ();
         }
     }
 
@@ -321,7 +320,7 @@ public class View : Gtk.ApplicationWindow {
         fontheight = double.min (max_h, max_w) / 2;
     }
 
-    private void update_labels_from_model () {
+    public void update_labels_from_model () {
         for (int r = 0; r < rows; r++) {
             row_clue_box.update_label_text (r, model.get_label_text (r, false));
         }

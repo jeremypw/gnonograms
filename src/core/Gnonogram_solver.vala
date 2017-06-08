@@ -232,6 +232,8 @@ namespace Gnonograms {
         }
 
         if (solved ()) {
+            solution.copy (grid);
+
             return pass;
         }
 

@@ -59,20 +59,23 @@ public class Filereader : Object {
         }
 
         if (game_file == null) {
-            throw new IOError.CANCELLED (_("Load game file dialog cancelled"));
+            throw new IOError.CANCELLED ("Load game file dialog cancelled");
         }
 
+        DataInputStream stream;
         try {
             var fstream = game_file.read (null);
-            var stream = new DataInputStream (fstream);
-            parse_gnonogram_game_file (stream);
+            stream = new DataInputStream (fstream);
         } catch (GLib.Error e) {
-            throw new IOError.FAILED (_("Unable to open data stream"));
+            throw new IOError.FAILED ("Unable to open data stream");
         }
+
+        parse_gnonogram_game_file (stream);
+
     }
 
     private File? get_load_game_file (Gtk.Window? parent, string? load_dir_path) {
-        string path = Utils.get_file_path (
+        string? path = Utils.get_file_path (
                             parent,
                             Gtk.FileChooserAction.OPEN,
                             _("Choose a puzzle"),
@@ -81,7 +84,7 @@ public class Filereader : Object {
                             load_dir_path
                         );
 
-        if (path == "") {
+        if (path == null || path == "") {
             return null;
         } else {
             return File.new_for_path (path);
@@ -103,7 +106,7 @@ public class Filereader : Object {
             }
 
         if (!parse_gnonogram_headings_and_bodies (headings, bodies)) {
-            throw new IOError.INVALID_DATA (_("Game file could not be parsed"));
+            throw new IOError.INVALID_DATA ("Game file could not be parsed - %s", err_msg);
         }
     }
 
@@ -126,9 +129,25 @@ public class Filereader : Object {
                 case "DIM" :
                     in_error = !get_gnonogram_dimensions(bodies[i]); break;
                 case "ROW" :
-                    in_error = !get_gnonogram_clues(bodies[i], false); break;
+                    row_clues = get_gnonogram_clues (bodies[i], cols / 2 + 1);
+                    if (row_clues.length != rows) {
+                        err_msg = "Wrong number of row clues";
+                        in_error = true;
+                    } else {
+                        has_row_clues = true;
+                    }
+                    break;
+
                 case "COL" :
-                    in_error = !get_gnonogram_clues(bodies[i], true); break;
+                    col_clues = get_gnonogram_clues(bodies[i], rows / 2 + 1);
+                    if (col_clues.length != cols) {
+                        err_msg = "Wrong number of column clues";
+                        in_error = true;
+                    } else {
+                        has_col_clues = true;
+                    }
+
+                    break;
                 case "SOL" :
                     in_error = !get_gnonogram_cellstate_array(bodies[i], true); break;
                 case "WOR" :
@@ -140,7 +159,7 @@ public class Filereader : Object {
                 case "LIC" :
                     in_error = !get_game_license(bodies[i]); break;
                 default :
-                    err_msg = _("Unrecognized heading");
+                    err_msg = "Unrecognized heading";
                     in_error = true;
                     break;
             }
@@ -151,13 +170,13 @@ public class Filereader : Object {
 
     private bool get_gnonogram_dimensions (string? body) {
         if (body == null) {
-            err_msg = _("No dimensions given");
+            err_msg = "No dimensions given";
             return false;
         }
 
         string[] s = Utils.remove_blank_lines (body.split ("\n"));
         if (s.length != 2) {
-            err_msg = _("Wrong number of dimensions");
+            err_msg = "Wrong number of dimensions";
             return false;
         }
 
@@ -167,50 +186,33 @@ public class Filereader : Object {
         return (rows > 0 && cols > 0);
     }
 
-    private bool get_gnonogram_clues (string? body, bool is_column) {
-        string[] arr = {};
+    private string[] get_gnonogram_clues (string? body, int max_block) {
+        string [] arr = {};
 
         if (body == null) {
-            err_msg = _("No clues given");
-            return false;
+            err_msg = "No clues given";
+            return {};
         }
 
         string[] s = Utils.remove_blank_lines (body.split ("\n"));
 
         if (s == null || s.length < 1) {
             err_msg = _("Missing clues");
-            return false;
+            return {};
         }
 
         for (int i = 0; i < s.length; i++) {
-            string? clue = parse_gnonogram_clue (s[i], is_column);
+            string? clue = parse_gnonogram_clue (s[i], max_block);
 
             if (clue == null) {
                 err_msg = _("Invalid clue");
-                return false;
+                return {};
             } else {
                 arr+= clue;
             }
         }
 
-        if (is_column) {
-            if (arr.length != cols) {
-                err_msg = _("Wrong number of column clues");
-                return false;
-            }
-
-            col_clues = arr;
-            has_col_clues = true;
-        } else {
-            if (arr.length != rows) {
-                err_msg = _("Wrong number of row clues");
-                return false;
-            }
-
-            row_clues = arr;
-            has_row_clues = true;
-        }
-        return true;
+        return arr;
     }
 
     private bool get_gnonogram_cellstate_array (string? body, bool is_solution) {
@@ -323,10 +325,9 @@ public class Filereader : Object {
         return true;
     }
 
-    private string? parse_gnonogram_clue (string line, bool is_column) {
+    private string? parse_gnonogram_clue (string line, int maxblock) {
         string[] s = Utils.remove_blank_lines (line.split_set (", "));
         int b, zero_count = 0;
-        int maxblock = is_column ? rows : cols;
 
         if (s == null) {
             return null;
@@ -346,10 +347,13 @@ public class Filereader : Object {
                 zero_count++;
             }
 
-            sb.append(s[i] + Gnonograms.BLOCKSEPARATOR);
+            sb.append (b.to_string ());
+
+            if (i < s.length - 1) {
+                sb.append (Gnonograms.BLOCKSEPARATOR);
+            }
         }
 
-        sb.truncate (sb.len - 1);
         return sb.str;
     }
 }
