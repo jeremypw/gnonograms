@@ -443,9 +443,8 @@ public class Controller : GLib.Object {
         update_history_view ();
 
         /* Check if puzzle finished */
-        if (is_solving && back_stack.size == rows * cols) {
-            var errors = model.count_errors ();
-            if (errors == 0) {
+        if (is_solving && model.is_finished ()) {
+            if (model.count_errors () == 0) {
                 view.send_notification (_("Congratulations. You have solved the puzzle"));
                 game_state = GameState.SETTING;
             } else {

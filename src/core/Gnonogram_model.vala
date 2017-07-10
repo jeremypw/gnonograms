@@ -129,6 +129,21 @@ public class Model : GLib.Object {
         return count;
     }
 
+    public bool is_finished () {
+        CellState cs;
+
+        for (int r = 0;r < rows; r++) {
+            for (int c = 0;c < cols; c++) {
+                cs = working_data.get_data_from_rc (r,c);
+                if (cs == CellState.UNKNOWN || cs == CellState.ERROR) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public void clear () {
         blank_solution ();
         blank_working ();
