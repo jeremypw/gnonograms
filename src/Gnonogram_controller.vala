@@ -196,6 +196,7 @@ public class Controller : GLib.Object {
         }
 
         if (passes >= 0 && rows > 1) {
+            view.update_labels_from_model ();
             game_state = GameState.SOLVING;
         } else {
             Utils.show_warning_dialog(_("Error occurred in solver"));
