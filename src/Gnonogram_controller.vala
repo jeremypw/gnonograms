@@ -124,15 +124,27 @@ public class Controller : GLib.Object {
         try {
             file = File.new_for_path (save_game_dir);
             file.make_directory_with_parents (null);
-        } catch (GLib.Error e) {warning ("Could not make %s - %s",file.get_uri (), e.message);}
+        } catch (GLib.Error e) {
+            if (!(e is IOError.EXISTS)) {
+                warning ("Could not make %s - %s",file.get_uri (), e.message);
+            }
+        }
         try {
             file = File.new_for_path (load_game_dir);
             file.make_directory_with_parents (null);
-        } catch (GLib.Error e) {warning ("Could not make %s - %s",file.get_uri (), e.message);}
+        } catch (GLib.Error e) {
+            if (!(e is IOError.EXISTS)) {
+                warning ("Could not make %s - %s",file.get_uri (), e.message);
+            }
+        }
         try {
             file = File.new_for_path (data_home_folder_current);
             file.make_directory_with_parents (null);
-        } catch (GLib.Error e) {warning ("Could not make %s - %s",file.get_uri (), e.message);}
+        } catch (GLib.Error e) {
+            if (!(e is IOError.EXISTS)) {
+                warning ("Could not make %s - %s",file.get_uri (), e.message);
+            }
+        }
 
         current_game_path = Path.build_path (Path.DIR_SEPARATOR_S, data_home_folder_current, Gnonograms.UNSAVED_FILENAME);
     }
