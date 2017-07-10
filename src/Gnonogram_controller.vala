@@ -445,10 +445,10 @@ public class Controller : GLib.Object {
         /* Check if puzzle finished */
         if (is_solving && model.is_finished ()) {
             if (model.count_errors () == 0) {
-                view.send_notification (_("Congratulations. You have solved the puzzle"));
+                view.send_notification (_("Correct solution"));
                 game_state = GameState.SETTING;
             } else {
-                view.send_notification (_("You have made some errors"));
+                view.send_notification (_("There are errors"));
                 rewind_until_correct ();
             }
         }

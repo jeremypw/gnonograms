@@ -229,8 +229,10 @@ public class View : Gtk.ApplicationWindow {
         mode_switch = new ModeButton ();
         header_bar.pack_end (mode_switch);
 
-        toast = new Granite.Widgets.Toast ("Test");
+        toast = new Granite.Widgets.Toast ("");
         toast.set_default_action (null);
+        toast.set_size_request (200, -1);
+        toast.hexpand = false;
 
         set_titlebar (header_bar);
 
