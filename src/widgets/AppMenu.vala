@@ -89,13 +89,9 @@ class AppMenu : Gtk.MenuButton {
         });
 
         grade_label = new Gtk.Label ("");
-        grade_label.xalign = 1;
-        grade_label.set_size_request (120, -1); /* So size does not change depending on text */
-        var grade_heading_label = new Gtk.Label (_("Grade:"));
-        grade_heading_label.xalign = 1;
+        var grade_grid = new ScaleGrid (_("Grade"), grade_label, grade_scale);
 
         row_scale = new AppScale (5, 50, 5);
-
         row_scale.scale.value_changed.connect ((range) => {
             var val = row_scale.get_value ();
             var s = val.to_string ();
@@ -105,12 +101,9 @@ class AppMenu : Gtk.MenuButton {
         });
 
         row_label = new Gtk.Label ("");
-        row_label.xalign = 1;
-        var row_heading_label = new Gtk.Label (_("Rows:"));
-        row_heading_label.xalign = 1;
+        var row_grid = new ScaleGrid (_("Rows"), row_label, row_scale);
 
         column_scale = new AppScale (5, 50, 5);
-
         column_scale.scale.value_changed.connect ((range) => {
             var val = column_scale.get_value ();
             var s = val.to_string ();
@@ -118,40 +111,14 @@ class AppMenu : Gtk.MenuButton {
                 column_label.label = s;
             }
         });
-
         column_label = new Gtk.Label ("");
-        column_label.xalign = 1;
-        var column_heading_label = new Gtk.Label (_("Columns:"));
-        column_heading_label.xalign = 1;
+        var column_grid = new ScaleGrid (_("Columns"), column_label, column_scale);
 
-        int pos = 0;
-//~         grid.attach (grade_heading_label, 0, pos, 1, 1);
-//~         grid.attach (grade_label, 1, pos, 1, 1);
-//~         grid.attach (grade_scale, 2, pos, 1, 1);
-
-//~         grid.attach (row_heading_label, 0, ++pos, 1, 1);
-//~         grid.attach (row_label, 1, pos, 1, 1);
-//~         grid.attach (row_scale, 2, pos, 1, 1);
-
-//~         grid.attach (column_heading_label, 0, ++pos, 1, 1);
-//~         grid.attach (column_label, 1, pos, 1, 1);
-//~         grid.attach (column_scale, 2, pos, 1, 1);
-        grid.attach (grade_heading_label, 0, pos, 2, 1);
-        grid.attach (grade_label, 0, ++pos, 1, 1);
-        grid.attach (grade_scale, 1, pos, 1, 1);
-
-        grid.attach (row_heading_label, 0, ++pos, 2, 1);
-        grid.attach (row_label, 0, ++pos, 1, 1);
-        grid.attach (row_scale, 0, pos, 1, 1);
-
-        grid.attach (column_heading_label, 0, ++pos, 2, 1);
-        grid.attach (column_label, 0, ++pos, 1, 1);
-        grid.attach (column_scale, 1, pos, 1, 1);
-
-        grid.margin = 6;
-        grid.expand = true;
+        grid.attach (grade_grid, 0, 0, 1, 1);
+        grid.attach (row_grid, 0, 1, 1, 1);
+        grid.attach (column_grid, 0, 2, 1, 1);
         grid.row_homogeneous = true;
-        grid.column_homogeneous = false;
+        grid.set_size_request (200, -1);
 
         clicked.connect (() => {
             store_values ();
@@ -217,7 +184,7 @@ class AppMenu : Gtk.MenuButton {
     }
 
     /** Scale limited to integral values separated by step (interface uses uint) **/
-    private class AppScale : Gtk.Grid {
+    protected class AppScale : Gtk.Grid {
         private uint step;
         public Gtk.Scale scale {get; private set;}
         private Gtk.Label val_label;
@@ -229,10 +196,6 @@ class AppMenu : Gtk.MenuButton {
 
             attach (val_label, 0, 0, 1, 1);
             attach (scale, 1, 0, 1, 1);
-
-            row_spacing = 12;
-            column_spacing = 6;
-            border_width = 12;
         }
 
         public AppScale (uint _start, uint _end, uint _step) {
@@ -261,6 +224,41 @@ class AppMenu : Gtk.MenuButton {
             scale.value_changed ();
         }
 
+    }
+
+    protected class ScaleGrid : Gtk.Grid {
+
+        public string heading {get; set;}
+        public Gtk.Label val_label {get; set;}
+        public AppScale scale {get; set;}
+
+        construct {
+            margin = 12;
+            row_homogeneous = true;
+            column_homogeneous = true;
+            expand = false;
+            column_spacing = 12;
+        }
+
+        public ScaleGrid (string _heading, Gtk.Label _val_label, AppScale _scale) {
+            Object (heading: _heading,
+                    val_label: _val_label,
+                    scale: _scale);
+
+            var heading_label = new Gtk.Label (heading);
+            heading_label.use_markup = true;
+            heading_label.xalign = 0.5f;
+            heading_label.valign = Gtk.Align.END;
+            /* So size does not change depending on text, Not ideal as max width may depend on translation */
+            heading_label.set_size_request (120, -1);
+            attach (heading_label, 0, 0, 1, 1);
+
+            ((Gtk.Widget)scale).valign = Gtk.Align.START;
+            attach (scale, 0, 1, 1, 3);
+            val_label.xalign = 0;
+            val_label.valign = Gtk.Align.START;
+            attach (val_label, 1, 1, 1, 3);
+        }
     }
 }
 }
