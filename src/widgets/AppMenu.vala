@@ -24,6 +24,10 @@ class AppMenu : Gtk.MenuButton {
     private AppPopover app_popover;
     private AppScale grade_scale;
     private Gtk.Label grade_label;
+    private AppScale row_scale;
+    private Gtk.Label row_label;
+    private AppScale column_scale;
+    private Gtk.Label column_label;
 
     private uint _grade_val;
     public uint grade_val {
@@ -34,7 +38,33 @@ class AppMenu : Gtk.MenuButton {
         set {
             _grade_val = value;
             grade_scale.set_value (value);
-            grade_label.label = Gnonograms.difficulty_to_string ((Difficulty)value);
+            grade_label.label = Gnonograms.difficulty_to_string ((Difficulty)(grade_scale.get_value ()));
+        }
+    }
+
+    private uint _row_val;
+    public uint row_val {
+        get {
+            return _row_val;
+        }
+
+        set {
+            _row_val = value;
+            row_scale.set_value (value);
+            row_label.label = row_scale.get_value ().to_string ();
+        }
+    }
+
+    private uint _column_val;
+    public uint column_val {
+        get {
+            return _column_val;
+        }
+
+        set {
+            _column_val = value;
+            column_scale.set_value (value);
+            column_label.label = column_scale.get_value ().to_string ();
         }
     }
 
@@ -46,10 +76,12 @@ class AppMenu : Gtk.MenuButton {
 
         var grid = new Gtk.Grid ();
         popover.add (grid);
+
         grade_scale = new AppScale (0, Difficulty.MAXIMUM, 1);
 
         grade_scale.scale.value_changed.connect ((range) => {
-            var val = (uint)(range.get_value ());
+            var val = grade_scale.get_value ();
+
             var s = Gnonograms.difficulty_to_string ((Difficulty)(val));
             if (s != grade_label.label) {
                 grade_label.label = s;
@@ -60,8 +92,41 @@ class AppMenu : Gtk.MenuButton {
         grade_label.xalign = 1;
         grade_label.set_size_request (120, -1); /* So size does not change depending on text */
 
-        grid.attach (grade_label, 0, 0, 1, 1);
-        grid.attach (grade_scale, 1, 0, 1, 1);
+        row_scale = new AppScale (5, 50, 5);
+
+        row_scale.scale.value_changed.connect ((range) => {
+            var val = row_scale.get_value ();
+            var s = val.to_string ();
+            if (s != row_label.label) {
+                row_label.label = s;
+            }
+        });
+
+        row_label = new Gtk.Label ("");
+        row_label.xalign = 1;
+        row_label.set_size_request (120, -1); /* So size does not change depending on text */
+
+        column_scale = new AppScale (5, 50, 5);
+
+        column_scale.scale.value_changed.connect ((range) => {
+            var val = column_scale.get_value ();
+            var s = val.to_string ();
+            if (s != column_label.label) {
+                column_label.label = s;
+            }
+        });
+
+        column_label = new Gtk.Label ("");
+        column_label.xalign = 1;
+        column_label.set_size_request (120, -1); /* So size does not change depending on text */
+
+        int pos = 0;
+        grid.attach (grade_label, 0, pos, 1, 1);
+        grid.attach (grade_scale, 1, pos, 1, 1);
+        grid.attach (row_label, 0, ++pos, 1, 1);
+        grid.attach (row_scale, 1, pos, 1, 1);
+        grid.attach (column_label, 0, ++pos, 1, 1);
+        grid.attach (column_scale, 1, pos, 1, 1);
 
         grid.row_spacing = 12;
         grid.column_spacing = 6;
