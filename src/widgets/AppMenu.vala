@@ -91,6 +91,8 @@ class AppMenu : Gtk.MenuButton {
         grade_label = new Gtk.Label ("");
         grade_label.xalign = 1;
         grade_label.set_size_request (120, -1); /* So size does not change depending on text */
+        var grade_heading_label = new Gtk.Label (_("Grade:"));
+        grade_heading_label.xalign = 1;
 
         row_scale = new AppScale (5, 50, 5);
 
@@ -104,7 +106,8 @@ class AppMenu : Gtk.MenuButton {
 
         row_label = new Gtk.Label ("");
         row_label.xalign = 1;
-        row_label.set_size_request (120, -1); /* So size does not change depending on text */
+        var row_heading_label = new Gtk.Label (_("Rows:"));
+        row_heading_label.xalign = 1;
 
         column_scale = new AppScale (5, 50, 5);
 
@@ -118,19 +121,26 @@ class AppMenu : Gtk.MenuButton {
 
         column_label = new Gtk.Label ("");
         column_label.xalign = 1;
-        column_label.set_size_request (120, -1); /* So size does not change depending on text */
+        var column_heading_label = new Gtk.Label (_("Columns:"));
+        column_heading_label.xalign = 1;
 
         int pos = 0;
-        grid.attach (grade_label, 0, pos, 1, 1);
-        grid.attach (grade_scale, 1, pos, 1, 1);
-        grid.attach (row_label, 0, ++pos, 1, 1);
-        grid.attach (row_scale, 1, pos, 1, 1);
-        grid.attach (column_label, 0, ++pos, 1, 1);
-        grid.attach (column_scale, 1, pos, 1, 1);
+        grid.attach (grade_heading_label, 0, pos, 1, 1);
+        grid.attach (grade_label, 1, pos, 1, 1);
+        grid.attach (grade_scale, 2, pos, 1, 1);
 
-        grid.row_spacing = 12;
-        grid.column_spacing = 6;
-        grid.border_width = 12;
+        grid.attach (row_heading_label, 0, ++pos, 1, 1);
+        grid.attach (row_label, 1, pos, 1, 1);
+        grid.attach (row_scale, 2, pos, 1, 1);
+
+        grid.attach (column_heading_label, 0, ++pos, 1, 1);
+        grid.attach (column_label, 1, pos, 1, 1);
+        grid.attach (column_scale, 2, pos, 1, 1);
+
+        grid.margin = 6;
+        grid.expand = true;
+        grid.row_homogeneous = true;
+        grid.column_homogeneous = false;
 
         clicked.connect (() => {
             store_values ();
@@ -154,10 +164,14 @@ class AppMenu : Gtk.MenuButton {
 
     private void store_values () {
         grade_val = (uint)(grade_scale.get_value ());
+        row_val = (uint)(row_scale.get_value ());
+        column_val = (uint)(column_scale.get_value ());
     }
 
     private void restore_values () {
         grade_scale.set_value (grade_val);
+        row_scale.set_value (row_val);
+        column_scale.set_value (column_val);
     }
 
     /** Popover that can be cancelled with Escape and closed by Enter **/

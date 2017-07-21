@@ -53,7 +53,9 @@ public class View : Gtk.ApplicationWindow {
                     column_clue_box.dimensions = dimensions;
                     set_default_fontheight_from_dimensions ();
                     row_resizer.set_value (dimensions.height);
+                    app_menu.row_val = dimensions.height;
                     col_resizer.set_value (dimensions.width);
+                    app_menu.column_val = dimensions.width;
                     resized (dimensions);
                     queue_draw ();
                 }
