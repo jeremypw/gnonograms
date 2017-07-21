@@ -125,17 +125,28 @@ class AppMenu : Gtk.MenuButton {
         column_heading_label.xalign = 1;
 
         int pos = 0;
-        grid.attach (grade_heading_label, 0, pos, 1, 1);
-        grid.attach (grade_label, 1, pos, 1, 1);
-        grid.attach (grade_scale, 2, pos, 1, 1);
+//~         grid.attach (grade_heading_label, 0, pos, 1, 1);
+//~         grid.attach (grade_label, 1, pos, 1, 1);
+//~         grid.attach (grade_scale, 2, pos, 1, 1);
 
-        grid.attach (row_heading_label, 0, ++pos, 1, 1);
-        grid.attach (row_label, 1, pos, 1, 1);
-        grid.attach (row_scale, 2, pos, 1, 1);
+//~         grid.attach (row_heading_label, 0, ++pos, 1, 1);
+//~         grid.attach (row_label, 1, pos, 1, 1);
+//~         grid.attach (row_scale, 2, pos, 1, 1);
 
-        grid.attach (column_heading_label, 0, ++pos, 1, 1);
-        grid.attach (column_label, 1, pos, 1, 1);
-        grid.attach (column_scale, 2, pos, 1, 1);
+//~         grid.attach (column_heading_label, 0, ++pos, 1, 1);
+//~         grid.attach (column_label, 1, pos, 1, 1);
+//~         grid.attach (column_scale, 2, pos, 1, 1);
+        grid.attach (grade_heading_label, 0, pos, 2, 1);
+        grid.attach (grade_label, 0, ++pos, 1, 1);
+        grid.attach (grade_scale, 1, pos, 1, 1);
+
+        grid.attach (row_heading_label, 0, ++pos, 2, 1);
+        grid.attach (row_label, 0, ++pos, 1, 1);
+        grid.attach (row_scale, 0, pos, 1, 1);
+
+        grid.attach (column_heading_label, 0, ++pos, 2, 1);
+        grid.attach (column_label, 0, ++pos, 1, 1);
+        grid.attach (column_scale, 1, pos, 1, 1);
 
         grid.margin = 6;
         grid.expand = true;
