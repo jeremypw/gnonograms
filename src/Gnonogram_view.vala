@@ -607,6 +607,10 @@ public class View : Gtk.ApplicationWindow {
 
     public void on_app_menu_apply () {
         grade = (Difficulty)(app_menu.grade_val);
+        var rows = app_menu.row_val;
+        var cols = app_menu.column_val;
+
+        dimensions = {cols, rows};
     }
 
 

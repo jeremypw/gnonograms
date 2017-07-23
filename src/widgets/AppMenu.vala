@@ -128,6 +128,7 @@ class AppMenu : Gtk.MenuButton {
                 } else {
                     cancel ();
                 }
+
                 cancelled = false;
             });
 
