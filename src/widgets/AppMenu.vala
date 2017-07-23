@@ -25,6 +25,7 @@ class AppMenu : Gtk.MenuButton {
     private AppSetting grade_setting;
     private AppSetting row_setting;
     private AppSetting column_setting;
+    private Gtk.Grid grid;
 
     private uint _grade_val;
     public uint grade_val {
@@ -68,19 +69,21 @@ class AppMenu : Gtk.MenuButton {
         popover = new AppPopover (this);
         app_popover = (AppPopover)popover;
 
-        var grid = new Gtk.Grid ();
+        grid = new Gtk.Grid ();
         popover.add (grid);
 
         grade_setting = new GradeChooser ();
         row_setting = new ScaleGrid (_("Rows"), 5, 50, 5);
         column_setting = new ScaleGrid (_("Columns"), 5, 50, 5);
 
-        grid.attach (grade_setting.get_heading (), 0, 0, 1, 1);
-        grid.attach (grade_setting.get_chooser (), 1, 0, 1, 1);
-        grid.attach (row_setting.get_heading (), 0, 1, 1, 1);
-        grid.attach (row_setting.get_chooser (), 1, 1, 1, 1);
-        grid.attach (column_setting.get_heading (), 0, 2, 1, 1);
-        grid.attach (column_setting.get_chooser(), 1, 2, 1, 1);
+        int pos = 0;
+        add_setting (ref pos, grade_setting);
+        add_setting (ref pos, row_setting);
+        add_setting (ref pos, column_setting);
+
+        grid.margin = 12;
+        grid.row_spacing = 6;
+        grid.column_spacing = 6;
 
         clicked.connect (() => {
             store_values ();
@@ -112,6 +115,14 @@ class AppMenu : Gtk.MenuButton {
         grade_setting.set_value (grade_val);
         row_setting.set_value (row_val);
         column_setting.set_value (column_val);
+    }
+
+    private void add_setting (ref int pos, AppSetting setting) {
+        var label = setting.get_heading ();
+        label.xalign = 1;
+        grid.attach (label, 0, pos, 1, 1);
+        grid.attach (setting.get_chooser (), 1, pos, 1, 1);
+        pos++;
     }
 
     /** Popover that can be cancelled with Escape and closed by Enter **/
@@ -157,6 +168,7 @@ class AppMenu : Gtk.MenuButton {
         construct {
             val_label = new Gtk.Label ("");
             chooser = new Gtk.Grid ();
+            chooser.column_spacing = 6;
         }
 
         public ScaleGrid (string _heading, uint _start, uint _end, uint _step) {
@@ -173,11 +185,7 @@ class AppMenu : Gtk.MenuButton {
             });
 
             heading_label = new Gtk.Label (heading);
-            heading_label.xalign = 0.5f;
-            heading_label.valign = Gtk.Align.END;
-
             val_label.xalign = 0;
-            val_label.valign = Gtk.Align.START;
 
             chooser.attach (scale, 0, 0, 1, 1);
             chooser.attach (val_label, 1, 0, 1, 1);
@@ -192,7 +200,7 @@ class AppMenu : Gtk.MenuButton {
             return scale.get_value ();
         }
 
-        public Gtk.Widget get_heading () {
+        public Gtk.Label get_heading () {
             return heading_label;
         }
 
@@ -257,7 +265,7 @@ class AppMenu : Gtk.MenuButton {
             return cb.active;
         }
 
-        public Gtk.Widget get_heading () {
+        public Gtk.Label get_heading () {
             return heading;
         }
 
@@ -272,7 +280,7 @@ public interface AppSetting : Object {
     public signal void value_changed (uint val);
     public abstract void set_value (uint val);
     public abstract uint get_value ();
-    public abstract Gtk.Widget get_heading ();
+    public abstract Gtk.Label get_heading ();
     public abstract Gtk.Widget get_chooser ();
 }
 }
