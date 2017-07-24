@@ -186,7 +186,6 @@ public class View : Gtk.ApplicationWindow {
         load_game_button.image = img;
         load_game_button.tooltip_text = _("Load a Game from File");
         load_game_button.clicked.connect (() => {open_game_request ();});
-        header_bar.pack_start (load_game_button);
 
         save_game_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("document-save-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
@@ -204,14 +203,12 @@ public class View : Gtk.ApplicationWindow {
                 save_game_request ();
             }
         });
-        header_bar.pack_start (save_game_button);
 
         random_game_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("list-add-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         random_game_button.image = img;
         random_game_button.tooltip_text = _("Generate a Random Game");
         random_game_button.clicked.connect (() => {random_game_request ();});
-        header_bar.pack_start (random_game_button);
 
         check_correct_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("media-seek-backward-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
@@ -219,18 +216,22 @@ public class View : Gtk.ApplicationWindow {
         check_correct_button.tooltip_text = _("Undo Any Errors");
         check_correct_button.clicked.connect (on_check_button_pressed);
         check_correct_button.sensitive = false;
-        header_bar.pack_start (check_correct_button);
 
         app_menu = new AppMenu ();
-        header_bar.pack_end (app_menu);
 
         mode_switch = new ModeButton ();
-        header_bar.pack_end (mode_switch);
 
         toast = new Granite.Widgets.Toast ("");
         toast.set_default_action (null);
         toast.set_size_request (200, -1);
         toast.hexpand = false;
+
+        header_bar.pack_start (random_game_button);
+        header_bar.pack_start (load_game_button);
+        header_bar.pack_start (save_game_button);
+        header_bar.pack_start (check_correct_button);
+        header_bar.pack_end (app_menu);
+        header_bar.pack_end (mode_switch);
 
         set_titlebar (header_bar);
     }
