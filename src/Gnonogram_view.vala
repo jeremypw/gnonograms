@@ -35,6 +35,7 @@ public class View : Gtk.ApplicationWindow {
     private Gtk.Button save_game_button;
     private Gtk.Button random_game_button;
     private Gtk.Button check_correct_button;
+    private Gtk.Button auto_solve_button;
     private Model model {get; set;}
     private CellState drawing_with_state;
 
@@ -219,6 +220,13 @@ public class View : Gtk.ApplicationWindow {
         check_correct_button.clicked.connect (on_check_button_pressed);
         check_correct_button.sensitive = false;
 
+        auto_solve_button = new Gtk.Button ();
+        img = new Gtk.Image.from_icon_name ("system-run", Gtk.IconSize.LARGE_TOOLBAR);
+        auto_solve_button.image = img;
+        auto_solve_button.tooltip_text = _("Solve by Computer");
+        auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
+        auto_solve_button.sensitive = true;
+
         app_menu = new AppMenu ();
 
         mode_switch = new ModeButton ();
@@ -229,6 +237,7 @@ public class View : Gtk.ApplicationWindow {
         header_bar.pack_start (check_correct_button);
         header_bar.pack_end (app_menu);
         header_bar.pack_end (mode_switch);
+        header_bar.pack_end (auto_solve_button);
 
         set_titlebar (header_bar);
 
@@ -609,6 +618,9 @@ public class View : Gtk.ApplicationWindow {
         if (errors > 0) {
             rewind_request ();
         }
+    }
+
+    private void on_auto_solve_button_pressed () {
     }
 
 
