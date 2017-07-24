@@ -26,6 +26,8 @@ public class View : Gtk.ApplicationWindow {
     private CellGrid cell_grid;
     private Gtk.HeaderBar header_bar;
     private AppMenu app_menu;
+    private Gtk.Grid main_grid;
+    private Gtk.Overlay overlay;
     private Granite.Widgets.Toast toast;
 
     private ModeButton mode_switch;
@@ -221,11 +223,6 @@ public class View : Gtk.ApplicationWindow {
 
         mode_switch = new ModeButton ();
 
-        toast = new Granite.Widgets.Toast ("");
-        toast.set_default_action (null);
-        toast.set_size_request (200, -1);
-        toast.hexpand = false;
-
         header_bar.pack_start (random_game_button);
         header_bar.pack_start (load_game_button);
         header_bar.pack_start (save_game_button);
@@ -234,6 +231,23 @@ public class View : Gtk.ApplicationWindow {
         header_bar.pack_end (mode_switch);
 
         set_titlebar (header_bar);
+
+        overlay = new Gtk.Overlay ();
+
+        toast = new Granite.Widgets.Toast ("");
+        toast.set_default_action (null);
+        toast.halign = Gtk.Align.START;
+        toast.valign = Gtk.Align.START;
+
+        main_grid = new Gtk.Grid ();
+        main_grid.row_spacing = 0;
+        main_grid.column_spacing = 0;
+        main_grid.row_spacing = 0;
+        main_grid.border_width = 0;
+
+        overlay.add (main_grid);
+        overlay.add_overlay (toast);
+        add (overlay);
     }
 
     public View (Model model) {
@@ -243,17 +257,9 @@ public class View : Gtk.ApplicationWindow {
 
         this.model = model;
 
-        var grid = new Gtk.Grid ();
-        grid.row_spacing = 0;
-        grid.column_spacing = 0;
-        grid.row_spacing = 0;
-        grid.border_width = 0;
-        grid.attach (toast, 0, 0, 1, 1);
-        grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for rows */
-        grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
-        grid.attach (cell_grid, 1, 1, 1, 1);
-
-        add (grid);
+        main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for rows */
+        main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
+        main_grid.attach (cell_grid, 1, 1, 1, 1);
 
         connect_signals ();
     }
