@@ -213,7 +213,7 @@ public class Controller : GLib.Object {
             view.update_labels_from_model ();
             game_state = GameState.SOLVING;
         } else {
-            Utils.show_warning_dialog(_("Error occurred in solver"));
+            view.send_notification (_("Error occurred in solver"));
             game_state = GameState.SOLVING;
             for (int r = 0; r < rows; r++) {
                 for (int c = 0; c < cols; c++) {
@@ -340,7 +340,7 @@ public class Controller : GLib.Object {
         } catch (GLib.IOError e) {
             if (!(e is IOError.CANCELLED)) {
                 if (reader != null) {
-                    Utils.show_warning_dialog (reader.err_msg);
+                    view.send_notification (reader.err_msg);
                 } else {
                     critical ("Failed to create game file reader - %s", e.message);
                 }
@@ -363,7 +363,7 @@ public class Controller : GLib.Object {
             }
         } else {
             /* There is something wrong with the file being loaded */
-            Utils.show_warning_dialog (reader.err_msg, view);
+            view.send_notification (reader.err_msg);
             return false;
         }
 
@@ -409,7 +409,7 @@ public class Controller : GLib.Object {
                 reader.err_msg = (_("Clues contradictory"));
                 return false;
             } else {
-                Utils.show_warning_dialog (_("Puzzle not solved by computer - may not be possible"), view);
+                view.send_notification (_("Puzzle not solved by computer - may not be possible"));
             }
         }
 

@@ -145,43 +145,6 @@ namespace Gnonograms {
         return simpleresult;
     }
 
-    /** Solver must be initialised with current state of puzzle before calling. **/
-    public bool get_hint () {
-        int pass = 1;
-
-        while (pass <= 30) {
-          //cycle through regions until one of them is changed then return
-          //that region index.
-
-            for (int i = 0; i < regionCount; i++ ) {
-                if (regions[i].isCompleted) {
-                    continue;
-                }
-
-                if (regions[i].solve (false, true)) {//run solve algorithm in hint mode
-                    showsolvergrid ();
-                    return true;
-                }
-
-                if (regions[i].inError) {
-                    Utils.show_warning_dialog (_ ("A logical error has already been made  -  cannot hint"));
-                    return false;
-                }
-            }
-
-            pass++;
-        }
-
-        if (pass > 30) {
-            if (solved ()) {
-                Utils.show_info_dialog (_ ("Already solved"));
-            } else {
-                Utils.show_info_dialog (_ ("Cannot find hint"));
-            }
-        }
-
-        return false;
-    }
 
     /** Returns -1 to indicate an error - TODO use throw error instead **/
     private int simplesolver (bool debug,
