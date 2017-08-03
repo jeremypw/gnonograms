@@ -36,6 +36,7 @@ public class View : Gtk.ApplicationWindow {
     private Gtk.Button random_game_button;
     private Gtk.Button check_correct_button;
     private Gtk.Button auto_solve_button;
+    private Gtk.Button restart_button;
     private Model model {get; set;}
     private CellState drawing_with_state;
 
@@ -108,9 +109,11 @@ public class View : Gtk.ApplicationWindow {
 
             if (value == GameState.SETTING) {
                 header_bar.subtitle = _("Setting");
+                restart_button.tooltip_text = _("Clear canvas");
                 update_labels_from_model ();
             } else {
                 header_bar.subtitle = _("Solving");
+                restart_button.tooltip_text = _("Restart solving");
             }
         }
     }
@@ -162,6 +165,7 @@ public class View : Gtk.ApplicationWindow {
     public signal void save_game_as_request ();
     public signal void open_game_request ();
     public signal void solve_this_request ();
+    public signal void restart_request ();
 
     public signal void resized (Dimensions dim);
     public signal void moved (Cell cell);
@@ -221,6 +225,12 @@ public class View : Gtk.ApplicationWindow {
         check_correct_button.clicked.connect (on_check_button_pressed);
         check_correct_button.sensitive = false;
 
+        restart_button = new Gtk.Button ();
+        img = new Gtk.Image.from_icon_name ("view-refresh", Gtk.IconSize.LARGE_TOOLBAR);
+        restart_button.image = img;
+        restart_button.clicked.connect (on_restart_button_pressed);
+        restart_button.sensitive = true;
+
         auto_solve_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("system-run", Gtk.IconSize.LARGE_TOOLBAR);
         auto_solve_button.image = img;
@@ -239,6 +249,7 @@ public class View : Gtk.ApplicationWindow {
         header_bar.pack_end (app_menu);
         header_bar.pack_end (mode_switch);
         header_bar.pack_end (auto_solve_button);
+        header_bar.pack_end (restart_button);
 
         set_titlebar (header_bar);
 
@@ -623,6 +634,10 @@ public class View : Gtk.ApplicationWindow {
 
     private void on_auto_solve_button_pressed () {
         solve_this_request ();
+    }
+
+    private void on_restart_button_pressed () {
+        restart_request ();
     }
 
 

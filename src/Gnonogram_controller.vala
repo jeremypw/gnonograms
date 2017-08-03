@@ -164,6 +164,7 @@ public class Controller : GLib.Object {
         view.save_game_as_request.connect (on_save_game_as_request);
         view.open_game_request.connect (on_open_game_request);
         view.solve_this_request.connect (on_solve_this_request);
+        view.restart_request.connect (on_restart_request);
 
         solver.showsolvergrid.connect (on_show_solver_grid);
     }
@@ -674,6 +675,16 @@ public class Controller : GLib.Object {
             for (int c = 0; c < cols; c++) {
                 model.set_data_from_rc (r, c, solver.grid.get_data_from_rc (r, c));
             }
+        }
+    }
+
+    private void on_restart_request () {
+        if (game_state == GameState.SETTING) {
+            new_game ();
+        } else {
+            model.blank_working ();
+            clear_history ();
+            view.queue_draw ();
         }
     }
 
