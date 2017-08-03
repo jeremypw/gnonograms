@@ -129,9 +129,9 @@ public class Filereader : Object {
                 case "DIM" :
                     in_error = !get_gnonogram_dimensions(bodies[i]); break;
                 case "ROW" :
-                    row_clues = get_gnonogram_clues (bodies[i], cols / 2 + 1);
+                    row_clues = get_gnonogram_clues (bodies[i], cols);
                     if (row_clues.length != rows) {
-                        err_msg = "Wrong number of row clues";
+                        err_msg = "Wrong number of row clues - " + err_msg;
                         in_error = true;
                     } else {
                         has_row_clues = true;
@@ -139,9 +139,9 @@ public class Filereader : Object {
                     break;
 
                 case "COL" :
-                    col_clues = get_gnonogram_clues(bodies[i], rows / 2 + 1);
+                    col_clues = get_gnonogram_clues(bodies[i], rows);
                     if (col_clues.length != cols) {
-                        err_msg = "Wrong number of column clues";
+                        err_msg = "Wrong number of column clues -" + err_msg;
                         in_error = true;
                     } else {
                         has_col_clues = true;
@@ -333,13 +333,10 @@ public class Filereader : Object {
             return null;
         }
 
+        int remaining_space = maxblock;
         StringBuilder sb = new StringBuilder ();
         for (int i = 0; i < s.length; i++) {
             b = int.parse(s[i]);
-
-            if (b < 0 || b > maxblock) {
-                return null;
-            }
 
             if (b == 0 && zero_count > 0) {
                 continue;
@@ -347,7 +344,15 @@ public class Filereader : Object {
                 zero_count++;
             }
 
+            if (b < 0 || b > remaining_space) {
+                return null;
+            }
+
             sb.append (b.to_string ());
+
+            if (b > 0) {
+                remaining_space -= (b + 1);
+            }
 
             if (i < s.length - 1) {
                 sb.append (Gnonograms.BLOCKSEPARATOR);
