@@ -237,7 +237,7 @@ namespace Gnonograms {
             return pass;
         }
 
-        if (pass > 1000) {
+        if (pass >= 100) {
             return 999999;
         }
 

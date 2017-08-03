@@ -161,6 +161,7 @@ public class View : Gtk.ApplicationWindow {
     public signal void save_game_request ();
     public signal void save_game_as_request ();
     public signal void open_game_request ();
+    public signal void solve_this_request ();
 
     public signal void resized (Dimensions dim);
     public signal void moved (Cell cell);
@@ -621,6 +622,7 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private void on_auto_solve_button_pressed () {
+        solve_this_request ();
     }
 
 

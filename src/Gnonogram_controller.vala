@@ -163,6 +163,7 @@ public class Controller : GLib.Object {
         view.save_game_request.connect (on_save_game_request);
         view.save_game_as_request.connect (on_save_game_as_request);
         view.open_game_request.connect (on_open_game_request);
+        view.solve_this_request.connect (on_solve_this_request);
 
         solver.showsolvergrid.connect (on_show_solver_grid);
     }
@@ -192,7 +193,7 @@ public class Controller : GLib.Object {
 
         while (count < limit) {
             count++;
-            passes = generate_simple_game (grd); //tries max tries times
+            passes = generate_simple_game (grade_to_passes (grd)); //tries max tries times
 
             if (passes > grd || passes < 0) {
                 break;
@@ -641,6 +642,47 @@ public class Controller : GLib.Object {
 
     private void on_open_game_request () {
         load_game (null, true); /* Will cause Filereader to ask for a location to open */
+    }
+
+    private void on_solve_this_request () {
+        string msg = "";
+        model.blank_working ();
+        game_state = GameState.SOLVING;
+        /* Look for unique simple solution */
+        var passes = solve_game (false, true, false, false, false);
+
+        if (passes > 0  && passes < 999999) {
+            for (int r = 0; r < rows; r++) {
+                for (int c = 0; c < cols; c++) {
+                    model.set_data_from_rc (r, c, solver.grid.get_data_from_rc (r, c));
+                }
+            }
+            msg =  _("Simple solution found in %i passes.  Graded as %s").printf (passes, passes_to_grade_description (passes));
+        } else if (passes == 0 || passes == 999999) {
+            msg = _("No simple solution found");
+            passes = solve_game (false, true, true, false, false);
+            if (passes > 0 && passes < 999999) {
+                for (int r = 0; r < rows; r++) {
+                    for (int c = 0; c < cols; c++) {
+                        model.set_data_from_rc (r, c, solver.grid.get_data_from_rc (r, c));
+                    }
+                }
+                msg = msg + "\n" + _("Advanced solution found in %i passes.  Graded as %s").printf (passes, passes_to_grade_description (passes));
+            } else if (passes == 0 || passes == 999999) {
+                msg = msg + "\n" + _("No advanced solution found");
+            }
+        }
+
+        view.send_notification (msg);
+    }
+
+    private int grade_to_passes (uint grd) {
+        return ((int)grd + 1) * 2;
+    }
+
+    private string passes_to_grade_description (int passes) requires (passes >= 1) {
+        var difficulty = (uint)(passes / 2 - 0.4); /* Ensure >= 0 */
+        return difficulty_to_string ((Difficulty)difficulty);
     }
 }
 }
