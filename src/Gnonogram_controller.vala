@@ -652,11 +652,6 @@ public class Controller : GLib.Object {
         var passes = solve_game (false, true, false, false, false);
 
         if (passes > 0  && passes < 999999) {
-            for (int r = 0; r < rows; r++) {
-                for (int c = 0; c < cols; c++) {
-                    model.set_data_from_rc (r, c, solver.grid.get_data_from_rc (r, c));
-                }
-            }
             msg =  _("Simple solution found in %i passes.  Graded as %s").printf (passes, passes_to_grade_description (passes));
         } else if (passes == 0 || passes == 999999) {
             msg = _("No simple solution found");
@@ -674,6 +669,12 @@ public class Controller : GLib.Object {
         }
 
         view.send_notification (msg);
+
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                model.set_data_from_rc (r, c, solver.grid.get_data_from_rc (r, c));
+            }
+        }
     }
 
     private int grade_to_passes (uint grd) {
