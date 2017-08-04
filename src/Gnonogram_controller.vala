@@ -57,11 +57,18 @@ public class Controller : GLib.Object {
     }
 
 /** PRIVATE **/
+    private View view;
+    private Model? model;
+    private Solver solver;
     private GLib.Settings settings;
     private GLib.Settings saved_state;
+    private Gee.Deque<Move> back_stack;
+    private Gee.Deque<Move> forward_stack;
+    private const int MAXTRIES = 5;
     private string load_game_dir;
     private string save_game_dir;
     private string current_game_path;
+    private string? game_path = null;
 
     private GameState game_state {
         get {
@@ -75,33 +82,50 @@ public class Controller : GLib.Object {
         }
     }
 
-    private bool is_solving {
-        get {return game_state == GameState.SOLVING;}
-    }
-
     private Difficulty grade {
-        get {return view.grade;}
-        set {view.grade = value;}
+        get {
+            return view.grade;
+        }
+
+        set {
+            view.grade = value;
+        }
     }
 
 
-    private uint rows {get {return view.rows;}}
-    private uint cols {get {return view.cols;}}
+    private Dimensions dimensions {
+        get {
+            return view.dimensions;
+        }
+    }
+
+    private bool is_solving {
+        get {
+            return game_state == GameState.SOLVING;
+        }
+    }
+
+    private uint rows {
+        get {
+            return view.rows;
+        }
+    }
+
+    private uint cols {
+        get {
+            return view.cols;
+        }
+    }
 
     private string title {
-        get {return view.header_title;}
-        set {view.header_title = value;}
+        get {
+            return view.header_title;
+        }
+
+        set {
+            view.header_title = value;
+        }
     }
-
-    private View view;
-    private Model? model;
-    private Solver solver;
-    private string? game_path = null;
-    private Dimensions dimensions {get {return view.dimensions;}}
-
-    private const int MAXTRIES = 5;
-    private Gee.Deque<Move> back_stack;
-    private Gee.Deque<Move> forward_stack;
 
     construct {
         model = new Model ();
@@ -109,11 +133,9 @@ public class Controller : GLib.Object {
         solver = new Solver ();
         back_stack = new Gee.LinkedList<Move> ();
         forward_stack = new Gee.LinkedList<Move> ();
-
-        connect_signals ();
-
         settings = new Settings ("apps.gnonograms-elementary.settings");
         saved_state = new Settings ("apps.gnonograms-elementary.saved-state");
+
         saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
         saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
         settings.bind ("grade", view, "grade", SettingsBindFlags.DEFAULT);
@@ -126,7 +148,7 @@ public class Controller : GLib.Object {
                                                 "unsaved"
                                             );
 
-        restore_settings ();
+        restore_settings (); /* May change load_game_dir and save_game_dir */
         restore_saved_state ();
 
         /* Ensure these directories exist */
@@ -139,6 +161,7 @@ public class Controller : GLib.Object {
                 warning ("Could not make %s - %s",file.get_uri (), e.message);
             }
         }
+
         try {
             file = File.new_for_path (load_game_dir);
             file.make_directory_with_parents (null);
@@ -147,6 +170,7 @@ public class Controller : GLib.Object {
                 warning ("Could not make %s - %s",file.get_uri (), e.message);
             }
         }
+
         try {
             file = File.new_for_path (data_home_folder_current);
             file.make_directory_with_parents (null);
@@ -156,10 +180,11 @@ public class Controller : GLib.Object {
             }
         }
 
-        current_game_path = Path.build_path (Path.DIR_SEPARATOR_S, data_home_folder_current, Gnonograms.UNSAVED_FILENAME);
-    }
+        current_game_path = Path.build_path (Path.DIR_SEPARATOR_S,
+                                             data_home_folder_current,
+                                             Gnonograms.UNSAVED_FILENAME);
 
-    private void connect_signals () {
+        /* Connect signals */
         view.resized.connect (on_view_resized);
         view.moved.connect (on_moved);
         view.next_move_request.connect (on_next_move_request);
@@ -405,6 +430,7 @@ public class Controller : GLib.Object {
         }
 
         model.game_state = GameState.SETTING; /* Selects the solution grid */
+
         if (reader.has_solution) {
             for (int i = 0; i < rows; i++) {
                 model.set_row_data_from_string (i, reader.solution[i]);
@@ -540,6 +566,7 @@ public class Controller : GLib.Object {
         }
 
         bool res;
+
         if (use_labels) {
             res = solver.initialize (view.get_row_clues (), view.get_col_clues (), startgrid, null);
         } else {
@@ -561,6 +588,7 @@ public class Controller : GLib.Object {
     }
 
 /*** Signal Handlers ***/
+
     private uint on_check_errors_request () {
         return model.count_errors ();
     }
@@ -654,6 +682,7 @@ public class Controller : GLib.Object {
         string msg = "";
         model.blank_working ();
         game_state = GameState.SOLVING;
+
         /* Look for unique simple solution */
         var passes = solve_game (false, true, false, false, false);
 
