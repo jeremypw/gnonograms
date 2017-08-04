@@ -18,60 +18,18 @@
  *  Jeremy Wootten <jeremy@elementaryos.org>
  */
 namespace Gnonograms {
+/*** Controller class is created by the Application class. It coordinates all other classes and
+   * provides business logic. Most of its properties and functions are private.
+***/
 public class Controller : GLib.Object {
-    private const int MAXTRIES = 5;
-
-    public GLib.Settings settings {get; construct;}
-    public GLib.Settings saved_state {get; construct;}
-
-    public View view {get; private set;}
-    private Model? model;
-    private Solver solver;
-    private string? game_path = null;
-    public string load_game_dir {get; set;}
-    public string save_game_dir {get; set;}
-    public string current_game_path {get; construct;}
-
-    private Gee.Deque<Move> back_stack;
-    private Gee.Deque<Move> forward_stack;
-
-    public GameState game_state {
-        get {
-            return view.game_state;
-        }
-
-        set {
-            view.game_state = value;
-            model.game_state = value;
-            clear_history ();
-        }
-    }
-
-    public bool is_solving {
-        get {return game_state == GameState.SOLVING;}
-    }
-
-    public Difficulty grade {
-        get {return view.grade;}
-        set {view.grade = value;}
-    }
-
-    private Dimensions dimensions {get {return view.dimensions;}}
-    public uint rows {get {return view.rows;}}
-    public uint cols {get {return view.cols;}}
+/** PUBLIC SIGNALS, PROPERTIES, FUNCTIONS AND CONSTRUCTOR **/
+    public signal void quit_app ();
 
     public Gtk.Window window {
         get {
             return (Gtk.Window)view;
         }
     }
-
-    public string title {
-        get {return view.header_title;}
-        set {view.header_title = value;}
-    }
-
-    public signal void quit_app ();
 
     public Controller (File? game = null) {
         bool success = false;
@@ -92,6 +50,58 @@ public class Controller : GLib.Object {
 
         view.show_all ();
     }
+
+    public void quit () {
+        save_game_state ();
+        quit_app ();
+    }
+
+/** PRIVATE **/
+    private GLib.Settings settings;
+    private GLib.Settings saved_state;
+    private string load_game_dir;
+    private string save_game_dir;
+    private string current_game_path;
+
+    private GameState game_state {
+        get {
+            return view.game_state;
+        }
+
+        set {
+            view.game_state = value;
+            model.game_state = value;
+            clear_history ();
+        }
+    }
+
+    private bool is_solving {
+        get {return game_state == GameState.SOLVING;}
+    }
+
+    private Difficulty grade {
+        get {return view.grade;}
+        set {view.grade = value;}
+    }
+
+
+    private uint rows {get {return view.rows;}}
+    private uint cols {get {return view.cols;}}
+
+    private string title {
+        get {return view.header_title;}
+        set {view.header_title = value;}
+    }
+
+    private View view;
+    private Model? model;
+    private Solver solver;
+    private string? game_path = null;
+    private Dimensions dimensions {get {return view.dimensions;}}
+
+    private const int MAXTRIES = 5;
+    private Gee.Deque<Move> back_stack;
+    private Gee.Deque<Move> forward_stack;
 
     construct {
         model = new Model ();
@@ -149,7 +159,6 @@ public class Controller : GLib.Object {
         current_game_path = Path.build_path (Path.DIR_SEPARATOR_S, data_home_folder_current, Gnonograms.UNSAVED_FILENAME);
     }
 
-
     private void connect_signals () {
         view.resized.connect (on_view_resized);
         view.moved.connect (on_moved);
@@ -183,7 +192,7 @@ public class Controller : GLib.Object {
         title = _("Blank sheet");
     }
 
-    public void new_random_game() {
+    private void new_random_game() {
         int passes = 0, count = 0;
         uint grd = grade; //grd may be reduced but this.grade always matches spin setting
         /* One row used to debug */
@@ -204,9 +213,10 @@ public class Controller : GLib.Object {
                 grd--;
             }
 
-            //no simple game generated with this setting -
-            //reduce complexity setting (relationship between complexity setting
-            //and ease of solution not simple - depends also on grid size)
+            /* no simple game generated with this setting -
+               reduce complexity setting (relationship between complexity setting
+              and ease of solution not simple - depends also on grid size)
+            */
         }
 
         if (passes >= 0 && rows > 1) {
@@ -441,7 +451,7 @@ public class Controller : GLib.Object {
         return true;
     }
 
-    public void record_move (Cell cell, CellState previous_state) {
+    private void record_move (Cell cell, CellState previous_state) {
         var new_move = new Move (cell, previous_state);
 
         if (new_move.cell.state != CellState.UNDEFINED) {
@@ -548,11 +558,6 @@ public class Controller : GLib.Object {
         }
 
         return res;
-    }
-
-    public void quit () {
-        save_game_state ();
-        quit_app ();
     }
 
 /*** Signal Handlers ***/
