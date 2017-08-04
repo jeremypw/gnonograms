@@ -148,10 +148,28 @@ public class Controller : GLib.Object {
                                                 "unsaved"
                                             );
 
+        /* Connect signals. Must be done before restoring settings so that e.g.
+         * dimensions of model are set. */
+        view.resized.connect (on_view_resized);
+        view.moved.connect (on_moved);
+        view.next_move_request.connect (on_next_move_request);
+        view.previous_move_request.connect (on_previous_move_request);
+        view.game_state_changed.connect (on_state_changed);
+        view.random_game_request.connect (new_random_game);
+        view.check_errors_request.connect (on_check_errors_request);
+        view.rewind_request.connect (on_rewind_request);
+        view.delete_event.connect (on_view_deleted);
+        view.save_game_request.connect (on_save_game_request);
+        view.save_game_as_request.connect (on_save_game_as_request);
+        view.open_game_request.connect (on_open_game_request);
+        view.solve_this_request.connect (on_solve_this_request);
+        view.restart_request.connect (on_restart_request);
+        solver.showsolvergrid.connect (on_show_solver_grid);
+
         restore_settings (); /* May change load_game_dir and save_game_dir */
         restore_saved_state ();
 
-        /* Ensure these directories exist */
+        /* Ensure load save and data directories exist */
         File file;
         try {
             file = File.new_for_path (save_game_dir);
@@ -183,24 +201,6 @@ public class Controller : GLib.Object {
         current_game_path = Path.build_path (Path.DIR_SEPARATOR_S,
                                              data_home_folder_current,
                                              Gnonograms.UNSAVED_FILENAME);
-
-        /* Connect signals */
-        view.resized.connect (on_view_resized);
-        view.moved.connect (on_moved);
-        view.next_move_request.connect (on_next_move_request);
-        view.previous_move_request.connect (on_previous_move_request);
-        view.game_state_changed.connect (on_state_changed);
-        view.random_game_request.connect (new_random_game);
-        view.check_errors_request.connect (on_check_errors_request);
-        view.rewind_request.connect (on_rewind_request);
-        view.delete_event.connect (on_view_deleted);
-        view.save_game_request.connect (on_save_game_request);
-        view.save_game_as_request.connect (on_save_game_as_request);
-        view.open_game_request.connect (on_open_game_request);
-        view.solve_this_request.connect (on_solve_this_request);
-        view.restart_request.connect (on_restart_request);
-
-        solver.showsolvergrid.connect (on_show_solver_grid);
     }
 
     private void clear () {

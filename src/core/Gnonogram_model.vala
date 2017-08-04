@@ -185,7 +185,7 @@ public class Model : GLib.Object {
 
     public bool set_row_data_from_data_array (int r, CellState[] cs) {
         if (cs.length != cols) {
-            warning ("Wrong number of columns in data");
+            warning ("Wrong number of columns in data cs length %u, cols %u", cs.length, cols);
             return false;
         } else {
             display_data.set_row (r, cs);
