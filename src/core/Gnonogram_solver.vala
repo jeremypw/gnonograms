@@ -201,7 +201,7 @@ namespace Gnonograms {
         }
 
         if (pass >= 100) {
-            return 999999;
+            return Gnonograms.FAILED_PASSES;
         }
 
         return 0;
@@ -339,7 +339,7 @@ namespace Gnonograms {
         if (useUltimate) {
             return ultimate_solver (gridstore, guesses);
         } else {
-            return 999999;
+            return Gnonograms.FAILED_PASSES;
         }
     }
 
@@ -405,7 +405,7 @@ namespace Gnonograms {
     private int ultimate_solver(CellState[] grid_store, int guesses) {
         //stdout.printf("Ultimate solver\n");
         int advanced_result = -99, simple_result = -99;
-        uint max_value = 999999, perm_reg = 0;
+        uint max_value = Gnonograms.FAILED_PASSES, perm_reg = 0;
 
         int limit = GUESSESBEFOREASK + guesses;
 
@@ -420,7 +420,7 @@ namespace Gnonograms {
         showsolvergrid();
 
         if (!Utils.show_confirm_dialog(_("Start Ultimate solver?\n This can take a long time and may not work"))) {
-            return 999999;
+            return Gnonograms.FAILED_PASSES;
         }
 
         CellState[] grid_store2 = new CellState[rows * cols];
@@ -460,7 +460,7 @@ namespace Gnonograms {
                     if (Utils.show_confirm_dialog (_("This is taking a long time!")+"\n"+_("Keep trying?"))) {
                         limit += GUESSESBEFOREASK;
                     } else {
-                        return 999999;
+                        return Gnonograms.FAILED_PASSES;
                     }
                 }
 
@@ -472,7 +472,7 @@ namespace Gnonograms {
                 if (simple_result == 0) {
                     advanced_result = advancedsolver (grid_store, false, 99,false, false);
 
-                    if (advanced_result > 0 && advanced_result < 999999) {
+                    if (advanced_result > 0 && advanced_result < Gnonograms.FAILED_PASSES) {
                         return advanced_result; //solution found
                     }
                 } else if (simple_result > 0) {

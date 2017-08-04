@@ -165,6 +165,7 @@ public static int MAXSIZE = 50; // max number rows or columns
 public static int MINSIZE = 5; // Change to 1 when debugging
 public static double MINFONTSIZE = 3.0;
 public static double MAXFONTSIZE = 72.0;
+public static int FAILED_PASSES = 999999;
 public const string BLOCKSEPARATOR = ", ";
 public const string BLANKLABELTEXT = _("?");
 public const string GAMEFILEEXTENSION = ".gno";

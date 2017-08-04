@@ -438,7 +438,7 @@ public class Controller : GLib.Object {
         } else {
             int passes = solve_game (false, true, true, false, true);
 
-            if (passes > 0 && passes < 999999) {
+            if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
                 set_model_from_solver ();
                 view.update_labels_from_model ();
             } else if (passes < 0) {
@@ -686,19 +686,19 @@ public class Controller : GLib.Object {
         /* Look for unique simple solution */
         var passes = solve_game (false, true, false, false, false);
 
-        if (passes > 0  && passes < 999999) {
+        if (passes > 0  && passes < Gnonograms.FAILED_PASSES) {
             msg =  _("Simple solution found in %i passes.  Graded as %s").printf (passes, passes_to_grade_description (passes));
-        } else if (passes == 0 || passes == 999999) {
+        } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
             msg = _("No simple solution found");
             passes = solve_game (false, true, true, false, false);
-            if (passes > 0 && passes < 999999) {
+            if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
                 for (int r = 0; r < rows; r++) {
                     for (int c = 0; c < cols; c++) {
                         model.set_data_from_rc (r, c, solver.grid.get_data_from_rc (r, c));
                     }
                 }
                 msg = msg + "\n" + _("Advanced solution found in %i passes.  Graded as %s").printf (passes, passes_to_grade_description (passes));
-            } else if (passes == 0 || passes == 999999) {
+            } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
                 msg = msg + "\n" + _("No advanced solution found");
             }
         }
