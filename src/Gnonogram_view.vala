@@ -235,7 +235,7 @@ public class View : Gtk.ApplicationWindow {
     private Difficulty _grade = 0;
     private double _fontheight;
     private GameState _game_state;
-    /* ---------------------- */
+    /* ----------------------------------------- */
 
     private CellState drawing_with_state;
 
@@ -263,10 +263,6 @@ public class View : Gtk.ApplicationWindow {
     construct {
         resizable = false;
         drawing_with_state = CellState.UNDEFINED;
-
-        if (Granite.Services.Logger.DisplayLevel != Granite.Services.LogLevel.DEBUG) {
-            Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.INFO;
-        }
 
         weak Gtk.IconTheme default_theme = Gtk.IconTheme.get_default ();
         default_theme.add_resource_path ("/com/gnonograms/icons");
