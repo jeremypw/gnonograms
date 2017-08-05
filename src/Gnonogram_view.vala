@@ -20,27 +20,32 @@
 
 namespace Gnonograms {
 public class View : Gtk.ApplicationWindow {
-    private const uint NOTIFICATION_TIMEOUT_SEC = 2;
-    private Gnonograms.LabelBox row_clue_box;
-    private Gnonograms.LabelBox column_clue_box;
-    private CellGrid cell_grid;
-    private Gtk.HeaderBar header_bar;
-    private AppMenu app_menu;
-    private Gtk.Grid main_grid;
-    private Gtk.Overlay overlay;
-    private Granite.Widgets.Toast toast;
+/**PUBLIC**/
+    public signal void random_game_request ();
+    public signal uint check_errors_request ();
+    public signal void rewind_request ();
+    public signal bool next_move_request ();
+    public signal bool previous_move_request ();
+    public signal void save_game_request ();
+    public signal void save_game_as_request ();
+    public signal void open_game_request ();
+    public signal void solve_this_request ();
+    public signal void restart_request ();
 
-    private ModeButton mode_switch;
-    private Gtk.Button load_game_button;
-    private Gtk.Button save_game_button;
-    private Gtk.Button random_game_button;
-    private Gtk.Button check_correct_button;
-    private Gtk.Button auto_solve_button;
-    private Gtk.Button restart_button;
-    private Model model {get; set;}
-    private CellState drawing_with_state;
+    public signal void resized (Dimensions dim);
+    public signal void moved (Cell cell);
+    public signal void game_state_changed (GameState gs);
 
-    private Dimensions _dimensions;
+    public string header_title {
+        get {
+            return header_bar.title;
+        }
+
+        set {
+            header_bar.title = value;
+        }
+    }
+
     public Dimensions dimensions {
         get {
             return _dimensions;
@@ -63,7 +68,6 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private Difficulty _grade = 0;
     public Difficulty grade {
         get {
             return _grade;
@@ -75,10 +79,18 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    public uint rows {get { return dimensions.height; }}
-    public uint cols {get { return dimensions.width; }}
+    public uint rows {
+        get {
+            return dimensions.height;
+        }
+    }
 
-    private double _fontheight;
+    public uint cols {
+        get {
+            return dimensions.width;
+        }
+    }
+
     public double fontheight {
         set {
             if (value < 1) {
@@ -96,7 +108,6 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private GameState _game_state;
     public GameState game_state {
         get {
             return _game_state;
@@ -118,15 +129,110 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private bool is_solving {get {return game_state == GameState.SOLVING;}}
+    public bool can_go_back {
+        set {
+            check_correct_button.sensitive = value && is_solving;
+        }
+    }
 
-    public string header_title {
-        get {
-            return header_bar.title;
+    public View (Model model) {
+        row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL);
+        column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL);
+        cell_grid = new CellGrid (model);
+
+        this.model = model;
+
+        main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for rows */
+        main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
+        main_grid.attach (cell_grid, 1, 1, 1, 1);
+
+        connect_signals ();
+    }
+
+    public void blank_labels () {
+        row_clue_box.blank_labels ();
+        column_clue_box.blank_labels ();
+    }
+
+    public string[] get_row_clues () {
+        return row_clue_box.get_clues ();
+    }
+
+    public string[] get_col_clues () {
+        return column_clue_box.get_clues ();
+    }
+
+
+    public void update_labels_from_string_array (string[] clues, bool is_column) {
+        var clue_box = is_column ? column_clue_box : row_clue_box;
+        var lim = is_column ? cols : rows;
+
+        for (int i = 0; i < lim; i++) {
+            clue_box.update_label_text (i, clues[i]);
+        }
+    }
+
+    public void update_labels_from_model () {
+        for (int r = 0; r < rows; r++) {
+            row_clue_box.update_label_text (r, model.get_label_text (r, false));
         }
 
-        set {
-            header_bar.title = value;
+        for (int c = 0; c < cols; c++) {
+            column_clue_box.update_label_text (c, model.get_label_text (c, true));
+        }
+    }
+
+    public void make_move (Move m) {
+        move_cursor_to (m.cell);
+        mark_cell (m.cell);
+
+        queue_draw ();
+    }
+
+    public void send_notification (string text) {
+        toast.title = text;
+        toast.send_notification ();
+        Timeout.add_seconds (NOTIFICATION_TIMEOUT_SEC, () => {
+            toast.reveal_child = false;
+            return false;
+        });
+    }
+
+
+    public void on_app_menu_apply () {
+        grade = (Difficulty)(app_menu.grade_val);
+        var rows = app_menu.row_val;
+        var cols = app_menu.column_val;
+
+        dimensions = {cols, rows};
+    }
+
+    /**PRIVATE**/
+    private Model model {get; set;}
+
+    private const uint NOTIFICATION_TIMEOUT_SEC = 2;
+    private Gnonograms.LabelBox row_clue_box;
+    private Gnonograms.LabelBox column_clue_box;
+    private CellGrid cell_grid;
+    private Gtk.HeaderBar header_bar;
+    private AppMenu app_menu;
+    private Gtk.Grid main_grid;
+    private Gtk.Overlay overlay;
+    private Granite.Widgets.Toast toast;
+
+    private ModeButton mode_switch;
+    private Gtk.Button load_game_button;
+    private Gtk.Button save_game_button;
+    private Gtk.Button random_game_button;
+    private Gtk.Button check_correct_button;
+    private Gtk.Button auto_solve_button;
+    private Gtk.Button restart_button;
+
+    private CellState drawing_with_state;
+
+    private bool is_solving {
+        get {
+            return game_state == GameState.SOLVING;
         }
     }
 
@@ -136,12 +242,6 @@ public class View : Gtk.ApplicationWindow {
         }
         set {
             cell_grid.current_cell = value;
-        }
-    }
-
-    public bool can_go_back {
-        set {
-            check_correct_button.sensitive = value && is_solving;
         }
     }
 
@@ -156,22 +256,12 @@ public class View : Gtk.ApplicationWindow {
     private bool shift_pressed = false;
     private bool only_control_pressed = false;
 
-    public signal void random_game_request ();
-    public signal uint check_errors_request ();
-    public signal void rewind_request ();
-    public signal bool next_move_request ();
-    public signal bool previous_move_request ();
-    public signal void save_game_request ();
-    public signal void save_game_as_request ();
-    public signal void open_game_request ();
-    public signal void solve_this_request ();
-    public signal void restart_request ();
-
-    public signal void resized (Dimensions dim);
-    public signal void moved (Cell cell);
-    public signal void game_state_changed (GameState gs);
-
-
+    /* Not to be set directly */
+    private Dimensions _dimensions;
+    private Difficulty _grade = 0;
+    private double _fontheight;
+    private GameState _game_state;
+    /* ---------------------- */
 
     construct {
         resizable = false;
@@ -271,32 +361,6 @@ public class View : Gtk.ApplicationWindow {
         add (overlay);
     }
 
-    public View (Model model) {
-        row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL);
-        column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL);
-        cell_grid = new CellGrid (model);
-
-        this.model = model;
-
-        main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for rows */
-        main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
-        main_grid.attach (cell_grid, 1, 1, 1, 1);
-
-        connect_signals ();
-    }
-
-    public void blank_labels () {
-        row_clue_box.blank_labels ();
-        column_clue_box.blank_labels ();
-    }
-
-    public string[] get_row_clues () {
-        return row_clue_box.get_clues ();
-    }
-
-    public string[] get_col_clues () {
-        return column_clue_box.get_clues ();
-    }
 
     private void connect_signals () {
         realize.connect (() => {
@@ -339,24 +403,6 @@ public class View : Gtk.ApplicationWindow {
         fontheight = double.min (max_h, max_w) / 2;
     }
 
-    public void update_labels_from_model () {
-        for (int r = 0; r < rows; r++) {
-            row_clue_box.update_label_text (r, model.get_label_text (r, false));
-        }
-
-        for (int c = 0; c < cols; c++) {
-            column_clue_box.update_label_text (c, model.get_label_text (c, true));
-        }
-    }
-
-    public void update_labels_from_string_array (string[] clues, bool is_column) {
-        var clue_box = is_column ? column_clue_box : row_clue_box;
-        var lim = is_column ? cols : rows;
-
-        for (int i = 0; i < lim; i++) {
-            clue_box.update_label_text (i, clues[i]);
-        }
-    }
 
     private void update_labels_for_cell (Cell cell) {
         row_clue_box.update_label_text (cell.row, model.get_label_text (cell.row, false));
@@ -376,13 +422,6 @@ public class View : Gtk.ApplicationWindow {
             mark_cell (cell);
             cell_grid.highlight_cell (cell, true);
         }
-    }
-
-    public void make_move (Move m) {
-        move_cursor_to (m.cell);
-        mark_cell (m.cell);
-
-        queue_draw ();
     }
 
     private void move_cursor_to (Cell to, Cell from = current_cell) {
@@ -450,16 +489,6 @@ public class View : Gtk.ApplicationWindow {
 
         make_move_at_cell ();
     }
-
-    public void send_notification (string text) {
-        toast.title = text;
-        toast.send_notification ();
-        Timeout.add_seconds (NOTIFICATION_TIMEOUT_SEC, () => {
-            toast.reveal_child = false;
-            return false;
-        });
-    }
-
 
     /*** Signal handlers ***/
     private void on_grid_cursor_moved (Cell from, Cell to) {
@@ -639,16 +668,6 @@ public class View : Gtk.ApplicationWindow {
     private void on_restart_button_pressed () {
         restart_request ();
     }
-
-
-    public void on_app_menu_apply () {
-        grade = (Difficulty)(app_menu.grade_val);
-        var rows = app_menu.row_val;
-        var cols = app_menu.column_val;
-
-        dimensions = {cols, rows};
-    }
-
 
     /** Private classes **/
     private class ModeButton : Granite.Widgets.ModeButton {
