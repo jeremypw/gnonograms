@@ -60,7 +60,7 @@ public class Controller : GLib.Object {
 
 /** PRIVATE **/
     private View view;
-    private Model? model;
+    private Model model;
     private Solver solver;
     private GLib.Settings settings;
     private GLib.Settings saved_state;
