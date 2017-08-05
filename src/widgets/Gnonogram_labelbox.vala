@@ -21,8 +21,9 @@
 namespace Gnonograms {
 /** Widget to hold variable number of clues, with either vertical or horizontal orientation **/
 public class LabelBox : Gtk.Grid {
+/** PUBLIC **/
     public Dimensions dimensions {
-        get {
+        private get {
             return _dimensions;
         }
 
@@ -38,6 +39,77 @@ public class LabelBox : Gtk.Grid {
         }
     }
 
+
+    public double fontheight {
+        set {
+           _fontheight = value.clamp(Gnonograms.MINFONTSIZE, Gnonograms.MAXFONTSIZE);
+
+            foreach (Gtk.Widget l in get_children ()) {
+                ((Label)l).fontheight = _fontheight;
+            }
+        }
+    }
+
+
+    public LabelBox (Gtk.Orientation orientation) {
+        Object (column_homogeneous: true,
+                row_homogeneous: true,
+                column_spacing: 0,
+                row_spacing: 0);
+
+        vertical_labels = (orientation == Gtk.Orientation.HORIZONTAL);
+
+        if (vertical_labels) {
+            vexpand = true;
+        } else {
+            hexpand = true;
+        }
+
+        /* Must have at least one label for resize to work */
+        var label = new_label (vertical_labels, other_size);
+        attach (label, 0, 0, 1, 1);
+
+    }
+
+
+    public void highlight (uint index, bool is_highlight) {
+        if (index >= size) {
+            return;
+        }
+
+        labels[index].highlight (is_highlight);
+    }
+
+    public void unhighlight_all() {
+        for (uint index = 0; index < current_size; index++) {
+            labels[index].highlight (false);
+        }
+    }
+
+    public void update_label_text (uint index, string? txt) {
+        if (txt == null) {
+            txt = BLANKLABELTEXT;
+        }
+
+        labels[index].clue = txt;
+    }
+
+    public string[] get_clues () {
+        var texts = new string [current_size];
+        for (uint index = 0; index < current_size; index++) {
+            texts[index] = labels[index].clue;
+        }
+
+        return texts;
+    }
+
+    public void blank_labels () {
+        for (uint index = 0; index < current_size; index++) {
+            labels[index].clue = ("---");
+        }
+    }
+
+/** PRIVATE **/
     private Label[] labels;
     private int current_size = 0;
     private bool vertical_labels; /* true if contains column labels */
@@ -65,47 +137,18 @@ public class LabelBox : Gtk.Grid {
         }
     }
 
-
-    public double fontheight {
-        set {
-           _fontheight = value.clamp(Gnonograms.MINFONTSIZE, Gnonograms.MAXFONTSIZE);
-
-            foreach (Gtk.Widget l in get_children ()) {
-                ((Label)l).fontheight = _fontheight;
-            }
-        }
-    }
-
-
     construct {
         labels = new Label[MAXSIZE];
-    }
-
-    public LabelBox (Gtk.Orientation orientation) {
-        Object (column_homogeneous: true,
-                row_homogeneous: true,
-                column_spacing: 0,
-                row_spacing: 0);
-
-        vertical_labels = (orientation == Gtk.Orientation.HORIZONTAL);
-
-        /* Must have at least one label for resize to work */
-        var label = new_label (vertical_labels, other_size);
-        attach (label, 0, 0, 1, 1);
-
-        if (vertical_labels) {
-            vexpand = true;
-        } else {
-            hexpand = true;
-        }
     }
 
     private Label new_label (bool vertical, uint size) {
         var label = new Label (vertical);
         label.size = size;
+        label.show_all ();
+
         labels[current_size] = label;
         current_size++;
-        label.show_all ();
+
         return label;
     }
 
@@ -114,7 +157,9 @@ public class LabelBox : Gtk.Grid {
         unhighlight_all();
 
         if (labels[0].size != other_size) {
-            update_label_size (other_size);
+            for (uint index = 0; index < current_size; index++) {
+                labels[index].size = other_size;
+            }
         }
 
         while (current_size < size) {
@@ -130,53 +175,6 @@ public class LabelBox : Gtk.Grid {
             }
             /* No need to destroy unused labels */
             current_size--;
-        }
-    }
-
-    public void highlight (uint index, bool is_highlight) {
-        if (index >= size) {
-            return;
-        }
-
-        labels[index].highlight (is_highlight);
-    }
-
-    public void unhighlight_all() {
-        for (uint index = 0; index < current_size; index++) {
-            labels[index].highlight (false);
-        }
-    }
-
-    public void update_label_text (uint index, string? txt) {
-        if (txt == null) {
-            txt = BLANKLABELTEXT;
-        }
-
-        labels[index].clue = txt;
-    }
-
-    public void update_label_size (uint new_size) {
-        for (uint index = 0; index < current_size; index++) {
-            labels[index].size = new_size;
-        }
-    }
-
-    public string[] get_clues () {
-        var texts = new string [current_size];
-        for (uint index = 0; index < current_size; index++) {
-            texts[index] = labels[index].clue;
-        }
-
-        return texts;
-    }
-
-    public void blank_labels () {
-        set_all_to_string ("---");
-    }
-
-    private void set_all_to_string (string txt) {
-        for (uint index = 0; index < current_size; index++) {
-            labels[index].clue = txt;
         }
     }
 }
