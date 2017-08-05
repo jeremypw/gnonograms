@@ -19,9 +19,8 @@
  */
 
 namespace Gnonograms {
-
+/** Widget to hold variable number of clues, with either vertical or horizontal orientation **/
 public class LabelBox : Gtk.Grid {
-    private Dimensions _dimensions;
     public Dimensions dimensions {
         get {
             return _dimensions;
@@ -43,6 +42,11 @@ public class LabelBox : Gtk.Grid {
     private int current_size = 0;
     private bool vertical_labels; /* true if contains column labels */
 
+    /* Backing variable - do not assign directly */
+    private Dimensions _dimensions;
+    private double _fontheight;
+    /* ----------------------------------------- */
+
     private uint size { /* no of labels in box */
         get {
             return vertical_labels ? dimensions.width : dimensions.height;
@@ -61,20 +65,14 @@ public class LabelBox : Gtk.Grid {
         }
     }
 
-    private double _fontheight;
-    public double fontheight {
-        get {
-            return _fontheight;
-        }
 
+    public double fontheight {
         set {
-            _fontheight = value.clamp(Gnonograms.MINFONTSIZE, Gnonograms.MAXFONTSIZE);
+           _fontheight = value.clamp(Gnonograms.MINFONTSIZE, Gnonograms.MAXFONTSIZE);
 
             foreach (Gtk.Widget l in get_children ()) {
                 ((Label)l).fontheight = _fontheight;
             }
-
-            update_size_request ();
         }
     }
 
@@ -105,7 +103,6 @@ public class LabelBox : Gtk.Grid {
     private Label new_label (bool vertical, uint size) {
         var label = new Label (vertical);
         label.size = size;
-        label.fontheight = fontheight;
         labels[current_size] = label;
         current_size++;
         label.show_all ();
@@ -134,9 +131,6 @@ public class LabelBox : Gtk.Grid {
             /* No need to destroy unused labels */
             current_size--;
         }
-
-        update_size_request ();
-        queue_draw ();
     }
 
     public void highlight (uint index, bool is_highlight) {
@@ -164,15 +158,6 @@ public class LabelBox : Gtk.Grid {
     public void update_label_size (uint new_size) {
         for (uint index = 0; index < current_size; index++) {
             labels[index].size = new_size;
-        }
-    }
-
-    private void update_size_request () {
-        /* Allow space for lengthening clues on game generation  (typical longest clue) */
-        if (vertical_labels) {
-            set_size_request(-1, (int)(fontheight * other_size * 0.75));
-        } else {
-            set_size_request((int)(fontheight * other_size * 0.5), -1);
         }
     }
 

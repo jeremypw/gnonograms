@@ -648,6 +648,8 @@ public class Controller : GLib.Object {
 
         settings.set_uint ("rows", rows);
         settings.set_uint ("columns", cols);
+
+        view.queue_draw ();
     }
 
     private void on_state_changed (GameState gs) {

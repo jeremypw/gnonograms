@@ -56,16 +56,12 @@ public class View : Gtk.ApplicationWindow {
         set {
             if (value != _dimensions) {
                 _dimensions = value;
-                /* Do not update during construction */
-                if (row_clue_box != null) {
-                    row_clue_box.dimensions = dimensions;
-                    column_clue_box.dimensions = dimensions;
-                    set_default_fontheight_from_dimensions ();
-                    app_menu.row_val = dimensions.height;
-                    app_menu.column_val = dimensions.width;
-                    resized (dimensions);
-                    queue_draw ();
-                }
+                row_clue_box.dimensions = dimensions;
+                column_clue_box.dimensions = dimensions;
+                fontheight = get_default_fontheight_from_dimensions ();
+                app_menu.row_val = dimensions.height;
+                app_menu.column_val = dimensions.width;
+                resized (dimensions); /* Controller will queue draw after resizing model */
             }
         }
     }
@@ -98,15 +94,19 @@ public class View : Gtk.ApplicationWindow {
             return _fontheight;
         }
 
+
         set {
-            if (value < 1) {
-                set_default_fontheight_from_dimensions ();
-                return;
+            _fontheight = value;
+            if (_fontheight < 1) {
+                _fontheight = get_default_fontheight_from_dimensions ();
             }
 
             _fontheight = value;
-            row_clue_box.fontheight = value;
-            column_clue_box.fontheight = value;
+            row_clue_box.fontheight = _fontheight;
+            column_clue_box.fontheight = _fontheight;
+            /* Allow space for lengthening clues on game generation  (typical longest clue) */
+            column_clue_box.set_size_request(-1, (int)(fontheight * rows * 0.75));
+            row_clue_box.set_size_request((int)(fontheight * cols * 0.5), -1);
         }
     }
 
@@ -232,8 +232,8 @@ public class View : Gtk.ApplicationWindow {
 
     /* Backing variables, not to be set directly */
     private Dimensions _dimensions;
-    private Difficulty _grade = 0;
     private double _fontheight;
+    private Difficulty _grade = 0;
     private GameState _game_state;
     /* ----------------------------------------- */
 
@@ -342,6 +342,7 @@ public class View : Gtk.ApplicationWindow {
         /* Connect signal handlers */
         realize.connect (() => {
             update_labels_from_model ();
+            fontheight = get_default_fontheight_from_dimensions ();
         });
 
         mode_switch.mode_changed.connect (on_mode_switch_changed);
@@ -360,12 +361,14 @@ public class View : Gtk.ApplicationWindow {
         auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
     }
 
-    private void set_default_fontheight_from_dimensions () {
+    private double get_default_fontheight_from_dimensions () {
+//~     private void set_default_fontheight_from_dimensions () {
         double max_h, max_w;
         Gdk.Rectangle rect;
 
         if (get_window () == null) {
-            return;
+            return 0;
+//~             return;
         }
 
 #if HAVE_GDK_3_22
@@ -380,7 +383,8 @@ public class View : Gtk.ApplicationWindow {
         max_h = (double)(rect.height) / ((double)(rows * 2));
         max_w = (double)(rect.width) / ((double)(cols * 2));
 
-        fontheight = double.min (max_h, max_w) / 2;
+        return double.min (max_h, max_w) / 2;
+//~         fontheight = double.min (max_h, max_w) / 2;
     }
 
 

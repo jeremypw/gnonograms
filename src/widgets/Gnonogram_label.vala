@@ -38,7 +38,7 @@ class Label : Gtk.Label {
         }
     }
 
-    public bool vertical_text {get; set;} /* true if clue for column */
+    public bool vertical_text { get; set; } /* true if clue for column */
 
     public double fontheight {
         set {
