@@ -19,66 +19,6 @@
  */
 
 namespace Gnonograms {
-/*TODO - move enum and struct definitions elsewhere */
-public enum Difficulty {
-    TRIVIAL,
-    EASY,
-    MODERATE,
-    HARD,
-    CHALLENGING,
-    MAXIMUM,
-    UNDEFINED;
-}
-
-public static string difficulty_to_string (Difficulty d) {
-    switch (d) {
-        case Difficulty.TRIVIAL:
-            return _("Very Easy");
-        case Difficulty.EASY:
-            return _("Easy");
-        case Difficulty.MODERATE:
-            return _("Moderately difficult");
-        case Difficulty.HARD:
-            return _("Difficult");
-        case Difficulty.CHALLENGING:
-            return _("Very Difficult");
-        default:
-            return _("Maximum Difficulty");
-    }
-}
-
-public enum GameState {
-    SETTING,
-    SOLVING,
-    UNDEFINED;
-}
-
-public enum CellState {
-    UNKNOWN,
-    EMPTY,
-    FILLED,
-    ERROR,
-    COMPLETED,
-    ERROR_EMPTY,
-    ERROR_FILLED,
-    UNDEFINED;
-}
-
-public enum CellPatternType {
-    CELL,
-    HIGHLIGHT,
-    UNDEFINED
-}
-
-public enum ButtonPress {
-    LEFT_SINGLE,
-    LEFT_DOUBLE,
-    MIDDLE_SINGLE,
-    MIDDLE_DOUBLE,
-    RIGHT_SINGLE,
-    RIGHT_DOUBLE,
-    UNDEFINED
-}
 
 public struct Cell {
     public uint row;
