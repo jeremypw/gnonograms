@@ -66,6 +66,7 @@ vala_precompile(VALA_C
     src/core/Move.vala
     src/core/Enums.vala
     src/core/Structs.vala
+    src/core/Constants.vala
 
 PACKAGES
     gee-0.8
