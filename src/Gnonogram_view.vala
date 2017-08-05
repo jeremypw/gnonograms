@@ -19,6 +19,9 @@
  */
 
 namespace Gnonograms {
+/*** The View class manages the header, clue label widgets and the drawing widget under instruction
+   * from the controller. It signals user interaction to the controller.
+***/
 public class View : Gtk.ApplicationWindow {
 /**PUBLIC**/
     public signal void random_game_request ();
@@ -31,7 +34,6 @@ public class View : Gtk.ApplicationWindow {
     public signal void open_game_request ();
     public signal void solve_this_request ();
     public signal void restart_request ();
-
     public signal void resized (Dimensions dim);
     public signal void moved (Cell cell);
     public signal void game_state_changed (GameState gs);
@@ -205,6 +207,7 @@ public class View : Gtk.ApplicationWindow {
 
     /**PRIVATE**/
     private const uint NOTIFICATION_TIMEOUT_SEC = 2;
+
     private Model model;
     private Gnonograms.LabelBox row_clue_box;
     private Gnonograms.LabelBox column_clue_box;
@@ -214,7 +217,6 @@ public class View : Gtk.ApplicationWindow {
     private Gtk.Grid main_grid;
     private Gtk.Overlay overlay;
     private Granite.Widgets.Toast toast;
-
     private ModeButton mode_switch;
     private Gtk.Button load_game_button;
     private Gtk.Button save_game_button;
@@ -222,6 +224,18 @@ public class View : Gtk.ApplicationWindow {
     private Gtk.Button check_correct_button;
     private Gtk.Button auto_solve_button;
     private Gtk.Button restart_button;
+
+    private bool control_pressed = false;
+    private bool other_mod_pressed = false;
+    private bool shift_pressed = false;
+    private bool only_control_pressed = false;
+
+    /* Backing variables, not to be set directly */
+    private Dimensions _dimensions;
+    private Difficulty _grade = 0;
+    private double _fontheight;
+    private GameState _game_state;
+    /* ---------------------- */
 
     private CellState drawing_with_state;
 
@@ -246,18 +260,6 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private bool control_pressed = false;
-    private bool other_mod_pressed = false;
-    private bool shift_pressed = false;
-    private bool only_control_pressed = false;
-
-    /* Not to be set directly */
-    private Dimensions _dimensions;
-    private Difficulty _grade = 0;
-    private double _fontheight;
-    private GameState _game_state;
-    /* ---------------------- */
-
     construct {
         resizable = false;
         drawing_with_state = CellState.UNDEFINED;
@@ -268,6 +270,7 @@ public class View : Gtk.ApplicationWindow {
 
         weak Gtk.IconTheme default_theme = Gtk.IconTheme.get_default ();
         default_theme.add_resource_path ("/com/gnonograms/icons");
+
         header_bar = new Gtk.HeaderBar ();
         header_bar.set_has_subtitle (true);
         header_bar.set_show_close_button (true);
@@ -320,8 +323,8 @@ public class View : Gtk.ApplicationWindow {
         set_titlebar (header_bar);
 
         overlay = new Gtk.Overlay ();
-
         toast = new Granite.Widgets.Toast ("");
+
         toast.set_default_action (null);
         toast.halign = Gtk.Align.START;
         toast.valign = Gtk.Align.START;
@@ -330,6 +333,7 @@ public class View : Gtk.ApplicationWindow {
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL);
         main_grid = new Gtk.Grid ();
+
         main_grid.row_spacing = 0;
         main_grid.column_spacing = 0;
         main_grid.row_spacing = 0;
@@ -337,9 +341,9 @@ public class View : Gtk.ApplicationWindow {
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for rows */
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
         overlay.add (main_grid);
-
         add (overlay);
 
+        /* Connect signal handlers */
         realize.connect (() => {
             update_labels_from_model ();
         });
