@@ -65,6 +65,7 @@ vala_precompile(VALA_C
     src/core/Gnonogram_filewriter.vala
     src/core/Move.vala
     src/core/Enums.vala
+    src/core/Structs.vala
 
 PACKAGES
     gee-0.8

@@ -20,58 +20,6 @@
 
 namespace Gnonograms {
 
-public struct Cell {
-    public uint row;
-    public uint col;
-    public CellState state;
-
-    public bool same_coords (Cell c) {
-        return (this.row == c.row && this.col == c.col);
-    }
-
-    public void copy (Cell b) {
-        this.row = b.row;
-        this.col = b.col;
-        this.state = b.state;
-    }
-
-    public bool equal (Cell b) {
-        return (
-            this.row == b.row &&
-            this.col == b.col &&
-            this.state == b.state
-        );
-
-    }
-
-    public Cell invert() {
-        Cell c = {row, col, CellState.UNKNOWN };
-
-        if (this.state == CellState.EMPTY) {
-            c.state = CellState.FILLED;
-        } else {
-            c.state = CellState.EMPTY;
-        }
-
-        return c;
-    }
-
-    public Cell clone () {
-        return {row, col, state};
-    }
-
-    public string to_string () {
-        return "Row %u, Col %u,  State %s".printf (row, col, state.to_string ());
-    }
-}
-
-public struct Dimensions {
-    uint width;
-    uint height;
-}
-
-
-
 public const Cell NULL_CELL = {uint.MAX, uint.MAX, CellState.UNDEFINED};
 public static int MAXSIZE = 50; // max number rows or columns
 public static int MINSIZE = 5; // Change to 1 when debugging
