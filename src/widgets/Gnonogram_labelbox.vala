@@ -39,7 +39,6 @@ public class LabelBox : Gtk.Grid {
         }
     }
 
-
     public double fontheight {
         set {
            _fontheight = value.clamp(Gnonograms.MINFONTSIZE, Gnonograms.MAXFONTSIZE);
@@ -49,7 +48,6 @@ public class LabelBox : Gtk.Grid {
             }
         }
     }
-
 
     public LabelBox (Gtk.Orientation orientation) {
         Object (column_homogeneous: true,
@@ -71,6 +69,9 @@ public class LabelBox : Gtk.Grid {
 
     }
 
+    construct {
+        labels = new Label[MAXSIZE];
+    }
 
     public void highlight (uint index, bool is_highlight) {
         if (index >= size) {
@@ -80,7 +81,7 @@ public class LabelBox : Gtk.Grid {
         labels[index].highlight (is_highlight);
     }
 
-    public void unhighlight_all() {
+    public void unhighlight_all () {
         for (uint index = 0; index < current_size; index++) {
             labels[index].highlight (false);
         }
@@ -96,6 +97,7 @@ public class LabelBox : Gtk.Grid {
 
     public string[] get_clues () {
         var texts = new string [current_size];
+
         for (uint index = 0; index < current_size; index++) {
             texts[index] = labels[index].clue;
         }
@@ -135,10 +137,6 @@ public class LabelBox : Gtk.Grid {
         get {
             return vertical_labels ? Gtk.PositionType.RIGHT : Gtk.PositionType.BOTTOM;
         }
-    }
-
-    construct {
-        labels = new Label[MAXSIZE];
     }
 
     private Label new_label (bool vertical, uint size) {
