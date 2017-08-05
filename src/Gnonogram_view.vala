@@ -92,6 +92,10 @@ public class View : Gtk.ApplicationWindow {
     }
 
     public double fontheight {
+        get {
+            return _fontheight;
+        }
+
         set {
             if (value < 1) {
                 set_default_fontheight_from_dimensions ();
@@ -101,10 +105,6 @@ public class View : Gtk.ApplicationWindow {
             _fontheight = value;
             row_clue_box.fontheight = value;
             column_clue_box.fontheight = value;
-        }
-
-        get {
-            return _fontheight;
         }
     }
 
@@ -135,18 +135,14 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    public View (Model model) {
-        row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL);
-        column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL);
+    public View (Model _model) {
+        model = _model;
         cell_grid = new CellGrid (model);
-
-        this.model = model;
-
-        main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for rows */
-        main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
         main_grid.attach (cell_grid, 1, 1, 1, 1);
-
-        connect_signals ();
+        cell_grid.cursor_moved.connect (on_grid_cursor_moved);
+        cell_grid.leave_notify_event.connect (on_grid_leave);
+        cell_grid.button_press_event.connect (on_grid_button_press);
+        cell_grid.button_release_event.connect (on_grid_button_release);
     }
 
     public void blank_labels () {
@@ -208,9 +204,8 @@ public class View : Gtk.ApplicationWindow {
     }
 
     /**PRIVATE**/
-    private Model model {get; set;}
-
     private const uint NOTIFICATION_TIMEOUT_SEC = 2;
+    private Model model;
     private Gnonograms.LabelBox row_clue_box;
     private Gnonograms.LabelBox column_clue_box;
     private CellGrid cell_grid;
@@ -283,53 +278,35 @@ public class View : Gtk.ApplicationWindow {
         var img = new Gtk.Image.from_icon_name ("document-open-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         load_game_button.image = img;
         load_game_button.tooltip_text = _("Load a Game from File");
-        load_game_button.clicked.connect (() => {open_game_request ();});
 
         save_game_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("document-save-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         save_game_button.image = img;
         save_game_button.tooltip_text = _("Save a Game to File");
-        save_game_button.button_release_event.connect ((event) => {
-            set_mods (event.state);
-            return false;
-        });
-
-        save_game_button.clicked.connect (() => {
-            if (shift_pressed) {
-                save_game_as_request ();
-            } else {
-                save_game_request ();
-            }
-        });
 
         random_game_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("list-add-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         random_game_button.image = img;
         random_game_button.tooltip_text = _("Generate a Random Game");
-        random_game_button.clicked.connect (() => {random_game_request ();});
 
         check_correct_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("media-seek-backward-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         check_correct_button.image = img;
         check_correct_button.tooltip_text = _("Undo Any Errors");
-        check_correct_button.clicked.connect (on_check_button_pressed);
         check_correct_button.sensitive = false;
 
         restart_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("view-refresh", Gtk.IconSize.LARGE_TOOLBAR);
         restart_button.image = img;
-        restart_button.clicked.connect (on_restart_button_pressed);
         restart_button.sensitive = true;
 
         auto_solve_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("system-run", Gtk.IconSize.LARGE_TOOLBAR);
         auto_solve_button.image = img;
         auto_solve_button.tooltip_text = _("Solve by Computer");
-        auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
         auto_solve_button.sensitive = true;
 
         app_menu = new AppMenu ();
-
         mode_switch = new ModeButton ();
 
         header_bar.pack_start (random_game_button);
@@ -340,7 +317,6 @@ public class View : Gtk.ApplicationWindow {
         header_bar.pack_end (mode_switch);
         header_bar.pack_end (auto_solve_button);
         header_bar.pack_end (restart_button);
-
         set_titlebar (header_bar);
 
         overlay = new Gtk.Overlay ();
@@ -349,28 +325,24 @@ public class View : Gtk.ApplicationWindow {
         toast.set_default_action (null);
         toast.halign = Gtk.Align.START;
         toast.valign = Gtk.Align.START;
+        overlay.add_overlay (toast);
 
+        row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL);
+        column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL);
         main_grid = new Gtk.Grid ();
         main_grid.row_spacing = 0;
         main_grid.column_spacing = 0;
         main_grid.row_spacing = 0;
         main_grid.border_width = 0;
-
+        main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for rows */
+        main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
         overlay.add (main_grid);
-        overlay.add_overlay (toast);
+
         add (overlay);
-    }
 
-
-    private void connect_signals () {
         realize.connect (() => {
             update_labels_from_model ();
         });
-
-        cell_grid.cursor_moved.connect (on_grid_cursor_moved);
-        cell_grid.leave_notify_event.connect (on_grid_leave);
-        cell_grid.button_press_event.connect (on_grid_button_press);
-        cell_grid.button_release_event.connect (on_grid_button_release);
 
         mode_switch.mode_changed.connect (on_mode_switch_changed);
 
@@ -378,6 +350,14 @@ public class View : Gtk.ApplicationWindow {
         key_release_event.connect (on_key_release_event);
 
         app_menu.apply.connect (on_app_menu_apply);
+
+        load_game_button.clicked.connect (on_load_game_button_clicked);
+        save_game_button.clicked.connect (on_save_game_button_clicked);
+        save_game_button.button_release_event.connect (on_save_game_button_release_event);
+        random_game_button.clicked.connect (on_random_game_button_clicked);
+        check_correct_button.clicked.connect (on_check_button_pressed);
+        restart_button.clicked.connect (on_restart_button_pressed);
+        auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
     }
 
     private void set_default_fontheight_from_dimensions () {
@@ -643,6 +623,27 @@ public class View : Gtk.ApplicationWindow {
     private void on_mode_switch_changed (Gtk.Widget widget) {
         game_state = widget.get_data ("mode");
         game_state_changed (game_state);
+    }
+
+    private void on_save_game_button_clicked () {
+        if (shift_pressed) {
+            save_game_as_request ();
+        } else {
+            save_game_request ();
+        }
+    }
+
+    private bool on_save_game_button_release_event (Gdk.EventButton event) {
+        set_mods (event.state);
+        return false;
+    }
+
+    private void on_load_game_button_clicked () {
+        open_game_request ();
+    }
+
+    private void on_random_game_button_clicked () {
+        random_game_request ();
     }
 
     private void on_check_button_pressed () {
