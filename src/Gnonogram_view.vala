@@ -217,7 +217,7 @@ public class View : Gtk.ApplicationWindow {
     private Gtk.Grid main_grid;
     private Gtk.Overlay overlay;
     private Granite.Widgets.Toast toast;
-    private ModeButton mode_switch;
+    private ViewModeButton mode_switch;
     private Gtk.Button load_game_button;
     private Gtk.Button save_game_button;
     private Gtk.Button random_game_button;
@@ -306,7 +306,7 @@ public class View : Gtk.ApplicationWindow {
         auto_solve_button.sensitive = true;
 
         app_menu = new AppMenu ();
-        mode_switch = new ModeButton ();
+        mode_switch = new ViewModeButton ();
 
         header_bar.pack_start (random_game_button);
         header_bar.pack_start (load_game_button);
@@ -668,36 +668,6 @@ public class View : Gtk.ApplicationWindow {
 
     private void on_restart_button_pressed () {
         restart_request ();
-    }
-
-    /** Private classes **/
-    private class ModeButton : Granite.Widgets.ModeButton {
-        private int setting_index;
-        private int solving_index;
-
-        public GameState mode {
-            set {
-                if (value == GameState.SETTING) {
-                    set_active (setting_index);
-                } else {
-                    set_active (solving_index);
-                }
-            }
-        }
-
-        public ModeButton () {
-            var setting_icon = new Gtk.Image.from_icon_name ("edit-symbolic", Gtk.IconSize.MENU); /* provisional only */
-            var solving_icon = new Gtk.Image.from_icon_name ("process-working-symbolic", Gtk.IconSize.MENU);  /* provisional only */
-
-            setting_icon.set_data ("mode", GameState.SETTING);
-            solving_icon.set_data ("mode", GameState.SOLVING);
-
-            setting_icon.tooltip_text = _("Draw a pattern");
-            solving_icon.tooltip_text = _("Solve a puzzle");
-
-            setting_index = append (setting_icon);
-            solving_index = append (solving_icon);
-        }
     }
 }
 }
