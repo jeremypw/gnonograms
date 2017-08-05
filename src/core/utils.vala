@@ -176,15 +176,15 @@ namespace Utils {
     }
 
     public static bool show_confirm_dialog(string msg, Gtk.Window? parent = null) {
-        return show_dlg (msg ,Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, parent)==Gtk.ResponseType.YES;
+        return show_dlg (msg, Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, parent) == Gtk.ResponseType.YES;
     }
 
     private static string? get_file_path (Gtk.Window? parent,
-        Gtk.FileChooserAction action,
-        string dialogname,
-        string[]? filternames,
-        string[]? filters,
-        string? start_path = null) {
+                                          Gtk.FileChooserAction action,
+                                          string dialogname,
+                                          string[]? filternames,
+                                          string[]? filters,
+                                          string? start_path = null) {
 
         string? file_path = null;
 
@@ -231,6 +231,7 @@ namespace Utils {
 
         if (start_path != null) {
             var start = File.new_for_path (start_path);
+
             if (start.query_file_type (GLib.FileQueryInfoFlags.NONE, null) == FileType.DIRECTORY) {
                 dialog.set_current_folder (start_path); //so Recently used folder not displayed
             }

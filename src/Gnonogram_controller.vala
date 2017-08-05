@@ -31,6 +31,8 @@ public class Controller : GLib.Object {
         }
     }
 
+    public string load_game_dir { get; private set; }
+
     public Controller (File? game = null) {
         bool success = false;
 
@@ -65,7 +67,6 @@ public class Controller : GLib.Object {
     private Gee.Deque<Move> back_stack;
     private Gee.Deque<Move> forward_stack;
     private const int MAXTRIES = 5;
-    private string load_game_dir;
     private string save_game_dir;
     private string current_game_path;
     private string? game_path = null;

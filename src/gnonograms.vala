@@ -21,9 +21,11 @@
 namespace Gnonograms {
 public class App : Granite.Application {
     public Controller controller;
-    private string game_name;
-    public string load_game_dir;
-    public string save_game_dir;
+    public string load_game_dir {
+        get {
+            return controller.load_game_dir;
+        }
+    }
 
     construct {
         application_id = "com.github.jeremypw.gnonograms-elementary";
@@ -58,8 +60,6 @@ public class App : Granite.Application {
 
         add_action (quit_action);
         add_accelerator ("<Ctrl>q", "app.quit", null);
-
-        game_name = "";
     }
 
     public override void startup () {
@@ -77,8 +77,6 @@ public class App : Granite.Application {
         var fname = file.get_basename ();
 
         if (fname.has_suffix (".gno")) {
-            game_name = fname;
-            /* TODO retrieve data from game */
             open_file (file);
         } else {
             activate ();
