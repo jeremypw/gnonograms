@@ -30,21 +30,17 @@ public class LabelBox : Gtk.Grid {
         set {
             if (value != _dimensions) {
                 _dimensions = value;
-
-                /* Do not update during construction */
-                if (current_size > 0) {
-                    resize ();
-                }
+                resize (value);
             }
         }
     }
 
     public double fontheight {
         set {
-           _fontheight = value.clamp(Gnonograms.MINFONTSIZE, Gnonograms.MAXFONTSIZE);
+           _fontheight = value.clamp (Gnonograms.MINFONTSIZE, Gnonograms.MAXFONTSIZE);
 
-            foreach (Gtk.Widget l in get_children ()) {
-                ((Label)l).fontheight = _fontheight;
+            for (uint index = 0; index < current_size; index++) {
+                labels[index].fontheight = _fontheight;
             }
         }
     }
@@ -56,6 +52,7 @@ public class LabelBox : Gtk.Grid {
                 row_spacing: 0);
 
         vertical_labels = (orientation == Gtk.Orientation.HORIZONTAL);
+        attach_position = vertical_labels ? Gtk.PositionType.RIGHT : Gtk.PositionType.BOTTOM;
 
         if (vertical_labels) {
             vexpand = true;
@@ -66,7 +63,7 @@ public class LabelBox : Gtk.Grid {
         /* Must have at least one label for resize to work */
         var label = new_label (vertical_labels, other_size);
         attach (label, 0, 0, 1, 1);
-
+        current_size = 1;
     }
 
     construct {
@@ -112,32 +109,17 @@ public class LabelBox : Gtk.Grid {
     }
 
 /** PRIVATE **/
-    private Label[] labels;
-    private int current_size = 0;
-    private bool vertical_labels; /* true if contains column labels */
-
-    /* Backing variable - do not assign directly */
+    /* Backing variables - do not assign directly */
     private Dimensions _dimensions;
     private double _fontheight;
     /* ----------------------------------------- */
 
-    private uint size { /* no of labels in box */
-        get {
-            return vertical_labels ? dimensions.width : dimensions.height;
-        }
-    }
-
-    private uint other_size { /* size of other label box */
-        get {
-            return vertical_labels ? dimensions.height : dimensions.width;
-        }
-    }
-
-    private Gtk.PositionType attach_position {
-        get {
-            return vertical_labels ? Gtk.PositionType.RIGHT : Gtk.PositionType.BOTTOM;
-        }
-    }
+    private Label[] labels;
+    private bool vertical_labels; /* True if contains column labels */
+    private uint size;
+    private int current_size; /* Index of last added label */
+    private uint other_size; /* Size of other label box */
+    private Gtk.PositionType attach_position;
 
     private Label new_label (bool vertical, uint size) {
         var label = new Label (vertical);
@@ -150,9 +132,12 @@ public class LabelBox : Gtk.Grid {
         return label;
     }
 
-    private void resize () {
+    private void resize (Dimensions dimensions) {
         assert (current_size > 0);
         unhighlight_all();
+
+        size = vertical_labels ? dimensions.width : dimensions.height;
+        other_size = vertical_labels ? dimensions.height : dimensions.width;
 
         if (labels[0].size != other_size) {
             for (uint index = 0; index < current_size; index++) {
@@ -162,7 +147,10 @@ public class LabelBox : Gtk.Grid {
 
         while (current_size < size) {
             var last_label = labels[current_size - 1];
-            attach_next_to (new_label (vertical_labels, other_size), last_label, attach_position, 1, 1);
+            attach_next_to (new_label (vertical_labels, other_size),
+                            last_label,
+                            attach_position,
+                            1, 1);
         }
 
         while (current_size > size) {
