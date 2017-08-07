@@ -22,11 +22,10 @@ namespace Gnonograms {
 /** Widget to hold variable number of clues, with either vertical or horizontal orientation **/
 public class LabelBox : Gtk.Grid {
 /** PUBLIC **/
-    public Dimensions dimensions {
-        private get {
-            return _dimensions;
-        }
+    public Gtk.PositionType attach_position {get; construct;}
+    public bool vertical_labels  {get; construct;} /* True if contains column labels */
 
+    public Dimensions dimensions {
         set {
             if (value != _dimensions) {
                 _dimensions = value;
@@ -37,10 +36,13 @@ public class LabelBox : Gtk.Grid {
 
     public double fontheight {
         set {
-           _fontheight = value.clamp (Gnonograms.MINFONTSIZE, Gnonograms.MAXFONTSIZE);
+            var fh = value.clamp (Gnonograms.MINFONTSIZE, Gnonograms.MAXFONTSIZE);
+            if (fh != _fontheight) {
+                for (uint index = 0; index < size; index++) {
+                    labels[index].fontheight = fh;
+                }
 
-            for (uint index = 0; index < current_size; index++) {
-                labels[index].fontheight = _fontheight;
+                _fontheight = fh;
             }
         }
     }
@@ -49,25 +51,17 @@ public class LabelBox : Gtk.Grid {
         Object (column_homogeneous: true,
                 row_homogeneous: true,
                 column_spacing: 0,
-                row_spacing: 0);
-
-        vertical_labels = (orientation == Gtk.Orientation.HORIZONTAL);
-        attach_position = vertical_labels ? Gtk.PositionType.RIGHT : Gtk.PositionType.BOTTOM;
-
-        if (vertical_labels) {
-            vexpand = true;
-        } else {
-            hexpand = true;
-        }
-
-        /* Must have at least one label for resize to work */
-        var label = new_label (vertical_labels, other_size);
-        attach (label, 0, 0, 1, 1);
-        current_size = 1;
+                row_spacing: 0,
+                vertical_labels: (orientation == Gtk.Orientation.HORIZONTAL),
+                attach_position: (orientation == Gtk.Orientation.HORIZONTAL) ? Gtk.PositionType.RIGHT : Gtk.PositionType.BOTTOM,
+                vexpand: (orientation == Gtk.Orientation.HORIZONTAL),
+                hexpand: !(orientation == Gtk.Orientation.HORIZONTAL)
+                );
     }
 
     construct {
         labels = new Label[MAXSIZE];
+        size = 0;
     }
 
     public void highlight (uint index, bool is_highlight) {
@@ -79,7 +73,7 @@ public class LabelBox : Gtk.Grid {
     }
 
     public void unhighlight_all () {
-        for (uint index = 0; index < current_size; index++) {
+        for (uint index = 0; index < size; index++) {
             labels[index].highlight (false);
         }
     }
@@ -93,9 +87,9 @@ public class LabelBox : Gtk.Grid {
     }
 
     public string[] get_clues () {
-        var texts = new string [current_size];
+        var texts = new string [size];
 
-        for (uint index = 0; index < current_size; index++) {
+        for (uint index = 0; index < size; index++) {
             texts[index] = labels[index].clue;
         }
 
@@ -103,7 +97,7 @@ public class LabelBox : Gtk.Grid {
     }
 
     public void blank_labels () {
-        for (uint index = 0; index < current_size; index++) {
+        for (uint index = 0; index < size; index++) {
             labels[index].clue = ("---");
         }
     }
@@ -115,53 +109,56 @@ public class LabelBox : Gtk.Grid {
     /* ----------------------------------------- */
 
     private Label[] labels;
-    private bool vertical_labels; /* True if contains column labels */
-    private uint size;
-    private int current_size; /* Index of last added label */
-    private uint other_size; /* Size of other label box */
-    private Gtk.PositionType attach_position;
+    private int size;
+    private int other_size; /* Size of other label box */
 
-    private Label new_label (bool vertical, uint size) {
+    private Label new_label (bool vertical, uint _other_size) {
         var label = new Label (vertical);
-        label.size = size;
+        label.size = _other_size;
+        label.fontheight = _fontheight;
         label.show_all ();
-
-        labels[current_size] = label;
-        current_size++;
 
         return label;
     }
 
     private void resize (Dimensions dimensions) {
-        assert (current_size > 0);
+        assert (size >= 0);
         unhighlight_all();
 
-        size = vertical_labels ? dimensions.width : dimensions.height;
-        other_size = vertical_labels ? dimensions.height : dimensions.width;
+        var new_size = (int)(vertical_labels ? dimensions.width : dimensions.height);
+        var new_other_size = (int)(vertical_labels ? dimensions.height : dimensions.width);
 
-        if (labels[0].size != other_size) {
-            for (uint index = 0; index < current_size; index++) {
-                labels[index].size = other_size;
+        if (new_other_size != other_size && size > 0) {
+            for (uint index = 0; index < size; index++) {
+                labels[index].size = new_other_size;
             }
         }
 
-        while (current_size < size) {
-            var last_label = labels[current_size - 1];
-            attach_next_to (new_label (vertical_labels, other_size),
-                            last_label,
-                            attach_position,
-                            1, 1);
+        while (size < new_size) {
+            var label = new_label (vertical_labels, new_other_size);
+            if (size > 0) {
+                var last_label = labels[size - 1];
+                attach_next_to (label, last_label, attach_position, 1, 1);
+            } else {
+                attach (label, 0, 0, 1, 1);
+            }
+
+            labels[size] = label;
+            size++;
         }
 
-        while (current_size > size) {
+        while (size > new_size) {
             if (vertical_labels) {
-                remove_column (current_size - 1);
+                remove_column (size - 1);
             } else {
-                remove_row (current_size - 1);
+                remove_row (size - 1);
             }
             /* No need to destroy unused labels */
-            current_size--;
+            size--;
         }
+
+        size = new_size;
+        other_size = new_other_size;
     }
 }
 }

@@ -21,24 +21,19 @@
 namespace Gnonograms {
 
 class Label : Gtk.Label {
-    private string attrib_start;
-    private string displayed_text; /* text of clue in final form */
-    private string _clue; /* text of clue in horizontal form */
-    private int blockextent;
+/** PUBLIC **/
+    public bool vertical_text { get; construct; }
 
-    private uint _size;
     public uint size { /* total number of cells in the row/column to which this label is attached */
         set {
             _size = value;
             update_tooltip ();
         }
 
-        get {
+        private get {
             return _size;
         }
     }
-
-    public bool vertical_text { get; set; } /* true if clue for column */
 
     public double fontheight {
         set {
@@ -76,27 +71,24 @@ class Label : Gtk.Label {
         }
     }
 
-    construct {
-        attrib_start = "<span>";
-        size = 0;
-    }
-
-    public Label (bool vertical_text, string label_text = "") {
-        Object (vertical_text: vertical_text,
-                has_tooltip: true,
-                use_markup: true);
-
-        if (vertical_text) {
-            set_alignment((float)0.5,(float)1.0);
-        } else {
-            set_alignment((float)1.0, (float)0.5);
-        }
+    public Label (bool _vertical_text, string label_text = "") {
+        Object (has_tooltip: true,
+                use_markup: true,
+                vertical_text: _vertical_text,
+                xalign: _vertical_text ? (float)0.5 : (float)1.0,
+                yalign: _vertical_text ? (float)1.0 : (float)0.5
+                );
 
         if (label_text != "") {
             clue = label_text;
         } else {
             clue = "?,?,?";
         }
+    }
+
+    construct {
+        attrib_start = "<span>";
+        size = 0;
     }
 
     public void highlight (bool is_highlight) {
@@ -106,6 +98,13 @@ class Label : Gtk.Label {
             set_state_flags (Gtk.StateFlags.NORMAL, true);
         }
     }
+
+/** PRIVATE **/
+    private string attrib_start;
+    private string displayed_text; /* text of clue in final form */
+    private string _clue; /* text of clue in horizontal form */
+    private int blockextent;
+    private uint _size;
 
     private void update_markup () {
         var markup = attrib_start + displayed_text + "</span>";
