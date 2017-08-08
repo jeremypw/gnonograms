@@ -245,7 +245,7 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private Cell current_cell {
+    private unowned Cell current_cell {
         get {
             return cell_grid.current_cell;
         }
