@@ -362,13 +362,11 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private double get_default_fontheight_from_dimensions () {
-//~     private void set_default_fontheight_from_dimensions () {
         double max_h, max_w;
         Gdk.Rectangle rect;
 
         if (get_window () == null) {
             return 0;
-//~             return;
         }
 
 #if HAVE_GDK_3_22
@@ -384,7 +382,6 @@ public class View : Gtk.ApplicationWindow {
         max_w = (double)(rect.width) / ((double)(cols * 2));
 
         return double.min (max_h, max_w) / 2;
-//~         fontheight = double.min (max_h, max_w) / 2;
     }
 
 
