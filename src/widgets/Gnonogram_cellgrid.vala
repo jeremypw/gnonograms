@@ -225,7 +225,7 @@ public class CellGrid : Gtk.DrawingArea {
         uint r =  ((uint)((e.y) / cell_height));
         uint c =  ((uint)(e.x / cell_width));
         /* Construct cell beneath pointer */
-        var cell = {r, c, array.get_data_from_rc (r, c)};
+        Cell cell = {r, c, array.get_data_from_rc (r, c)};
 
         move_cursor_to (cell);
 
