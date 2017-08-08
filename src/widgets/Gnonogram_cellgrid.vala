@@ -20,10 +20,10 @@
 
 namespace Gnonograms {
 public class CellGrid : Gtk.DrawingArea {
-
     public signal void cursor_moved (Cell from, Cell to);
 
-    public Model model {get; set;}
+    public Model model { get; set; }
+
     public My2DCellArray array {
         get {
             return model.display_data;
@@ -71,6 +71,7 @@ public class CellGrid : Gtk.DrawingArea {
             unknown_color = colors[(int)value, (int)CellState.UNKNOWN];
             fill_color = colors[(int)value, (int)CellState.FILLED];
             empty_color = colors[(int)value, (int)CellState.EMPTY];
+
             cell_pattern_type = CellPatternType.UNDEFINED; /* Causes refresh of existing pattern */
 
             queue_draw ();
@@ -115,7 +116,6 @@ public class CellGrid : Gtk.DrawingArea {
 #else
         var cr = Gdk.cairo_create (this.get_window ());
 #endif
-
         cell.state = array.get_data_from_rc (cell.row, cell.col);
         draw_cell (cr, cell, highlight);
         draw_grid (cr);
@@ -123,19 +123,6 @@ public class CellGrid : Gtk.DrawingArea {
 #if HAVE_GDK_3_22
         this.window ().end_draw_frame ();
 #endif
-    }
-
-    private void move_cursor_to (Cell target) {
-        if (target.row >= rows || target.col >= cols) {
-            target = NULL_CELL;
-        }
-
-        if (!target.equal (current_cell)) { /* only signal when cursor changes cell */
-            highlight_cell (current_cell, false);
-            highlight_cell (target, true);
-            cursor_moved (current_cell, target);
-            current_cell = target.clone ();
-        }
     }
 
     public void move_cursor_relative (int row_delta, int col_delta) {
@@ -146,7 +133,8 @@ public class CellGrid : Gtk.DrawingArea {
         if (row_delta != 0 || col_delta != 0) {
             Cell target = {current_cell.row + row_delta,
                            current_cell.col + col_delta,
-                           CellState.UNDEFINED};
+                           CellState.UNDEFINED
+                          };
 
             if (target.row >= rows || target.col >= cols) {
                 return;
@@ -212,14 +200,15 @@ public class CellGrid : Gtk.DrawingArea {
         cell_height = (alloc_height) / (double)rows;
         cell_body_width = cell_width;
         cell_body_height = cell_height;
-
-        highlight_pattern = new CellPattern.highlight (cell_width, cell_height); /* Causes refresh of existing pattern */
+        /* Cause refresh of existing pattern */
+        highlight_pattern = new CellPattern.highlight (cell_width, cell_height);
     }
 
 
     private bool on_draw_event (Cairo.Context cr) {
         if (array != null) {
-            foreach (Cell c in array) { /* Note, even tho' array holds CellStates, its iterator returns Cells */
+            /* Note, even tho' array holds CellStates, its iterator returns Cells */
+            foreach (Cell c in array) {
                 draw_cell (cr, c);
             }
         }
@@ -229,15 +218,33 @@ public class CellGrid : Gtk.DrawingArea {
     }
 
     private bool on_pointer_moved (Gdk.EventMotion e) {
-        /* Calculate which cell the pointer is over */
         if (e.x < 0 || e.y < 0) {
             return false;
         }
-
+        /* Calculate which cell the pointer is over */
         uint r =  ((uint)((e.y) / cell_height));
         uint c =  ((uint)(e.x / cell_width));
-        move_cursor_to ({r, c, array.get_data_from_rc (r, c)});
+        /* Construct cell beneath pointer */
+        var cell = {r, c, array.get_data_from_rc (r, c)};
+
+        move_cursor_to (cell);
+
         return true;
+    }
+
+/*** --------------------------------------------------- ***/
+
+    private void move_cursor_to (Cell target) {
+        if (target.row >= rows || target.col >= cols) {
+            target = NULL_CELL;
+        }
+
+        if (!target.equal (current_cell)) { /* only signal when cursor changes cell */
+            highlight_cell (current_cell, false);
+            highlight_cell (target, true);
+            cursor_moved (current_cell, target);
+            current_cell = target.clone ();
+        }
     }
 
     private void draw_grid (Cairo.Context cr) {
@@ -333,8 +340,6 @@ public class CellGrid : Gtk.DrawingArea {
                 break;
         }
 
-
-
         /* Draw cell body */
         cell_pattern.move_to (x, y); /* Not needed for plain fill, but may use a pattern later */
         cr.set_line_width (0.5);
@@ -361,14 +366,6 @@ public class CellGrid : Gtk.DrawingArea {
 
     private class CellPattern: GLib.Object {
         public Cairo.Pattern pattern;
-        private double x0 = 0;
-        private double y0 = 0;
-
-        private Cairo.Matrix matrix;
-
-        construct {
-            matrix = Cairo.Matrix.identity ();
-        }
 
         public CellPattern.cell (Gdk.RGBA color) {
             double red = color.red;
@@ -378,17 +375,18 @@ public class CellGrid : Gtk.DrawingArea {
         }
 
         public CellPattern.highlight (double wd, double ht) {
-            scale_to_size (wd, ht);
-        }
-
-        public void scale_to_size (double wd, double ht) {
             var r = (wd + ht) / 4.0;
+
             pattern = new Cairo.Pattern.radial (r, r, 0.0, r, r, r * 1.1);
             pattern.add_color_stop_rgba (0.0, 1.0, 1.0, 1.0, 0.1);
             pattern.add_color_stop_rgba (0.95, 1.0, 1.0, 1.0, 0.2);
             pattern.add_color_stop_rgba (1.0, 0.0, 0.0, 0.0, 1.0);
 
             pattern.set_matrix (matrix);
+        }
+
+        construct {
+            matrix = Cairo.Matrix.identity ();
         }
 
         public void move_to (double x, double y) {
@@ -400,6 +398,9 @@ public class CellGrid : Gtk.DrawingArea {
             y0 = y;
         }
 
+        private double x0 = 0;
+        private double y0 = 0;
+        private Cairo.Matrix matrix;
     }
 }
 }
