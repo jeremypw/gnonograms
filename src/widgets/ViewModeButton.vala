@@ -32,24 +32,30 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
         }
     }
 
+    public ViewModeButton () {
+        /* Cannot do this in construct */
+        setting_index = append (setting_icon);
+        solving_index = append (solving_icon);
+    }
+
     construct {
         /* Icons used are provisional */
-        var setting_icon = new Gtk.Image.from_icon_name ("edit-symbolic", Gtk.IconSize.MENU);
-        var solving_icon = new Gtk.Image.from_icon_name ("process-working-symbolic", Gtk.IconSize.MENU);
+        setting_icon = new Gtk.Image.from_icon_name ("edit-symbolic", Gtk.IconSize.MENU);
+        solving_icon = new Gtk.Image.from_icon_name ("process-working-symbolic", Gtk.IconSize.MENU);
 
         setting_icon.set_data ("mode", GameState.SETTING);
         solving_icon.set_data ("mode", GameState.SOLVING);
 
         setting_icon.tooltip_text = _("Draw a pattern");
         solving_icon.tooltip_text = _("Solve a puzzle");
-
-        setting_index = append (setting_icon);
-        solving_index = append (solving_icon);
     }
 
     /** PRIVATE **/
     private int setting_index;
     private int solving_index;
+    private Gtk.Image setting_icon;
+    private Gtk.Image solving_icon;
+
 
 }
 }
