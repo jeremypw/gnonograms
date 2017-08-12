@@ -21,15 +21,20 @@
 
 namespace Gnonograms {
 public class Filereader : Object {
+    /** PUBLIC **/
+    public string err_msg = "";
 
     public File? game_file {get; set; default = null;}
+    public GameState state {get; private set; default = GameState.UNDEFINED;}
+
     public int rows {get; private set; default = 0;}
     public int cols {get; private set; default = 0;}
+
     public string[] row_clues {get; private set;}
     public string[] col_clues {get; private set;}
     public string[] solution {get; private set;}
     public string[] working {get; private set;}
-    public GameState state {get; private set; default = GameState.UNDEFINED;}
+
     public string name {get; private set; default = "";}
     public string author {get; private set; default = "";}
     public string date {get; private set; default = "";}
@@ -42,8 +47,6 @@ public class Filereader : Object {
     public bool has_solution {get; private set; default = false;}
     public bool has_working {get; private set; default = false;}
     public bool has_state {get; private set; default = false;}
-
-    public string err_msg = "";
 
     public bool valid {
         get {
@@ -74,6 +77,7 @@ public class Filereader : Object {
 
     }
 
+    /** PRIVATE **/
     private File? get_load_game_file (Gtk.Window? parent, string? load_dir_path) {
         string? path = Utils.get_file_path (
                             parent,
@@ -96,14 +100,15 @@ public class Filereader : Object {
         string[] headings = {};
         string[] bodies = {};
 
-            stream.read_until ("[", out header_length, null);
-            while (true) {
-                headings += stream.read_until ("]", out header_length, null);
-                bodies += stream.read_until ("[", out body_length, null);
-                if (header_length == 0  ||  body_length == 0) {
-                    break;
-                }
+        stream.read_until ("[", out header_length, null);
+
+        while (true) {
+            headings += stream.read_until ("]", out header_length, null);
+            bodies += stream.read_until ("[", out body_length, null);
+            if (header_length == 0  ||  body_length == 0) {
+                break;
             }
+        }
 
         if (!parse_gnonogram_headings_and_bodies (headings, bodies)) {
             throw new IOError.INVALID_DATA ("Game file could not be parsed - %s", err_msg);
@@ -126,20 +131,24 @@ public class Filereader : Object {
             }
 
             switch (heading.up ()) {
-                case "DIM" :
-                    in_error = !get_gnonogram_dimensions(bodies[i]); break;
-                case "ROW" :
+                case "DIM":
+                    in_error = !get_gnonogram_dimensions (bodies[i]);
+                    break;
+
+                case "ROW":
                     row_clues = get_gnonogram_clues (bodies[i], cols);
+
                     if (row_clues.length != rows) {
                         err_msg = "Wrong number of row clues - " + err_msg;
                         in_error = true;
                     } else {
                         has_row_clues = true;
                     }
+
                     break;
 
-                case "COL" :
-                    col_clues = get_gnonogram_clues(bodies[i], rows);
+                case "COL":
+                    col_clues = get_gnonogram_clues (bodies[i], rows);
                     if (col_clues.length != cols) {
                         err_msg = "Wrong number of column clues -" + err_msg;
                         in_error = true;
@@ -148,17 +157,28 @@ public class Filereader : Object {
                     }
 
                     break;
-                case "SOL" :
-                    in_error = !get_gnonogram_cellstate_array(bodies[i], true); break;
-                case "WOR" :
-                    in_error = !get_gnonogram_cellstate_array(bodies[i], false); break;
-                case "STA" :
-                    in_error = !get_gnonogram_state(bodies[i]); break;
-                case "DES" :
-                    in_error = !get_game_description(bodies[i]); break;
-                case "LIC" :
-                    in_error = !get_game_license(bodies[i]); break;
-                default :
+
+                case "SOL":
+                    in_error = !get_gnonogram_cellstate_array (bodies[i], true);
+                    break;
+
+                case "WOR":
+                    in_error = !get_gnonogram_cellstate_array (bodies[i], false);
+                    break;
+
+                case "STA":
+                    in_error = !get_gnonogram_state(bodies[i]);
+                    break;
+
+                case "DES":
+                    in_error = !get_game_description(bodies[i]);
+                    break;
+
+                case "LIC":
+                    in_error = !get_game_license(bodies[i]);
+                    break;
+
+                default:
                     err_msg = "Unrecognized heading";
                     in_error = true;
                     break;
@@ -175,6 +195,7 @@ public class Filereader : Object {
         }
 
         string[] s = Utils.remove_blank_lines (body.split ("\n"));
+
         if (s.length != 2) {
             err_msg = "Wrong number of dimensions";
             return false;
@@ -183,6 +204,7 @@ public class Filereader : Object {
         rows = int.parse (s[0]);
         cols = int.parse (s[1]);
         has_dimensions = true;
+
         return (rows > 0 && cols > 0);
     }
 
@@ -234,6 +256,7 @@ public class Filereader : Object {
                 err_msg = _("Wrong number of columns in solution or working grid");
                 return false;
             }
+
             if (is_solution) {
                 for (int c = 0; c < cols; c++) {
                     if (arr[c] != CellState.EMPTY && arr[c] != CellState.FILLED) {
@@ -243,6 +266,7 @@ public class Filereader : Object {
                 }
             }
         }
+
         if (is_solution) {
             solution = s;
             has_solution = true;
@@ -327,14 +351,15 @@ public class Filereader : Object {
 
     private string? parse_gnonogram_clue (string line, int maxblock) {
         string[] s = Utils.remove_blank_lines (line.split_set (", "));
-        int b, zero_count = 0;
 
         if (s == null) {
             return null;
         }
 
+        int b, zero_count = 0;
         int remaining_space = maxblock;
         StringBuilder sb = new StringBuilder ();
+
         for (int i = 0; i < s.length; i++) {
             b = int.parse(s[i]);
 
