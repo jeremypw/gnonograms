@@ -386,16 +386,25 @@ public class View : Gtk.ApplicationWindow {
 
 
     private void update_labels_for_cell (Cell cell) {
+        if (cell == NULL_CELL) {
+            return;
+        }
+
         row_clue_box.update_label_text (cell.row, model.get_label_text (cell.row, false));
         column_clue_box.update_label_text (cell.col, model.get_label_text (cell.col, true));
     }
 
     private void highlight_labels (Cell c, bool is_highlight) {
+        /* If c is NULL_CELL then will unhighlight all labels */
         row_clue_box.highlight (c.row, is_highlight);
         column_clue_box.highlight (c.col, is_highlight);
     }
 
     private void make_move_at_cell (CellState state = drawing_with_state, Cell target = current_cell) {
+        if (target == NULL_CELL) {
+            return;
+        }
+
         if (state != CellState.UNDEFINED) {
             Cell cell = target.clone ();
             cell.state = state;
@@ -412,9 +421,7 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private void mark_cell (Cell cell) {
-        assert (cell.state != CellState.UNDEFINED);
-
-        if (!is_solving) {
+        if (!is_solving && cell.state != CellState.UNDEFINED) {
             update_labels_for_cell (cell);
         }
     }
