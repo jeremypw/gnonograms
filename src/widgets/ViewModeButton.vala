@@ -21,9 +21,7 @@
 namespace Gnonograms {
 /** ModeButton used by View in headbar to switch between SETTING and SOLVING modes **/
 public class ViewModeButton : Granite.Widgets.ModeButton {
-    private int setting_index;
-    private int solving_index;
-
+    /** PUBLIC **/
     public GameState mode {
         set {
             if (value == GameState.SETTING) {
@@ -34,9 +32,10 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
         }
     }
 
-    public ViewModeButton () {
-        var setting_icon = new Gtk.Image.from_icon_name ("edit-symbolic", Gtk.IconSize.MENU); /* provisional only */
-        var solving_icon = new Gtk.Image.from_icon_name ("process-working-symbolic", Gtk.IconSize.MENU);  /* provisional only */
+    construct {
+        /* Icons used are provisional */
+        var setting_icon = new Gtk.Image.from_icon_name ("edit-symbolic", Gtk.IconSize.MENU);
+        var solving_icon = new Gtk.Image.from_icon_name ("process-working-symbolic", Gtk.IconSize.MENU);
 
         setting_icon.set_data ("mode", GameState.SETTING);
         solving_icon.set_data ("mode", GameState.SOLVING);
@@ -47,5 +46,10 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
         setting_index = append (setting_icon);
         solving_index = append (solving_icon);
     }
+
+    /** PRIVATE **/
+    private int setting_index;
+    private int solving_index;
+
 }
 }
