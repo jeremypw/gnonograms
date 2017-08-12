@@ -18,22 +18,22 @@
  *  Jeremy Wootten <jeremy@elementaryos.org>
  */
 namespace Gnonograms {
-
 public class Model : GLib.Object {
-    private Dimensions _dimensions;
-    public Dimensions dimensions {
-        get {
-            return _dimensions;
-        }
+    /** PUBLIC **/
+    public GameState game_state { get; set; }
+    public My2DCellArray solution_data { get; private set; }
+    public My2DCellArray working_data { get; private set; }
+    public uint rows { get; private set; }
+    public uint cols  { get; private set; }
 
+    public Dimensions dimensions {
         set {
-            _dimensions = value;
-            solution_data.dimensions = _dimensions;
-            working_data.dimensions = _dimensions;
+            solution_data.dimensions = value;
+            working_data.dimensions = value;
+            rows = value.height;
+            cols = value.width;
         }
     }
-
-    public GameState game_state {get; set;}
 
     public My2DCellArray display_data  {
         get {
@@ -43,37 +43,22 @@ public class Model : GLib.Object {
                 return working_data;
             }
         }
-    }//points to grid being displayed
-
-    public My2DCellArray solution_data {get; private set;} //display when setting
-    public My2DCellArray working_data {get; private set;} //display when solving
-    public  CellState[] data;
-    private Rand rand_gen;
-
-    public uint rows {
-        get {
-            return dimensions.height;
-        }
-    }
-
-    public uint cols {
-        get {
-            return dimensions.width;
-        }
     }
 
     construct {
-        rand_gen = new Rand();
-        solution_data = new My2DCellArray ({MAXSIZE, MAXSIZE}, CellState.EMPTY);
-        working_data = new My2DCellArray ({MAXSIZE, MAXSIZE}, CellState.UNKNOWN);
+        rand_gen = new Rand ();
+        solution_data = new My2DCellArray ({ MAXSIZE, MAXSIZE }, CellState.EMPTY);
+        working_data = new My2DCellArray ({ MAXSIZE, MAXSIZE }, CellState.UNKNOWN);
         data = new CellState[MAXSIZE];
     }
 
     public void clear_errors() {
         CellState cs;
+
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
                 cs = working_data.get_data_from_rc (r,c);
+
                 switch (cs) {
                     case CellState.ERROR_EMPTY:
                         working_data.set_data_from_rc (r, c, CellState.EMPTY);
@@ -94,9 +79,9 @@ public class Model : GLib.Object {
         CellState cs;
         int count = 0;
 
-        for (int r = 0;r < rows; r++) {
-            for (int c = 0;c < cols;c++) {
-                cs=working_data.get_data_from_rc(r,c);
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols;c++) {
+                cs = working_data.get_data_from_rc (r,c);
 
                 if (cs != CellState.UNKNOWN && cs != solution_data.get_data_from_rc (r, c)) {
                     if (cs == CellState.EMPTY) {
@@ -117,8 +102,8 @@ public class Model : GLib.Object {
         int count=0;
         CellState cs;
 
-        for (int r = 0;r < rows; r++) {
-            for (int c = 0;c < cols; c++) {
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
                 cs = working_data.get_data_from_rc (r,c);
                 if (cs == CellState.UNKNOWN || cs == CellState.ERROR) {
                     count++;
@@ -132,8 +117,8 @@ public class Model : GLib.Object {
     public bool is_finished () {
         CellState cs;
 
-        for (int r = 0;r < rows; r++) {
-            for (int c = 0;c < cols; c++) {
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
                 cs = working_data.get_data_from_rc (r,c);
                 if (cs == CellState.UNKNOWN || cs == CellState.ERROR) {
                     return false;
@@ -194,6 +179,9 @@ public class Model : GLib.Object {
         return true;
     }
 
+    /*** Generate a pseudo-random pattern which is adjusted to be more likely to
+       * give a solvable game of the desired difficulty.
+    ***/
     public void fill_random (uint grade) {
         clear();
         double rel_g = (double)grade / (double)(Difficulty.MAXIMUM);
@@ -235,6 +223,10 @@ public class Model : GLib.Object {
         }
     }
 
+    /** PRIVATE **/
+    private  CellState[] data;
+    private Rand rand_gen;
+
     private void fill_region (uint size, ref CellState[] data, uint grade, uint e, uint maxb, uint maxp) {
         //e is larger for rows/cols further from edge
         //do not want too many edge cells filled
@@ -265,6 +257,7 @@ public class Model : GLib.Object {
                 if (fill) {
                     data[p] = CellState.FILLED;
                 }
+
                 p++;
             }
             p++; //at least one space between blocks
@@ -289,6 +282,7 @@ public class Model : GLib.Object {
         for (int i = 0; i < s; i++) {
             if (arr[i] == CellState.FILLED) {
                 b++;
+
                 if (i == 0 || arr[i - 1] == CellState.EMPTY) {
                     bc++;
                 }
@@ -301,9 +295,11 @@ public class Model : GLib.Object {
             arr[rand_gen.int_range (0, (int)s)] = CellState.FILLED;
         } else {// empty cells until reach min freedom
             int count = 0;
+
             while (df < mindf && count < 30) {
                 count++;
                 int i = rand_gen.int_range (1, (int)(s - 1));
+
                 if (arr[i] == CellState.FILLED) {
                     arr[i] = CellState.EMPTY;
                     df++;
