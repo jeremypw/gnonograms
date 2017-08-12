@@ -21,24 +21,21 @@
 
 namespace Gnonograms {
 public class Filewriter : Object {
-
-    public string? game_path {get; set;}
-    public string name {get; construct;}
+    /** PUBLIC **/
+    public DateTime date {get; construct;}
     public uint rows {get; construct;}
     public uint cols {get; construct;}
+    public string name {get; construct;}
     public string[] row_clues {get; construct;}
     public string[] col_clues {get; construct;}
+    public string? game_path {get; private set;}
 
-    /* Optional properties */
     public string author {get; set; default = "";}
-    public DateTime date {get; set;}
     public string license {get; set; default = "";}
     public Difficulty difficulty {get; set; default = Difficulty.UNDEFINED;}
+    public GameState game_state {get; set; default = GameState.UNDEFINED;}
     public My2DCellArray? solution {get; set; default = null;}
     public My2DCellArray? working {get; set; default = null;}
-    public GameState game_state {get; set; default = GameState.UNDEFINED;}
-
-    private FileStream? stream;
 
     public Filewriter (Gtk.Window? parent,
                        string? save_dir_path,
@@ -49,11 +46,13 @@ public class Filewriter : Object {
                        string[] row_clues,
                        string[] col_clues) throws IOError {
 
-        Object (name: name,
-                rows: rows,
-                cols: cols,
-                row_clues: row_clues,
-                col_clues: col_clues);
+        Object (
+            name: name,
+            rows: rows,
+            cols: cols,
+            row_clues: row_clues,
+            col_clues: col_clues
+        );
 
         if (path == null || path.length <= 4) {
             game_path = get_save_file_path (parent, save_dir_path);
@@ -61,18 +60,11 @@ public class Filewriter : Object {
             game_path = path;
         }
 
-        if (game_path == "") {
-            throw new IOError.CANCELLED ("No path selected");
-        }
+        if (game_path != "" &&
+            (game_path.length < 4 ||
+             game_path[-4 : game_path.length] != Gnonograms.GAMEFILEEXTENSION)) {
 
-        if (game_path.length < 4 || game_path[-4 : game_path.length] != Gnonograms.GAMEFILEEXTENSION){
             game_path = game_path + Gnonograms.GAMEFILEEXTENSION;
-        }
-
-        stream = FileStream.open (game_path, "w"); /* This requires local path, not a uri */
-
-        if (stream == null) {
-            throw new IOError.FAILED ("Could not open filestream to %s".printf (game_path));
         }
     }
 
@@ -80,18 +72,18 @@ public class Filewriter : Object {
         date = new DateTime.now_local ();
     }
 
-    private string? get_save_file_path (Gtk.Window? parent, string? save_dir_path) {
-        return Utils.get_file_path (parent,
-            Gtk.FileChooserAction.SAVE,
-            _("Name and save this puzzle"),
-            {_("Gnonogram puzzles")},
-            {"*" + Gnonograms.GAMEFILEEXTENSION},
-            save_dir_path
-        );
-    }
-
     /*** Writes minimum information required for valid game file ***/
     public void write_game_file () throws IOError {
+        if (game_path == "") {
+            throw new IOError.CANCELLED ("No path selected");
+        }
+
+        stream = FileStream.open (game_path, "w"); /* This requires local path, not a uri */
+
+        if (stream == null) {
+            throw new IOError.FAILED ("Could not open filestream to %s".printf (game_path));
+        }
+
         if (name == null || name.length == 0) {
             throw new IOError.NOT_INITIALIZED ("No name to save");
         }
@@ -155,6 +147,19 @@ public class Filewriter : Object {
         stream.printf ("[State]\n");
         stream.printf (game_state.to_string() + "\n");
         stream.flush ();
+    }
+
+    /** PRIVATE **/
+    private FileStream? stream;
+
+    private string? get_save_file_path (Gtk.Window? parent, string? save_dir_path) {
+        return Utils.get_file_path (parent,
+            Gtk.FileChooserAction.SAVE,
+            _("Name and save this puzzle"),
+            {_("Gnonogram puzzles")},
+            {"*" + Gnonograms.GAMEFILEEXTENSION},
+            save_dir_path
+        );
     }
 }
 }
