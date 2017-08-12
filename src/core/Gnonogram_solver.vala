@@ -106,7 +106,7 @@ namespace Gnonograms {
 
     public bool valid () {
         foreach (Region r in regions) {
-            if (r.inError) {
+            if (r.in_error) {
                 return false;
             }
         }
@@ -160,7 +160,7 @@ namespace Gnonograms {
             changed = false;
 
             foreach (Region r in regions) {
-                if (r.isCompleted) {
+                if (r.is_completed) {
                     continue;
                 }
 
@@ -168,7 +168,7 @@ namespace Gnonograms {
                     changed = true; //no hinting
                 }
 
-                if (r.inError) {
+                if (r.in_error) {
                     if (debug) {
                         stdout.printf ("::" + r.message);
                         stdout.printf (r.to_string ());
@@ -209,7 +209,7 @@ namespace Gnonograms {
 
     public bool solved () {
         foreach (Region r in regions) {
-            if (!r.isCompleted) {
+            if (!r.is_completed) {
                 return false;
             }
         }
