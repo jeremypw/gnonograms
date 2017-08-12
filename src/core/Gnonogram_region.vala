@@ -37,11 +37,8 @@ namespace Gnonograms {
   Can save and restore its state  - used to implement (one level)
   * back tracking during trial and error solution ('advanced solver').
 **/
-public class Region {
-    private static int MAXCYCLES = 20;
-    private static int FORWARDS = 1;
-    private static int BACKWARDS =  -1;
-
+public class Region { /* Not a GObject, to reduce weight */
+    /** PUBLIC **/
     public bool isColumn;
     public bool inError;
     public bool isCompleted = false;
@@ -53,35 +50,6 @@ public class Region {
     public string message;
     public My2DCellArray grid;
     public CellState[] status;
-
-    private bool debug;
-    private bool isCompletedStore;
-    private bool[] completedBlocks;
-    private bool[] completedBlocksStore;
-    private bool[, ] tags;
-    private bool[, ] tagsStore;
-    private int unknown;
-    private int unknownStore;
-    private int filled;
-    private int filledStore;
-    private CellState[] tempStatus;
-    private CellState[] tempStatus2;
-    private CellState[] statusStore;
-
-    private int[, ] ranges;  //format: start, length, unfilled?, complete?
-    private int[, ] rangesStore;
-
-    private int unchangedCount = 0;
-
-    private string clue;
-    private int nBlocks;
-
-    private int blockExtent;  //int.minimum span of blocks, including gaps of 1 cell.
-    private int canBeEmptyPointer;
-    private int isFinishedPointer;
-    private int[] myBlocks;
-    private int currentIdx;
-    private int currentBlockNum;
 
     public Region (My2DCellArray grid) {
         this.grid = grid;
@@ -182,31 +150,6 @@ public class Region {
         putStatus ();
     }
 
-    private void initialfix () {
-        //finds cells that can be identified as FILLED from the start.
-        //stdout.printf ("initialfix\n");
-        int freedom = nCells - blockExtent;
-        int start = 0, length = 0;
-
-        for (int i = 0;  i < nBlocks;  i++ ) {
-            length = myBlocks[i] + freedom;
-
-            for (int j = start;  j < start + length;  j++ ) {
-                tags[j, i] = true;
-            }
-
-            if (freedom < myBlocks[i]) {
-                setRangeOwner (i, start + freedom, myBlocks[i] - freedom, true, false);
-            }
-
-            start = start + myBlocks[i] + 1;  //leave a gap between blocks
-        }
-
-        if (freedom == 0) {
-            isCompleted = true;
-        }
-    }
-
     public bool solve (bool debug, bool hint) {
         /**if change has occurred since last visit (due to change in an intersecting
          * region), runs full -fix () to see whether any inferences possible.
@@ -287,6 +230,199 @@ public class Region {
         return made_changes;
     }
 
+    public void savestate () {
+        for (int i = 0; i < nCells; i++) {
+            statusStore[i] = status[i];
+            for (int j = 0;  j < nBlocks + 2;  j++) {
+                tagsStore[i, j] = tags[i, j];
+            }
+        }
+
+        for (int j = 0;  j < nBlocks;  j++) {
+            completedBlocksStore[j] = completedBlocks[j];
+        }
+
+        isCompletedStore = this.isCompleted;
+        filledStore = this.filled;
+        unknownStore = this.unknown;
+    }
+
+    public void restorestate () {
+        for (int i = 0; i < nCells; i++) {
+            status[i] = statusStore[i];
+            for (int j = 0;  j < nBlocks + 2;  j++) {
+                tags[i, j] = tagsStore[i, j];
+            }
+        }
+
+        for (int j = 0;  j < nBlocks;  j++ ) {
+            completedBlocks[j] = completedBlocksStore[j];
+        }
+
+        isCompleted = isCompletedStore;
+        filled = filledStore;
+        unknown = unknownStore;
+        inError = false;  message = "";
+        unchangedCount = 0;
+    }
+
+    public string getID () {
+        string colrow;
+        var sb =  new StringBuilder ("");
+
+        if (isColumn) {
+            colrow = "Column";
+        } else {
+            colrow = "Row";
+        }
+
+        sb.append (" [" + colrow.to_string () + " " + index.to_string () + " Clue: " + clue.to_string ()  +  " Is Completed "  + isCompleted.to_string () + "] ");
+        return sb.str;
+    }
+
+    public string to_string ()  {
+        var sb =  new StringBuilder ("");
+        sb.append (this.getID ());
+        sb.append ("\n\r status before:\n\r");
+
+        for (int i = 0;  i < nCells;  i++ ) {
+            sb.append ((tempStatus[i].to_string () + "\n\r"));
+        }
+
+        sb.append ("\n\r status now:\n\r");
+
+        for (int i = 0;  i < nCells;  i++ ) {
+            sb.append ((status[i].to_string () + "\n\r"));
+        }
+
+        sb.append ("\n\rCell Status and Tags:\n\r");
+
+        for (int i = 0;  i < nCells;  i++) {
+            sb.append ("Cell " + i.to_string () + " Status: ");
+            sb.append (status[i].to_string () + "\n\r");
+
+            for (int j = 0;  j < nBlocks;  j++ ) {
+                sb.append (tags[i, j] ? "t" :"f");
+            }
+
+            sb.append (" : ");
+
+            for (int j = canBeEmptyPointer;  j < canBeEmptyPointer + 2;  j++ ) {
+                sb.append (tags[i, j] ? "t" :"f");
+            }
+
+            sb.append ("\n\r");
+        }
+
+        return sb.str;
+    }
+
+    public uint value_as_permute_region () {
+        if (isCompleted) {
+            return 0;
+        }
+
+        int navailable_ranges = countAvailableRanges (false);
+
+        if (navailable_ranges != 1) {
+            return 0;   //useless as permute region
+        }
+
+        int block_extent = 0, count = 0, largest = 0;
+
+        for (int b = 0; b < nBlocks; b++ ) {
+            if (!completedBlocks[b]) {
+                block_extent += myBlocks[b];
+                count++;
+                largest = int.max (largest, myBlocks[b]);
+            }
+        }
+
+        int pvalue = (largest - 1) * block_extent;  //block length 1 useless
+        if (count == 1) {
+            pvalue = pvalue * 2;
+        }
+
+        return pvalue;
+    }
+
+    public Permutor? get_permutor (out int start) {
+        string clue = "";  start = 0;
+        int[] ablocks = countBlocksAvailable ();
+
+        for (int b = 0; b < ablocks.length; b++ ) {
+            clue = clue + myBlocks[ablocks[b]].to_string () + ", ";
+        }
+
+        //Find available range (must be only one)
+        if (countAvailableRanges (false) != 1) {
+            return null;
+        }
+
+        start = ranges[0, 0];
+        var p = new Permutor (ranges[0, 1], clue);
+        return p;
+    }
+
+    /** PRIVATE **/
+    private static int MAXCYCLES = 20;
+    private static int FORWARDS = 1;
+    private static int BACKWARDS =  -1;
+
+    private bool debug;
+    private bool isCompletedStore;
+    private bool[] completedBlocks;
+    private bool[] completedBlocksStore;
+    private bool[, ] tags;
+    private bool[, ] tagsStore;
+    private int unknown;
+    private int unknownStore;
+    private int filled;
+    private int filledStore;
+    private CellState[] tempStatus;
+    private CellState[] tempStatus2;
+    private CellState[] statusStore;
+
+    private int[, ] ranges;  //format: start, length, unfilled?, complete?
+    private int[, ] rangesStore;
+
+    private int unchangedCount = 0;
+
+    private string clue;
+    private int nBlocks;
+
+    private int blockExtent;  //int.minimum span of blocks, including gaps of 1 cell.
+    private int canBeEmptyPointer;
+    private int isFinishedPointer;
+    private int[] myBlocks;
+    private int currentIdx;
+    private int currentBlockNum;
+
+    private void initialfix () {
+        //finds cells that can be identified as FILLED from the start.
+        //stdout.printf ("initialfix\n");
+        int freedom = nCells - blockExtent;
+        int start = 0, length = 0;
+
+        for (int i = 0;  i < nBlocks;  i++ ) {
+            length = myBlocks[i] + freedom;
+
+            for (int j = start;  j < start + length;  j++ ) {
+                tags[j, i] = true;
+            }
+
+            if (freedom < myBlocks[i]) {
+                setRangeOwner (i, start + freedom, myBlocks[i] - freedom, true, false);
+            }
+
+            start = start + myBlocks[i] + 1;  //leave a gap between blocks
+        }
+
+        if (freedom == 0) {
+            isCompleted = true;
+        }
+    }
+
     private bool fullfix () {
         //stdout.printf ("Fullfix");
         // Tries each ploy in turn, returns as soon as a change is made
@@ -333,6 +469,10 @@ public class Region {
 
         return false;
     }
+
+    /* ******* */
+    /*  PLOYS  */
+    /* ******* */
 
     private bool filledSubregionAudit () {
     //find a range of filled cells not completed and see if can be associated
@@ -1872,138 +2012,5 @@ public class Region {
         }
     }
 
-    public void savestate () {
-        for (int i = 0; i < nCells; i++) {
-            statusStore[i] = status[i];
-            for (int j = 0;  j < nBlocks + 2;  j++) {
-                tagsStore[i, j] = tags[i, j];
-            }
-        }
-
-        for (int j = 0;  j < nBlocks;  j++) {
-            completedBlocksStore[j] = completedBlocks[j];
-        }
-
-        isCompletedStore = this.isCompleted;
-        filledStore = this.filled;
-        unknownStore = this.unknown;
-    }
-
-    public void restorestate () {
-        for (int i = 0; i < nCells; i++) {
-            status[i] = statusStore[i];
-            for (int j = 0;  j < nBlocks + 2;  j++) {
-                tags[i, j] = tagsStore[i, j];
-            }
-        }
-
-        for (int j = 0;  j < nBlocks;  j++ ) {
-            completedBlocks[j] = completedBlocksStore[j];
-        }
-
-        isCompleted = isCompletedStore;
-        filled = filledStore;
-        unknown = unknownStore;
-        inError = false;  message = "";
-        unchangedCount = 0;
-    }
-
-    public string getID () {
-        string colrow;
-        var sb =  new StringBuilder ("");
-
-        if (isColumn) {
-            colrow = "Column";
-        } else {
-            colrow = "Row";
-        }
-
-        sb.append (" [" + colrow.to_string () + " " + index.to_string () + " Clue: " + clue.to_string ()  +  " Is Completed "  + isCompleted.to_string () + "] ");
-        return sb.str;
-    }
-
-    public string to_string ()  {
-        var sb =  new StringBuilder ("");
-        sb.append (this.getID ());
-        sb.append ("\n\r status before:\n\r");
-
-        for (int i = 0;  i < nCells;  i++ ) {
-            sb.append ((tempStatus[i].to_string () + "\n\r"));
-        }
-
-        sb.append ("\n\r status now:\n\r");
-
-        for (int i = 0;  i < nCells;  i++ ) {
-            sb.append ((status[i].to_string () + "\n\r"));
-        }
-
-        sb.append ("\n\rCell Status and Tags:\n\r");
-
-        for (int i = 0;  i < nCells;  i++) {
-            sb.append ("Cell " + i.to_string () + " Status: ");
-            sb.append (status[i].to_string () + "\n\r");
-
-            for (int j = 0;  j < nBlocks;  j++ ) {
-                sb.append (tags[i, j] ? "t" :"f");
-            }
-
-            sb.append (" : ");
-
-            for (int j = canBeEmptyPointer;  j < canBeEmptyPointer + 2;  j++ ) {
-                sb.append (tags[i, j] ? "t" :"f");
-            }
-
-            sb.append ("\n\r");
-        }
-
-        return sb.str;
-    }
-
-    public uint value_as_permute_region () {
-        if (isCompleted) {
-            return 0;
-        }
-
-        int navailable_ranges = countAvailableRanges (false);
-
-        if (navailable_ranges != 1) {
-            return 0;   //useless as permute region
-        }
-
-        int block_extent = 0, count = 0, largest = 0;
-
-        for (int b = 0; b < nBlocks; b++ ) {
-            if (!completedBlocks[b]) {
-                block_extent += myBlocks[b];
-                count++;
-                largest = int.max (largest, myBlocks[b]);
-            }
-        }
-
-        int pvalue = (largest - 1) * block_extent;  //block length 1 useless
-        if (count == 1) {
-            pvalue = pvalue * 2;
-        }
-
-        return pvalue;
-    }
-
-    public Permutor? get_permutor (out int start) {
-        string clue = "";  start = 0;
-        int[] ablocks = countBlocksAvailable ();
-
-        for (int b = 0; b < ablocks.length; b++ ) {
-            clue = clue + myBlocks[ablocks[b]].to_string () + ", ";
-        }
-
-        //Find available range (must be only one)
-        if (countAvailableRanges (false) != 1) {
-            return null;
-        }
-
-        start = ranges[0, 0];
-        var p = new Permutor (ranges[0, 1], clue);
-        return p;
-    }
 }
 }
