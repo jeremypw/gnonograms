@@ -34,22 +34,22 @@ namespace Gnonograms {
     * EMPTY, or
     * COMPLETED (assigned to a completed block).
     *
-  Can save and restore its state  - used to implement (one level)
-  * back tracking during trial and error solution ('advanced solver').
+  5) Can save and restore its state  - used to implement (one level)
+     back tracking during trial and error solution ('advanced solver').
+
+  6) Re-used if grid dimensions do not change.
+
 **/
+
 public class Region { /* Not a GObject, to reduce weight */
     /** PUBLIC **/
-    public bool isColumn;
-    public bool in_error;
-    public bool is_completed = false;
-
-    public uint index;
-    public int nCells;
-    public int blockTotal;  //total cells to be filled
-
+    public bool isColumn  { get; private set; }
+    public bool in_error  { get; private set;  default = false; }
+    public bool is_completed { get; private set; default = false; }
+    public uint index  { get; private set; }
+    public int nCells  { get; private set; }
+    public int blockTotal { get; private set; }  //total cells to be filled
     public string message;
-    public My2DCellArray grid;
-    public CellState[] status;
 
     public Region (My2DCellArray grid) {
         this.grid = grid;
@@ -59,11 +59,15 @@ public class Region { /* Not a GObject, to reduce weight */
         status_backup = new CellState[maxlen];
 
         uint maxblks = maxlen / 2 + 2;
+
         ranges = new int[maxblks, 4 + maxblks];
         ranges_backup = new int[maxblks, 4 + maxblks];
+
         myBlocks = new int[maxblks];
+
         completed_blocks = new bool[maxblks];
         completed_blocks_backup = new bool[maxblks];
+
         tags = new bool[maxlen, maxblks + 2];
         tags_backup = new bool[maxlen, maxblks + 2];
         //two extra flags for "can be empty" and "is finished".
@@ -292,6 +296,11 @@ public class Region { /* Not a GObject, to reduce weight */
         return sb.str;
     }
 
+    public CellState get_cell_state (uint index) {
+        assert (index < nCells);
+        return status[index];
+    }
+
     /* For debugging and testing */
     public string to_string ()  {
         var sb =  new StringBuilder ("");
@@ -382,6 +391,8 @@ public class Region { /* Not a GObject, to reduce weight */
     }
 
     /** PRIVATE **/
+    private My2DCellArray grid;
+
     private static int MAXCYCLES = 20;
     private static int FORWARDS = 1;
     private static int BACKWARDS =  -1;
@@ -393,6 +404,7 @@ public class Region { /* Not a GObject, to reduce weight */
     private bool[,] tags;
     private bool[,] tags_backup;
 
+    private CellState[] status;
     private CellState[] temp_status;
     private CellState[] temp_status2;
     private CellState[] status_backup;

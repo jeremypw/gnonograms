@@ -225,7 +225,7 @@ namespace Gnonograms {
         int solutionState, regionState;
 
         for (uint i = 0; i < nCells; i++ ) {
-            regionState = r.status[i];
+            regionState = r.get_cell_state (i);
 
             if (regionState == CellState.UNKNOWN) {
                 continue;
