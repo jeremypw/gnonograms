@@ -43,71 +43,71 @@ namespace Gnonograms {
 
 public class Region { /* Not a GObject, to reduce weight */
     /** PUBLIC **/
-    public bool isColumn  { get; private set; }
+    public bool is_column  { get; private set; }
     public bool in_error  { get; private set;  default = false; }
     public bool is_completed { get; private set; default = false; }
     public uint index  { get; private set; }
-    public int nCells  { get; private set; }
-    public int blockTotal { get; private set; }  //total cells to be filled
+    public int n_cells  { get; private set; }
+    public int block_total { get; private set; }  //total cells to be filled
     public string message;
 
     public Region (My2DCellArray grid) {
         this.grid = grid;
 
-        uint maxlen = uint.max (grid.rows, grid.cols);
-        status = new CellState[maxlen];
-        status_backup = new CellState[maxlen];
+        uint max_len = uint.max (grid.rows, grid.cols);
+        status = new CellState[max_len];
+        status_backup = new CellState[max_len];
 
-        uint maxblks = maxlen / 2 + 2;
+        uint max_blocks = max_len / 2 + 2;
 
-        ranges = new int[maxblks, 4 + maxblks];
-        ranges_backup = new int[maxblks, 4 + maxblks];
+        ranges = new int[max_blocks, 4 + max_blocks];
+        ranges_backup = new int[max_blocks, 4 + max_blocks];
 
-        myBlocks = new int[maxblks];
+        blocks = new int[max_blocks];
 
-        completed_blocks = new bool[maxblks];
-        completed_blocks_backup = new bool[maxblks];
+        completed_blocks = new bool[max_blocks];
+        completed_blocks_backup = new bool[max_blocks];
 
-        tags = new bool[maxlen, maxblks + 2];
-        tags_backup = new bool[maxlen, maxblks + 2];
+        tags = new bool[max_len, max_blocks + 2];
+        tags_backup = new bool[max_len, max_blocks + 2];
         //two extra flags for "can be empty" and "is finished".
     }
 
-    public void initialize (uint index, bool isColumn, uint nCells, string clue) {
+    public void initialize (uint index, bool is_column, uint n_cells, string clue) {
         this.index = index;
-        this.isColumn = isColumn;
-        this.nCells = (int)nCells;
+        this.is_column = is_column;
+        this.n_cells = (int)n_cells;
         this.clue = clue;
 
-        temp_status = new CellState[nCells];
-        temp_status2 = new CellState[nCells];
+        temp_status = new CellState[n_cells];
+        temp_status2 = new CellState[n_cells];
         int[] tmpblcks = Utils.block_array_from_clue (clue);
-        nBlocks = tmpblcks.length;
-        can_be_empty_pointer = nBlocks;  //flag for cell that may be empty
-        is_finished_pointer = nBlocks + 1;  //flag for finished cell (filled or empty?)
-        blockTotal = 0;
+        n_blocks = tmpblcks.length;
+        can_be_empty_pointer = n_blocks;  //flag for cell that may be empty
+        is_finished_pointer = n_blocks + 1;  //flag for finished cell (filled or empty?)
+        block_total = 0;
 
-        for (int i = 0; i < nBlocks; i++) {
-          myBlocks[i] = tmpblcks[i];
-          blockTotal = blockTotal + myBlocks[i];
+        for (int i = 0; i < n_blocks; i++) {
+          blocks[i] = tmpblcks[i];
+          block_total = block_total + blocks[i];
         }
 
-        block_extent = blockTotal + nBlocks - 1;  //minimum space needed for blocks
-        initialstate ();
+        block_extent = block_total + n_blocks - 1;  //minimum space needed for blocks
+        set_to_initial_state ();
 
-        if (nCells == 1) { /* Ignore single cell regions (for debugging) */
+        if (n_cells == 1) { /* Ignore single cell regions (for debugging) */
             this.is_completed = true;
         }
     }
 
-    public void initialstate () {
-        for (int i = 0; i < nBlocks; i++) {
+    public void set_to_initial_state () {
+        for (int i = 0; i < n_blocks; i++) {
           completed_blocks[i] = false;
           completed_blocks_backup[i] = false;
         }
 
-        for (int i = 0; i < nCells; i++) { //Start with no possible owners and can be empty.
-          for (int j = 0; j < nBlocks;  j++) {
+        for (int i = 0; i < n_cells; i++) { //Start with no possible owners and can be empty.
+          for (int j = 0; j < n_blocks;  j++) {
             tags[i, j] = false;
             tags_backup[i, j] = false;
           }
@@ -120,7 +120,7 @@ public class Region { /* Not a GObject, to reduce weight */
         }
 
         in_error = false;
-        is_completed = (nCells == 1);  //allows debugging of single row
+        is_completed = (n_cells == 1);  //allows debugging of single row
 
         if (is_completed) {
             return;
@@ -131,9 +131,9 @@ public class Region { /* Not a GObject, to reduce weight */
 
         get_status ();
 
-        if (myBlocks[0] == 0) { //trivial solution  - complete now
-          for (int i = 0; i < nCells; i++) {
-            for (int j = 0; j < nBlocks; j++) {
+        if (blocks[0] == 0) { //trivial solution  - complete now
+          for (int i = 0; i < n_cells; i++) {
+            for (int j = 0; j < n_blocks; j++) {
                 tags[i, j] = false;
             }
 
@@ -235,16 +235,16 @@ public class Region { /* Not a GObject, to reduce weight */
         return made_changes;
     }
 
-    public void savestate () {
-        for (int i = 0; i < nCells; i++) {
+    public void save_state () {
+        for (int i = 0; i < n_cells; i++) {
             status_backup[i] = status[i];
 
-            for (int j = 0; j < nBlocks + 2; j++) {
+            for (int j = 0; j < n_blocks + 2; j++) {
                 tags_backup[i, j] = tags[i, j];
             }
         }
 
-        for (int j = 0; j < nBlocks; j++) {
+        for (int j = 0; j < n_blocks; j++) {
             completed_blocks_backup[j] = completed_blocks[j];
         }
 
@@ -253,16 +253,16 @@ public class Region { /* Not a GObject, to reduce weight */
         unknown_backup = this.unknown;
     }
 
-    public void restorestate () {
-        for (int i = 0; i < nCells; i++) {
+    public void restore_state () {
+        for (int i = 0; i < n_cells; i++) {
             status[i] = status_backup[i];
 
-            for (int j = 0; j < nBlocks + 2; j++) {
+            for (int j = 0; j < n_blocks + 2; j++) {
                 tags[i, j] = tags_backup[i, j];
             }
         }
 
-        for (int j = 0; j < nBlocks; j++) {
+        for (int j = 0; j < n_blocks; j++) {
             completed_blocks[j] = completed_blocks_backup[j];
         }
 
@@ -274,17 +274,17 @@ public class Region { /* Not a GObject, to reduce weight */
         unchanged_count = 0;
     }
 
-    public string getID () {
-        string colrow;
+    public string get_id () {
+        string column_or_row;
         var sb =  new StringBuilder ("");
 
-        if (isColumn) {
-            colrow = "Column";
+        if (is_column) {
+            column_or_row = "Column";
         } else {
-            colrow = "Row";
+            column_or_row = "Row";
         }
 
-        sb.append (colrow.to_string ());
+        sb.append (column_or_row.to_string ());
         sb.append (" ");
         sb.append (index.to_string ());
         sb.append (" Clue: ");
@@ -297,33 +297,33 @@ public class Region { /* Not a GObject, to reduce weight */
     }
 
     public CellState get_cell_state (uint index) {
-        assert (index < nCells);
+        assert (index < n_cells);
         return status[index];
     }
 
     /* For debugging and testing */
     public string to_string ()  {
         var sb =  new StringBuilder ("");
-        sb.append (this.getID ());
+        sb.append (this.get_id ());
         sb.append ("\n\r status before:\n\r");
 
-        for (int i = 0; i < nCells;  i++) {
+        for (int i = 0; i < n_cells;  i++) {
             sb.append ((temp_status[i].to_string () + "\n\r"));
         }
 
         sb.append ("\n\r status now:\n\r");
 
-        for (int i = 0; i < nCells; i++) {
+        for (int i = 0; i < n_cells; i++) {
             sb.append ((status[i].to_string () + "\n\r"));
         }
 
         sb.append ("\n\rCell Status and Tags:\n\r");
 
-        for (int i = 0; i < nCells; i++) {
+        for (int i = 0; i < n_cells; i++) {
             sb.append ("Cell " + i.to_string () + " Status: ");
             sb.append (status[i].to_string () + "\n\r");
 
-            for (int j = 0; j < nBlocks;  j++) {
+            for (int j = 0; j < n_blocks;  j++) {
                 sb.append (tags[i, j] ? "t" :"f");
             }
 
@@ -344,9 +344,9 @@ public class Region { /* Not a GObject, to reduce weight */
             return 0;
         }
 
-        int navailable_ranges = countAvailableRanges (false);
+        int n_available_ranges = count_available_ranges (false);
 
-        if (navailable_ranges != 1) {
+        if (n_available_ranges != 1) {
             return 0;   //useless as permute region
         }
 
@@ -354,11 +354,11 @@ public class Region { /* Not a GObject, to reduce weight */
         int count = 0;
         int largest = 0;
 
-        for (int b = 0; b < nBlocks; b++) {
+        for (int b = 0; b < n_blocks; b++) {
             if (!completed_blocks[b]) {
-                block_extent += myBlocks[b];
+                block_extent += blocks[b];
                 count++;
-                largest = int.max (largest, myBlocks[b]);
+                largest = int.max (largest, blocks[b]);
             }
         }
 
@@ -376,14 +376,14 @@ public class Region { /* Not a GObject, to reduce weight */
         start = 0;
 
         //Find available range (must be only one)
-        if (countAvailableRanges (false) != 1) {
+        if (count_available_ranges (false) != 1) {
             return null;
         }
 
         int[] ablocks = get_blocks_available ();
 
         for (int b = 0; b < ablocks.length; b++) {
-            clue = clue + myBlocks[ablocks[b]].to_string () + ", ";
+            clue = clue + blocks[ablocks[b]].to_string () + ", ";
         }
 
         start = ranges[0, 0];
@@ -410,7 +410,7 @@ public class Region { /* Not a GObject, to reduce weight */
     private CellState[] status_backup;
 
     private int unchanged_count = 0;
-    private int nBlocks;
+    private int n_blocks;
     private int block_extent;
     private int can_be_empty_pointer;
     private int is_finished_pointer;
@@ -421,7 +421,7 @@ public class Region { /* Not a GObject, to reduce weight */
     private int filled;
     private int filled_backup;
 
-    private int[] myBlocks;
+    private int[] blocks;
 
     private int[,] ranges;
     private int[,] ranges_backup;
@@ -431,21 +431,21 @@ public class Region { /* Not a GObject, to reduce weight */
     private void initial_fix () {
         //finds cells that can be identified as FILLED from the start.
         //stdout.printf ("initial_fix\n");
-        int freedom = nCells - block_extent;
+        int freedom = n_cells - block_extent;
         int start = 0, length = 0;
 
-        for (int i = 0; i < nBlocks; i++) {
-            length = myBlocks[i] + freedom;
+        for (int i = 0; i < n_blocks; i++) {
+            length = blocks[i] + freedom;
 
             for (int j = start; j < start + length; j++) {
                 tags[j, i] = true;
             }
 
-            if (freedom < myBlocks[i]) {
-                set_range_owner (i, start + freedom, myBlocks[i] - freedom, true, false);
+            if (freedom < blocks[i]) {
+                set_range_owner (i, start + freedom, blocks[i] - freedom, true, false);
             }
 
-            start = start + myBlocks[i] + 1;  //leave a gap between blocks
+            start = start + blocks[i] + 1;  //leave a gap between blocks
         }
 
         if (freedom == 0) {
@@ -508,18 +508,18 @@ public class Region { /* Not a GObject, to reduce weight */
     //find a range of filled cells not completed and see if can be associated
     // with a unique block.
     bool changed = false;
-    bool startcapped;
-    bool endcapped;
+    bool start_is_capped;
+    bool end_is_capped;
     int length;
 
     current_index = 0;
 
-        while (current_index < nCells) { //find a filled sub -region
-            startcapped = false;
-            endcapped = false;
-            current_index = skipWhileNotStatus (CellState.FILLED, current_index, nCells, 1);
+        while (current_index < n_cells) { //find a filled sub -region
+            start_is_capped = false;
+            end_is_capped = false;
+            current_index = seek_next_required_status (CellState.FILLED, current_index, n_cells, 1);
 
-            if (current_index == nCells) {
+            if (current_index == n_cells) {
                 break;
             }
 
@@ -530,19 +530,19 @@ public class Region { /* Not a GObject, to reduce weight */
             }//ignore if completed already
 
             if (current_index == 0 || status[current_index - 1] == CellState.EMPTY) {
-                startcapped = true;  //edge cell
+                start_is_capped = true;  //edge cell
             }
 
-            length = countNextState (CellState.FILLED, current_index, true); //current_index not changed
+            length = count_consecutive_with_state_from (CellState.FILLED, current_index, true); //current_index not changed
             int lastcell = current_index + length - 1; //last filled cell in this (partial) block
 
-            if (lastcell == nCells - 1 || status[lastcell + 1] == CellState.EMPTY) {
-                endcapped = true;  //last cell is at edge
+            if (lastcell == n_cells - 1 || status[lastcell + 1] == CellState.EMPTY) {
+                end_is_capped = true;  //last cell is at edge
             }
 
             //is this region fully capped?
-            if (startcapped && endcapped) {  // assigned block must fit exactly
-                assignAndCapRange (current_index, length);
+            if (start_is_capped && end_is_capped) {  // assigned block must fit exactly
+                assign_and_cap_range (current_index, length);
                 current_index += length + 1;
                 continue;
             } else { //find largest possible owner of this (partial) block
@@ -550,7 +550,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
                 if (largest == length) {//there is **at least one** largest block that fits exactly.
                     // this region must therefore be complete
-                    assignAndCapRange (current_index, length);
+                    assign_and_cap_range (current_index, length);
                     current_index += length + 1;
                     changed = true;
                     continue;
@@ -560,10 +560,10 @@ public class Region { /* Not a GObject, to reduce weight */
                 int start = current_index;
                 int end = current_index + length - 1;  // last filled cell
 
-                for (int bl = 0; bl < nBlocks; bl++) {
+                for (int bl = 0; bl < n_blocks; bl++) {
                     for (int i = start; i <= end; i++) {
 
-                        if (tags[i, bl] && myBlocks[bl] < length) {
+                        if (tags[i, bl] && blocks[bl] < length) {
                             tags[i, bl] = false;
                         }
                     }
@@ -574,35 +574,35 @@ public class Region { /* Not a GObject, to reduce weight */
                 if (start > 0) {
                     start--;
 
-                    for (int bl = 0; bl < nBlocks; bl++) {
-                        if (tags[start, bl] && myBlocks[bl] < length + 1) {
+                    for (int bl = 0; bl < n_blocks; bl++) {
+                        if (tags[start, bl] && blocks[bl] < length + 1) {
                             tags[start, bl] = false;
                         }
                     }
                 }
 
-                if (end < nCells - 1) {
+                if (end < n_cells - 1) {
                     end++;
 
-                    for (int bl = 0; bl < nBlocks; bl++) {
-                        if (tags[end, bl] && myBlocks[bl] < length + 1) {
+                    for (int bl = 0; bl < n_blocks; bl++) {
+                        if (tags[end, bl] && blocks[bl] < length + 1) {
                             tags[end, bl] = false;
                         }
                     }
                 }
 
-                if (startcapped || endcapped) {//semi-capped  - can we extend it?
+                if (start_is_capped || end_is_capped) {//semi-capped  - can we extend it?
                   int smallest = find_smallest_possible_block_for_cell (current_index);
 
                     if (smallest > length) {//can extend by smallest -length away from cap
                         int ptr;
 
-                        if (startcapped) {
+                        if (start_is_capped) {
                           ptr = current_index + length;
 
                             for (int i = 0; i < smallest - length; i++) {
 
-                                if (ptr < nCells) {
+                                if (ptr < n_cells) {
                                     tags[ptr, can_be_empty_pointer] = false;
                                     ptr++;
                                 }
@@ -634,7 +634,7 @@ public class Region { /* Not a GObject, to reduce weight */
         // Find unknown gap between filled cells and complete accordingly.
         bool changed = false;
 
-        for (int idx = 0; idx < nCells - 2; idx++) {
+        for (int idx = 0; idx < n_cells - 2; idx++) {
 
             if (status[idx] != CellState.FILLED) {
                 continue;  //find a FILLED cell
@@ -652,81 +652,84 @@ public class Region { /* Not a GObject, to reduce weight */
                 }
                 // we have found a one cell gap
                 // calculate total length if gap were to be FILLED.
-                int blength = countNextState (CellState.FILLED, idx + 2, true) +
-                              countNextState (CellState.FILLED, idx, false) + 1;
+                int block_length = count_consecutive_with_state_from (CellState.FILLED, idx + 2, true) +
+                              count_consecutive_with_state_from (CellState.FILLED, idx, false) + 1;
 
-                bool mustbeempty = true;
+                bool must_be_empty = true;
 
                 //look for a possible owner at least as long as combined length
-                for (int bl = 0; bl < nBlocks; bl++) {
+                for (int bl = 0; bl < n_blocks; bl++) {
 
-                    if (tags[idx, bl] && myBlocks[bl] >= blength) { //possible owner found  - gap could be filled
-                        mustbeempty = false;
+                    if (tags[idx, bl] && blocks[bl] >= block_length) { //possible owner found  - gap could be filled
+                        must_be_empty = false;
                         break;
                     }
                 }
 
                 //no permissible blocks large enough
-                if (mustbeempty) {
+                if (must_be_empty) {
                     set_cell_empty (idx + 1);
                     changed =  true;
                 } else {
                     // see if setting empty would create two regions one or more of which
                     // is too small for the available blocks
-                    bool mustNotBeEmpty = false;
-                    int lengthLeft = 0, lengthRight = 0;
+                    bool must_not_be_empty = false;
+                    int length_to_the_left = 0, length_to_the_right = 0;
                     int ptr = idx;
 
-                    //left -hand region
+                    //left-hand region
                     while (ptr >= 0 && !tags[ptr, is_finished_pointer]) {
                         ptr--;
-                        lengthLeft++;
+                        length_to_the_left++;
                     }
 
                     ptr = idx + 2;
 
-                    //right -hand region
-                    while (ptr < nCells && !tags[ptr, is_finished_pointer]) {
+                    //right-hand region
+                    while (ptr < n_cells && !tags[ptr, is_finished_pointer]) {
                         ptr++;
-                        lengthRight++;
+                        length_to_the_right++;
                     }
 
                     //find largest, earliest possible block fitting in first range
-                    int countLeft = 0, countRight = 0, totalCount;
+                    int count_to_the_left = 0;
+                    int count_to_the_right = 0;
+                    int total_count;
+
                     ptr = idx;  //cell before gap
 
-                    for (int i = 0; i < nBlocks; i++) {
-                        if (tags[ptr, i] && myBlocks[i] <= lengthLeft) {
-                            countLeft++;
+                    for (int i = 0; i < n_blocks; i++) {
+                        if (tags[ptr, i] && blocks[i] <= length_to_the_left) {
+                            count_to_the_left++;
                         }
                     }
 
                     ptr = idx + 2;  //cell after gap
 
-                    for (int i = 0; i < nBlocks; i++) {
-                        if (tags[ptr, i] && myBlocks[i] <= lengthRight) {
-                            countRight++;
+                    for (int i = 0; i < n_blocks; i++) {
+                        if (tags[ptr, i] && blocks[i] <= length_to_the_right) {
+                            count_to_the_right++;
                         }
                     }
 
-                    totalCount = countLeft + countRight;
+                    total_count = count_to_the_left + count_to_the_right;
 
-                    if (totalCount == 2) {
+                    if (total_count == 2) {
 
-                        for (int i = 0; i < nBlocks; i++) {
+                        for (int i = 0; i < n_blocks; i++) {
 
-                            if (tags[ptr, i] && myBlocks[i] <= lengthRight) {
+                            if (tags[ptr, i] && blocks[i] <= length_to_the_right) {
 
-                                if (tags[idx, i] && myBlocks[i] <= lengthLeft) {
-                                    mustNotBeEmpty = true;  // only one block fits in both sides
+                                if (tags[idx, i] && blocks[i] <= length_to_the_left) {
+                                    must_not_be_empty = true;  // only one block fits in both sides
                                 }
                             }
                         }
-                    } else if (totalCount < 2) {
-                        mustNotBeEmpty = true;
+                    } else if (total_count < 2) {
+                        must_not_be_empty = true;
                     }
 
-                    if (mustNotBeEmpty) {
+                    if (must_not_be_empty) {
                         tags[idx + 1, can_be_empty_pointer] = false;
                         changed = true;
                     }
@@ -738,7 +741,7 @@ public class Region { /* Not a GObject, to reduce weight */
                 idx++;
 
                 //skip to end of gap
-                while (idx < nCells - 1 && status[idx] == CellState.UNKNOWN) {
+                while (idx < n_cells - 1 && status[idx] == CellState.UNKNOWN) {
                     idx++;
                 }
 
@@ -764,7 +767,7 @@ public class Region { /* Not a GObject, to reduce weight */
         int start, length, count;
         bool changed = false;
 
-        for (int i = 0; i < nBlocks; i++) {
+        for (int i = 0; i < n_blocks; i++) {
 
             if (completed_blocks[i]) {
                 continue;  //skip completed block
@@ -774,7 +777,7 @@ public class Region { /* Not a GObject, to reduce weight */
             length = 0;
             count = 0;  //how many possible ranges for this block
 
-            for (int idx = 0; idx < nCells; idx++) {
+            for (int idx = 0; idx < n_cells; idx++) {
 
                 if (count > 1) {
                     break;  //no unique range  - try next block
@@ -785,9 +788,9 @@ public class Region { /* Not a GObject, to reduce weight */
                 }
 
                 int s = idx;  //first cell with block i as possible owner
-                int l = countnextowner (i, idx);  //length of contiguous cells having this block (i) as a possible owner.
+                int l = count_contiguous_with_same_owner_from (i, idx);  //length of contiguous cells having this block (i) as a possible owner.
 
-                if (l < myBlocks[i]) {
+                if (l < blocks[i]) {
                     remove_block_from_range (i, s, l, 1); //block cannot be here
                 } else {
                     length = l;
@@ -809,24 +812,24 @@ public class Region { /* Not a GObject, to reduce weight */
         return changed;
     }
 
-    private void assignAndCapRange (int start, int length) {
-        //make list of possible blocks with right length in maxblks[]
+    private void assign_and_cap_range (int start, int length) {
+        //make list of possible blocks with right length in max_blocks[]
         //record which is first and which last (in order).
         //always changes at least one cell status
 
         int count = 0;
-        int[] maxblks = new int[nBlocks];
-        int first = nBlocks;
+        int[] max_blocks = new int[n_blocks];
+        int first = n_blocks;
         int last = 0;
         int end = start + length - 1;
 
-        for (int i = 0; i < nBlocks; i++) {
+        for (int i = 0; i < n_blocks; i++) {
 
             if (completed_blocks[i]) {
                 continue;
             }
 
-            if (myBlocks[i] != length) {
+            if (blocks[i] != length) {
                 continue;
             }
 
@@ -834,7 +837,7 @@ public class Region { /* Not a GObject, to reduce weight */
                 continue;
             }
 
-            maxblks[count] = i;
+            max_blocks[count] = i;
             count++;
 
             if (i < first) {
@@ -851,10 +854,10 @@ public class Region { /* Not a GObject, to reduce weight */
         }
 
         if (count == 1) {  //unique owner
-            set_block_complete_and_cap (maxblks[0], start, 1);
+            set_block_complete_and_cap (max_blocks[0], start, 1);
         } else { //ambiguous owner
             //delete out of sequence blocks before end of range
-            for (int i = last + 1; i < nBlocks; i++) {
+            for (int i = last + 1; i < n_blocks; i++) {
                 remove_block_from_cell_to_end (i, start + length - 1,  -1);
             }
 
@@ -866,7 +869,7 @@ public class Region { /* Not a GObject, to reduce weight */
             //remove as possible owner blocks between first and last that are wrong length
             for (int i = first + 1; i < last; i++) {
 
-                if (myBlocks[i] == length) {
+                if (blocks[i] == length) {
                     continue;
                 }
 
@@ -875,7 +878,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
             //for each possible mark as possible owner of subregion (not exclusive)
             for (int i = 0; i < count; i++) {
-                set_range_owner (maxblks[i], start, length, false, false);
+                set_range_owner (max_blocks[i], start, length, false, false);
             }
 
             // cap range
@@ -883,7 +886,7 @@ public class Region { /* Not a GObject, to reduce weight */
                 set_cell_empty (start - 1);
             }
 
-            if (start + length < nCells) {
+            if (start + length < n_cells) {
                 set_cell_empty (start + length);
             }
         }
@@ -896,7 +899,7 @@ public class Region { /* Not a GObject, to reduce weight */
         int length;
         int start;
 
-        for (int i = 0; i < nCells; i++) {
+        for (int i = 0; i < n_cells; i++) {
             if (tags[i, is_finished_pointer]) {
                 continue;
             }
@@ -904,13 +907,13 @@ public class Region { /* Not a GObject, to reduce weight */
             // unfinished cell found
             if (status[i] == CellState.FILLED && has_one_owner (i)) { //cell is FILLED and has only one owner
                 //find the owner
-                for (owner = 0; owner < nBlocks; owner++) {
+                for (owner = 0; owner < n_blocks; owner++) {
                     if (tags[i, owner]) {
                         break;
                     }
                 }
 
-                length = myBlocks[owner];
+                length = blocks[owner];
                 //remove this block from earlier cells our of range
                 start = i - length;
                 if (start >= 0) {
@@ -919,7 +922,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
                 //remove this block from later cells our of range
                 start = i + length;
-                if (start < nCells) {
+                if (start < n_cells) {
                     remove_block_from_cell_to_end (owner, start, FORWARDS);
                 }
             }
@@ -936,30 +939,30 @@ public class Region { /* Not a GObject, to reduce weight */
         // If there are no unassigned block cells then mark all UNKNOWN
         // cells as EMPTY.
 
-        int freecells = count_cell_state (CellState.UNKNOWN);
+        int free_cells = count_cell_state (CellState.UNKNOWN);
 
-        if (freecells == 0) {
+        if (free_cells == 0) {
             return false;
         }
 
-        int filledcells = count_cell_state (CellState.FILLED);
-        int completedcells = count_cell_state (CellState.COMPLETED);
-        int tolocate = blockTotal - filledcells - completedcells;
+        int filled_cells = count_cell_state (CellState.FILLED);
+        int completed_cells = count_cell_state (CellState.COMPLETED);
+        int to_be_located = block_total - filled_cells - completed_cells;
 
-        if (freecells == tolocate) { // Set all UNKNOWN as COMPLETE
-            for (int i = 0; i < nCells; i++) {
+        if (free_cells == to_be_located) { // Set all UNKNOWN as COMPLETE
+            for (int i = 0; i < n_cells; i++) {
                 if (status[i] == CellState.UNKNOWN) {
                     set_cell_complete (i);
                 }
             }
 
-            for (int i = 0; i < nBlocks; i++) {
+            for (int i = 0; i < n_blocks; i++) {
                 completed_blocks[i] = true;
             }
 
             return true;
-        } else if (tolocate == 0) {
-            for (int i = 0; i < nCells; i++) {
+        } else if (to_be_located == 0) {
+            for (int i = 0; i < n_cells; i++) {
 
                 if (status[i] == CellState.UNKNOWN) {
                     set_cell_empty (i);
@@ -987,15 +990,15 @@ public class Region { /* Not a GObject, to reduce weight */
         if (dir) {
             current_index = 0;
             current_block_number = 0;
-            limit = nCells;
+            limit = n_cells;
         } else {
-            current_index = nCells - 1;
-            current_block_number = nBlocks - 1;
+            current_index = n_cells - 1;
+            current_block_number = n_blocks - 1;
             limit = -1;
         }
 
         //Find first edge - skipping completed cells
-        if (!findEdge (limit, direction)) {
+        if (!find_edge (limit, direction)) {
             return false;
         }
 
@@ -1004,21 +1007,21 @@ public class Region { /* Not a GObject, to reduce weight */
             //first cell is FILLED. Can complete whole block
             return set_block_complete_and_cap (current_block_number, current_index, direction);
         } else {  // see if filled cell in range of first block and complete after that
-            int edgestart = current_index;
-            int fillstart = -1;
-            int blength = myBlocks[current_block_number];
-            int blocklimit = (dir? current_index + blength : current_index - blength);
+            int start_of_edge = current_index;
+            int start_of_filling = -1;
+            int block_length = blocks[current_block_number];
+            int blocklimit = (dir? current_index + block_length : current_index - block_length);
 
-            if (blocklimit < -1 || blocklimit > nCells) {
+            if (blocklimit < -1 || blocklimit > n_cells) {
                 in_error = true;
                 message = "Invalid blocklimit";
                 return false;
             }
 
-            current_index = skipWhileNotStatus (CellState.FILLED, current_index, blocklimit, direction);
+            current_index = seek_next_required_status (CellState.FILLED, current_index, blocklimit, direction);
 
             if (current_index != blocklimit) {
-                fillstart = current_index;
+                start_of_filling = current_index;
                 bool changed = false;
 
                 while (current_index != blocklimit) {
@@ -1041,24 +1044,24 @@ public class Region { /* Not a GObject, to reduce weight */
 
                 while (current_index != blocklimit && status[current_index] == CellState.FILLED) {
                     set_cell_owner (current_index, current_block_number, true, false);
-                    set_cell_empty (edgestart);
+                    set_cell_empty (start_of_edge);
                     changed = true;
 
                     if (dir) {
                         current_index++;
-                        edgestart++;
+                        start_of_edge++;
                     } else {
                         current_index--;
-                        edgestart--;
+                        start_of_edge--;
                     }
                 }
 
-                //if a fillable cell was found then fillstart > 0
-                if (fillstart > 0) {
+                //if a fillable cell was found then start_of_filling > 0
+                if (start_of_filling > 0) {
                     //delete block more than block length from where filling started
-                    current_index = fillstart + (dir ? blength : -blength);
+                    current_index = start_of_filling + (dir ? block_length : -block_length);
 
-                    if (current_index >= 0 && current_index < nCells) {
+                    if (current_index >= 0 && current_index < n_cells) {
                         remove_block_from_cell_to_end (current_block_number, current_index, direction);
                     }
                 }
@@ -1070,25 +1073,25 @@ public class Region { /* Not a GObject, to reduce weight */
         return false;
     }
 
-    private bool findEdge (int limit, int direction) {
+    private bool find_edge (int limit, int direction) {
         // Edge is first FILLED or UNKNOWN cell from limit of region.
         //starting point is set in current_index and current_block_number before calling.
         //stdout.printf (this.toString ());
         bool dir = (direction == FORWARDS);
-        int loopstep = dir ? 1 : -1;
+        int loop_step = dir ? 1 : -1;
 
-        for (int i = current_index; (i >= 0 && i < nCells); i += loopstep) {
+        for (int i = current_index; (i >= 0 && i < n_cells); i += loop_step) {
             if (status[i] == CellState.EMPTY) {
                 continue;
             }
 
             //now pointing at first cell of filled or unknown block after edge
             if (tags[i, is_finished_pointer]) {  //skip to end of finished block
-                i += (dir ? myBlocks[current_block_number] - 1 : 1 - myBlocks[current_block_number]);
+                i += (dir ? blocks[current_block_number] - 1 : 1 - blocks[current_block_number]);
                 //now pointing at last cell of filled block
-                current_block_number += loopstep;  //Increment or decrement current block as appropriate
+                current_block_number += loop_step;  //Increment or decrement current block as appropriate
 
-                if (current_block_number < 0 || current_block_number == nBlocks) {
+                if (current_block_number < 0 || current_block_number == n_blocks) {
                     record_error ("FindEdge", "Invalid BlockNum");
                     return false;
                 }
@@ -1103,13 +1106,13 @@ public class Region { /* Not a GObject, to reduce weight */
 
     private bool fix_blocks_in_ranges () {
         // blocks may have been marked completed  - thereby reducing available ranges
-        int[] availableBlocks = get_blocks_available ();
-        int bl = availableBlocks.length;
-        int[,] blockstart = new int[bl, 2];  //range number and offset of earliest start point
-        int[,] blockend = new int[bl, 2];  //range number and offset of latest end point
+        int[] available_blocks = get_blocks_available ();
+        int bl = available_blocks.length;
+        int[,] block_start = new int[bl, 2];  //range number and offset of earliest start point
+        int[,] block_end = new int[bl, 2];  //range number and offset of latest end point
 
         //update ranges with currently available ranges (can contain only unknown  and incomplete cells)
-        int numberOfAvailableRanges = countAvailableRanges (false);
+        int n_available_ranges = count_available_ranges (false);
 
         //find earliest start point of each block (treating ranges as all unknown cells)
         int rng = 0;
@@ -1118,17 +1121,17 @@ public class Region { /* Not a GObject, to reduce weight */
         int ptr;
 
         for (int b = 0; b < bl; b++) {//for each available block
-            length = myBlocks[availableBlocks[b]];  //get its length
+            length = blocks[available_blocks[b]];  //get its length
 
             if (ranges[rng, 1] < (length + offset)) {//cannot fit in current range
                 rng++;
                 offset = 0; //skip to start of next range
 
-                while (rng < numberOfAvailableRanges && ranges[rng, 1] < length) {
+                while (rng < n_available_ranges && ranges[rng, 1] < length) {
                     rng++; //keep skipping if too small
                 }
 
-                if (rng >= numberOfAvailableRanges) {
+                if (rng >= n_available_ranges) {
                     return false;
                 }
             }
@@ -1136,22 +1139,23 @@ public class Region { /* Not a GObject, to reduce weight */
             //look for collision with filled cell
             ptr = ranges[rng, 0] + offset + length;  //cell after end of block
 
-            while (ptr < nCells && !tags[ptr, can_be_empty_pointer]) {
+            while (ptr < n_cells && !tags[ptr, can_be_empty_pointer]) {
                 ptr++;
                 offset++;
             }
 
-            blockstart[b, 0] = rng;  //set start range number
-            blockstart[b, 1] =  offset;  //and start point
+            block_start[b, 0] = rng;  //set start range number
+            block_start[b, 1] =  offset;  //and start point
             offset += (length + 1);  //move offset allowing for one cell gap between blocks
         }
 
         //carry out same process in reverse to get latest end points
-        rng = numberOfAvailableRanges - 1;
+        rng = n_available_ranges - 1;
         offset = 0;  //start at end of last range NB offset now counts from end
 
         for (int b = bl - 1; b >= 0; b --) { //start at last block
-            length = myBlocks[availableBlocks[b]];  //get length
+            length = blocks[available_blocks[b]];  //get length
+
             if (ranges[rng, 1] < (length + offset)) { //doesn't fit
                 rng --;
                 offset = 0;
@@ -1173,8 +1177,8 @@ public class Region { /* Not a GObject, to reduce weight */
                 offset++;
             }
 
-            blockend[b, 0] = rng;  //set end range number
-            blockend[b, 1] =  ranges[rng, 1] - offset;   //and end point
+            block_end[b, 0] = rng;  //set end range number
+            block_end[b, 1] =  ranges[rng, 1] - offset;   //and end point
             //NB end point is index of cell AFTER last possible cell so that
             //subtracting start from end gives length of range.
             offset += (length + 1);  //shift offset allowing for one cell gap
@@ -1183,35 +1187,35 @@ public class Region { /* Not a GObject, to reduce weight */
         int start;
 
         for (int b = 0; b < bl; b++) { //for each available block
-            rng = blockstart[b, 0];
-            offset = blockstart[b, 1];
+            rng = block_start[b, 0];
+            offset = block_start[b, 1];
             start = ranges[rng, 0];
 
-            if (rng == blockend[b, 0]) { //if starts and ends in same range
-                length = blockend[b, 1] - blockstart[b, 1];
+            if (rng == block_end[b, 0]) { //if starts and ends in same range
+                length = block_end[b, 1] - block_start[b, 1];
                 //'length' now used for total length of possible range for this block
-                fix_block_in_range (availableBlocks[b], start + offset, length);
+                fix_block_in_range (available_blocks[b], start + offset, length);
             }
 
             //remove block from outside possible range
             if (offset > 1) {
-                remove_block_from_range (availableBlocks[b], start, offset - 1, 1);
+                remove_block_from_range (available_blocks[b], start, offset - 1, 1);
             }
 
-            for (int r = 0; r < blockstart[b, 0]; r++) { //ranges before possible
-                remove_block_from_range (availableBlocks[b], ranges[r, 0], ranges[r, 1], 1);
+            for (int r = 0; r < block_start[b, 0]; r++) { //ranges before possible
+                remove_block_from_range (available_blocks[b], ranges[r, 0], ranges[r, 1], 1);
             }
 
-            rng = blockend[b, 0];
-            start = ranges[rng, 0] + blockend[b, 1];
-            length = ranges[rng, 1] - blockend[b, 1];
+            rng = block_end[b, 0];
+            start = ranges[rng, 0] + block_end[b, 1];
+            length = ranges[rng, 1] - block_end[b, 1];
 
             if (length > 0) {
-                remove_block_from_range (availableBlocks[b], start, length, 1);
+                remove_block_from_range (available_blocks[b], start, length, 1);
             }
 
-            for (int r = numberOfAvailableRanges - 1; r > blockend[b, 0]; r--) { //ranges after possible
-                remove_block_from_range (availableBlocks[b], ranges[r, 0], ranges[r, 1], 1);
+            for (int r = n_available_ranges - 1; r > block_end[b, 0]; r--) { //ranges after possible
+                remove_block_from_range (available_blocks[b], ranges[r, 0], ranges[r, 1], 1);
             }
         }
 
@@ -1227,25 +1231,25 @@ public class Region { /* Not a GObject, to reduce weight */
         int start = 0;
         int length = 0;
         int idx = 0;
-        int nranges = countcappedranges ();
+        int n_ranges = count_capped_ranges ();
 
-        if (nranges == 0) {
+        if (n_ranges == 0) {
             return false;
         }
 
-        for (int rng = 0; rng < nranges; rng++) {
+        for (int rng = 0; rng < n_ranges; rng++) {
             start = ranges[rng, 0];
             length = ranges[rng, 1];
 
             for (idx = start; idx < start + length; idx++) {
                 int count = 0;
 
-                for (int b = 0; b < nBlocks; b++) {
+                for (int b = 0; b < n_blocks; b++) {
 
                     if (tags[idx, b]) {
                         count++;
 
-                        if (myBlocks[b] != length) {
+                        if (blocks[b] != length) {
                             tags[idx, b] = false;
                             count--;
                         }
@@ -1267,139 +1271,139 @@ public class Region { /* Not a GObject, to reduce weight */
 
         int idx = 0;
         int start = 0;
-        int end = nCells;
-        int countRegions = 0;
-        Range[] availableSubRegions = new Range[nCells / 2];  //start and end of each subregion
+        int end = n_cells;
+        int region_count = 0;
+        Range[] available_subregions = new Range[n_cells / 2];  //start and end of each subregion
 
-        while (idx < nCells) {
+        while (idx < n_cells) {
             if (status[idx] != CellState.FILLED) {
                 idx++;
                 continue;
             }
 
-            countRegions++;
+            region_count++;
 
-            if (countRegions <= nBlocks) {
+            if (region_count <= n_blocks) {
                 start = idx;
             } else {
                 return false;
             }
 
-            while (idx < nCells && status[idx] == CellState.FILLED) {
+            while (idx < n_cells && status[idx] == CellState.FILLED) {
                 idx++;
             }
 
             end = idx - 1;  //last filled cell
-            availableSubRegions[countRegions - 1] = new Range (start, end,  -1,  -1);
+            available_subregions[region_count - 1] = new Range (start, end,  -1,  -1);
         }
 
-        if (countRegions < 2 || countRegions > nBlocks) {
+        if (region_count < 2 || region_count > n_blocks) {
             return false;
         }
 
         //now see how many blocks could fit here;
-        int[] availableBlocks = get_blocks_available ();
-        int nAvailableBlocks = availableBlocks.length;
+        int[] available_blocks = get_blocks_available ();
+        int n_available_blocks = available_blocks.length;
 
-        if (countRegions > nAvailableBlocks) {
+        if (region_count > n_available_blocks) {
             return false;
         }
 
-        int firstStart = availableSubRegions[0].start;
-        int length = availableSubRegions[0].length ();
-        int lastEnd = availableSubRegions[countRegions - 1].end;
+        int first_start = available_subregions[0].start;
+        int length = available_subregions[0].length ();
+        int last_end = available_subregions[region_count - 1].end;
 
         //delete available blocks up to first in the first subregion
-        int countBlocks = nAvailableBlocks;
+        int block_count = n_available_blocks;
         int bl;
 
-        for (int i = 0; i < nAvailableBlocks; i++) {
-            bl = availableBlocks[i];
+        for (int i = 0; i < n_available_blocks; i++) {
+            bl = available_blocks[i];
 
-            if (!tags[firstStart, bl]) {
-                availableBlocks[i] = -1;
-                countBlocks --;
+            if (!tags[first_start, bl]) {
+                available_blocks[i] = -1;
+                block_count --;
             } else {
                 break;
             }
         }
 
-        for (int i = nAvailableBlocks - 1; i >= 0; i --) {
-            bl = availableBlocks[i];
+        for (int i = n_available_blocks - 1; i >= 0; i --) {
+            bl = available_blocks[i];
 
-            if (bl >= 0 && !tags[lastEnd, bl]) {
-                availableBlocks[i] = -1;
-                countBlocks --;
+            if (bl >= 0 && !tags[last_end, bl]) {
+                available_blocks[i] = -1;
+                block_count --;
             } else {
                 break;
             }
         }
 
-        if (countBlocks != countRegions) {
+        if (block_count != region_count) {
             return false;
         }
 
-        int[] candidates =  new int[countBlocks];
-        int countCandidates = 0;
-        int combinedLength = 0;
+        int[] candidates =  new int[block_count];
+        int candidates_count = 0;
+        int combined_length = 0;
 
-        for (int i = 0; i < nAvailableBlocks; i++) {
-            if (availableBlocks[i] < 0) {
+        for (int i = 0; i < n_available_blocks; i++) {
+            if (available_blocks[i] < 0) {
                 continue;
             } else {
-                candidates[countCandidates] = availableBlocks[i];
-                combinedLength += myBlocks[availableBlocks[i]];
-                countCandidates++;
+                candidates[candidates_count] = available_blocks[i];
+                combined_length += blocks[available_blocks[i]];
+                candidates_count++;
             }
         }
 
-        combinedLength += (countCandidates - 1);  //allow for gap of at least 1 between blocks
+        combined_length += (candidates_count - 1);  //allow for gap of at least 1 between blocks
 
         // for unambiguous assignment all sub regions must be separated by more than
         // the combined length of the candidate blocks and gaps
-        int overallLength = lastEnd - firstStart + 1;
+        int overall_length = last_end - first_start + 1;
 
-        if (overallLength < combinedLength) {
+        if (overall_length < combined_length) {
             return false;
         }
 
         //consecutive regions must be separated so one block cannot cover both
         //either by finished cell or by distance
 
-        for (int ar = 0; ar < countRegions - 1; ar++) {
-            bool separate = false;
+        for (int ar = 0; ar < region_count - 1; ar++) {
+            bool regions_are_separate = false;
 
-            for (int i = availableSubRegions[ar].end; i < availableSubRegions[ar + 1].start; i++) {
+            for (int i = available_subregions[ar].end; i < available_subregions[ar + 1].start; i++) {
 
                 if (tags[i, is_finished_pointer]) {
-                    separate = true;
+                    regions_are_separate = true;
                     break;
                 }
             }
 
-            if (separate) {
+            if (regions_are_separate) {
                 continue;  //separated by empty or complete cell
             } else {
-                start = availableSubRegions[ar].start;
-                end = availableSubRegions[ar + 1].end;
+                start = available_subregions[ar].start;
+                end = available_subregions[ar + 1].end;
                 length = end - start + 1;
 
-                if (length <= myBlocks[candidates[ar]] || length <= myBlocks[candidates[ar + 1]]) {
+                if (length <= blocks[candidates[ar]] || length <= blocks[candidates[ar + 1]]) {
                     return false;  //too close
                 }
             }
         }
 
         //Unambiguous assignment possible
-        if (countRegions > countCandidates) {
+        if (region_count > candidates_count) {
             in_error = true;
             return false;
         }
 
-        for (int ar = 0; ar < countRegions; ar++) {
+        for (int ar = 0; ar < region_count; ar++) {
             bl = candidates[ar];
-            length = myBlocks[bl];
-            set_range_owner (bl, availableSubRegions[ar].start, availableSubRegions[ar].length (), true, false);
+            length = blocks[bl];
+            set_range_owner (bl, available_subregions[ar].start, available_subregions[ar].length (), true, false);
         }
 
         return false;   //only changes tags
@@ -1410,12 +1414,12 @@ public class Region { /* Not a GObject, to reduce weight */
     // HELPER FUNCTIONS FOLLOW
     // == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==
 
-    private int skipWhileNotStatus (int cs, int idx, int limit, int direction) {
+    private int seek_next_required_status (int cs, int idx, int limit, int direction) {
         // increments/decrements idx until cell of required state
         // or end of range found.
         // returns idx of cell with status cs if found else limit
 
-        if (limit < -1 || limit > nCells) {
+        if (limit < -1 || limit > n_cells) {
             in_error = true;
             return 0;
         }
@@ -1436,7 +1440,7 @@ public class Region { /* Not a GObject, to reduce weight */
         return limit;  //false;
     }
 
-    private int countNextState (int cs, int idx, bool forwards) {
+    private int count_consecutive_with_state_from (int cs, int idx, bool forwards) {
         // count how may consecutive cells of state cs starting at given
         // index idx (inclusive of starting cell)
 
@@ -1444,11 +1448,11 @@ public class Region { /* Not a GObject, to reduce weight */
 
         if (forwards && idx >= 0) {
 
-            while (idx < nCells && status[idx] == cs) {
+            while (idx < n_cells && status[idx] == cs) {
                 count++;
                 idx++;
             }
-        } else if (!forwards && idx < nCells) {
+        } else if (!forwards && idx < n_cells) {
 
             while (idx >= 0 && status[idx] == cs) {
                 count++;
@@ -1461,14 +1465,14 @@ public class Region { /* Not a GObject, to reduce weight */
         return count;
     }
 
-    private int countnextowner (int owner, int idx) {
+    private int count_contiguous_with_same_owner_from (int owner, int idx) {
         // count how may consecutive cells with owner possible starting
         // at given index idx?
 
         int count = 0;
 
         if (idx >= 0) {
-            while (idx < nCells && tags[idx, owner] && !tags[idx, is_finished_pointer]) {
+            while (idx < n_cells && tags[idx, owner] && !tags[idx, is_finished_pointer]) {
                 count++;
                 idx++;
             }
@@ -1479,7 +1483,7 @@ public class Region { /* Not a GObject, to reduce weight */
         return count;
     }
 
-    private int countAvailableRanges (bool notempty) {
+    private int count_available_ranges (bool notempty) {
         // determine location of ranges of unknown or unfinished filled cells
         // and store in ranges[, ]
         // ranges[ , 0] indicates start point,
@@ -1493,18 +1497,18 @@ public class Region { /* Not a GObject, to reduce weight */
         int idx = 0;
 
         //skip to start of first range;
-        while (idx < nCells && tags[idx, is_finished_pointer]) {
+        while (idx < n_cells && tags[idx, is_finished_pointer]) {
             idx++;
         }
 
-        while (idx < nCells) {
+        while (idx < n_cells) {
             length = 0;
             start = idx;
             ranges[range, 0] = start;
             ranges[range, 2] = 0;
             ranges[range, 3] = 0;
 
-            while (idx < nCells && !tags[idx, is_finished_pointer]) {
+            while (idx < n_cells && !tags[idx, is_finished_pointer]) {
 
                 if (!tags[idx, can_be_empty_pointer]) {
                     ranges[range, 2]++;  //FILLED
@@ -1524,7 +1528,7 @@ public class Region { /* Not a GObject, to reduce weight */
             //skip to beginning of next range
             idx++;
 
-            while (idx < nCells && tags[idx, is_finished_pointer]) {
+            while (idx < n_cells && tags[idx, is_finished_pointer]) {
                 idx++;
             }
         }
@@ -1532,37 +1536,37 @@ public class Region { /* Not a GObject, to reduce weight */
         return range;  //number of ranges  - not last index!
     }
 
-    private bool checkNumberOfBlocks () {
+    private bool check_number_of_blocks () {
         //only called when region is completed. Checks whether number of blocks is correct
 
         int count = 0, idx = 0;
 
-        while (idx < nCells) {
+        while (idx < n_cells) {
 
-            while (idx < nCells && status[idx] == CellState.EMPTY) {
+            while (idx < n_cells && status[idx] == CellState.EMPTY) {
                 idx++;
             }
 
-            if (idx < nCells) {
+            if (idx < n_cells) {
                 count++;
             } else {
                 break;
             }
 
-            while (idx < nCells && status[idx] != CellState.EMPTY) {
+            while (idx < n_cells && status[idx] != CellState.EMPTY) {
                 idx++;
             }
         }
 
-        if (count != nBlocks) {
-          record_error ("Check nBlocks", "Wrong number of blocks found " + count.to_string () + " should be " + nBlocks.to_string ());
+        if (count != n_blocks) {
+          record_error ("Check n_blocks", "Wrong number of blocks found " + count.to_string () + " should be " + n_blocks.to_string ());
           return false;
         } else {
             return true;
         }
     }
 
-    private int countcappedranges () {
+    private int count_capped_ranges () {
         // determine location of capped ranges of filled cells (not marked complete) and store in ranges[, ]
 
         int range = 0;
@@ -1570,24 +1574,24 @@ public class Region { /* Not a GObject, to reduce weight */
         int length = 0;
         int idx = 0;
 
-        while (idx < nCells && status[idx] != CellState.FILLED) {
+        while (idx < n_cells && status[idx] != CellState.FILLED) {
             idx++;  //skip to beginning of first range
         }
 
-        while (idx < nCells) {
+        while (idx < n_cells) {
             length = 0;
             start = idx;
             ranges[range, 0] = start;
             ranges[range, 2] = 0;  //not used
             ranges[range, 3] = 0;  //not used
 
-            while (idx < nCells && status[idx] == CellState.FILLED) {
+            while (idx < n_cells && status[idx] == CellState.FILLED) {
                 idx++;
                 length++;
             }
 
             if ((start == 0 || status[start - 1] == CellState.EMPTY) &&
-                (idx == nCells || status[idx] == CellState.EMPTY)) { //capped
+                (idx == n_cells || status[idx] == CellState.EMPTY)) { //capped
 
                 ranges[range, 1] = length;
                 range++;
@@ -1595,7 +1599,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
             idx++;
 
-            while (idx < nCells && status[idx] != CellState.FILLED) {
+            while (idx < n_cells && status[idx] != CellState.FILLED) {
                 idx++;  //skip to beginning of next range
             }
         }
@@ -1611,7 +1615,7 @@ public class Region { /* Not a GObject, to reduce weight */
         if (is_invalid_data (cell)) {
             in_error = true;
         } else {
-            for (int j = 0; j < nBlocks; j++) {
+            for (int j = 0; j < n_blocks; j++) {
                 if (tags[cell, j]) {
                     count++;
                 }
@@ -1634,7 +1638,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
         int count = 0;
 
-        for (int i = 0; i < nCells; i++) {
+        for (int i = 0; i < n_cells; i++) {
             if (status[i] == cs) {
                 count++;
             }
@@ -1648,7 +1652,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
         int[] blocks = {};
 
-        for (int i = 0; i < nBlocks; i++) {
+        for (int i = 0; i < n_blocks; i++) {
             if (!completed_blocks[i]) {
                 blocks += i;
             }
@@ -1665,11 +1669,11 @@ public class Region { /* Not a GObject, to reduce weight */
         int owner = -1;
         bool tmp;
 
-        if (cell1 < 0 || cell1 >= nCells || cell2 < 0 || cell2 >= nCells) {
+        if (cell1 < 0 || cell1 >= n_cells || cell2 < 0 || cell2 >= n_cells) {
             in_error = true;
         } else {
 
-            for (int i = 0; i < nBlocks; i++) {
+            for (int i = 0; i < n_blocks; i++) {
                 tmp = tags[cell1, i];
 
                 if (count > 1 ||  (tmp != tags[cell2, i])) {
@@ -1690,7 +1694,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
         int count = 0;
 
-        for (int i = 0; i < nBlocks; i++) {
+        for (int i = 0; i < n_blocks; i++) {
 
             if (tags[cell, i]) {
                 count++;
@@ -1712,7 +1716,7 @@ public class Region { /* Not a GObject, to reduce weight */
         if (is_invalid_data (start, block, length)) {
           in_error = true;
         } else {
-            int blocklength = myBlocks[block];
+            int blocklength = blocks[block];
             int freedom = length - blocklength;
 
             if (freedom < 0) {
@@ -1739,17 +1743,17 @@ public class Region { /* Not a GObject, to reduce weight */
 
         int maxsize = -1;
 
-        for (int i = 0; i < nBlocks; i++) {
+        for (int i = 0; i < n_blocks; i++) {
 
             if (!tags[cell, i]) {
                 continue;  // not possible
             }
 
-            if (myBlocks[i] <= maxsize) {
+            if (blocks[i] <= maxsize) {
                 continue;  // not largest
             }
 
-            maxsize = myBlocks[i];  //update largest
+            maxsize = blocks[i];  //update largest
         }
 
         return maxsize;
@@ -1760,16 +1764,16 @@ public class Region { /* Not a GObject, to reduce weight */
 
         int minsize = 9999;
 
-        for (int i = 0; i < nBlocks; i++) {
+        for (int i = 0; i < n_blocks; i++) {
             if (!tags[cell, i]) {
                 continue;  // not possible
             }
 
-            if (myBlocks[i] >= minsize) {
+            if (blocks[i] >= minsize) {
                 continue;  // not largest
             }
 
-            minsize = myBlocks[i];  //update largest
+            minsize = blocks[i];  //update largest
         }
 
         if (minsize == 9999) {
@@ -1786,7 +1790,7 @@ public class Region { /* Not a GObject, to reduce weight */
         //if reverse direction then equivalent forward range is used
         //only changes tags
 
-        int length = direction > 0 ? nCells - start : start + 1;
+        int length = direction > 0 ? n_cells - start : start + 1;
         start = direction > 0 ? start : 0;
 
         if (length > 0) {
@@ -1818,7 +1822,7 @@ public class Region { /* Not a GObject, to reduce weight */
         //returns true  - always changes a cell status if not in error
 
         bool changed = false;
-        int length = myBlocks[block];
+        int length = blocks[block];
 
         if (direction < 0) {
             start = start - length + 1;
@@ -1842,7 +1846,7 @@ public class Region { /* Not a GObject, to reduce weight */
             set_cell_empty (start - 1);
         }
 
-        if (start + length < nCells && !tags[start + length, is_finished_pointer]) {
+        if (start + length < n_cells && !tags[start + length, is_finished_pointer]) {
             changed = true;
             set_cell_empty (start + length);
         }
@@ -1859,17 +1863,17 @@ public class Region { /* Not a GObject, to reduce weight */
             l = 0;
 
             for (int bl = block - 2; bl >= 0; bl--) {
-                l = l + myBlocks[bl + 1] + 1; // length of exclusion zone for this block
+                l = l + blocks[bl + 1] + 1; // length of exclusion zone for this block
                 remove_block_from_range (bl, start - 2, l, -1);
             }
         }
 
         // constrain the following blocks if there are at least two
-        if (block < nBlocks - 2) {
+        if (block < n_blocks - 2) {
             l = 0;
 
-            for (int bl = block + 2; bl <= nBlocks - 1; bl++) {
-                l = l + myBlocks[bl - 1] + 1; // length of exclusion zone for this block
+            for (int bl = block + 2; bl <= n_blocks - 1; bl++) {
+                l = l + blocks[bl - 1] + 1; // length of exclusion zone for this block
                 remove_block_from_range (bl, start + length + 1, l, 1);
             }
         }
@@ -1878,22 +1882,22 @@ public class Region { /* Not a GObject, to reduce weight */
     }
 
 
-    private bool set_range_owner (int owner, int start, int length, bool exclusive, bool canbeempty) {
+    private bool set_range_owner (int owner, int start, int length, bool exclusive, bool can_be_empty) {
         bool changed = false;
 
         if (is_invalid_data (start, owner, length)) {
             in_error = true;
             return false;
         } else {
-            int blocklength = myBlocks[owner];
+            int blocklength = blocks[owner];
 
             for (int cell = start; cell < start + length; cell++) {
-                set_cell_owner (cell, owner, exclusive, canbeempty);
+                set_cell_owner (cell, owner, exclusive, can_be_empty);
             }
 
             if (exclusive) {
                 //remove block and out of sequence from regions out of reach if exclusive
-                if (blocklength < length && !canbeempty) {
+                if (blocklength < length && !can_be_empty) {
                     in_error = true;
                     return false;
                 }
@@ -1906,13 +1910,13 @@ public class Region { /* Not a GObject, to reduce weight */
 
                 int bend = int.max (start + length, start + blocklength);
 
-                if (bend < nCells) {
+                if (bend < n_cells) {
                     remove_block_from_cell_to_end (owner, bend, 1);
                 }
 
                 int earliestend = start + length;
 
-                for (int bl = nBlocks - 1; bl > owner; bl --) { //following blocks cannot be earlier
+                for (int bl = n_blocks - 1; bl > owner; bl --) { //following blocks cannot be earlier
                     remove_block_from_cell_to_end (bl, earliestend, -1);
                 }
 
@@ -1927,7 +1931,7 @@ public class Region { /* Not a GObject, to reduce weight */
         return changed;
     }
 
-    private bool set_cell_owner (int cell, int owner, bool exclusive, bool canbeempty) {
+    private bool set_cell_owner (int cell, int owner, bool exclusive, bool can_be_empty) {
         //exclusive  - cant be any other block here
         //can be empty  - self evident
 
@@ -1940,12 +1944,12 @@ public class Region { /* Not a GObject, to reduce weight */
             record_error ("set_cell_owner", "contradiction cell " + cell.to_string () + " filled but cannot be owner");
         } else {
             if (exclusive) {
-                for (int i = 0; i < nBlocks; i++) {
+                for (int i = 0; i < n_blocks; i++) {
                     tags[cell, i] = false;
                 }
             }
 
-            if (!canbeempty) {
+            if (!can_be_empty) {
                 status[cell] = CellState.FILLED;
                 changed = true;
                 tags[cell, can_be_empty_pointer] = false;
@@ -1966,7 +1970,7 @@ public class Region { /* Not a GObject, to reduce weight */
             record_error ("set_cell_empty", "cell " + cell.to_string () + " is filled");
         } else {
 
-            for (int i = 0; i < nBlocks; i++) {
+            for (int i = 0; i < n_blocks; i++) {
                 tags[cell, i] = false;
             }
 
@@ -1988,11 +1992,11 @@ public class Region { /* Not a GObject, to reduce weight */
 
     private bool is_invalid_data (int start, int block = 0, int length = 1) {
         return (start < 0 ||
-                start >= nCells ||
+                start >= n_cells ||
                 length < 0 ||
-                start + length > nCells ||
+                start + length > n_cells ||
                 block < 0 ||
-                block >= nBlocks);
+                block >= n_blocks);
     }
 
     private bool is_cell_filled (int cell) {
@@ -2013,15 +2017,15 @@ public class Region { /* Not a GObject, to reduce weight */
             this.unknown = unknown;
             this.filled = filled;
 
-            if (filled + completed > blockTotal) {
+            if (filled + completed > block_total) {
                 record_error ("totals changed", "too many filled cells");
             } else if (this.unknown == 0) {
                 this.is_completed = true;
 
-                if (filled + completed < blockTotal) {
+                if (filled + completed < block_total) {
                     record_error ("totals changed", "too few filled cells  - " + filled.to_string ());
                 } else {
-                    checkNumberOfBlocks ();  //generates its own error
+                    check_number_of_blocks ();  //generates its own error
                 }
             }
         }
@@ -2032,9 +2036,9 @@ public class Region { /* Not a GObject, to reduce weight */
     private void get_status () {
         //transfers cell statuses from grid to internal range status array
 
-        grid.get_array (index, isColumn, ref temp_status);
+        grid.get_array (index, is_column, ref temp_status);
 
-        for (int i = 0; i < nCells; i++) {
+        for (int i = 0; i < n_cells; i++) {
 
             switch (temp_status[i]) {
 
@@ -2070,15 +2074,15 @@ public class Region { /* Not a GObject, to reduce weight */
     private void put_status () {
         //use temp_status2 to ovoid overwriting original input  - needed for debugging
 
-        for (int i = 0; i < nCells;  i++) {
+        for (int i = 0; i < n_cells;  i++) {
             temp_status2[i] = (status[i] == CellState.COMPLETED ? CellState.FILLED : status[i]);
         }
 
-        grid.set_array (index, isColumn, temp_status2);
+        grid.set_array (index, is_column, temp_status2);
     }
 
     private void status_to_tags () {
-        for (int i = 0; i < nCells; i++) {
+        for (int i = 0; i < n_cells; i++) {
 
             switch (status[i]) {
 
@@ -2094,7 +2098,7 @@ public class Region { /* Not a GObject, to reduce weight */
                     break;
 
                 case CellState.EMPTY:
-                    for (int j = 0; j < nBlocks; j++) {
+                    for (int j = 0; j < n_blocks; j++) {
                         tags[i, j] = false;
                     }
 
@@ -2110,7 +2114,7 @@ public class Region { /* Not a GObject, to reduce weight */
     }
 
     private void tags_to_status () {
-        for (int i = 0; i < nCells; i++) {
+        for (int i = 0; i < n_cells; i++) {
             if (status[i] == CellState.FILLED && tags[i, is_finished_pointer]) {
                 status[i] = CellState.COMPLETED;
             }
@@ -2136,7 +2140,7 @@ public class Region { /* Not a GObject, to reduce weight */
         if (debug) {
             var sb  = new StringBuilder ("");
             sb.append (":  ");
-            sb.append (isColumn ? "column" : "row");
+            sb.append (is_column ? "column" : "row");
             sb.append (index.to_string ());
             sb.append (" in method ");
             sb.append (method);

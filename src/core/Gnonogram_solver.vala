@@ -115,11 +115,11 @@ namespace Gnonograms {
         int colTotal = 0;
 
         for (int r = 0; r < rows; r++ ) {
-            rowTotal += regions[r].blockTotal;
+            rowTotal += regions[r].block_total;
         }
 
         for (int c = 0; c < cols; c++ ) {
-            colTotal += regions[rows + c].blockTotal;
+            colTotal += regions[rows + c].block_total;
         }
 
         return rowTotal == colTotal;
@@ -219,19 +219,19 @@ namespace Gnonograms {
 
     private bool differsFromSolution (Region r) {
         //use for debugging
-        bool isColumn = r.isColumn;
+        bool is_column = r.is_column;
         uint index = r.index;
-        int nCells = r.nCells;
+        int n_cells = r.n_cells;
         int solutionState, regionState;
 
-        for (uint i = 0; i < nCells; i++ ) {
+        for (uint i = 0; i < n_cells; i++ ) {
             regionState = r.get_cell_state (i);
 
             if (regionState == CellState.UNKNOWN) {
                 continue;
             }
 
-            solutionState = solution.get_data_from_rc (isColumn ? i : index, isColumn ? index : i);
+            solutionState = solution.get_data_from_rc (is_column ? i : index, is_column ? index : i);
 
             if (solutionState == CellState.EMPTY) {
                 if (regionState == CellState.EMPTY) {
@@ -352,7 +352,7 @@ namespace Gnonograms {
         }
 
         for (int i = 0; i < regionCount; i++ ) {
-            regions[i].savestate ();
+            regions[i].save_state ();
         }
     }
 
@@ -364,7 +364,7 @@ namespace Gnonograms {
         }
 
         for (int i = 0; i < regionCount; i++ ) {
-            regions[i].restorestate ();
+            regions[i].restore_state ();
         }
     }
 
@@ -412,7 +412,7 @@ namespace Gnonograms {
         loadposition (grid_store); //return to last valid state
 
         for (int i = 0; i < regionCount; i++) {
-            regions[i].initialstate();
+            regions[i].set_to_initial_state();
         }
 
         simplesolver (false,true,false,false); //make sure region state correct
@@ -441,13 +441,13 @@ namespace Gnonograms {
                 break;
             }
 
-            bool isColumn = regions[perm_reg].isColumn;
+            bool is_column = regions[perm_reg].is_column;
             uint idx = regions[perm_reg].index;
 
             //try advanced solver with every possible pattern in this range.
 
             for (int i = 0; i < regionCount; i++) {
-                regions[i].initialstate ();
+                regions[i].set_to_initial_state ();
             }
 
             saveposition (grid_store2);
@@ -466,7 +466,7 @@ namespace Gnonograms {
 
                 guess=p.get();
 
-                grid.set_array (idx, isColumn, guess, start);
+                grid.set_array (idx, is_column, guess, start);
                 simple_result = simplesolver (false, false, false, false);
 
                 if (simple_result == 0) {
@@ -482,14 +482,14 @@ namespace Gnonograms {
                 loadposition (grid_store2); //back track
 
                 for (int i = 0; i < regionCount; i++) {
-                    regions[i].initialstate();
+                    regions[i].set_to_initial_state();
                 }
             }
 
             loadposition (grid_store2); //back track
 
             for (int i = 0; i < regionCount; i++) {
-                regions[i].initialstate();
+                regions[i].set_to_initial_state();
             }
 
             simplesolver (false, false, false, false);
