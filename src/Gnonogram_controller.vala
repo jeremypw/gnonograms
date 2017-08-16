@@ -165,7 +165,7 @@ public class Controller : GLib.Object {
         view.open_game_request.connect (on_open_game_request);
         view.solve_this_request.connect (on_solve_this_request);
         view.restart_request.connect (on_restart_request);
-        solver.showsolvergrid.connect (on_show_solver_grid);
+        solver.show_solver_grid.connect (on_show_solver_grid);
 
         restore_settings (); /* May change load_game_dir and save_game_dir */
         restore_saved_state ();

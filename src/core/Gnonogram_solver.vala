@@ -24,8 +24,7 @@
 namespace Gnonograms {
  public class Solver : GLib.Object {
     /** PUBLIC **/
-    public signal void showsolvergrid ();
-    public signal void showprogress (int guesses);
+    public signal void show_solver_grid ();
 
     public My2DCellArray grid {get; private set;}
     public My2DCellArray solution {get; private set;}
@@ -46,35 +45,35 @@ namespace Gnonograms {
         }
     }
 
-    public bool initialize (string[] rowclues,
-                            string[] colclues,
-                            My2DCellArray? startgrid,
-                            My2DCellArray? solutiongrid) {
+    /** Set up solver for a particular puzzle. In addition to the clues, a starting point
+      * and/or the correct solution may be provided (useful for debugging).
+    **/
+    public bool initialize (string[] row_clues,
+                            string[] col_clues,
+                            My2DCellArray? start_grid = null,
+                            My2DCellArray? solution_grid = null) {
 
-        if (rowclues.length != rows || colclues.length != cols) {
-            warning ("row/col size mismatch clues length %u, rows %u, col clues length %u, cols %u", rowclues.length, rows, colclues.length, cols );
-            return false;
+        assert (row_clues.length == rows && col_clues.length == cols);
+
+        should_check_solution = false;
+
+        if (solution_grid != null) {
+            should_check_solution = true;
+            solution.copy (solution_grid);
         }
 
-        checksolution = false;
-
-        if (solutiongrid != null) {
-            checksolution = true;
-            solution.copy (solutiongrid);
-        }
-
-        if (startgrid != null) {
-            grid.copy (startgrid);
+        if (start_grid != null) {
+            grid.copy (start_grid);
         } else {
             grid.set_all (CellState.UNKNOWN);
         }
 
-        for (int r = 0; r < rows; r++ ) {
-            regions[r].initialize (r, false, cols, rowclues[r]);
+        for (int r = 0; r < rows; r++) {
+            regions[r].initialize (r, false, cols, row_clues[r]);
         }
 
-        for (int c = 0; c < cols; c++ ) {
-            regions[c + rows].initialize (c, true, rows, colclues[c]);
+        for (int c = 0; c < cols; c++) {
+            regions[c + rows].initialize (c, true, rows, col_clues[c]);
         }
 
         return valid ();
@@ -87,38 +86,45 @@ namespace Gnonograms {
             }
         }
 
-        int rowTotal = 0;
-        int colTotal = 0;
+        int row_total = 0;
+        int col_total = 0;
 
-        for (int r = 0; r < rows; r++ ) {
-            rowTotal += regions[r].block_total;
+        for (int r = 0; r < rows; r++) {
+            row_total += regions[r].block_total;
         }
 
-        for (int c = 0; c < cols; c++ ) {
-            colTotal += regions[rows + c].block_total;
+        for (int c = 0; c < cols; c++) {
+            col_total += regions[rows + c].block_total;
         }
 
-        return rowTotal == colTotal;
+        return row_total == col_total;
     }
 
-    public int solve_it (bool debug,
-                          bool use_advanced,
-                          bool use_ultimate = true,
-                          bool uniqueOnly = false,
-                          bool stepwise = false) {
+    /** Initiate solving, specifying whether or not to use the advanced and ultimate
+      * procedures. Also specify whether in debugging mode and whether to solve one step
+      * at a time (used for hinting if implemented).
+    **/
+    public int solve_it (bool debug = false,
+                         bool use_advanced = true,
+                         bool use_ultimate = true,
+                         bool unique_only = false,
+                         bool stepwise = false) {
 
-        int simpleresult = simplesolver (debug, true, checksolution, stepwise); //debug, log errors, check solution, step through solution one pass at a time
+        int simple_result = simple_solver (debug,
+//~                                            true,
+                                           should_check_solution,
+                                           stepwise);
 
-        if (simpleresult == 0 && use_advanced) {
-            CellState[] gridstore =  new CellState[rows*cols];
-            return advancedsolver (gridstore, debug, 9999, uniqueOnly, use_ultimate);
+        if (simple_result == 0 && use_advanced) {
+            CellState[] grid_backup =  new CellState[rows * cols];
+            return advanced_solver (grid_backup, debug, 9999, unique_only, use_ultimate);
         }
 
         if (rows == 1) {
             stdout.printf (regions[0].to_string ());  //used for debugging
         }
 
-        return simpleresult;
+        return simple_result;
     }
 
     public bool solved () {
@@ -137,27 +143,27 @@ namespace Gnonograms {
     private Region[] regions;
     private uint n_regions;
 
-    private Cell trialCell;
+    private Cell trial_cell;
     private int rdir;
     private int cdir;
     private int rlim;
     private int clim;
     private int turn;
-    private uint maxTurns;
-    private bool checksolution;
+    private uint max_turns;
+    private bool should_check_solution;
 
-    static int GUESSESBEFOREASK  =  1000000;
+    static int GUESSES_BEFORE_ASKING  =  1000000;
+    static int MAX_PASSES  =  100;
 
     /** Returns -1 to indicate an error - TODO use throw error instead **/
-    private int simplesolver (bool debug,
-                               bool logerror,
-                               bool checksolution,
+    private int simple_solver (bool debug,
+                               bool should_check_solution,
                                bool stepwise) {
 
         bool changed = true;
         int pass = 1;
 
-        while (changed && pass < 100) {
+        while (changed && pass < MAX_PASSES) {
             //keep cycling through regions while at least one of them is changing
             changed = false;
 
@@ -179,7 +185,7 @@ namespace Gnonograms {
                     return  -1;
                 }
 
-                if (checksolution && differsFromSolution (r)) {
+                if (should_check_solution && differs_from_solution (r)) {
                     stdout.printf (r.to_string ());
                     return  -1;
                 }
@@ -210,28 +216,29 @@ namespace Gnonograms {
     }
 
 
-    private bool differsFromSolution (Region r) {
-        //use for debugging
+    private bool differs_from_solution (Region r) {
         bool is_column = r.is_column;
         uint index = r.index;
         int n_cells = r.n_cells;
-        int solutionState, regionState;
+        int solution_state;
+        int region_state;
 
-        for (uint i = 0; i < n_cells; i++ ) {
-            regionState = r.get_cell_state (i);
+        for (uint i = 0; i < n_cells; i++) {
+            region_state = r.get_cell_state (i);
 
-            if (regionState == CellState.UNKNOWN) {
+            if (region_state == CellState.UNKNOWN) {
                 continue;
             }
 
-            solutionState = solution.get_data_from_rc (is_column ? i : index, is_column ? index : i);
+            solution_state = solution.get_data_from_rc (is_column ? i : index,
+                                                        is_column ? index : i);
 
-            if (solutionState == CellState.EMPTY) {
-                if (regionState == CellState.EMPTY) {
+            if (solution_state == CellState.EMPTY) {
+                if (region_state == CellState.EMPTY) {
                     continue;
                 }
-            } else {//solutionState is FILLED
-                if (regionState != CellState.EMPTY) {
+            } else { //solution_state is FILLED
+                if (region_state != CellState.EMPTY) {
                     continue;
                 }
             }
@@ -242,82 +249,103 @@ namespace Gnonograms {
         return false;
     }
 
-    private int advancedsolver (CellState[] gridstore,
+    /** Make single cell guesses, depth 1 (no recursion)
+        Make a guess in each unknown cell in turn
+        If it leads to contradiction mark opposite to guess,
+        continue simple solve and if still no solution, continue with another guess.
+        If first guess does not lead to solution leave unknown and choose another cell
+    **/
+    private int advanced_solver (CellState[] grid_backup,
                                 bool debug,
-                                int maxGuesswork,
-                                bool uniqueOnly,
-                                bool useUltimate = true) {
+                                int max_guesswork,
+                                bool unique_only,
+                                bool use_ultimate = true) {
 
-        // single cell guesses, depth 1 (no recursion)
-        // make a guess in each unknown cell in turn
-        // if leads to contradiction mark opposite to guess,
-        // continue simple solve, if still no solution start again.
-        // if does not lead to solution leave unknown and choose another cell
-
-        int simpleresult = 0;
+        int simple_result = 0;
         int wraps = 0;
         int guesses = 0;
         bool changed = false;
-        int countChanged = 0;
-        uint initialmaxTurns = 3; //stay near edges until no more changes
-        CellState initialcellstate = CellState.FILLED;
+        int changed_count = 0;
+        uint initial_max_turns = 3; //stay near edges until no more changes
+        CellState initial_cell_state = CellState.FILLED;
 
-        rdir = 0; cdir = 1; rlim = (int)rows; clim = (int)cols;
-        turn = 0; maxTurns = initialmaxTurns; guesses = 0;
-        trialCell = {0, - 1, initialcellstate};
+        rdir = 0;
+        cdir = 1;
+        rlim = (int)rows;
+        clim = (int)cols;
 
-        this.saveposition (gridstore);
+        turn = 0;
+        max_turns = initial_max_turns;
+        guesses = 0;
+
+        trial_cell = {0, - 1, initial_cell_state};
+
+        this.save_position (grid_backup);
 
         while (true) {
-            trialCell = makeguess (trialCell); guesses++;
+            trial_cell = make_guess (trial_cell);
+            guesses++;
 
-            if (trialCell.col == -1) { //run out of guesses
+            if (trial_cell.col == -1) { //run out of guesses
                 if (changed) {
-                    //stdout.printf (@"Changed $changed wraps: $wraps maxturns: $maxTurns\n");
-                    if (countChanged>maxGuesswork) {
+                    if (changed_count > max_guesswork) {
                         return 0;
                     }
-                } else if (maxTurns == initialmaxTurns) {
-                    maxTurns = (uint.min (rows, cols)) / 2 + 2; //ensure full coverage
-                } else if (trialCell.state == initialcellstate) {
-                    trialCell = trialCell.invert (); //start making opposite guesses
-                    maxTurns = initialmaxTurns; wraps = 0;
+                } else if (max_turns == initial_max_turns) {
+                    max_turns = (uint.min (rows, cols)) / 2 + 2; //ensure full coverage
+                } else if (trial_cell.state == initial_cell_state) {
+                    trial_cell = trial_cell.invert (); //start making opposite guesses
+                    max_turns = initial_max_turns;
+                    wraps = 0;
                 } else {
-                    break; //cant make progress
+                    break; //cannot make progress
                 }
 
-                rdir = 0; cdir = 1; rlim = (int)rows; clim = (int)cols; turn = 0;
+                rdir = 0;
+                cdir = 1;
+                rlim = (int)rows;
+                clim = (int)cols;
+                turn = 0;
+
                 changed = false;
+
                 wraps++;
                 continue;
             }
 
-            grid.set_data_from_cell (trialCell);
-            simpleresult = simplesolver (false, false, false, false); //only debug advanced part, ignore errors
+            grid.set_data_from_cell (trial_cell);
 
-            if (simpleresult > 0) {
-                if (uniqueOnly) {//unique solutions must be solved by contradiction.
-                    countChanged++;
-                    simpleresult = 0;
+            simple_result = simple_solver (false,
+                                           false,
+                                           false); //only debug advanced part, ignore errors
+
+            if (simple_result > 0) {
+                if (unique_only) { //unique solutions must be solved by contradiction.
+                    changed_count++;
+                    simple_result = 0;
                 }
 
                 break;
             }
 
-            loadposition (gridstore); //back track
+            load_position (grid_backup); //back track
 
-            if (simpleresult < 0) { //contradiction  -   insert opposite guess
-                grid.set_data_from_cell (trialCell.invert ()); //mark opposite to guess
-                changed = true; countChanged++; //worth trying another cycle
-                simpleresult = simplesolver (false, false, false, false); //can we solve now?
+            if (simple_result < 0) { //contradiction  -   insert opposite guess
+                grid.set_data_from_cell (trial_cell.invert ()); //mark opposite to guess
+                changed = true;
+                changed_count++; //worth trying another cycle
 
-                if (simpleresult == 0) {//no we cant
-                    this.saveposition (gridstore); //update grid store
+                simple_result = simple_solver (false,
+                                               false,
+                                               false); //can we solve now?
+
+                if (simple_result == 0) { //no we cant
+                    this.save_position (grid_backup); //update grid store
                     continue; //go back to start
-                } else if (simpleresult > 0) {
+                } else if (simple_result > 0) {
                     break; // unique solution found
                 } else {
-                    return  -1; //starting point was invalid
+                    return -1; //starting point was invalid
                 }
             } else {
                 continue; //guess again
@@ -325,69 +353,88 @@ namespace Gnonograms {
         }
 
         //return vague measure of difficulty
-        if (simpleresult > 0) {
-            return simpleresult + countChanged * 20;
+        if (simple_result > 0) {
+            return simple_result + changed_count * 20;
         }
 
-        if (useUltimate) {
-            return ultimate_solver (gridstore, guesses);
+        if (use_ultimate) {
+            return ultimate_solver (grid_backup, guesses);
         } else {
             return Gnonograms.FAILED_PASSES;
         }
     }
 
-    private void saveposition (CellState[] gs) {
-        //store grid in linearised form.
-        for (int r = 0; r < rows; r++ ) {
-            for (int c = 0; c < cols; c++ ) {
+    /** Store the grid in linearised form **/
+    private void save_position (CellState[] gs) {
+        for (int r = 0; r < rows; r++) {
+
+            for (int c = 0; c < cols; c++) {
                 gs[r * cols + c] = grid.get_data_from_rc (r, c);
             }
         }
 
-        for (int i = 0; i < n_regions; i++ ) {
+        for (int i = 0; i < n_regions; i++) {
             regions[i].save_state ();
         }
     }
 
-    private void loadposition (CellState[] gs) {
-        for (int r = 0; r < rows; r++ ) {
-            for (int c = 0; c < cols; c++ ) {
+    private void load_position (CellState[] gs) {
+        for (int r = 0; r < rows; r++) {
+
+            for (int c = 0; c < cols; c++) {
                 grid.set_data_from_rc (r, c, gs[r * cols + c]);
             }
         }
 
-        for (int i = 0; i < n_regions; i++ ) {
+        for (int i = 0; i < n_regions; i++) {
             regions[i].restore_state ();
         }
     }
 
-    private Cell makeguess (Cell cell) {
-        //Scan in spiral pattern from edges.  Critical cells most likely in this region
-
+    /** Used by advanced solver. Scans in a spiral pattern from edges
+      * as critical cells most likely in this region.
+    **/
+    private Cell make_guess (Cell cell) {
         uint r = cell.row;
         uint c = cell.col;
 
         while (true) {
-            r += rdir; c += cdir; //only one changes at any one time
+            r += rdir;
+            c += cdir; //only one changes at any one time
 
             if (cdir == 1 && c >= clim) {
-                c--; cdir = 0; rdir = 1; r++;
-            } else if (rdir == 1 && r >= rlim) {//across top  -  rh edge reached
-                r--; rdir = 0; cdir = -1; c--;
-            } else if (cdir == -1 && c < turn) {//down rh side  -  bottom reached
-                c++; cdir = 0; rdir = -1; r--;
-            } else if (rdir == -1 && r <= turn) {//back across bottom lh edge reached
-                r++; turn++; rlim--; clim--; rdir = 0; cdir = 1;
+                c--;
+                cdir = 0;
+                rdir = 1;
+                r++;
+            } else if (rdir == 1 && r >= rlim) { //across top  -  rh edge reached
+                r--;
+                rdir = 0;
+                cdir = -1;
+                c--;
+            } else if (cdir == -1 && c < turn) { //down rh side  -  bottom reached
+                c++;
+                cdir = 0;
+                rdir = -1;
+                 r--;
+            } else if (rdir == -1 && r <= turn) { //back across bottom lh edge reached
+                r++;
+                turn++;
+                rlim--;
+                clim--;
+                rdir = 0;
+                cdir = 1;
             } //up lh side  -  top edge reached
 
-            if (turn > maxTurns) {//stay near edge until no more changes
+            if (turn > max_turns) { //stay near edge until no more changes
                 cell.row = 0;
                 cell.col = -1;
                 break;
             }
 
             if (grid.get_data_from_rc (r, c) == CellState.UNKNOWN) {
-                cell.row = r; cell.col = c;
+                cell.row = r;
+                cell.col = c;
                 break;
             }
         }
@@ -395,32 +442,42 @@ namespace Gnonograms {
         return cell;
     }
 
+    /** The ultimate solver take a region and runs through all possible permutations
+      * of filled and empty cells in that region, trying to solve the puzzle from that
+      * point on using the advanced solver. If that fails, another region is chosen to permute.
+      * Puzzles requiring this method are unlikely to solvable by a human and are unlikely to
+      * have a unique solution so its utility is debatable.
+    **/
     private int ultimate_solver(CellState[] grid_store, int guesses) {
-        //stdout.printf("Ultimate solver\n");
-        int advanced_result = -99, simple_result = -99;
-        uint max_value = Gnonograms.FAILED_PASSES, perm_reg = 0;
+        int advanced_result = -99;
+        int simple_result = -99;
+        int limit = GUESSES_BEFORE_ASKING + guesses;
 
-        int limit = GUESSESBEFOREASK + guesses;
+        uint max_value = Gnonograms.FAILED_PASSES;
+        uint perm_reg = 0;
 
-        loadposition (grid_store); //return to last valid state
+        load_position (grid_store); //return to last valid state
 
         for (int i = 0; i < n_regions; i++) {
             regions[i].set_to_initial_state();
         }
 
-        simplesolver (false,true,false,false); //make sure region state correct
+        simple_solver (false,
+                       false,
+                       false); //make sure region state correct
 
-        showsolvergrid();
+        show_solver_grid();
 
         if (!Utils.show_confirm_dialog(_("Start Ultimate solver?\n This can take a long time and may not work"))) {
             return Gnonograms.FAILED_PASSES;
         }
 
-        CellState[] grid_store2 = new CellState[rows * cols];
+        CellState[] grid_backup2 = new CellState[rows * cols];
         CellState[] guess = {};
 
         while (true) {
             perm_reg = choose_permute_region (ref max_value);
+
             if (perm_reg < 0) {
                 stdout.printf ("No perm region found\n");
                 break;
@@ -443,61 +500,76 @@ namespace Gnonograms {
                 regions[i].set_to_initial_state ();
             }
 
-            saveposition (grid_store2);
+            save_position (grid_backup2);
 
             p.initialise ();
 
             while (p.next()) {
                 guesses++;
+
                 if (guesses > limit) {
+
                     if (Utils.show_confirm_dialog (_("This is taking a long time!")+"\n"+_("Keep trying?"))) {
-                        limit += GUESSESBEFOREASK;
+                        limit += GUESSES_BEFORE_ASKING;
                     } else {
                         return Gnonograms.FAILED_PASSES;
                     }
                 }
 
-                guess=p.get();
+                guess = p.get();
 
                 grid.set_array (idx, is_column, guess, start);
-                simple_result = simplesolver (false, false, false, false);
+
+                simple_result = simple_solver (false,
+                                               false,
+                                               false);
 
                 if (simple_result == 0) {
-                    advanced_result = advancedsolver (grid_store, false, 99,false, false);
+                    advanced_result = advanced_solver (grid_store,
+                                                       false,
+                                                       99,
+                                                       false,
+                                                       false);
 
                     if (advanced_result > 0 && advanced_result < Gnonograms.FAILED_PASSES) {
                         return advanced_result; //solution found
                     }
                 } else if (simple_result > 0) {
-                    return simple_result+guesses; //unlikely!
+                    return simple_result + guesses; //unlikely!
                 }
 
-                loadposition (grid_store2); //back track
+                load_position (grid_backup2); //back track
 
                 for (int i = 0; i < n_regions; i++) {
                     regions[i].set_to_initial_state();
                 }
             }
 
-            loadposition (grid_store2); //back track
+            load_position (grid_backup2); //back track
 
             for (int i = 0; i < n_regions; i++) {
                 regions[i].set_to_initial_state();
             }
 
-            simplesolver (false, false, false, false);
+            simple_solver (false,
+                           false,
+                           false);
         }
 
         return 0;
     }
 
+    /** Try to fund a region of the puzzle most likely to yield a solution
+      * (or contradiction) if permuted.
+    **/
     private uint choose_permute_region (ref uint max_value) {
-        uint best_value = 0, perm_reg = 0;
-        uint edg, current_value;
+        uint best_value = 0;
+        uint perm_reg = 0;
+        uint edg; /* A measure of how close to the edge the region is - modifies value. */
+        uint current_value;
 
-        for (uint r = 0; r < n_regions; r++ ) {
+        for (uint r = 0; r < n_regions; r++) {
             current_value = regions[r].value_as_permute_region ();
-            //weight towards edge regions
 
             if (current_value == 0) {
                 continue;
@@ -509,7 +581,8 @@ namespace Gnonograms {
                 edg = uint.min (r - rows, rows + cols - r - 1);
             }
 
-            edg += 1;
+            edg++;
+
             current_value = current_value * 100 / edg;
 
             if (current_value > best_value && current_value < max_value) {
@@ -519,6 +592,7 @@ namespace Gnonograms {
         }
 
         max_value = best_value;
+
         return perm_reg;
     }
 }
