@@ -22,58 +22,34 @@
  */
 
 namespace Gnonograms {
-
  public class Solver : GLib.Object {
+    /** PUBLIC **/
+    public signal void showsolvergrid ();
+    public signal void showprogress (int guesses);
+
     public My2DCellArray grid {get; private set;}
     public My2DCellArray solution {get; private set;}
 
-    private Dimensions _dimensions;
     public Dimensions dimensions {
-        public get {
-            return _dimensions;
-        }
-
         set {
-            _dimensions = value;
-            grid = new My2DCellArray (_dimensions);
-            solution = new My2DCellArray (_dimensions);
-            regions = new Region[_dimensions.height + _dimensions.width];
+            rows = value.height;
+            cols = value.width;
+            n_regions = rows + cols;
 
-            for (int i = 0; i < regionCount; i++ ) {
+            grid = new My2DCellArray (value);
+            solution = new My2DCellArray (value);
+            regions = new Region[n_regions];
+
+            for (int i = 0; i < n_regions; i++) {
                 regions[i] = new Region (grid);
             }
         }
     }
 
-    private uint rows {
-        get {return dimensions.height;}
-    }
-
-    private uint cols {
-        get {return dimensions.width;}
-    }
-
-    private Region[] regions;
-    private int regionCount  {
-        get {return regions.length;}
-    }
-
-    private Cell trialCell;
-    private int rdir;
-    private int cdir;
-    private int rlim;
-    private int clim;
-    private int turn;
-    private uint maxTurns;
-    private bool checksolution;
-
-    static int GUESSESBEFOREASK  =  1000000;
-
-    public signal void showsolvergrid ();
-    public signal void showprogress (int guesses);
-
-    public bool initialize (string[] rowclues, string[] colclues,
-                            My2DCellArray? startgrid, My2DCellArray? solutiongrid) {
+    public bool initialize (string[] rowclues,
+                            string[] colclues,
+                            My2DCellArray? startgrid,
+                            My2DCellArray? solutiongrid) {
 
         if (rowclues.length != rows || colclues.length != cols) {
             warning ("row/col size mismatch clues length %u, rows %u, col clues length %u, cols %u", rowclues.length, rows, colclues.length, cols );
@@ -145,6 +121,32 @@ namespace Gnonograms {
         return simpleresult;
     }
 
+    public bool solved () {
+        foreach (Region r in regions) {
+            if (!r.is_completed) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /** PRIVATE **/
+    private uint rows;
+    private uint cols;
+    private Region[] regions;
+    private uint n_regions;
+
+    private Cell trialCell;
+    private int rdir;
+    private int cdir;
+    private int rlim;
+    private int clim;
+    private int turn;
+    private uint maxTurns;
+    private bool checksolution;
+
+    static int GUESSESBEFOREASK  =  1000000;
 
     /** Returns -1 to indicate an error - TODO use throw error instead **/
     private int simplesolver (bool debug,
@@ -207,15 +209,6 @@ namespace Gnonograms {
         return 0;
     }
 
-    public bool solved () {
-        foreach (Region r in regions) {
-            if (!r.is_completed) {
-                return false;
-            }
-        }
-
-        return true;
-    }
 
     private bool differsFromSolution (Region r) {
         //use for debugging
@@ -351,7 +344,7 @@ namespace Gnonograms {
             }
         }
 
-        for (int i = 0; i < regionCount; i++ ) {
+        for (int i = 0; i < n_regions; i++ ) {
             regions[i].save_state ();
         }
     }
@@ -363,7 +356,7 @@ namespace Gnonograms {
             }
         }
 
-        for (int i = 0; i < regionCount; i++ ) {
+        for (int i = 0; i < n_regions; i++ ) {
             regions[i].restore_state ();
         }
     }
@@ -411,7 +404,7 @@ namespace Gnonograms {
 
         loadposition (grid_store); //return to last valid state
 
-        for (int i = 0; i < regionCount; i++) {
+        for (int i = 0; i < n_regions; i++) {
             regions[i].set_to_initial_state();
         }
 
@@ -446,7 +439,7 @@ namespace Gnonograms {
 
             //try advanced solver with every possible pattern in this range.
 
-            for (int i = 0; i < regionCount; i++) {
+            for (int i = 0; i < n_regions; i++) {
                 regions[i].set_to_initial_state ();
             }
 
@@ -481,14 +474,14 @@ namespace Gnonograms {
 
                 loadposition (grid_store2); //back track
 
-                for (int i = 0; i < regionCount; i++) {
+                for (int i = 0; i < n_regions; i++) {
                     regions[i].set_to_initial_state();
                 }
             }
 
             loadposition (grid_store2); //back track
 
-            for (int i = 0; i < regionCount; i++) {
+            for (int i = 0; i < n_regions; i++) {
                 regions[i].set_to_initial_state();
             }
 
@@ -502,7 +495,7 @@ namespace Gnonograms {
         uint best_value = 0, perm_reg = 0;
         uint edg, current_value;
 
-        for (uint r = 0; r < regionCount; r++ ) {
+        for (uint r = 0; r < n_regions; r++ ) {
             current_value = regions[r].value_as_permute_region ();
             //weight towards edge regions
 
