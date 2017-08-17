@@ -68,6 +68,7 @@ namespace Gnonograms {
     private bool checksolution;
 
     static int GUESSESBEFOREASK  =  1000000;
+    static int MAX_PASS  =  100;
 
     public signal void showsolvergrid ();
     public signal void showprogress (int guesses);
@@ -155,7 +156,7 @@ namespace Gnonograms {
         bool changed = true;
         int pass = 1;
 
-        while (changed && pass < 100) {
+        while (changed && pass < MAX_PASS) {
             //keep cycling through regions while at least one of them is changing
             changed = false;
 
@@ -200,7 +201,7 @@ namespace Gnonograms {
             return pass;
         }
 
-        if (pass >= 100) {
+        if (pass >= MAX_PASS) {
             return Gnonograms.FAILED_PASSES;
         }
 
@@ -278,9 +279,9 @@ namespace Gnonograms {
         while (true) {
             trialCell = makeguess (trialCell); guesses++;
 
-            if (trialCell.col == -1) { //run out of guesses
+            if (trialCell.col == uint.MAX) { //run out of guesses
                 if (changed) {
-                    //stdout.printf (@"Changed $changed wraps: $wraps maxturns: $maxTurns\n");
+                    stdout.printf (@"Changed $changed wraps: $wraps maxturns: $maxTurns\n");
                     if (countChanged>maxGuesswork) {
                         return 0;
                     }
@@ -371,8 +372,8 @@ namespace Gnonograms {
     private Cell makeguess (Cell cell) {
         //Scan in spiral pattern from edges.  Critical cells most likely in this region
 
-        uint r = cell.row;
-        uint c = cell.col;
+        int r = (int)(cell.row);
+        int c = (int)(cell.col);
 
         while (true) {
             r += rdir; c += cdir; //only one changes at any one time
@@ -388,13 +389,12 @@ namespace Gnonograms {
             } //up lh side  -  top edge reached
 
             if (turn > maxTurns) {//stay near edge until no more changes
-                cell.row = 0;
-                cell.col = -1;
+                cell.col = uint.MAX;
                 break;
             }
 
             if (grid.get_data_from_rc (r, c) == CellState.UNKNOWN) {
-                cell.row = r; cell.col = c;
+                cell.row = (uint)r; cell.col = (uint)c;
                 break;
             }
         }
