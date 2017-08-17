@@ -272,7 +272,7 @@ namespace Gnonograms {
 
         rdir = 0; cdir = 1; rlim = (int)rows; clim = (int)cols;
         turn = 0; maxTurns = initialmaxTurns; guesses = 0;
-        trialCell = {0, - 1, initialcellstate};
+        trialCell = {0, uint.MAX, initialcellstate};
 
         this.saveposition (gridstore);
 

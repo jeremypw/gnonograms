@@ -74,6 +74,10 @@ public class Region { /* Not a GObject, to reduce weight */
     }
 
     public void initialize (uint index, bool is_column, uint n_cells, string clue) {
+        if (n_cells == 1) { /* Ignore single cell regions (for debugging) */
+            this.is_completed = true;
+        }
+
         this.index = index;
         this.is_column = is_column;
         this.n_cells = (int)n_cells;
@@ -94,10 +98,6 @@ public class Region { /* Not a GObject, to reduce weight */
 
         block_extent = block_total + n_blocks - 1;  //minimum space needed for blocks
         set_to_initial_state ();
-
-        if (n_cells == 1) { /* Ignore single cell regions (for debugging) */
-            this.is_completed = true;
-        }
     }
 
     public void set_to_initial_state () {
@@ -798,7 +798,7 @@ public class Region { /* Not a GObject, to reduce weight */
                     count++;
                 }
 
-                idx += l - 1;  //allow for incrementing on next loop
+                idx += (l - 1);  //allow for incrementing on next loop
             }
 
             if (count != 1) {
