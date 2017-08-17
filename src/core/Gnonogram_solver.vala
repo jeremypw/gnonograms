@@ -1,11 +1,10 @@
-/* Solver class for Gnonograms - java
- * Finds solution for a set of clues
- * Contains extra code for advanced solving and hinting not used in this Java version
- * Copyright (C) 2012  Jeremy Wootten
+/* Solver class for gnonograms
+ * Finds solution for a set of clues.
+ * Copyright (C) 2010-2017  Jeremy Wootten
  *
-  This program is free software; you can redistribute it and/or modify
+    This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
+    the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -13,18 +12,16 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License along
-    with this program; if not, write to the Free Software Foundation, Inc.,
-    51 Franklin Street, Fifth Floor, Boston, MA 02110 - 1301 USA.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *  Author:
- *  Jeremy Wootten  < jeremwootten@gmail.com>
+ *  Jeremy Wootten <jeremy@elementaryos.org>
  */
 
 namespace Gnonograms {
  public class Solver : GLib.Object {
     /** PUBLIC **/
-    public signal void show_solver_grid ();
 
     public My2DCellArray grid {get; private set;}
     public My2DCellArray solution {get; private set;}
@@ -111,13 +108,16 @@ namespace Gnonograms {
                          bool stepwise = false) {
 
         int simple_result = simple_solver (debug,
-//~                                            true,
                                            should_check_solution,
                                            stepwise);
 
         if (simple_result == 0 && use_advanced) {
             CellState[] grid_backup =  new CellState[rows * cols];
-            return advanced_solver (grid_backup, debug, 9999, unique_only, use_ultimate);
+            return advanced_solver (grid_backup,
+                                    use_ultimate,
+                                    debug,
+                                    9999,
+                                    unique_only);
         }
 
         if (rows == 1) {
@@ -152,8 +152,8 @@ namespace Gnonograms {
     private uint max_turns;
     private bool should_check_solution;
 
-    static int GUESSES_BEFORE_ASKING  =  1000000;
-    static int MAX_PASSES  =  100;
+    static int GUESSES_BEFORE_ASKING = 500;
+    static int MAX_PASSES = 100;
 
     /** Returns -1 to indicate an error - TODO use throw error instead **/
     private int simple_solver (bool debug,
@@ -256,10 +256,10 @@ namespace Gnonograms {
         If first guess does not lead to solution leave unknown and choose another cell
     **/
     private int advanced_solver (CellState[] grid_backup,
-                                bool debug,
-                                int max_guesswork,
-                                bool unique_only,
-                                bool use_ultimate = true) {
+                                 bool use_ultimate = true,
+                                 bool debug = false,
+                                 int max_guesswork = 999,
+                                 bool unique_only = false) {
 
         int simple_result = 0;
         int wraps = 0;
@@ -278,7 +278,7 @@ namespace Gnonograms {
         max_turns = initial_max_turns;
         guesses = 0;
 
-        trial_cell = {0, - 1, initial_cell_state};
+        trial_cell = { 0, -1, initial_cell_state };
 
         this.save_position (grid_backup);
 
@@ -315,11 +315,12 @@ namespace Gnonograms {
 
             grid.set_data_from_cell (trial_cell);
 
-            simple_result = simple_solver (false,
-                                           false,
-                                           false); //only debug advanced part, ignore errors
+            simple_result = simple_solver (false, // not debug
+                                           false, // do not check solution
+                                           false); // not stepwise
 
             if (simple_result > 0) {
+
                 if (unique_only) { //unique solutions must be solved by contradiction.
                     changed_count++;
                     simple_result = 0;
@@ -335,9 +336,9 @@ namespace Gnonograms {
                 changed = true;
                 changed_count++; //worth trying another cycle
 
-                simple_result = simple_solver (false,
-                                               false,
-                                               false); //can we solve now?
+                simple_result = simple_solver (false, // not debug
+                                               false, // do not check solution
+                                               false); // not stepwise
 
                 if (simple_result == 0) { //no we cant
                     this.save_position (grid_backup); //update grid store
@@ -347,8 +348,6 @@ namespace Gnonograms {
                 } else {
                     return -1; //starting point was invalid
                 }
-            } else {
-                continue; //guess again
             }
         }
 
@@ -449,6 +448,16 @@ namespace Gnonograms {
       * have a unique solution so its utility is debatable.
     **/
     private int ultimate_solver(CellState[] grid_store, int guesses) {
+        load_position (grid_store); //return to last valid state
+
+        if (!Utils.show_confirm_dialog(_("Start Ultimate solver?\n This can take a long time and may not work"))) {
+            return Gnonograms.FAILED_PASSES;
+        }
+
+        return permute (grid_store, guesses);
+    }
+
+    private int permute (CellState[] grid_store, int guesses) {
         int advanced_result = -99;
         int simple_result = -99;
         int limit = GUESSES_BEFORE_ASKING + guesses;
@@ -456,26 +465,19 @@ namespace Gnonograms {
         uint max_value = Gnonograms.FAILED_PASSES;
         uint perm_reg = 0;
 
-        load_position (grid_store); //return to last valid state
+        CellState[] grid_backup2 = new CellState[rows * cols];
+        CellState[] guess = {};
 
         for (int i = 0; i < n_regions; i++) {
             regions[i].set_to_initial_state();
         }
 
-        simple_solver (false,
-                       false,
-                       false); //make sure region state correct
-
-        show_solver_grid();
-
-        if (!Utils.show_confirm_dialog(_("Start Ultimate solver?\n This can take a long time and may not work"))) {
-            return Gnonograms.FAILED_PASSES;
-        }
-
-        CellState[] grid_backup2 = new CellState[rows * cols];
-        CellState[] guess = {};
+        simple_solver (false, // not debug
+                       false, // do not check solution
+                       false); // not stepwise
 
         while (true) {
+
             perm_reg = choose_permute_region (ref max_value);
 
             if (perm_reg < 0) {
@@ -509,7 +511,7 @@ namespace Gnonograms {
 
                 if (guesses > limit) {
 
-                    if (Utils.show_confirm_dialog (_("This is taking a long time!")+"\n"+_("Keep trying?"))) {
+                    if (Utils.show_confirm_dialog (_("This is taking a long time!")+ "\n" +_("Keep trying?"))) {
                         limit += GUESSES_BEFORE_ASKING;
                     } else {
                         return Gnonograms.FAILED_PASSES;
@@ -520,16 +522,12 @@ namespace Gnonograms {
 
                 grid.set_array (idx, is_column, guess, start);
 
-                simple_result = simple_solver (false,
-                                               false,
-                                               false);
+                simple_result = simple_solver (false, // not debug
+                                               false, // do not check solution
+                                               false); // not stepwise
 
                 if (simple_result == 0) {
-                    advanced_result = advanced_solver (grid_store,
-                                                       false,
-                                                       99,
-                                                       false,
-                                                       false);
+                    advanced_result = advanced_solver (grid_store, false);
 
                     if (advanced_result > 0 && advanced_result < Gnonograms.FAILED_PASSES) {
                         return advanced_result; //solution found
@@ -569,7 +567,7 @@ namespace Gnonograms {
         uint current_value;
 
         for (uint r = 0; r < n_regions; r++) {
-            current_value = regions[r].value_as_permute_region ();
+            current_value = regions[r].value_as_permute_region;
 
             if (current_value == 0) {
                 continue;

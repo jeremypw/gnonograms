@@ -165,7 +165,6 @@ public class Controller : GLib.Object {
         view.open_game_request.connect (on_open_game_request);
         view.solve_this_request.connect (on_solve_this_request);
         view.restart_request.connect (on_restart_request);
-        solver.show_solver_grid.connect (on_show_solver_grid);
 
         restore_settings (); /* May change load_game_dir and save_game_dir */
         restore_saved_state ();
@@ -277,10 +276,14 @@ public class Controller : GLib.Object {
         return passes;
     }
 
+    /** Generate a random, soluble puzzle (simple and unique solution only) **/
     private int generate_game (uint grd) {
-        model.fill_random (grd); //fills solution grid
-        /* Currently only want simple and unique solutions */
-        return solve_game (false, false, false, false, true); // no start grid, dont use labels, no advanced
+        model.fill_random (grd);
+        return solve_game (false, // no start_grid
+                           false, // use model
+                           false, // no advanced solutions
+                           false, // no ultimate solutions
+                           true); // unique solutions only
     }
 
 
@@ -437,7 +440,11 @@ public class Controller : GLib.Object {
                 model.set_row_data_from_string (i, reader.solution[i]);
             }
         } else {
-            int passes = solve_game (false, true, true, false, true);
+            int passes = solve_game (false, // no startgrid
+                                     true, // use loaded labels, not model
+                                     true, // use advanced solver
+                                     false, // do not use ultimate solver (to time consuming for loading)
+                                     false); // do not insist unique solution exists
 
             if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
                 set_model_from_solver ();
@@ -535,7 +542,16 @@ public class Controller : GLib.Object {
     }
 
     /*** Solver related functions ***/
+    /********************************/
 
+    /** Solve a puzzle
+      * @use_startgrid: continue solving partially filled grid.
+      * @use_labels: use text clues from view labels rather than from model (used
+      * for solving manually entered games (if implemented).
+      * @use_advanced: If simple solver fails, continue with advanced solver.
+      * @use_ultimate: I advanced solver fails continue with ultimate solver (time consuming).
+      * @unique_only: Only accept unique solutions (otherwise puzzle regarded insoluble).
+    **/
     private int solve_game (bool use_startgrid,
                             bool use_labels,
                             bool use_advanced,
@@ -545,6 +561,7 @@ public class Controller : GLib.Object {
         int passes = -1; //indicates error - TODO use throw error
 
         if (prepare_to_solve (use_startgrid, use_labels)) {
+            /* Single row puzzles used for development and debugging */
             passes = solver.solve_it (rows == 1, use_advanced, use_ultimate, unique_only);
         } else {
             critical ("could not prepare solver");
@@ -553,7 +570,8 @@ public class Controller : GLib.Object {
         return passes;
     }
 
-    private bool prepare_to_solve (bool use_startgrid, bool use_labels) {
+    /** Initialize solver **/
+    private bool prepare_to_solve (bool use_startgrid, bool use_labels = false) {
         My2DCellArray? startgrid = null;
 
         if (use_startgrid) {
@@ -592,10 +610,6 @@ public class Controller : GLib.Object {
 
     private uint on_check_errors_request () {
         return model.count_errors ();
-    }
-
-    private void on_show_solver_grid () {
-
     }
 
     private void on_moved (Cell cell) {
@@ -687,13 +701,22 @@ public class Controller : GLib.Object {
         game_state = GameState.SOLVING;
 
         /* Look for unique simple solution */
-        var passes = solve_game (false, true, false, false, false);
+        var passes = solve_game (false, // no startgrid
+                                 true, // use labels not model
+                                 false, // no advanced solutions
+                                 false, // no ultimate solutions
+                                 true); // must be unique solution
 
         if (passes > 0  && passes < Gnonograms.FAILED_PASSES) {
             msg =  _("Simple solution found in %i passes.  Graded as %s").printf (passes, passes_to_grade_description (passes));
         } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
             msg = _("No simple solution found");
-            passes = solve_game (false, true, true, false, false);
+            passes = solve_game (false, // no startgrid
+                                 true, // use labels not model
+                                 true, // use advanced solver
+                                 true, // use ultimate if necessary (option cancel given)
+                                 false); // do not insist on unique
+
             if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
                 for (int r = 0; r < rows; r++) {
                     for (int c = 0; c < cols; c++) {
@@ -725,6 +748,8 @@ public class Controller : GLib.Object {
         }
     }
 
+    /** Utilities **/
+    /***************/
     private int grade_to_passes (uint grd) {
         return ((int)grd + 1) * 2;
     }

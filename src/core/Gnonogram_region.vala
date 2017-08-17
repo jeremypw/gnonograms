@@ -51,6 +51,17 @@ public class Region { /* Not a GObject, to reduce weight */
     public int block_total { get; private set; }  //total cells to be filled
     public string message;
 
+    private uint _value_as_permute_region = uint.MAX;
+    public uint value_as_permute_region {
+        get {
+            if (_value_as_permute_region == uint.MAX) {
+                _value_as_permute_region = calc_value_as_permute_region ();
+            }
+
+            return _value_as_permute_region;
+        }
+    }
+
     public Region (My2DCellArray grid) {
         this.grid = grid;
 
@@ -98,6 +109,8 @@ public class Region { /* Not a GObject, to reduce weight */
         if (n_cells == 1) { /* Ignore single cell regions (for debugging) */
             this.is_completed = true;
         }
+
+        _value_as_permute_region = uint.MAX;
     }
 
     public void set_to_initial_state () {
@@ -339,7 +352,7 @@ public class Region { /* Not a GObject, to reduce weight */
         return sb.str;
     }
 
-    public uint value_as_permute_region () {
+    private uint calc_value_as_permute_region () {
         if (is_completed) {
             return 0;
         }
