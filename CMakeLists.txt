@@ -16,11 +16,9 @@ set (DATADIR "${CMAKE_INSTALL_PREFIX}/share")
 set (PKGDATADIR "${DATADIR}/gnonograms-elementary")
 set (DOLLAR "$")
 
-set(CMAKE_BUILD_TYPE Debug)
-
 configure_file (${CMAKE_SOURCE_DIR}/config.h.cmake ${CMAKE_BINARY_DIR}/config.h)
 
-add_definitions ("-w")
+add_definitions (-w -O3)
 add_definitions (-DGETTEXT_PACKAGE=\"${GETTEXT_PACKAGE}\")
 
 find_package(PkgConfig)
