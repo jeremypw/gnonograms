@@ -66,7 +66,7 @@ public class Controller : GLib.Object {
     private GLib.Settings saved_state;
     private Gee.Deque<Move> back_stack;
     private Gee.Deque<Move> forward_stack;
-    private const int MAXTRIES = 5;
+    private const int MAXTRIES = 500;
     private string save_game_dir;
     private string current_game_path;
     private string? game_path = null;

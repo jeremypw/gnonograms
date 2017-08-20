@@ -208,7 +208,7 @@ namespace Gnonograms {
             return pass;
         }
 
-        if (pass >= 100) {
+        if (pass >= MAX_PASSES) {
             return Gnonograms.FAILED_PASSES;
         }
 
@@ -278,7 +278,7 @@ namespace Gnonograms {
         max_turns = initial_max_turns;
         guesses = 0;
 
-        trial_cell = { 0, -1, initial_cell_state };
+        trial_cell = { 0, uint.MAX, initial_cell_state };
 
         this.save_position (grid_backup);
 
@@ -286,7 +286,7 @@ namespace Gnonograms {
             trial_cell = make_guess (trial_cell);
             guesses++;
 
-            if (trial_cell.col == -1) { //run out of guesses
+            if (trial_cell.col == uint.MAX) { //run out of guesses
                 if (changed) {
                     if (changed_count > max_guesswork) {
                         return 0;
@@ -394,8 +394,8 @@ namespace Gnonograms {
       * as critical cells most likely in this region.
     **/
     private Cell make_guess (Cell cell) {
-        uint r = cell.row;
-        uint c = cell.col;
+        int r = (int)(cell.row);
+        int c = (int)(cell.col);
 
         while (true) {
             r += rdir;
@@ -427,13 +427,13 @@ namespace Gnonograms {
 
             if (turn > max_turns) { //stay near edge until no more changes
                 cell.row = 0;
-                cell.col = -1;
+                cell.col = uint.MAX;
                 break;
             }
 
             if (grid.get_data_from_rc (r, c) == CellState.UNKNOWN) {
-                cell.row = r;
-                cell.col = c;
+                cell.row = (uint)r;
+                cell.col = (uint)c;
                 break;
             }
         }
