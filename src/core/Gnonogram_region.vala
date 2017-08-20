@@ -85,10 +85,6 @@ public class Region { /* Not a GObject, to reduce weight */
     }
 
     public void initialize (uint index, bool is_column, uint n_cells, string clue) {
-        if (n_cells == 1) { /* Ignore single cell regions (for debugging) */
-            this.is_completed = true;
-        }
-
         this.index = index;
         this.is_column = is_column;
         this.n_cells = (int)n_cells;
@@ -96,14 +92,14 @@ public class Region { /* Not a GObject, to reduce weight */
 
         temp_status = new CellState[n_cells];
         temp_status2 = new CellState[n_cells];
-        int[] tmpblcks = Utils.block_array_from_clue (clue);
-        n_blocks = tmpblcks.length;
+        int[] clue_blocks = Utils.block_array_from_clue (clue);
+        n_blocks = clue_blocks.length;
         can_be_empty_pointer = n_blocks;  //flag for cell that may be empty
         is_finished_pointer = n_blocks + 1;  //flag for finished cell (filled or empty?)
         block_total = 0;
 
         for (int i = 0; i < n_blocks; i++) {
-          blocks[i] = tmpblcks[i];
+          blocks[i] = clue_blocks[i];
           block_total = block_total + blocks[i];
         }
 
@@ -988,7 +984,13 @@ public class Region { /* Not a GObject, to reduce weight */
                     set_cell_empty (i);
                 }
 
+            }
+
+            if (match_clue ()) {
                 is_completed = true;
+            } else {
+                in_error = true;
+                return false;
             }
 
             return true;
@@ -1556,10 +1558,10 @@ public class Region { /* Not a GObject, to reduce weight */
         return range;  //number of ranges  - not last index!
     }
 
-    private bool check_number_of_blocks () {
+    private bool match_clue () {
         //only called when region is completed. Checks whether number of blocks is correct
 
-        int count = 0, idx = 0;
+        int count = 0, idx = 0, blk_ptr = 0, blk_counter = 0;
 
         while (idx < n_cells) {
 
@@ -1574,7 +1576,15 @@ public class Region { /* Not a GObject, to reduce weight */
             }
 
             while (idx < n_cells && status[idx] != CellState.EMPTY) {
+                blk_counter++;
                 idx++;
+            }
+
+            if (blocks[blk_ptr] != blk_counter) {
+                return false;
+            } else {
+                blk_ptr++;
+                blk_counter=0;
             }
         }
 
@@ -2040,12 +2050,13 @@ public class Region { /* Not a GObject, to reduce weight */
             if (filled + completed > block_total) {
                 record_error ("totals changed", "too many filled cells");
             } else if (this.unknown == 0) {
-                this.is_completed = true;
-
                 if (filled + completed < block_total) {
                     record_error ("totals changed", "too few filled cells  - " + filled.to_string ());
+                } else if (match_clue ()) {
+                    this.is_completed = true;
                 } else {
-                    check_number_of_blocks ();  //generates its own error
+                    in_error = true;
+                    return false;
                 }
             }
         }
