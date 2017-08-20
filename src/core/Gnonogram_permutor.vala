@@ -21,6 +21,10 @@
  */
 
 namespace Gnonograms {
+
+/** Takes one region with its clue and runs through all possible patterns of given blocks
+ *  in that region.
+ **/
 public class Permutor {
     public CellState[] perm;
     public bool valid = false;

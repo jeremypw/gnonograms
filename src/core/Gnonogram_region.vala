@@ -356,6 +356,9 @@ public class Region { /* Not a GObject, to reduce weight */
         return sb.str;
     }
 
+    /** Try and choose more restricted regions to permute to reduce number of possible
+      * combinations.
+    **/
     private uint calc_value_as_permute_region () {
         if (is_completed) {
             return 0;

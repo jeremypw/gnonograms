@@ -107,24 +107,24 @@ namespace Gnonograms {
                          bool unique_only = false,
                          bool stepwise = false) {
 
-        int simple_result = simple_solver (debug,
-                                           should_check_solution,
-                                           stepwise);
+        int result = simple_solver (debug,
+                                    should_check_solution,
+                                    stepwise);
 
-        if (simple_result == 0 && use_advanced) {
+        if (result == 0 && use_advanced) {
             CellState[] grid_backup =  new CellState[rows * cols];
-            return advanced_solver (grid_backup,
-                                    use_ultimate,
-                                    debug,
-                                    9999,
-                                    unique_only);
+            result = advanced_solver (grid_backup,
+                                      use_ultimate,
+                                      debug,
+                                      9999,
+                                      unique_only);
         }
 
         if (rows == 1) {
             stdout.printf (regions[0].to_string ());  //used for debugging
         }
 
-        return simple_result;
+        return result;
     }
 
     public bool solved () {
@@ -153,7 +153,7 @@ namespace Gnonograms {
     private bool should_check_solution;
 
     static int GUESSES_BEFORE_ASKING = 500;
-    static int MAX_PASSES = 100;
+    static int MAX_PASSES = 1000;
 
     /** Returns -1 to indicate an error - TODO use throw error instead **/
     private int simple_solver (bool debug,
