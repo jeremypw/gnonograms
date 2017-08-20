@@ -463,7 +463,7 @@ namespace Gnonograms {
         int limit = GUESSES_BEFORE_ASKING + guesses;
 
         uint max_value = Gnonograms.FAILED_PASSES;
-        uint perm_reg = 0;
+        uint permute_region = 0;
 
         CellState[] grid_backup2 = new CellState[rows * cols];
         CellState[] guess = {};
@@ -478,23 +478,23 @@ namespace Gnonograms {
 
         while (true) {
 
-            perm_reg = choose_permute_region (ref max_value);
+            permute_region = choose_permute_region (ref max_value);
 
-            if (perm_reg < 0) {
+            if (permute_region < 0) {
                 stdout.printf ("No perm region found\n");
                 break;
             }
 
             int start;
-            var p = regions[perm_reg].get_permutor (out start);
+            var p = regions[permute_region].get_permutor (out start);
 
             if (p == null || p.valid == false) {
                 stdout.printf ("No valid permutator generated\n");
                 break;
             }
 
-            bool is_column = regions[perm_reg].is_column;
-            uint idx = regions[perm_reg].index;
+            bool is_column = regions[permute_region].is_column;
+            uint idx = regions[permute_region].index;
 
             //try advanced solver with every possible pattern in this range.
 
@@ -518,7 +518,7 @@ namespace Gnonograms {
                     }
                 }
 
-                guess = p.get();
+                guess = p.permutation;
 
                 grid.set_array (idx, is_column, guess, start);
 
@@ -562,7 +562,7 @@ namespace Gnonograms {
     **/
     private uint choose_permute_region (ref uint max_value) {
         uint best_value = 0;
-        uint perm_reg = 0;
+        uint permute_region = 0;
         uint edg; /* A measure of how close to the edge the region is - modifies value. */
         uint current_value;
 
@@ -579,19 +579,19 @@ namespace Gnonograms {
                 edg = uint.min (r - rows, rows + cols - r - 1);
             }
 
-            edg++;
+            edg = uint.min (3, 1 + edg);
 
-            current_value = current_value * 100 / edg;
+            current_value = current_value / edg;
 
             if (current_value > best_value && current_value < max_value) {
                 best_value = current_value;
-                perm_reg = r;
+                permute_region = r;
             }
         }
 
         max_value = best_value;
 
-        return perm_reg;
+        return permute_region;
     }
 }
 }

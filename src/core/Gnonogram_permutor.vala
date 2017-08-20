@@ -1,4 +1,4 @@
-/* Gnonogram permutor class for Gnonograms3
+/* Gnonogram permutationutor class for Gnonograms3
  * generates all possible solutions for a given clue.
  * Copyright (C) 2010-2011  Jeremy Wootten
  *
@@ -26,35 +26,30 @@ namespace Gnonograms {
  *  in that region.
  **/
 public class Permutor {
-    public CellState[] perm;
-    public bool valid = false;
+    /** PUBLIC **/
+    public CellState[] permutation { get; private set; }
+    public bool valid { get; private set; default = false; }
 
-    private int _freedom;
-    private int n_blocks;
-    private int[] blocks;
-    private int size;
-    private int[] range_start; // earliest possible start point for block
-    private int[] range_end; // latest possible start point for block
-    private int[] block_start; //current start point for block
-
-    public Permutor (int size, string clue) {
-        this.size = size;
-        this.blocks = Utils.block_array_from_clue (clue);
-        perm = new CellState[size];
-        int extent = 0; n_blocks = blocks.length;
+    public Permutor (int _size, string _clue) {
+        size = _size;
+        blocks = Utils.block_array_from_clue (_clue);
+        n_blocks = blocks.length;
         range_start = new int[n_blocks];
         range_end = new int[n_blocks];
         block_start = new int[n_blocks];
+        permutation = new CellState[size];
+
+        int extent = 0;
 
         foreach (int b in blocks) {
             extent += (b + 1);
         }
 
         extent--;
-        _freedom = size-extent;
+        freedom = size - extent;
 
-        if (_freedom<0) {
-            warning ("Invalid permutator");
+        if (freedom < 0) {
+            warning ("Invalid permutor");
         } else {
             valid = true;
         }
@@ -66,7 +61,7 @@ public class Permutor {
         for (int b = 0; b < n_blocks; b++) {
             range_start[b] = start;
             block_start[b] = range_start[b];
-            range_end[b] = start + _freedom;
+            range_end[b] = start + freedom;
             start += (blocks[b] + 1);
         }
 
@@ -84,7 +79,7 @@ public class Permutor {
                 }
             } else {
                 block_start[b]++;
-                make_perm ();
+                make_permutation ();
                 return true;
             }
         }
@@ -92,30 +87,36 @@ public class Permutor {
         return false;
     }
 
-    private void make_perm () {
+    private void make_permutation () {
         for (int idx = 0; idx < size; idx++) {
-            perm[idx] = CellState.EMPTY;
+            permutation[idx] = CellState.EMPTY;
         }
 
         for (int b = 0; b < n_blocks; b++) {
             for (int idx = block_start[b]; idx < block_start[b] + blocks[b]; idx++) {
-                perm[idx] = CellState.FILLED;
+                permutation[idx] = CellState.FILLED;
             }
         }
-    }
-
-    public CellState[] get () {
-        return perm;
     }
 
     public string to_string () {
         var sb  = new StringBuilder ("");
 
-        foreach (CellState cs in perm) {
+        foreach (CellState cs in permutation) {
             sb.append (((int)cs).to_string ());
         }
 
         return sb.str;
     }
+
+    /** PRIVATE **/
+    private int freedom;
+    private int n_blocks;
+    private int size;
+
+    private int[] blocks;
+    private int[] range_start; // earliest possible start point for block
+    private int[] range_end; // latest possible start point for block
+    private int[] block_start; //current start point for block
 }
 }
