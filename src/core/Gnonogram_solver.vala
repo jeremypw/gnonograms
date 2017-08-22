@@ -101,19 +101,18 @@ namespace Gnonograms {
       * procedures. Also specify whether in debugging mode and whether to solve one step
       * at a time (used for hinting if implemented).
     **/
-    public int solve_it (bool debug = false,
-                         bool use_advanced = true,
+    public async int solve_it (bool debug = false,
+                               bool use_advanced = true,
                          bool use_ultimate = true,
                          bool unique_only = false,
                          bool stepwise = false) {
-
-        int result = simple_solver (debug,
+        int result = yield simple_solver (debug,
                                     should_check_solution,
                                     stepwise);
 
         if (result == 0 && use_advanced) {
             CellState[] grid_backup =  new CellState[rows * cols];
-            result = advanced_solver (grid_backup,
+            result = yield advanced_solver (grid_backup,
                                       use_ultimate,
                                       debug,
                                       9999,
@@ -156,10 +155,24 @@ namespace Gnonograms {
     static int MAX_PASSES = 1000;
 
     /** Returns -1 to indicate an error - TODO use throw error instead **/
-    private int simple_solver (bool debug,
+    private async int simple_solver (bool debug,
                                bool should_check_solution,
                                bool stepwise) {
 
+        int result = 0;
+        Idle.add (() => {
+            result = do_simple_solve (debug, should_check_solution, stepwise);
+            simple_solver.callback ();
+            return false;
+        });
+
+        yield;
+        return result;
+    }
+
+    private int do_simple_solve (bool debug,
+                               bool should_check_solution,
+                               bool stepwise) {
         bool changed = true;
         int pass = 1;
 
@@ -215,7 +228,6 @@ namespace Gnonograms {
         return 0;
     }
 
-
     private bool differs_from_solution (Region r) {
         bool is_column = r.is_column;
         uint index = r.index;
@@ -255,12 +267,11 @@ namespace Gnonograms {
         continue simple solve and if still no solution, continue with another guess.
         If first guess does not lead to solution leave unknown and choose another cell
     **/
-    private int advanced_solver (CellState[] grid_backup,
+    private async int advanced_solver (CellState[] grid_backup,
                                  bool use_ultimate = true,
                                  bool debug = false,
                                  int max_guesswork = 999,
                                  bool unique_only = false) {
-
         int simple_result = 0;
         int wraps = 0;
         int guesses = 0;
@@ -315,7 +326,7 @@ namespace Gnonograms {
 
             grid.set_data_from_cell (trial_cell);
 
-            simple_result = simple_solver (false, // not debug
+            simple_result = yield simple_solver (false, // not debug
                                            false, // do not check solution
                                            false); // not stepwise
 
@@ -336,7 +347,7 @@ namespace Gnonograms {
                 changed = true;
                 changed_count++; //worth trying another cycle
 
-                simple_result = simple_solver (false, // not debug
+                simple_result = yield simple_solver (false, // not debug
                                                false, // do not check solution
                                                false); // not stepwise
 
@@ -357,7 +368,11 @@ namespace Gnonograms {
         }
 
         if (use_ultimate) {
-            return ultimate_solver (grid_backup, guesses);
+            int result = Gnonograms.FAILED_PASSES;
+            ultimate_solver.begin (grid_backup, guesses, (obj, res) => {
+                result = ultimate_solver.end (res);
+            });
+            return yield ultimate_solver (grid_backup, guesses);
         } else {
             return Gnonograms.FAILED_PASSES;
         }
@@ -447,17 +462,20 @@ namespace Gnonograms {
       * Puzzles requiring this method are unlikely to solvable by a human and are unlikely to
       * have a unique solution so its utility is debatable.
     **/
-    private int ultimate_solver(CellState[] grid_store, int guesses) {
+    private async int ultimate_solver(CellState[] grid_store, int guesses) {
         load_position (grid_store); //return to last valid state
 
         if (!Utils.show_confirm_dialog(_("Start Ultimate solver?\n This can take a long time and may not work"))) {
             return Gnonograms.FAILED_PASSES;
         }
 
-        return permute (grid_store, guesses);
+        int result = Gnonograms.FAILED_PASSES;
+
+        result = yield permute (grid_store, guesses);
+        return result;
     }
 
-    private int permute (CellState[] grid_store, int guesses) {
+    private async int permute (CellState[] grid_store, int guesses) {
         int advanced_result = -99;
         int simple_result = -99;
         int limit = GUESSES_BEFORE_ASKING + guesses;
@@ -472,7 +490,7 @@ namespace Gnonograms {
             regions[i].set_to_initial_state();
         }
 
-        simple_solver (false, // not debug
+        yield simple_solver (false, // not debug
                        false, // do not check solution
                        false); // not stepwise
 
@@ -488,7 +506,7 @@ namespace Gnonograms {
             int start;
             var p = regions[permute_region].get_permutor (out start);
 
-            if (p == null || p.valid == false) {
+            if (p == null || !p.valid == false) {
                 stdout.printf ("No valid permutator generated\n");
                 break;
             }
@@ -522,12 +540,12 @@ namespace Gnonograms {
 
                 grid.set_array (idx, is_column, guess, start);
 
-                simple_result = simple_solver (false, // not debug
-                                               false, // do not check solution
-                                               false); // not stepwise
+                simple_result = yield simple_solver (false, // not debug
+                                                    false, // do not check solution
+                                                    false); // not stepwise
 
                 if (simple_result == 0) {
-                    advanced_result = advanced_solver (grid_store, false);
+                    advanced_result = yield advanced_solver (grid_store, false);
 
                     if (advanced_result > 0 && advanced_result < Gnonograms.FAILED_PASSES) {
                         return advanced_result; //solution found
@@ -549,7 +567,7 @@ namespace Gnonograms {
                 regions[i].set_to_initial_state();
             }
 
-            simple_solver (false,
+            yield simple_solver (false,
                            false,
                            false);
         }
@@ -557,7 +575,7 @@ namespace Gnonograms {
         return 0;
     }
 
-    /** Try to fund a region of the puzzle most likely to yield a solution
+    /** Try to find a region of the puzzle most likely to yield a solution
       * (or contradiction) if permuted.
     **/
     private uint choose_permute_region (ref uint max_value) {

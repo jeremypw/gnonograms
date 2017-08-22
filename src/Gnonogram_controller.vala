@@ -34,23 +34,31 @@ public class Controller : GLib.Object {
     public string load_game_dir { get; private set; }
 
     public Controller (File? game = null) {
-        bool success = false;
+//~         bool success = false;
 
         if (game != null) {
-            success = load_game (game, true);
+            load_game.begin (game, true, (obj, res) => {
+                if (!load_game.end (res)) {
+                    new_or_random_game ();
+                }
+            });
         } else {
-            success = restore_game ();
-        }
-
-        if (!success) {
-            if (is_solving && title == null) {
-                new_random_game ();
-            } else {
-                new_game ();
-            }
+            restore_game.begin ((obj, res) => {
+                if (!load_game.end (res)) {
+                    new_or_random_game ();
+                }
+            });
         }
 
         view.show_all ();
+    }
+
+    private void new_or_random_game () {
+        if (is_solving && title == null) {
+            new_random_game.begin ();
+        } else {
+            new_game ();
+        }
     }
 
     public void quit () {
@@ -217,7 +225,7 @@ public class Controller : GLib.Object {
         title = _("Blank sheet");
     }
 
-    private void new_random_game() {
+    private async void new_random_game() {
         int passes = 0, count = 0;
         uint grd = grade; //grd may be reduced but this.grade always matches spin setting
         /* One row used to debug */
@@ -228,7 +236,7 @@ public class Controller : GLib.Object {
 
         while (count < limit) {
             count++;
-            passes = generate_simple_game (grade_to_passes (grd)); //tries max tries times
+            passes = yield generate_simple_game (grade_to_passes (grd)); //tries max tries times
 
             if (passes > grd || passes < 0) {
                 break;
@@ -258,7 +266,7 @@ public class Controller : GLib.Object {
         }
     }
 
-    private int generate_simple_game (uint grd) {
+    private async int generate_simple_game (uint grd) {
         /* returns 0 - failed to generate solvable game
          * returns value > 1 - generated game took value passes to solve
          * returns -1 - an error occurred in the solver
@@ -270,16 +278,16 @@ public class Controller : GLib.Object {
 
         while (passes == 0 && tries <= limit) {
             tries++;
-            passes = generate_game (grd);
+            passes = yield generate_game (grd);
         }
 
         return passes;
     }
 
     /** Generate a random, soluble puzzle (simple and unique solution only) **/
-    private int generate_game (uint grd) {
+    private async int generate_game (uint grd) {
         model.fill_random (grd);
-        return solve_game (false, // no start_grid
+        return yield solve_game (false, // no start_grid
                            false, // use model
                            false, // no advanced solutions
                            false, // no ultimate solutions
@@ -333,9 +341,9 @@ public class Controller : GLib.Object {
         }
     }
 
-    private bool restore_game () {
+    private async bool restore_game () {
         var current_game = File.new_for_path (current_game_path);
-        return load_game (current_game, false);
+        return yield load_game (current_game, false);
     }
 
     private string? write_game (string? path, bool save_state = false) {
@@ -369,7 +377,7 @@ public class Controller : GLib.Object {
         return file_writer.game_path;
     }
 
-    private bool load_game (File? game, bool update_load_dir) {
+    private async bool load_game (File? game, bool update_load_dir) {
         Filereader? reader = null;
 
         clear ();
@@ -388,7 +396,7 @@ public class Controller : GLib.Object {
             return false;
         }
 
-        if (reader.valid && load_common (reader) && load_position_extra (reader)) {
+        if (reader.valid && (yield load_common (reader)) && load_position_extra (reader)) {
             if (reader.state != GameState.UNDEFINED) {
                 game_state = reader.state;
             } else {
@@ -409,7 +417,7 @@ public class Controller : GLib.Object {
         return true;
     }
 
-    private bool load_common (Filereader reader) {
+    private async bool load_common (Filereader reader) {
         if (reader.has_dimensions) {
             if (reader.rows > MAXSIZE || reader.cols > MAXSIZE) {
                 reader.err_msg = (_("Dimensions too large"));
@@ -440,7 +448,7 @@ public class Controller : GLib.Object {
                 model.set_row_data_from_string (i, reader.solution[i]);
             }
         } else {
-            int passes = solve_game (false, // no startgrid
+            int passes = yield solve_game (false, // no startgrid
                                      true, // use loaded labels, not model
                                      true, // use advanced solver
                                      false, // do not use ultimate solver (to time consuming for loading)
@@ -552,7 +560,7 @@ public class Controller : GLib.Object {
       * @use_ultimate: I advanced solver fails continue with ultimate solver (time consuming).
       * @unique_only: Only accept unique solutions (otherwise puzzle regarded insoluble).
     **/
-    private int solve_game (bool use_startgrid,
+    private async int solve_game (bool use_startgrid,
                             bool use_labels,
                             bool use_advanced,
                             bool use_ultimate,
@@ -562,7 +570,7 @@ public class Controller : GLib.Object {
 
         if (prepare_to_solve (use_startgrid, use_labels)) {
             /* Single row puzzles used for development and debugging */
-            passes = solver.solve_it (rows == 1, use_advanced, use_ultimate, unique_only);
+            passes = yield solver.solve_it (rows == 1, use_advanced, use_ultimate, unique_only);
         } else {
             critical ("could not prepare solver");
         }
@@ -692,7 +700,7 @@ public class Controller : GLib.Object {
     }
 
     private void on_open_game_request () {
-        load_game (null, true); /* Will cause Filereader to ask for a location to open */
+        load_game.begin (null, true); /* Will cause Filereader to ask for a location to open */
     }
 
     private void on_solve_this_request () {
@@ -701,34 +709,39 @@ public class Controller : GLib.Object {
         game_state = GameState.SOLVING;
 
         /* Look for unique simple solution */
-        var passes = solve_game (false, // no startgrid
-                                 true, // use labels not model
-                                 false, // no advanced solutions
-                                 false, // no ultimate solutions
-                                 true); // must be unique solution
+        solve_game.begin (false, // no startgrid
+                          true, // use labels not model
+                          false, // no advanced solutions
+                          false, // no ultimate solutions
+                          true, // must be unique solution
+                          (obj, res) => {
+            int passes = solve_game.end (res);
 
-        if (passes > 0  && passes < Gnonograms.FAILED_PASSES) {
-            msg =  _("Simple solution found in %i passes.  Graded as %s").printf (passes, passes_to_grade_description (passes));
-        } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
-            msg = _("No simple solution found");
-            passes = solve_game (false, // no startgrid
-                                 true, // use labels not model
-                                 true, // use advanced solver
-                                 true, // use ultimate if necessary (option cancel given)
-                                 false); // do not insist on unique
-
-            if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
-                for (int r = 0; r < rows; r++) {
-                    for (int c = 0; c < cols; c++) {
-                        model.set_data_from_rc (r, c, solver.grid.get_data_from_rc (r, c));
-                    }
-                }
-                msg = msg + "\n" + _("Advanced solution found in %i passes.  Graded as %s").printf (passes, passes_to_grade_description (passes));
+            if (passes > 0  && passes < Gnonograms.FAILED_PASSES) {
+                msg =  _("Simple solution found in %i passes.  Graded as %s").printf (passes, passes_to_grade_description (passes));
+                after_solve_game (msg);
             } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
-                msg = msg + "\n" + _("No advanced solution found");
-            }
-        }
+                msg = _("No simple solution found");
+                solve_game.begin (false, // no startgrid
+                               true, // use labels not model
+                               true, // use advanced solver
+                               true, // use ultimate if necessary (option cancel given)
+                               false, // do not insist on unique
+                               (obj, res) => {
+                    passes = solve_game.end (res);
 
+                    if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
+                        msg = msg + "\n" + _("Advanced solution found in %i passes.  Graded as %s").printf (passes, passes_to_grade_description (passes));
+                    } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
+                        msg = msg + "\n" + _("No advanced solution found");
+                    }
+                    after_solve_game (msg);
+                });
+            }
+        });
+    }
+
+    private void after_solve_game (string msg) {
         view.send_notification (msg);
 
         for (int r = 0; r < rows; r++) {
@@ -736,6 +749,8 @@ public class Controller : GLib.Object {
                 model.set_data_from_rc (r, c, solver.grid.get_data_from_rc (r, c));
             }
         }
+
+        view.queue_draw ();
     }
 
     private void on_restart_request () {
