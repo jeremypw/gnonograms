@@ -60,6 +60,12 @@ public class Region { /* Not a GObject, to reduce weight */
 
             return _value_as_permute_region;
         }
+
+        set {
+            if (_value_as_permute_region < uint.MAX && _value_as_permute_region > 0) {
+                _value_as_permute_region = 0;
+            }
+        }
     }
 
     public Region (My2DCellArray grid) {

@@ -34,8 +34,6 @@ public class Controller : GLib.Object {
     public string load_game_dir { get; private set; }
 
     public Controller (File? game = null) {
-//~         bool success = false;
-
         if (game != null) {
             load_game.begin (game, true, (obj, res) => {
                 if (!load_game.end (res)) {
@@ -226,7 +224,8 @@ public class Controller : GLib.Object {
     }
 
     private async void new_random_game() {
-        int passes = 0, count = 0;
+        uint passes = 0;
+        uint count = 0;
         uint grd = grade; //grd may be reduced but this.grade always matches spin setting
         /* One row used to debug */
         var limit = rows == 1 ? 1 : 100;
@@ -266,13 +265,13 @@ public class Controller : GLib.Object {
         }
     }
 
-    private async int generate_simple_game (uint grd) {
+    private async uint generate_simple_game (uint grd) {
         /* returns 0 - failed to generate solvable game
          * returns value > 1 - generated game took value passes to solve
          * returns -1 - an error occurred in the solver
         */
         uint tries = 0;
-        int passes = 0;
+        uint passes = 0;
 
         uint limit = rows == 1 ? 1 : MAXTRIES;
 
@@ -285,7 +284,7 @@ public class Controller : GLib.Object {
     }
 
     /** Generate a random, soluble puzzle (simple and unique solution only) **/
-    private async int generate_game (uint grd) {
+    private async uint generate_game (uint grd) {
         model.fill_random (grd);
         return yield solve_game (false, // no start_grid
                            false, // use model
@@ -448,7 +447,7 @@ public class Controller : GLib.Object {
                 model.set_row_data_from_string (i, reader.solution[i]);
             }
         } else {
-            int passes = yield solve_game (false, // no startgrid
+            uint passes = yield solve_game (false, // no startgrid
                                      true, // use loaded labels, not model
                                      true, // use advanced solver
                                      false, // do not use ultimate solver (to time consuming for loading)
@@ -560,13 +559,13 @@ public class Controller : GLib.Object {
       * @use_ultimate: I advanced solver fails continue with ultimate solver (time consuming).
       * @unique_only: Only accept unique solutions (otherwise puzzle regarded insoluble).
     **/
-    private async int solve_game (bool use_startgrid,
+    private async uint solve_game (bool use_startgrid,
                             bool use_labels,
                             bool use_advanced,
                             bool use_ultimate,
                             bool unique_only) {
 
-        int passes = -1; //indicates error - TODO use throw error
+        uint passes = uint.MAX; //indicates error - TODO use throw error
 
         if (prepare_to_solve (use_startgrid, use_labels)) {
             /* Single row puzzles used for development and debugging */
@@ -715,10 +714,10 @@ public class Controller : GLib.Object {
                           false, // no ultimate solutions
                           true, // must be unique solution
                           (obj, res) => {
-            int passes = solve_game.end (res);
+            uint passes = solve_game.end (res);
 
             if (passes > 0  && passes < Gnonograms.FAILED_PASSES) {
-                msg =  _("Simple solution found in %i passes.  Graded as %s").printf (passes, passes_to_grade_description (passes));
+                msg =  _("Simple solution found in %u passes.  Graded as %s").printf (passes, passes_to_grade_description (passes));
                 after_solve_game (msg);
             } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
                 msg = _("No simple solution found");
@@ -731,7 +730,7 @@ public class Controller : GLib.Object {
                     passes = solve_game.end (res);
 
                     if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
-                        msg = msg + "\n" + _("Advanced solution found in %i passes.  Graded as %s").printf (passes, passes_to_grade_description (passes));
+                        msg = msg + "\n" + _("Advanced solution found in %u passes.  Graded as %s").printf (passes, passes_to_grade_description (passes));
                     } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
                         msg = msg + "\n" + _("No advanced solution found");
                     }
@@ -769,8 +768,8 @@ public class Controller : GLib.Object {
         return ((int)grd + 1) * 2;
     }
 
-    private string passes_to_grade_description (int passes) requires (passes >= 1) {
-        var difficulty = (uint)(passes / 2 - 0.4); /* Ensure >= 0 */
+    private string passes_to_grade_description (uint passes) {
+        var difficulty = passes / 2;
         return difficulty_to_string ((Difficulty)difficulty);
     }
 }
