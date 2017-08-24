@@ -527,7 +527,7 @@ public class View : Gtk.ApplicationWindow {
         return true;
     }
 
-    private bool on_grid_scroll_event (Gdk.EventScroll event) {
+    private bool on_scroll_event (Gdk.EventScroll event) {
         set_mods (event.state);
 
         if (control_pressed) {

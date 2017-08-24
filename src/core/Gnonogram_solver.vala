@@ -463,7 +463,6 @@ namespace Gnonograms {
     **/
     private async uint ultimate_solver(CellState[] grid_store) {
         load_position (grid_store); //return to last valid state
-        warning ("ultimate solver");
         return yield permute (grid_store);
     }
 

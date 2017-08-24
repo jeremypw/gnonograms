@@ -229,23 +229,25 @@ namespace Utils {
             }
         }
 
-        if (start_path != null) {
-            var start = File.new_for_path (start_path);
-
-            if (start.query_file_type (GLib.FileQueryInfoFlags.NONE, null) == FileType.DIRECTORY) {
-                dialog.set_current_folder (start_path); //so Recently used folder not displayed
-            }
-        }
+        dialog.local_only = false;
 
         //only need access to built-in puzzle directory if loading a .gno puzzle
         if (action == Gtk.FileChooserAction.OPEN && filters != null && filters[0] == "*.gno") {
              dialog.add_button (_("Built in puzzles"), Gtk.ResponseType.NONE);
         }
 
+        /* Will silently fail if not a folder */
+        if (start_path != null) {
+            dialog.set_current_folder (start_path);
+        } else {
+            dialog.set_current_folder (get_app ().load_game_dir);
+        }
+
         int response;
 
         while (true) {
             response = dialog.run ();
+
             if (response == Gtk.ResponseType.NONE) {
                 dialog.set_current_folder (get_app ().load_game_dir);
             } else {

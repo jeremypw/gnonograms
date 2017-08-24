@@ -335,6 +335,7 @@ public class Controller : GLib.Object {
         }
 
         dir = settings.get_string ("save-game-dir");
+
         if (dir.length > 0) {
             save_game_dir = dir;
         }
@@ -378,7 +379,6 @@ public class Controller : GLib.Object {
 
     private async bool load_game (File? game, bool update_load_dir) {
         Filereader? reader = null;
-
         clear ();
 
         try {
