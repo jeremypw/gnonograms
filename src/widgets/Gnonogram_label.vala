@@ -42,9 +42,9 @@ class Label : Gtk.Label {
 
             /* Ensure grid remains square */
             if (vertical_text) {
-                set_size_request (int.max((int)(value * 2), 24), -1);
+                set_size_request (int.max((int)(value * 2), 8), -1);
             } else {
-                set_size_request (-1, int.max((int)(value * 2), 24));
+                set_size_request (-1, int.max((int)(value * 2), 8));
             }
 
             update_markup ();

@@ -96,9 +96,8 @@ public class View : Gtk.ApplicationWindow {
 
 
         set {
-            _fontheight = value;
-            if (_fontheight < 1) {
-                _fontheight = get_default_fontheight_from_dimensions ();
+            if (value < MINFONTSIZE || value > MAXFONTSIZE) {
+                return;
             }
 
             _fontheight = value;
