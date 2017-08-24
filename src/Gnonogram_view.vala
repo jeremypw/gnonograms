@@ -144,6 +144,9 @@ public class View : Gtk.ApplicationWindow {
         cell_grid.leave_notify_event.connect (on_grid_leave);
         cell_grid.button_press_event.connect (on_grid_button_press);
         cell_grid.button_release_event.connect (on_grid_button_release);
+
+        add_events (Gdk.EventMask.SCROLL_MASK);
+        scroll_event.connect (on_scroll_event);
     }
 
     public void blank_labels () {
@@ -522,6 +525,22 @@ public class View : Gtk.ApplicationWindow {
     private bool on_grid_button_release () {
         drawing_with_state = CellState.UNDEFINED;
         return true;
+    }
+
+    private bool on_grid_scroll_event (Gdk.EventScroll event) {
+        set_mods (event.state);
+
+        if (control_pressed) {
+            if (event.direction == Gdk.ScrollDirection.UP) {
+                fontheight -= 1.0;
+            } else if (event.direction == Gdk.ScrollDirection.DOWN) {
+                fontheight += 1.0;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     private bool on_key_press_event (Gdk.EventKey event) {
