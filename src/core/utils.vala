@@ -236,12 +236,14 @@ namespace Utils {
              dialog.add_button (_("Built in puzzles"), Gtk.ResponseType.NONE);
         }
 
-        /* Will silently fail if not a folder */
+        File start;
         if (start_path != null) {
-            dialog.set_current_folder (start_path);
+            start = File.new_for_commandline_arg (start_path);
         } else {
-            dialog.set_current_folder (get_app ().load_game_dir);
+            start = File.new_for_commandline_arg (get_app ().load_game_dir);
         }
+
+        dialog.set_current_folder (start.get_path ());
 
         int response;
 
