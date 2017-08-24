@@ -42,7 +42,7 @@ public class Controller : GLib.Object {
             });
         } else {
             restore_game.begin ((obj, res) => {
-                if (!load_game.end (res)) {
+                if (!restore_game.end (res)) {
                     new_or_random_game ();
                 }
             });
@@ -61,6 +61,7 @@ public class Controller : GLib.Object {
 
     public void quit () {
         save_game_state ();
+        save_settings ();
         quit_app ();
     }
 
@@ -304,6 +305,11 @@ public class Controller : GLib.Object {
         save_current_game ();
     }
 
+    private void save_settings () {
+        settings.set_string ("save-game-dir", save_game_dir);
+        settings.set_string ("load-game-dir", load_game_dir);
+    }
+
     private void save_current_game () {
         try {
             var current_game = File.new_for_path (current_game_path);
@@ -335,6 +341,7 @@ public class Controller : GLib.Object {
         }
 
         dir = settings.get_string ("save-game-dir");
+
         if (dir.length > 0) {
             save_game_dir = dir;
         }
@@ -378,7 +385,6 @@ public class Controller : GLib.Object {
 
     private async bool load_game (File? game, bool update_load_dir) {
         Filereader? reader = null;
-
         clear ();
 
         try {
