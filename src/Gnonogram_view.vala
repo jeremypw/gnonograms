@@ -144,9 +144,7 @@ public class View : Gtk.ApplicationWindow {
         cell_grid.leave_notify_event.connect (on_grid_leave);
         cell_grid.button_press_event.connect (on_grid_button_press);
         cell_grid.button_release_event.connect (on_grid_button_release);
-
-        add_events (Gdk.EventMask.SCROLL_MASK);
-        scroll_event.connect (on_scroll_event);
+        cell_grid.scroll_event.connect (on_scroll_event);
     }
 
     public void blank_labels () {
@@ -376,7 +374,6 @@ public class View : Gtk.ApplicationWindow {
         var monitor = display.get_monitor_at_window (get_window ());
         monitor.get_geometry (out rect);
 #else
-        var screen = Gdk.Screen.get_default();
         var monitor = screen.get_monitor_at_window (get_window ());
         screen.get_monitor_geometry (monitor, out rect);
 #endif
@@ -527,15 +524,59 @@ public class View : Gtk.ApplicationWindow {
         return true;
     }
 
+    /** With Control pressed, zoom using the fontsize.  Else, if button is down (drawing)
+      * draw a straight line in the scroll direction.
+    **/
     private bool on_scroll_event (Gdk.EventScroll event) {
         set_mods (event.state);
 
         if (control_pressed) {
-            if (event.direction == Gdk.ScrollDirection.UP) {
-                fontheight -= 1.0;
-            } else if (event.direction == Gdk.ScrollDirection.DOWN) {
-                fontheight += 1.0;
+
+            switch (event.direction) {
+                case Gdk.ScrollDirection.UP:
+                    fontheight -= 1.0;
+                    break;
+
+                case Gdk.ScrollDirection.DOWN:
+                    fontheight += 1.0;
+                    break;
+
+                default:
+                    break;
             }
+
+            return true;
+
+        } else if (drawing_with_state != CellState.UNDEFINED) {
+
+            switch (event.direction) {
+                case Gdk.ScrollDirection.UP:
+                    handle_arrow_keys ("UP");
+                    break;
+
+                case Gdk.ScrollDirection.DOWN:
+                    handle_arrow_keys ("DOWN");
+                    break;
+
+                case Gdk.ScrollDirection.LEFT:
+                    handle_arrow_keys ("LEFT");
+                    break;
+
+                case Gdk.ScrollDirection.RIGHT:
+                    handle_arrow_keys ("RIGHT");
+                    break;
+
+                default:
+                    return false;
+            }
+
+            /* Cause mouse pointer to follow current cell */
+            int window_x, window_y;
+            double x = (current_cell.col + 0.5) * cell_grid.cell_width;
+            double y = (current_cell.row + 0.5) * cell_grid.cell_height;
+
+            cell_grid.get_window ().get_root_coords ((int)x, (int)y, out window_x, out window_y);
+            event.device.warp (screen, window_x, window_y);
 
             return true;
         }
@@ -551,7 +592,6 @@ public class View : Gtk.ApplicationWindow {
 
         set_mods (event.state);
         var name = (Gdk.keyval_name (event.keyval)).up();
-
 
         switch (name) {
             case "UP":

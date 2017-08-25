@@ -40,6 +40,9 @@ public class CellGrid : Gtk.DrawingArea {
         }
     }
 
+    public double cell_width { get; private set; } /* Width of cell including frame */
+    public double cell_height { get; private set; } /* Height of cell including frame */
+
     /* Could have more options for cell pattern - only plain implemented for elementaryos*/
     public CellPatternType cell_pattern_type {
         get {
@@ -96,7 +99,8 @@ public class CellGrid : Gtk.DrawingArea {
             Gdk.EventMask.POINTER_MOTION_MASK|
             Gdk.EventMask.KEY_PRESS_MASK|
             Gdk.EventMask.KEY_RELEASE_MASK|
-            Gdk.EventMask.LEAVE_NOTIFY_MASK
+            Gdk.EventMask.LEAVE_NOTIFY_MASK|
+            Gdk.EventMask.SCROLL_MASK
         );
 
         motion_notify_event.connect (on_pointer_moved);
@@ -163,8 +167,6 @@ public class CellGrid : Gtk.DrawingArea {
 
     private double alloc_width; /* Width of drawing area less frame*/
     private double alloc_height; /* Height of drawing area less frame */
-    private double cell_width; /* Width of cell including frame */
-    private double cell_height; /* Height of cell including frame */
     private double cell_body_width; /* Width of cell excluding frame */
     private double cell_body_height; /* height of cell excluding frame */
 
