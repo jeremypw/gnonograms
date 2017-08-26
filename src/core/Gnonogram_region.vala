@@ -1136,11 +1136,20 @@ public class Region { /* Not a GObject, to reduce weight */
         // blocks may have been marked completed  - thereby reducing available ranges
         int[] available_blocks = get_blocks_available ();
         int bl = available_blocks.length;
-        int[,] block_start = new int[bl, 2];  //range number and offset of earliest start point
-        int[,] block_end = new int[bl, 2];  //range number and offset of latest end point
+
+        if (bl == 0) {
+            return false;
+        }
 
         //update ranges with currently available ranges (can contain only unknown  and incomplete cells)
         int n_available_ranges = count_available_ranges (false);
+        if (n_available_ranges == 0) {
+            return false;
+        }
+
+        int[,] block_start = new int[bl, 2];  //range number and offset of earliest start point
+        int[,] block_end = new int[bl, 2];  //range number and offset of latest end point
+
 
         //find earliest start point of each block (treating ranges as all unknown cells)
         int rng = 0;
@@ -1181,7 +1190,7 @@ public class Region { /* Not a GObject, to reduce weight */
         rng = n_available_ranges - 1;
         offset = 0;  //start at end of last range NB offset now counts from end
 
-        for (int b = bl - 1; b >= 0; b --) { //start at last block
+        for (int b = bl - 1; b >= 0; b--) { //start at last block
             length = blocks[available_blocks[b]];  //get length
 
             if (ranges[rng, 1] < (length + offset)) { //doesn't fit

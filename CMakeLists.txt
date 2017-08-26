@@ -77,6 +77,7 @@ CUSTOM_VAPIS
 
 OPTIONS
     --vapidir=${CMAKE_CURRENT_SOURCE_DIR}/vapi/
+    -g
     $(GDK_OPTIONS)
 )
 

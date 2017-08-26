@@ -233,10 +233,13 @@ public class Controller : GLib.Object {
 
         clear ();
         view.header_title = _("Random pattern");
+        view.show_progress (_("Generating"));
 
         while (count < limit) {
+            view.pulse_progress ();
+
             count++;
-            passes = yield generate_simple_game (grade_to_passes (grd)); //tries max tries times
+            passes = yield generate_simple_game (grd); //tries max tries times
 
             if (passes > grd || passes < 0) {
                 break;
@@ -244,6 +247,8 @@ public class Controller : GLib.Object {
 
             if (passes == 0 && grd > 1) {
                 grd--;
+            } else {
+                grd++;
             }
 
             /* no simple game generated with this setting -
@@ -264,12 +269,14 @@ public class Controller : GLib.Object {
                 }
             }
         }
+
+        view.hide_progress ();
     }
 
     private async uint generate_simple_game (uint grd) {
         /* returns 0 - failed to generate solvable game
          * returns value > 1 - generated game took value passes to solve
-         * returns -1 - an error occurred in the solver
+         * returns uint.MAX - an error occurred in the solver
         */
         uint tries = 0;
         uint passes = 0;
@@ -288,10 +295,10 @@ public class Controller : GLib.Object {
     private async uint generate_game (uint grd) {
         model.fill_random (grd);
         return yield solve_game (false, // no start_grid
-                           false, // use model
-                           false, // no advanced solutions
-                           false, // no ultimate solutions
-                           true); // unique solutions only
+                                 false, // use model
+                                 false, // no advanced solutions
+                                 false, // no ultimate solutions
+                                 true); // unique solutions only
     }
 
 
@@ -566,12 +573,13 @@ public class Controller : GLib.Object {
       * @unique_only: Only accept unique solutions (otherwise puzzle regarded insoluble).
     **/
     private async uint solve_game (bool use_startgrid,
-                            bool use_labels,
-                            bool use_advanced,
-                            bool use_ultimate,
-                            bool unique_only) {
+                                   bool use_labels,
+                                   bool use_advanced,
+                                   bool use_ultimate,
+                                   bool unique_only) {
 
         uint passes = uint.MAX; //indicates error - TODO use throw error
+
 
         if (prepare_to_solve (use_startgrid, use_labels)) {
             /* Single row puzzles used for development and debugging */
@@ -579,6 +587,7 @@ public class Controller : GLib.Object {
         } else {
             critical ("could not prepare solver");
         }
+
 
         return passes;
     }
@@ -755,7 +764,7 @@ public class Controller : GLib.Object {
             }
         }
 
-        view.queue_draw ();
+//~         view.queue_draw ();
     }
 
     private void on_restart_request () {

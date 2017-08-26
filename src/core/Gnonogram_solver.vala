@@ -164,10 +164,11 @@ namespace Gnonograms {
 
     /** Returns -1 to indicate an error - TODO use throw error instead **/
     private async int simple_solver (bool debug,
-                                     bool should_check_solution,
-                                     bool stepwise) {
+                                      bool should_check_solution,
+                                      bool stepwise) {
 
         int result = 0;
+
         Idle.add (() => {
             result = do_simple_solve (debug, should_check_solution, stepwise);
             simple_solver.callback ();
@@ -179,8 +180,8 @@ namespace Gnonograms {
     }
 
     private int do_simple_solve (bool debug,
-                                 bool should_check_solution,
-                                 bool stepwise) {
+                                  bool should_check_solution,
+                                  bool stepwise) {
         bool changed = true;
         int pass = 1;
 
@@ -349,7 +350,7 @@ namespace Gnonograms {
 
             load_position (grid_backup); //back track
 
-            if (simple_result < 0) { //contradiction  -   insert opposite guess
+            if (simple_result < 1) { //contradiction  -   insert opposite guess
                 grid.set_data_from_cell (trial_cell.invert ()); //mark opposite to guess
                 changed = true;
                 changed_count++; //worth trying another cycle
@@ -364,13 +365,13 @@ namespace Gnonograms {
                 } else if (simple_result > 0) {
                     break; // unique solution found
                 } else {
-                    return -1; //starting point was invalid
+                    return -1; //starting point was invalid - cannot contradict both options.
                 }
             }
         }
 
         //return vague measure of difficulty
-        if (simple_result > 0) {
+        if (simple_result > 0 && simple_result < Gnonograms.FAILED_PASSES) {
             return simple_result + changed_count * 20;
         }
 
@@ -519,8 +520,8 @@ namespace Gnonograms {
                 grid.set_array (idx, is_column, guess, start);
 
                 int simple_result = yield simple_solver (false, // not debug
-                                                     false, // do not check solution
-                                                     false); // not stepwise
+                                                          false, // do not check solution
+                                                          false); // not stepwise
 
                 if (simple_result == 0) {
                     int advanced_result = yield advanced_solver (grid_store, false);
