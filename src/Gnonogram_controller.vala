@@ -751,6 +751,7 @@ public class Controller : GLib.Object {
                     } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
                         msg = msg + "\n" + _("No advanced solution found");
                     }
+
                     after_solve_game (msg);
                     view.queue_draw ();
                 });
