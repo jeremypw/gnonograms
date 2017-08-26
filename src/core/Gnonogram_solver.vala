@@ -350,7 +350,7 @@ namespace Gnonograms {
 
             load_position (grid_backup); //back track
 
-            if (simple_result < 1) { //contradiction  -   insert opposite guess
+            if (simple_result < 0) { //contradiction  -   insert opposite guess
                 grid.set_data_from_cell (trial_cell.invert ()); //mark opposite to guess
                 changed = true;
                 changed_count++; //worth trying another cycle

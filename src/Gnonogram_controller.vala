@@ -752,6 +752,7 @@ public class Controller : GLib.Object {
                         msg = msg + "\n" + _("No advanced solution found");
                     }
                     after_solve_game (msg);
+                    view.queue_draw ();
                 });
             }
         });
@@ -765,8 +766,6 @@ public class Controller : GLib.Object {
                 model.set_data_from_rc (r, c, solver.grid.get_data_from_rc (r, c));
             }
         }
-
-//~         view.queue_draw ();
     }
 
     private void on_restart_request () {
