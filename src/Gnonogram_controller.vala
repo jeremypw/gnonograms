@@ -233,7 +233,7 @@ public class Controller : GLib.Object {
 
         clear ();
         view.header_title = _("Random pattern");
-        view.show_progress (_("Generating"));
+        view.show_generating ();
 
         while (count < limit) {
             view.pulse_progress ();
@@ -241,7 +241,9 @@ public class Controller : GLib.Object {
             count++;
             passes = yield generate_simple_game (grd); //tries max tries times
 
-            if (passes > grd || passes < 0) {
+            int target = grade_to_passes (grd);
+
+            if (passes > target || passes < 0) {
                 break;
             }
 

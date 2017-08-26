@@ -139,15 +139,9 @@ public class View : Gtk.ApplicationWindow {
     }
 
     public View (Model _model) {
-        Object (model: _model);
-//~         model = _model;
-        cell_grid = new CellGrid (model);
-        main_grid.attach (cell_grid, 1, 1, 1, 1);
-        cell_grid.cursor_moved.connect (on_grid_cursor_moved);
-        cell_grid.leave_notify_event.connect (on_grid_leave);
-        cell_grid.button_press_event.connect (on_grid_button_press);
-        cell_grid.button_release_event.connect (on_grid_button_release);
-        cell_grid.scroll_event.connect (on_scroll_event);
+        Object (
+            model: _model
+        );
     }
 
     construct {
@@ -237,7 +231,15 @@ public class View : Gtk.ApplicationWindow {
         progress_grid.attach_next_to (progress_cancel_button, progress_bar, Gtk.PositionType.RIGHT, 1, 1);
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL);
+        cell_grid = new CellGrid (model);
         main_grid = new Gtk.Grid ();
+
+        main_grid.attach (cell_grid, 1, 1, 1, 1);
+        cell_grid.cursor_moved.connect (on_grid_cursor_moved);
+        cell_grid.leave_notify_event.connect (on_grid_leave);
+        cell_grid.button_press_event.connect (on_grid_button_press);
+        cell_grid.button_release_event.connect (on_grid_button_release);
+        cell_grid.scroll_event.connect (on_scroll_event);
 
         main_grid.row_spacing = 0;
         main_grid.column_spacing = 0;
@@ -319,13 +321,25 @@ public class View : Gtk.ApplicationWindow {
         });
     }
 
-    public void show_progress (string text = "") {
-        progress_bar.text = text;
-        progress_popover.show_all ();
+    public void show_progress () {
+        progress_bar.text = (_("Solving"));
+        progress_popover.set_relative_to (auto_solve_button);
+        schedule_show_progress ();
+    }
+
+    public void show_generating () {
+        progress_bar.text = (_("Generating"));
+        progress_popover.set_relative_to (random_game_button);
+        schedule_show_progress ();
     }
 
     public void hide_progress () {
-        progress_popover.hide ();
+        if (progress_timeout_id > 0) {
+            Source.remove (progress_timeout_id);
+            progress_timeout_id = 0;
+        } else {
+            progress_popover.hide ();
+        }
     }
 
     public void pulse_progress () {
@@ -334,6 +348,7 @@ public class View : Gtk.ApplicationWindow {
 
     /**PRIVATE**/
     private const uint NOTIFICATION_TIMEOUT_SEC = 2;
+    private const uint PROGRESS_DELAY_MSEC = 1000;
 
     private Gnonograms.LabelBox row_clue_box;
     private Gnonograms.LabelBox column_clue_box;
@@ -502,6 +517,17 @@ public class View : Gtk.ApplicationWindow {
         }
 
         make_move_at_cell ();
+    }
+
+    private uint progress_timeout_id = 0;
+    private void schedule_show_progress () {
+        hide_progress ();
+
+        progress_timeout_id = Timeout.add (PROGRESS_DELAY_MSEC, () => {
+            progress_popover.show_all ();
+            progress_timeout_id = 0;
+            return false;
+        });
     }
 
     /*** Signal handlers ***/
