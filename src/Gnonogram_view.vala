@@ -348,7 +348,7 @@ public class View : Gtk.ApplicationWindow {
 
     /**PRIVATE**/
     private const uint NOTIFICATION_TIMEOUT_SEC = 2;
-    private const uint PROGRESS_DELAY_MSEC = 100;
+    private const uint PROGRESS_DELAY_MSEC = 1000;
 
     private Gnonograms.LabelBox row_clue_box;
     private Gnonograms.LabelBox column_clue_box;
