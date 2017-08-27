@@ -321,7 +321,7 @@ public class View : Gtk.ApplicationWindow {
         });
     }
 
-    public void show_progress () {
+    public void show_solving () {
         progress_bar.text = (_("Solving"));
         progress_popover.set_relative_to (auto_solve_button);
         schedule_show_progress ();
@@ -348,7 +348,7 @@ public class View : Gtk.ApplicationWindow {
 
     /**PRIVATE**/
     private const uint NOTIFICATION_TIMEOUT_SEC = 2;
-    private const uint PROGRESS_DELAY_MSEC = 1000;
+    private const uint PROGRESS_DELAY_MSEC = 500;
 
     private Gnonograms.LabelBox row_clue_box;
     private Gnonograms.LabelBox column_clue_box;

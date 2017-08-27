@@ -145,8 +145,8 @@ public class Region { /* Not a GObject, to reduce weight */
             return;
         }
 
-        this.unknown = 99;
-        this.filled = 99;
+        this.unknown = Gnonograms.MAXSIZE;
+        this.filled = Gnonograms.MAXSIZE;
 
         get_status ();
 

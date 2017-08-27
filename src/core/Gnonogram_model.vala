@@ -238,7 +238,7 @@ public class Model : GLib.Object {
         uint p = 0; //pointer
         int mid = (int)size / 2;
         uint bsize; // blocksize
-        int baseline = (int)(e + grade - 10);
+        int baseline = (int)(e + grade);
         // baseline relates to the probability of a filled block before
         // adjusting for distance from edge of region.
         bool fill;

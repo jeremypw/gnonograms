@@ -108,7 +108,7 @@ namespace Gnonograms {
                                 bool stepwise = false) {
         guesses = 0;
 
-        uint result = yield simple_solver (debug,
+        int result = yield simple_solver (debug,
                                            should_check_solution,
                                            stepwise);
 
@@ -130,7 +130,7 @@ namespace Gnonograms {
             stdout.printf (regions[0].to_string ());  //used for debugging
         }
 
-        return result;
+        return (uint)result;
     }
 
     public bool solved () {
@@ -184,6 +184,10 @@ namespace Gnonograms {
                                   bool stepwise) {
         bool changed = true;
         int pass = 1;
+
+        for (int i = 0; i < n_regions; i++) {
+            regions[i].set_to_initial_state();
+        }
 
         while (changed && pass < MAX_PASSES) {
             //keep cycling through regions while at least one of them is changing
@@ -317,6 +321,7 @@ namespace Gnonograms {
                     max_turns = initial_max_turns;
                     wraps = 0;
                 } else {
+                    simple_result = 0;
                     break; //cannot make progress
                 }
 
@@ -342,10 +347,10 @@ namespace Gnonograms {
 
                 if (unique_only) { //unique solutions must be solved by contradiction.
                     changed_count++;
-                    simple_result = 0;
+                } else {
+                    break;
                 }
 
-                break;
             }
 
             load_position (grid_backup); //back track
@@ -359,11 +364,11 @@ namespace Gnonograms {
                                                      false, // do not check solution
                                                      false); // not stepwise
 
-                if (simple_result == 0) { //no we cant
+                if (simple_result == 0 || simple_result == Gnonograms.FAILED_PASSES) { //no we cant
                     this.save_position (grid_backup); //update grid store
                     continue; //go back to start
                 } else if (simple_result > 0) {
-                    break; // unique solution found
+                    break;
                 } else {
                     return -1; //starting point was invalid - cannot contradict both options.
                 }
@@ -371,7 +376,7 @@ namespace Gnonograms {
         }
 
         //return vague measure of difficulty
-        if (simple_result > 0 && simple_result < Gnonograms.FAILED_PASSES) {
+        if (simple_result > 0) {
             return simple_result + changed_count * 20;
         }
 
@@ -462,20 +467,16 @@ namespace Gnonograms {
       * Puzzles requiring this method are unlikely to solvable by a human and are unlikely to
       * have a unique solution so its utility is debatable.
     **/
-    private async uint ultimate_solver(CellState[] grid_store) {
+    private async int ultimate_solver(CellState[] grid_store) {
         load_position (grid_store); //return to last valid state
         return yield permute (grid_store);
     }
 
-    private async uint permute (CellState[] grid_store) {
+    private async int permute (CellState[] grid_store) {
         uint permute_region;
 
         CellState[] grid_backup2 = new CellState[rows * cols];
         CellState[] guess = {};
-
-        for (int i = 0; i < n_regions; i++) {
-            regions[i].set_to_initial_state();
-        }
 
         yield simple_solver (false, // not debug
                              false, // do not check solution
@@ -530,7 +531,7 @@ namespace Gnonograms {
                         return advanced_result; //solution found
                     }
                 } else if (simple_result > 0) {
-                    return simple_result + guesses; //unlikely!
+                    return simple_result + (int)guesses; //unlikely!
                 }
 
                 load_position (grid_backup2); //back track

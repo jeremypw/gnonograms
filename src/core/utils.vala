@@ -272,5 +272,14 @@ namespace Utils {
 
         return file_path;
     }
+
+    public int grade_to_passes (uint grd) {
+        return ((int)grd + 1) * 2;
+    }
+
+    public string passes_to_grade_description (uint passes) {
+        var difficulty = passes / 2;
+        return difficulty_to_string ((Difficulty)difficulty);
+    }
 }
 }

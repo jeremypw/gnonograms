@@ -25,6 +25,7 @@ public enum Difficulty {
     MODERATE,
     HARD,
     CHALLENGING,
+    ADVANCED,
     MAXIMUM,
     UNDEFINED;
 }
@@ -41,8 +42,10 @@ public static string difficulty_to_string (Difficulty d) {
             return _("Difficult");
         case Difficulty.CHALLENGING:
             return _("Very Difficult");
+        case Difficulty.ADVANCED:
+            return _("Advanced logic required");
         default:
-            return _("Maximum Difficulty");
+            return _("Possibly ambiguous");
     }
 }
 

@@ -73,7 +73,7 @@ public class Controller : GLib.Object {
     private GLib.Settings saved_state;
     private Gee.Deque<Move> back_stack;
     private Gee.Deque<Move> forward_stack;
-    private const int MAXTRIES = 500;
+    private const int MAX_TRIES = 1000;
     private string save_game_dir;
     private string current_game_path;
     private string? game_path = null;
@@ -235,33 +235,39 @@ public class Controller : GLib.Object {
         view.header_title = _("Random pattern");
         view.show_generating ();
 
+
+        int target = Utils.grade_to_passes (grd);
+        int next_target = Utils.grade_to_passes (grd + 1);
+
         while (count < limit) {
             view.pulse_progress ();
 
             count++;
-            passes = yield generate_simple_game (grd); //tries max tries times
+            passes = yield try_generate_game (grd); //tries max tries times
 
-            int target = grade_to_passes (grd);
 
-            if (passes > target || passes < 0) {
+            if (passes >= target && passes < next_target) {
                 break;
             }
 
             if (passes == 0 && grd > 1) {
+warning ("reduce grade");
                 grd--;
+                next_target = target;
+                target = Utils.grade_to_passes (grd);
+
             } else {
+warning ("increase grade");
                 grd++;
             }
-
-            /* no simple game generated with this setting -
-               reduce complexity setting (relationship between complexity setting
-              and ease of solution not simple - depends also on grid size)
-            */
         }
 
-        if (passes >= 0 && rows > 1) {
+        if (count >= limit) {
+            view.send_notification (_("Failed to generate game of required grade"));
+        } else if (passes >= 0 && rows > 1) {
             view.update_labels_from_model ();
             game_state = GameState.SOLVING;
+            view.send_notification (_("Difficulty: %s").printf (Utils.passes_to_grade_description (passes)));
         } else {
             view.send_notification (_("Error occurred in solver"));
             game_state = GameState.SOLVING;
@@ -275,7 +281,7 @@ public class Controller : GLib.Object {
         view.hide_progress ();
     }
 
-    private async uint generate_simple_game (uint grd) {
+    private async uint try_generate_game (uint grd) {
         /* returns 0 - failed to generate solvable game
          * returns value > 1 - generated game took value passes to solve
          * returns uint.MAX - an error occurred in the solver
@@ -283,13 +289,13 @@ public class Controller : GLib.Object {
         uint tries = 0;
         uint passes = 0;
 
-        uint limit = rows == 1 ? 1 : MAXTRIES;
+        uint limit = rows == 1 ? 1 : MAX_TRIES;
 
         while (passes == 0 && tries <= limit) {
             tries++;
             passes = yield generate_game (grd);
         }
-
+warning ("generate simple return tries %u, passes %u", tries, passes);
         return passes;
     }
 
@@ -298,9 +304,9 @@ public class Controller : GLib.Object {
         model.fill_random (grd);
         return yield solve_game (false, // no start_grid
                                  false, // use model
-                                 false, // no advanced solutions
+                                 grd >= Difficulty.ADVANCED,
                                  false, // no ultimate solutions
-                                 true); // unique solutions only
+                                 grd < Difficulty.MAXIMUM); // unique solutions only
     }
 
 
@@ -463,10 +469,10 @@ public class Controller : GLib.Object {
             }
         } else {
             uint passes = yield solve_game (false, // no startgrid
-                                     true, // use loaded labels, not model
-                                     true, // use advanced solver
-                                     false, // do not use ultimate solver (to time consuming for loading)
-                                     false); // do not insist unique solution exists
+                                            true, // use loaded labels, not model
+                                            true, // use advanced solver
+                                            false, // do not use ultimate solver (to time consuming for loading)
+                                            false); // do not insist unique solution exists
 
             if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
                 set_model_from_solver ();
@@ -581,7 +587,6 @@ public class Controller : GLib.Object {
                                    bool unique_only) {
 
         uint passes = uint.MAX; //indicates error - TODO use throw error
-
 
         if (prepare_to_solve (use_startgrid, use_labels)) {
             /* Single row puzzles used for development and debugging */
@@ -724,6 +729,8 @@ public class Controller : GLib.Object {
         model.blank_working ();
         game_state = GameState.SOLVING;
 
+        view.show_solving ();
+
         /* Look for unique simple solution */
         solve_game.begin (false, // no startgrid
                           true, // use labels not model
@@ -734,27 +741,32 @@ public class Controller : GLib.Object {
             uint passes = solve_game.end (res);
 
             if (passes > 0  && passes < Gnonograms.FAILED_PASSES) {
-                msg =  _("Simple solution found in %u passes.  Graded as %s").printf (passes, passes_to_grade_description (passes));
+                msg =  _("Simple solution found in %u passes.  Graded as %s").printf (passes, Utils.passes_to_grade_description (passes));
                 after_solve_game (msg);
             } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
                 msg = _("No simple solution found");
                 solve_game.begin (false, // no startgrid
-                               true, // use labels not model
-                               true, // use advanced solver
-                               true, // use ultimate if necessary (option cancel given)
-                               false, // do not insist on unique
-                               (obj, res) => {
+                                  true, // use labels not model
+                                  true, // use advanced solver
+                                  true, // use ultimate if necessary (option cancel given)
+                                  false, // do not insist on unique
+                                  (obj, res) => {
+
                     passes = solve_game.end (res);
 
                     if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
-                        msg = msg + "\n" + _("Advanced solution found in %u passes.  Graded as %s").printf (passes, passes_to_grade_description (passes));
+                        msg = msg + "\n" + _("Advanced solution found in %u passes.  Graded as %s").printf (passes, Utils.passes_to_grade_description (passes));
                     } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
                         msg = msg + "\n" + _("No advanced solution found");
                     }
+
                     after_solve_game (msg);
                     view.queue_draw ();
                 });
             }
+
+            after_solve_game (msg);
+            view.queue_draw ();
         });
     }
 
@@ -766,6 +778,8 @@ public class Controller : GLib.Object {
                 model.set_data_from_rc (r, c, solver.grid.get_data_from_rc (r, c));
             }
         }
+
+        view.hide_progress ();
     }
 
     private void on_restart_request () {
@@ -776,17 +790,6 @@ public class Controller : GLib.Object {
             clear_history ();
             view.queue_draw ();
         }
-    }
-
-    /** Utilities **/
-    /***************/
-    private int grade_to_passes (uint grd) {
-        return ((int)grd + 1) * 2;
-    }
-
-    private string passes_to_grade_description (uint passes) {
-        var difficulty = passes / 2;
-        return difficulty_to_string ((Difficulty)difficulty);
     }
 }
 }
