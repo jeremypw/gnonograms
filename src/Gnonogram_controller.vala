@@ -235,29 +235,23 @@ public class Controller : GLib.Object {
         view.header_title = _("Random pattern");
         view.show_generating ();
 
-
         int target = Utils.grade_to_passes (grd);
         int next_target = Utils.grade_to_passes (grd + 1);
 
         while (count < limit) {
-            view.pulse_progress ();
-
             count++;
             passes = yield try_generate_game (grd); //tries max tries times
 
 
-            if (passes >= target && passes < next_target) {
-                break;
+            if (passes >= target) {
+                if (passes < next_target) {
+                    break;
+                } else {
+                    continue;
+                }
             }
 
-            if (passes == 0 && grd > 1) {
-warning ("reduce grade");
-                grd--;
-                next_target = target;
-                target = Utils.grade_to_passes (grd);
-
-            } else {
-warning ("increase grade");
+            if (passes > 0 && grd < Difficulty.CHALLENGING) {
                 grd++;
             }
         }
@@ -295,13 +289,14 @@ warning ("increase grade");
             tries++;
             passes = yield generate_game (grd);
         }
-warning ("generate simple return tries %u, passes %u", tries, passes);
+
         return passes;
     }
 
     /** Generate a random, soluble puzzle (simple and unique solution only) **/
     private async uint generate_game (uint grd) {
         model.fill_random (grd);
+
         return yield solve_game (false, // no start_grid
                                  false, // use model
                                  grd >= Difficulty.ADVANCED,
@@ -584,13 +579,14 @@ warning ("generate simple return tries %u, passes %u", tries, passes);
                                    bool use_labels,
                                    bool use_advanced,
                                    bool use_ultimate,
-                                   bool unique_only) {
+                                   bool unique_only,
+                                   bool human = false) {
 
         uint passes = uint.MAX; //indicates error - TODO use throw error
 
         if (prepare_to_solve (use_startgrid, use_labels)) {
             /* Single row puzzles used for development and debugging */
-            passes = yield solver.solve_it (rows == 1, use_advanced, use_ultimate, unique_only);
+            passes = yield solver.solve_it (rows == 1, use_advanced, use_ultimate, unique_only, human);
         } else {
             critical ("could not prepare solver");
         }
@@ -737,6 +733,7 @@ warning ("generate simple return tries %u, passes %u", tries, passes);
                           false, // no advanced solutions
                           false, // no ultimate solutions
                           true, // must be unique solution
+                          false, // not human
                           (obj, res) => {
             uint passes = solve_game.end (res);
 
@@ -750,6 +747,7 @@ warning ("generate simple return tries %u, passes %u", tries, passes);
                                   true, // use advanced solver
                                   true, // use ultimate if necessary (option cancel given)
                                   false, // do not insist on unique
+                                  false, // not human
                                   (obj, res) => {
 
                     passes = solve_game.end (res);

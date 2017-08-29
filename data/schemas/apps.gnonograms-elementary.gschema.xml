@@ -6,7 +6,8 @@
         <value value="2" nick="moderate"/>
         <value value="3" nick="hard"/>
         <value value="4" nick="challenging"/>
-        <value value="5" nick="maximum"/>
+        <value value="5" nick="advanced"/>
+        <value value="6" nick="maximum"/>
     </enum>
 
     <enum id="apps.gnonograms-elementary.game-state">

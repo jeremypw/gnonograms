@@ -274,12 +274,24 @@ namespace Utils {
     }
 
     public int grade_to_passes (uint grd) {
-        return ((int)grd + 1) * 2;
+        if (grd <= Difficulty.ADVANCED) {
+            return ((int)grd + 1) * 2;
+        } else {
+            return (int)(grd - (Difficulty.ADVANCED)) * 100;
+        }
+
+    }
+
+    public Difficulty passes_to_grade (uint passes) {
+        if (passes >= 50) {
+            return Difficulty.ADVANCED;
+        } else {
+            return (Difficulty)(passes / 2 - 1);
+        }
     }
 
     public string passes_to_grade_description (uint passes) {
-        var difficulty = passes / 2;
-        return difficulty_to_string ((Difficulty)difficulty);
+        return difficulty_to_string (passes_to_grade (passes));
     }
 }
 }

@@ -20,14 +20,14 @@
 
 namespace Gnonograms {
 public enum Difficulty {
-    TRIVIAL,
-    EASY,
-    MODERATE,
-    HARD,
-    CHALLENGING,
-    ADVANCED,
-    MAXIMUM,
-    UNDEFINED;
+    TRIVIAL = 0,
+    EASY = 2,
+    MODERATE = 3,
+    HARD =4 ,
+    CHALLENGING = 5,
+    ADVANCED = 6,
+    MAXIMUM = 7,
+    UNDEFINED = 99;
 }
 
 public static string difficulty_to_string (Difficulty d) {

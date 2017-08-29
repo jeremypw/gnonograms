@@ -185,6 +185,7 @@ public class Model : GLib.Object {
     public void fill_random (uint grade) {
         clear();
         double rel_g = (double)grade / (double)(Difficulty.MAXIMUM);
+        uint g = (uint) (12 * rel_g);
         int midcol = (int)rows / 2;
         int midrow = (int)cols / 2;
         int mincdf = 2 + (int)(((double)rows * rel_g / 4));
@@ -198,7 +199,7 @@ public class Model : GLib.Object {
 
         for (int r = 0; r < rows; r++) {
             solution_data.get_row (r, ref data);
-            fill_region (cols, ref data, grade, (uint)((r - midcol).abs()), maxb, cols);
+            fill_region (cols, ref data, g, (uint)((r - midcol).abs()), maxb, cols);
             solution_data.set_row (r, data);
         }
 
@@ -206,7 +207,7 @@ public class Model : GLib.Object {
 
         for (int c = 0; c < cols; c++) {
             solution_data.get_col (c, ref data);
-            fill_region (rows, ref data, grade, (c - midrow).abs(), maxb, rows);
+            fill_region (rows, ref data, g, (c - midrow).abs(), maxb, rows);
             solution_data.set_col (c, data);
         }
 
@@ -233,12 +234,23 @@ public class Model : GLib.Object {
         //maxb is maximum size of one random block
         //maxp is range of random number generator
 
-        maxb = uint.max (2, maxb);
-
         uint p = 0; //pointer
         int mid = (int)size / 2;
+        int baseline;
         uint bsize; // blocksize
-        int baseline = (int)(e + grade);
+
+        if (grade < Difficulty.ADVANCED) {
+            maxb = uint.max (2, maxb);
+        } else {
+            maxb = mid;
+        }
+
+
+        if (grade < Difficulty.ADVANCED) {
+            baseline = (int)(e + grade);
+        } else {
+            baseline = (int)(maxp / 3);
+        }
         // baseline relates to the probability of a filled block before
         // adjusting for distance from edge of region.
         bool fill;
@@ -251,15 +263,18 @@ public class Model : GLib.Object {
             // random length up to remaining space but not larger than
             // maxb for filled cells or size-maxb for empty cells
             // bsize=int.min(rand_gen.int_range(0,size-p),maxb);
-            bsize = uint.min (rand_gen.int_range (0, (int)(size - p)), fill ? maxb : size - maxb);
+            if (size - p > 1) {
+                bsize = uint.min (rand_gen.int_range (1, (int)(size - p)), fill ? maxb : size - maxb);
 
-            for (uint i = 0; i < bsize; i++) {
-                if (fill) {
-                    data[p] = CellState.FILLED;
+                for (uint i = 0; i < bsize - 1; i++) {
+                    if (fill && i < size -1) {
+                        data[p] = CellState.FILLED;
+                    }
+
+                    p++;
                 }
-
-                p++;
             }
+
             p++; //at least one space between blocks
 
             if (fill && p < size) {

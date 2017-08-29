@@ -105,6 +105,7 @@ namespace Gnonograms {
                                 bool use_advanced = true,
                                 bool use_ultimate = true,
                                 bool unique_only = false,
+                                bool human = false,
                                 bool stepwise = false) {
         guesses = 0;
 
@@ -119,7 +120,8 @@ namespace Gnonograms {
                                             use_ultimate,
                                             debug,
                                             9999,
-                                            unique_only);
+                                            unique_only,
+                                            human);
 
             if (result == 0 && use_ultimate) {
                 result = yield ultimate_solver (grid_backup);
@@ -208,12 +210,12 @@ namespace Gnonograms {
                         stdout.printf (r.to_string ());
                     }
 
-                    return  -1;
+                    return  -pass;
                 }
 
                 if (should_check_solution && differs_from_solution (r)) {
                     stdout.printf (r.to_string ());
-                    return  -1;
+                    return  -Gnonograms.FAILED_PASSES;
                 }
 
                 if (debug) {
@@ -283,14 +285,16 @@ namespace Gnonograms {
                                        bool use_ultimate = true,
                                        bool debug = false,
                                        int max_guesswork = 999,
-                                       bool unique_only = false) {
+                                       bool unique_only = false,
+                                       bool human = false) {
         int simple_result = 0;
         int wraps = 0;
         int guesses = 0;
         bool changed = false;
         int changed_count = 0;
+        uint contradiction_count = 0;
         uint initial_max_turns = 3; //stay near edges until no more changes
-        CellState initial_cell_state = CellState.FILLED;
+        CellState initial_cell_state = CellState.EMPTY;
 
         rdir = 0;
         cdir = 1;
@@ -355,7 +359,8 @@ namespace Gnonograms {
 
             load_position (grid_backup); //back track
 
-            if (simple_result < 0) { //contradiction  -   insert opposite guess
+            if (simple_result < 0 && (!human || simple_result > -3)) { //contradiction  -   insert opposite guess
+                contradiction_count++;
                 grid.set_data_from_cell (trial_cell.invert ()); //mark opposite to guess
                 changed = true;
                 changed_count++; //worth trying another cycle

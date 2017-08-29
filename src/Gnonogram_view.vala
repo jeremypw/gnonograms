@@ -338,6 +338,11 @@ public class View : Gtk.ApplicationWindow {
             Source.remove (progress_timeout_id);
             progress_timeout_id = 0;
         } else {
+            if (progress_pulse_timeout_id > 0) {
+                Source.remove (progress_pulse_timeout_id);
+                progress_pulse_timeout_id = 0;
+            }
+
             progress_popover.hide ();
         }
     }
@@ -524,9 +529,23 @@ public class View : Gtk.ApplicationWindow {
         hide_progress ();
 
         progress_timeout_id = Timeout.add (PROGRESS_DELAY_MSEC, () => {
-            progress_popover.show_all ();
+            show_and_pulse_progress ();
             progress_timeout_id = 0;
             return false;
+        });
+    }
+
+    private uint progress_pulse_timeout_id = 0;
+    private void show_and_pulse_progress () {
+        progress_popover.show_all ();
+        if (progress_pulse_timeout_id > 0) {
+            Source.remove (progress_pulse_timeout_id);
+            progress_pulse_timeout_id = 0;
+        }
+
+        progress_pulse_timeout_id = Timeout.add (100, () => {
+            progress_bar.pulse ();
+            return true;
         });
     }
 
