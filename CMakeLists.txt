@@ -53,6 +53,7 @@ vala_precompile(VALA_C
     src/widgets/Gnonogram_cellgrid.vala
     src/widgets/AppMenu.vala
     src/widgets/ViewModeButton.vala
+    src/widgets/Progress_indicator.vala
     src/core/utils.vala
     src/core/Gnonogram_model.vala
     src/core/My2DCellArray.vala

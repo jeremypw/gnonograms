@@ -467,7 +467,8 @@ public class Controller : GLib.Object {
                                             true, // use loaded labels, not model
                                             true, // use advanced solver
                                             false, // do not use ultimate solver (to time consuming for loading)
-                                            false); // do not insist unique solution exists
+                                            false, // do not insist unique solution exists
+                                            null); // No cancellable at this point. (TODO?)
 
             if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
                 set_model_from_solver ();
@@ -580,13 +581,14 @@ public class Controller : GLib.Object {
                                    bool use_advanced,
                                    bool use_ultimate,
                                    bool unique_only,
+                                   Cancellable? cancellable = null,
                                    bool human = false) {
 
         uint passes = uint.MAX; //indicates error - TODO use throw error
 
         if (prepare_to_solve (use_startgrid, use_labels)) {
             /* Single row puzzles used for development and debugging */
-            passes = yield solver.solve_it (rows == 1, use_advanced, use_ultimate, unique_only, human);
+            passes = yield solver.solve_it (rows == 1, use_advanced, use_ultimate, unique_only, cancellable, human);
         } else {
             critical ("could not prepare solver");
         }
@@ -725,7 +727,8 @@ public class Controller : GLib.Object {
         model.blank_working ();
         game_state = GameState.SOLVING;
 
-        view.show_solving ();
+        Cancellable cancellable = new Cancellable ();
+        view.show_solving (cancellable);
 
         /* Look for unique simple solution */
         solve_game.begin (false, // no startgrid
@@ -733,6 +736,7 @@ public class Controller : GLib.Object {
                           false, // no advanced solutions
                           false, // no ultimate solutions
                           true, // must be unique solution
+                          cancellable,
                           false, // not human
                           (obj, res) => {
             uint passes = solve_game.end (res);
@@ -747,6 +751,7 @@ public class Controller : GLib.Object {
                                   true, // use advanced solver
                                   true, // use ultimate if necessary (option cancel given)
                                   false, // do not insist on unique
+                                  cancellable,
                                   false, // not human
                                   (obj, res) => {
 

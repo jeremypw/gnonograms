@@ -192,10 +192,13 @@ public class View : Gtk.ApplicationWindow {
         app_menu = new AppMenu ();
         mode_switch = new ViewModeButton ();
 
+        progress_indicator = new Gnonograms.Progress_indicator ();
+
         header_bar.pack_start (random_game_button);
         header_bar.pack_start (load_game_button);
         header_bar.pack_start (save_game_button);
         header_bar.pack_start (check_correct_button);
+
         header_bar.pack_end (app_menu);
         header_bar.pack_end (mode_switch);
         header_bar.pack_end (auto_solve_button);
@@ -210,25 +213,6 @@ public class View : Gtk.ApplicationWindow {
         toast.valign = Gtk.Align.START;
         overlay.add_overlay (toast);
 
-        progress_popover = new Gtk.Popover (auto_solve_button);
-        progress_popover.modal = true;
-        progress_popover.position = Gtk.PositionType.BOTTOM;
-
-        var progress_grid = new Gtk.Grid ();
-        progress_popover.add (progress_grid);
-
-        progress_bar = new Gtk.ProgressBar ();
-        progress_bar.show_text = true;
-        progress_bar.pulse_step = 1;
-
-        progress_grid.add (progress_bar);
-
-        var progress_cancel_button = new Gtk.Button ();
-        img = new Gtk.Image.from_icon_name ("process-stop-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
-        img.set_tooltip_text (_("Cancel solving"));
-        progress_cancel_button.image = img;
-
-        progress_grid.attach_next_to (progress_cancel_button, progress_bar, Gtk.PositionType.RIGHT, 1, 1);
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL);
         cell_grid = new CellGrid (model);
@@ -270,6 +254,7 @@ public class View : Gtk.ApplicationWindow {
         check_correct_button.clicked.connect (on_check_button_pressed);
         restart_button.clicked.connect (on_restart_button_pressed);
         auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
+        progress_indicator.cancel.connect (on_progress_cancel);
     }
 
     public void blank_labels () {
@@ -321,16 +306,14 @@ public class View : Gtk.ApplicationWindow {
         });
     }
 
-    public void show_solving () {
-        progress_bar.text = (_("Solving"));
-        progress_popover.set_relative_to (auto_solve_button);
-        schedule_show_progress ();
+    public void show_solving (Cancellable? cancellable = null) {
+        progress_indicator.text = (_("Solving"));
+        schedule_show_progress (cancellable);
     }
 
-    public void show_generating () {
-        progress_bar.text = (_("Generating"));
-        progress_popover.set_relative_to (random_game_button);
-        schedule_show_progress ();
+    public void show_generating (Cancellable? cancellable = null) {
+        progress_indicator.text = (_("Generating"));
+        schedule_show_progress (cancellable);
     }
 
     public void hide_progress () {
@@ -338,17 +321,8 @@ public class View : Gtk.ApplicationWindow {
             Source.remove (progress_timeout_id);
             progress_timeout_id = 0;
         } else {
-            if (progress_pulse_timeout_id > 0) {
-                Source.remove (progress_pulse_timeout_id);
-                progress_pulse_timeout_id = 0;
-            }
-
-            progress_popover.hide ();
+            header_bar.set_custom_title (null);
         }
-    }
-
-    public void pulse_progress () {
-        progress_bar.pulse ();
     }
 
     /**PRIVATE**/
@@ -362,8 +336,7 @@ public class View : Gtk.ApplicationWindow {
     private AppMenu app_menu;
     private Gtk.Grid main_grid;
     private Gtk.Overlay overlay;
-    private Gtk.Popover progress_popover;
-    private Gtk.ProgressBar progress_bar;
+    private Gnonograms.Progress_indicator progress_indicator;
     private Granite.Widgets.Toast toast;
     private ViewModeButton mode_switch;
     private Gtk.Button load_game_button;
@@ -525,27 +498,16 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private uint progress_timeout_id = 0;
-    private void schedule_show_progress () {
-        hide_progress ();
+    private void schedule_show_progress (Cancellable? cancellable) {
+        header_bar.set_custom_title (null);
 
         progress_timeout_id = Timeout.add (PROGRESS_DELAY_MSEC, () => {
-            show_and_pulse_progress ();
+            if (cancellable == null || !cancellable.is_cancelled ()) {
+                header_bar.set_custom_title (progress_indicator);
+            }
+
             progress_timeout_id = 0;
             return false;
-        });
-    }
-
-    private uint progress_pulse_timeout_id = 0;
-    private void show_and_pulse_progress () {
-        progress_popover.show_all ();
-        if (progress_pulse_timeout_id > 0) {
-            Source.remove (progress_pulse_timeout_id);
-            progress_pulse_timeout_id = 0;
-        }
-
-        progress_pulse_timeout_id = Timeout.add (100, () => {
-            progress_bar.pulse ();
-            return true;
         });
     }
 
@@ -814,6 +776,10 @@ public class View : Gtk.ApplicationWindow {
         var cols = app_menu.column_val;
 
         dimensions = {cols, rows};
+    }
+
+    private void on_progress_cancel () {
+        warning ("Progress cancel clicked");
     }
 }
 }

@@ -105,13 +105,14 @@ namespace Gnonograms {
                                 bool use_advanced = true,
                                 bool use_ultimate = true,
                                 bool unique_only = false,
+                                Cancellable? cancellable,
                                 bool human = false,
                                 bool stepwise = false) {
         guesses = 0;
 
         int result = yield simple_solver (debug,
-                                           should_check_solution,
-                                           stepwise);
+                                          should_check_solution,
+                                          stepwise);
 
         if (result == 0 && use_advanced) {
             CellState[] grid_backup =  new CellState[rows * cols];
@@ -166,8 +167,9 @@ namespace Gnonograms {
 
     /** Returns -1 to indicate an error - TODO use throw error instead **/
     private async int simple_solver (bool debug,
-                                      bool should_check_solution,
-                                      bool stepwise) {
+                                     bool should_check_solution,
+                                     bool stepwise,
+                                     Cancellable? cancellable = null) {
 
         int result = 0;
 
