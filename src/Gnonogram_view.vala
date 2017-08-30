@@ -254,7 +254,6 @@ public class View : Gtk.ApplicationWindow {
         check_correct_button.clicked.connect (on_check_button_pressed);
         restart_button.clicked.connect (on_restart_button_pressed);
         auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
-        progress_indicator.cancel.connect (on_progress_cancel);
     }
 
     public void blank_labels () {
@@ -306,12 +305,12 @@ public class View : Gtk.ApplicationWindow {
         });
     }
 
-    public void show_solving (Cancellable? cancellable = null) {
+    public void show_solving (Cancellable cancellable) {
         progress_indicator.text = (_("Solving"));
         schedule_show_progress (cancellable);
     }
 
-    public void show_generating (Cancellable? cancellable = null) {
+    public void show_generating (Cancellable cancellable) {
         progress_indicator.text = (_("Generating"));
         schedule_show_progress (cancellable);
     }
@@ -498,14 +497,11 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private uint progress_timeout_id = 0;
-    private void schedule_show_progress (Cancellable? cancellable) {
-        header_bar.set_custom_title (null);
-
+    private void schedule_show_progress (Cancellable cancellable) {
         progress_timeout_id = Timeout.add (PROGRESS_DELAY_MSEC, () => {
-            if (cancellable == null || !cancellable.is_cancelled ()) {
-                header_bar.set_custom_title (progress_indicator);
-            }
-
+            progress_indicator.cancellable = cancellable;
+            header_bar.set_custom_title (progress_indicator);
+            this.queue_draw ();
             progress_timeout_id = 0;
             return false;
         });
@@ -776,10 +772,6 @@ public class View : Gtk.ApplicationWindow {
         var cols = app_menu.column_val;
 
         dimensions = {cols, rows};
-    }
-
-    private void on_progress_cancel () {
-        warning ("Progress cancel clicked");
     }
 }
 }

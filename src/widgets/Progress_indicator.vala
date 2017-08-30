@@ -21,7 +21,6 @@
 namespace Gnonograms {
 /** Widget to show working when generating or solving and allow cancel **/
 public class Progress_indicator : Gtk.Grid {
-    public signal void cancel ();
 
     private Gtk.Spinner spinner;
     private Gtk.Button cancel_button;
@@ -59,18 +58,10 @@ public class Progress_indicator : Gtk.Grid {
 
         show_all ();
 
-        if (cancellable != null) {
-            cancellable.connect (() => {
-                cancel ();
-            });
-        }
-
         cancel_button.clicked.connect (() => {
             if (cancellable != null) {
                 cancellable.cancel ();
             }
-
-            cancel ();
         });
 
         realize.connect (() => {
@@ -83,6 +74,7 @@ public class Progress_indicator : Gtk.Grid {
 
         unrealize.connect (() => {
             if (cancellable != null) {
+                cancellable = null;
                 cancel_button.hide ();
             }
 

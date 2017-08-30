@@ -233,30 +233,32 @@ public class Controller : GLib.Object {
 
         clear ();
         view.header_title = _("Random pattern");
-        view.show_generating ();
+        var solver_cancellable = new Cancellable ();
+        view.show_generating (solver_cancellable);
 
         int target = Utils.grade_to_passes (grd);
         int next_target = Utils.grade_to_passes (grd + 1);
 
         while (count < limit) {
             count++;
-            passes = yield try_generate_game (grd); //tries max tries times
+            passes = yield try_generate_game (grd, solver_cancellable); //tries max tries times
 
-
-            if (passes >= target) {
+            if (solver_cancellable.is_cancelled ()) {
+                break;
+            } else if (passes >= target) {
                 if (passes < next_target) {
                     break;
                 } else {
                     continue;
                 }
-            }
-
-            if (passes > 0 && grd < Difficulty.CHALLENGING) {
+            } else if (passes > 0 && grd < Difficulty.CHALLENGING) {
                 grd++;
             }
         }
 
-        if (count >= limit) {
+        if (solver_cancellable.is_cancelled ()) {
+            view.send_notification (_("Game generation was cancelled"));
+        } else if (count >= limit) {
             view.send_notification (_("Failed to generate game of required grade"));
         } else if (passes >= 0 && rows > 1) {
             view.update_labels_from_model ();
@@ -275,7 +277,7 @@ public class Controller : GLib.Object {
         view.hide_progress ();
     }
 
-    private async uint try_generate_game (uint grd) {
+    private async uint try_generate_game (uint grd, Cancellable cancellable) {
         /* returns 0 - failed to generate solvable game
          * returns value > 1 - generated game took value passes to solve
          * returns uint.MAX - an error occurred in the solver
@@ -287,21 +289,26 @@ public class Controller : GLib.Object {
 
         while (passes == 0 && tries <= limit) {
             tries++;
-            passes = yield generate_game (grd);
+            passes = yield generate_game (grd, cancellable);
+
+            if (cancellable.is_cancelled ()) {
+                break;
+            }
         }
 
         return passes;
     }
 
     /** Generate a random, soluble puzzle (simple and unique solution only) **/
-    private async uint generate_game (uint grd) {
+    private async uint generate_game (uint grd, Cancellable cancellable) {
         model.fill_random (grd);
 
         return yield solve_game (false, // no start_grid
                                  false, // use model
                                  grd >= Difficulty.ADVANCED,
                                  false, // no ultimate solutions
-                                 grd < Difficulty.MAXIMUM); // unique solutions only
+                                 grd < Difficulty.MAXIMUM,
+                                 cancellable); // unique solutions only
     }
 
 
@@ -463,12 +470,13 @@ public class Controller : GLib.Object {
                 model.set_row_data_from_string (i, reader.solution[i]);
             }
         } else {
+            var cancellable = new Cancellable ();
             uint passes = yield solve_game (false, // no startgrid
                                             true, // use loaded labels, not model
                                             true, // use advanced solver
                                             false, // do not use ultimate solver (to time consuming for loading)
                                             false, // do not insist unique solution exists
-                                            null); // No cancellable at this point. (TODO?)
+                                            cancellable); // Not currently used (TODO)
 
             if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
                 set_model_from_solver ();
@@ -581,7 +589,7 @@ public class Controller : GLib.Object {
                                    bool use_advanced,
                                    bool use_ultimate,
                                    bool unique_only,
-                                   Cancellable? cancellable = null,
+                                   Cancellable cancellable,
                                    bool human = false) {
 
         uint passes = uint.MAX; //indicates error - TODO use throw error
@@ -727,8 +735,8 @@ public class Controller : GLib.Object {
         model.blank_working ();
         game_state = GameState.SOLVING;
 
-        Cancellable cancellable = new Cancellable ();
-        view.show_solving (cancellable);
+        var solver_cancellable = new Cancellable ();
+        view.show_solving (solver_cancellable);
 
         /* Look for unique simple solution */
         solve_game.begin (false, // no startgrid
@@ -736,40 +744,40 @@ public class Controller : GLib.Object {
                           false, // no advanced solutions
                           false, // no ultimate solutions
                           true, // must be unique solution
-                          cancellable,
+                          solver_cancellable,
                           false, // not human
                           (obj, res) => {
             uint passes = solve_game.end (res);
 
-            if (passes > 0  && passes < Gnonograms.FAILED_PASSES) {
+            if (solver_cancellable.is_cancelled ()) {
+                msg = _("Solving was cancelled");
+            } else if (passes > 0  && passes < Gnonograms.FAILED_PASSES) {
                 msg =  _("Simple solution found in %u passes.  Graded as %s").printf (passes, Utils.passes_to_grade_description (passes));
                 after_solve_game (msg);
-            } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
+            } else {
                 msg = _("No simple solution found");
                 solve_game.begin (false, // no startgrid
                                   true, // use labels not model
                                   true, // use advanced solver
                                   true, // use ultimate if necessary (option cancel given)
                                   false, // do not insist on unique
-                                  cancellable,
+                                  solver_cancellable,
                                   false, // not human
                                   (obj, res) => {
 
                     passes = solve_game.end (res);
 
-                    if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
+                    if (solver_cancellable.is_cancelled ()) {
+                        msg = _("Solving was cancelled");
+                    } else if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
                         msg = msg + "\n" + _("Advanced solution found in %u passes.  Graded as %s").printf (passes, Utils.passes_to_grade_description (passes));
                     } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
                         msg = msg + "\n" + _("No advanced solution found");
                     }
 
                     after_solve_game (msg);
-                    view.queue_draw ();
                 });
             }
-
-            after_solve_game (msg);
-            view.queue_draw ();
         });
     }
 
@@ -783,6 +791,7 @@ public class Controller : GLib.Object {
         }
 
         view.hide_progress ();
+        view.queue_draw ();
     }
 
     private void on_restart_request () {

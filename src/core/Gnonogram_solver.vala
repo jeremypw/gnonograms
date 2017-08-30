@@ -105,7 +105,7 @@ namespace Gnonograms {
                                 bool use_advanced = true,
                                 bool use_ultimate = true,
                                 bool unique_only = false,
-                                Cancellable? cancellable,
+                                Cancellable cancellable,
                                 bool human = false,
                                 bool stepwise = false) {
         guesses = 0;
@@ -113,19 +113,27 @@ namespace Gnonograms {
         int result = yield simple_solver (debug,
                                           should_check_solution,
                                           stepwise);
+        if (cancellable.is_cancelled ()) {
+            return Gnonograms.FAILED_PASSES;
+        }
 
         if (result == 0 && use_advanced) {
             CellState[] grid_backup =  new CellState[rows * cols];
 
             result = yield advanced_solver (grid_backup,
+                                            cancellable,
                                             use_ultimate,
                                             debug,
                                             9999,
                                             unique_only,
                                             human);
 
+            if (cancellable.is_cancelled ()) {
+                return Gnonograms.FAILED_PASSES;
+            }
+
             if (result == 0 && use_ultimate) {
-                result = yield ultimate_solver (grid_backup);
+                result = yield ultimate_solver (grid_backup, cancellable);
             }
         }
 
@@ -168,8 +176,7 @@ namespace Gnonograms {
     /** Returns -1 to indicate an error - TODO use throw error instead **/
     private async int simple_solver (bool debug,
                                      bool should_check_solution,
-                                     bool stepwise,
-                                     Cancellable? cancellable = null) {
+                                     bool stepwise) {
 
         int result = 0;
 
@@ -284,6 +291,7 @@ namespace Gnonograms {
         If first guess does not lead to solution leave unknown and choose another cell
     **/
     private async int advanced_solver (CellState[] grid_backup,
+                                       Cancellable cancellable,
                                        bool use_ultimate = true,
                                        bool debug = false,
                                        int max_guesswork = 999,
@@ -474,12 +482,12 @@ namespace Gnonograms {
       * Puzzles requiring this method are unlikely to solvable by a human and are unlikely to
       * have a unique solution so its utility is debatable.
     **/
-    private async int ultimate_solver(CellState[] grid_store) {
+    private async int ultimate_solver(CellState[] grid_store, Cancellable cancellable) {
         load_position (grid_store); //return to last valid state
-        return yield permute (grid_store);
+        return yield permute (grid_store, cancellable);
     }
 
-    private async int permute (CellState[] grid_store) {
+    private async int permute (CellState[] grid_store, Cancellable cancellable) {
         uint permute_region;
 
         CellState[] grid_backup2 = new CellState[rows * cols];
@@ -488,6 +496,10 @@ namespace Gnonograms {
         yield simple_solver (false, // not debug
                              false, // do not check solution
                              false); // not stepwise
+
+        if (cancellable.is_cancelled ()) {
+            return Gnonograms.FAILED_PASSES;
+        }
 
         while (true) {
             permute_region = choose_permute_region ();
@@ -532,7 +544,11 @@ namespace Gnonograms {
                                                           false); // not stepwise
 
                 if (simple_result == 0) {
-                    int advanced_result = yield advanced_solver (grid_store, false);
+                    int advanced_result = yield advanced_solver (grid_store, cancellable, false);
+
+                    if (cancellable.is_cancelled ()) {
+                        return Gnonograms.FAILED_PASSES;
+                    }
 
                     if (advanced_result > 0 && advanced_result < Gnonograms.FAILED_PASSES) {
                         return advanced_result; //solution found
