@@ -265,11 +265,13 @@ public class Controller : GLib.Object {
         } else if (count >= limit) {
             msg = _("Failed to generate game of required grade");
         } else if (passes >= 0 && rows > 1) {
+            game_state = GameState.SOLVING;
             view.update_labels_from_model ();
             msg = _("Difficulty: %s").printf (Utils.passes_to_grade_description (passes));
         } else {
             msg = _("Error occurred in solver");
             game_state = GameState.SOLVING;
+
             for (int r = 0; r < rows; r++) {
                 for (int c = 0; c < cols; c++) {
                     model.set_data_from_rc (r, c, solver.grid.get_data_from_rc (r, c));
@@ -279,6 +281,7 @@ public class Controller : GLib.Object {
 
         view.send_notification (msg);
         view.hide_progress ();
+        view.queue_draw ();
     }
 
     private async uint try_generate_game (uint grd, Cancellable cancellable) {
