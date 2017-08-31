@@ -343,7 +343,8 @@ public class Controller : GLib.Object {
         } catch (GLib.Error e) {
             warning ("Error deleting current game file - %s", e.message);
         } finally {
-            write_game (current_game_path, true);
+            /* Save solution and current state */
+            write_game (current_game_path, true, true);
         }
     }
 
@@ -378,7 +379,7 @@ public class Controller : GLib.Object {
         return yield load_game (current_game, false);
     }
 
-    private string? write_game (string? path, bool save_state = false) {
+    private string? write_game (string? path, bool save_solution = false, bool save_state = false) {
         Filewriter file_writer;
 
         try {
@@ -397,6 +398,7 @@ public class Controller : GLib.Object {
             file_writer.game_state = game_state;
             file_writer.working = model.working_data;
             file_writer.solution = model.solution_data;
+            file_writer.save_solution = save_solution;
 
             if (save_state) {
                 file_writer.write_position_file ();
@@ -725,7 +727,8 @@ public class Controller : GLib.Object {
     }
 
     private void on_save_game_request () {
-        var write_path = write_game (game_path, false); /* Do not save working */
+        /* Do not save working, but save any solution present */
+        var write_path = write_game (game_path, true, false);
 
         if (game_path == null || game_path == "") {
             game_path = write_path;
@@ -733,7 +736,8 @@ public class Controller : GLib.Object {
     }
 
     private void on_save_game_as_request () {
-        var write_path = write_game (null, false); /* Filewriter will request save location */
+        /* Filewriter will request save location, no solution saved as default */
+        var write_path = write_game (null, false, false);
 
         if (write_path != null) {
             game_path = write_path;

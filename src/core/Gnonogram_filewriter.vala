@@ -34,6 +34,7 @@ public class Filewriter : Object {
     public string license {get; set; default = "";}
     public Difficulty difficulty {get; set; default = Difficulty.UNDEFINED;}
     public GameState game_state {get; set; default = GameState.UNDEFINED;}
+    public bool save_solution {get; set; default = false;}
     public My2DCellArray? solution {get; set; default = null;}
     public My2DCellArray? working {get; set; default = null;}
 
@@ -154,17 +155,28 @@ public class Filewriter : Object {
 
     /** PRIVATE **/
     private FileStream? stream;
-    private bool save_solution;
 
     private string? get_save_file_path (Gtk.Window? parent, string? save_dir_path) {
-        return Utils.get_file_path (parent,
-            Gnonograms.FileChooserAction.SAVE_WITH_SOLUTION,
+        var action = Gnonograms.FileChooserAction.SAVE_NO_SOLUTION;
+
+        if (save_solution) {
+            action = Gnonograms.FileChooserAction.SAVE_WITH_SOLUTION;
+        }
+
+        bool with_solution;
+
+        var path = Utils.get_file_path (parent,
+            action,
             _("Name and save this puzzle"),
             {_("Gnonogram puzzles")},
             {"*" + Gnonograms.GAMEFILEEXTENSION},
             save_dir_path,
-            out save_solution
+            out with_solution  // cannot use save_solution directly (will not compile)
         );
+
+        save_solution = with_solution;
+
+        return path;
     }
 }
 }

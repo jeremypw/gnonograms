@@ -179,6 +179,9 @@ namespace Utils {
         return show_dlg (msg, Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, parent) == Gtk.ResponseType.YES;
     }
 
+    /** The @action parameter also indicates the default setting for saving the solution.
+      * The user selected option is returned in @save_solution.
+     **/
     public static string? get_file_path (Gtk.Window? parent,
                                           Gnonograms.FileChooserAction action,
                                           string dialogname,
