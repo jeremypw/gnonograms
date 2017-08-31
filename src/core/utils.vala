@@ -179,31 +179,39 @@ namespace Utils {
         return show_dlg (msg, Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, parent) == Gtk.ResponseType.YES;
     }
 
-    private static string? get_file_path (Gtk.Window? parent,
-                                          Gtk.FileChooserAction action,
+    public static string? get_file_path (Gtk.Window? parent,
+                                          Gnonograms.FileChooserAction action,
                                           string dialogname,
                                           string[]? filternames,
                                           string[]? filters,
-                                          string? start_path = null) {
+                                          string? start_path,
+                                          out bool save_solution) {
 
         string? file_path = null;
+
+        save_solution = (action == Gnonograms.FileChooserAction.SAVE_WITH_SOLUTION);
 
         if (filternames != null) {
             assert (filternames.length == filters.length);
         }
 
         string button = "Error";
+        Gtk.FileChooserAction gtk_action = Gtk.FileChooserAction.SAVE;
 
         switch (action) {
-            case Gtk.FileChooserAction.OPEN:
+            case Gnonograms.FileChooserAction.OPEN:
+                gtk_action = Gtk.FileChooserAction.OPEN;
                 button = Gtk.Stock.OPEN;
                 break;
 
-            case Gtk.FileChooserAction.SAVE:
+            case Gnonograms.FileChooserAction.SAVE_WITH_SOLUTION:
+            case Gnonograms.FileChooserAction.SAVE_NO_SOLUTION:
+                gtk_action = Gtk.FileChooserAction.SAVE;
                 button = Gtk.Stock.SAVE;
                 break;
 
-            case Gtk.FileChooserAction.SELECT_FOLDER:
+            case Gnonograms.FileChooserAction.SELECT_FOLDER:
+                gtk_action = Gtk.FileChooserAction.SELECT_FOLDER;
                 button = Gtk.Stock.APPLY;
                 break;
 
@@ -214,7 +222,7 @@ namespace Utils {
         var dialog = new Gtk.FileChooserDialog (
                         dialogname,
                         parent,
-                        action,
+                        gtk_action,
                         Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
                         button, Gtk.ResponseType.ACCEPT,
                         null
@@ -232,8 +240,24 @@ namespace Utils {
         dialog.local_only = false;
 
         //only need access to built-in puzzle directory if loading a .gno puzzle
-        if (action == Gtk.FileChooserAction.OPEN && filters != null && filters[0] == "*.gno") {
-             dialog.add_button (_("Built in puzzles"), Gtk.ResponseType.NONE);
+        if (action == Gnonograms.FileChooserAction.OPEN) {
+             dialog.add_button (_("Built in puzzles"), Gtk.ResponseType.APPLY);
+        } else {
+            var grid = new Gtk.Grid ();
+            grid.orientation = Gtk.Orientation.HORIZONTAL;
+            grid.column_spacing = 6;
+
+            var save_solution_switch = new Gtk.Switch ();
+            save_solution_switch.state = save_solution;
+
+            var save_solution_label = new Gtk.Label (_("Save solution too"));
+
+            grid.add (save_solution_label);
+            grid.add (save_solution_switch);
+
+            dialog.add_action_widget (grid, Gtk.ResponseType.NONE);
+
+            grid.show_all ();
         }
 
         File start;
@@ -245,20 +269,10 @@ namespace Utils {
 
         dialog.set_current_folder (start.get_path ());
 
-        int response;
-
-        while (true) {
-            response = dialog.run ();
-
-            if (response == Gtk.ResponseType.NONE) {
-                dialog.set_current_folder (get_app ().load_game_dir);
-            } else {
-                break;
-            }
-        }
+        var response = run_dialog (dialog);
 
         if (response == Gtk.ResponseType.ACCEPT) {
-            if (action == Gtk.FileChooserAction.SAVE) {
+            if (gtk_action == Gtk.FileChooserAction.SAVE) {
                 file_path = Path.build_path (Path.DIR_SEPARATOR_S,
                                              dialog.get_current_folder (),
                                              dialog.get_current_name ()
@@ -271,6 +285,28 @@ namespace Utils {
         dialog.destroy ();
 
         return file_path;
+    }
+
+    private int run_dialog (Gtk.FileChooserDialog dialog) {
+        int response;
+
+        while (true) {
+            response = dialog.run ();
+
+            switch (response) {
+                case Gtk.ResponseType.APPLY:
+                    dialog.set_current_folder (get_app ().load_game_dir);
+                    break;
+
+                case Gtk.ResponseType.NONE:
+                    break;
+
+                default:
+                    return response;
+            }
+        }
+
+
     }
 
     public int grade_to_passes (uint grd) {

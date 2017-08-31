@@ -126,6 +126,11 @@ public class Filewriter : Object {
         }
 
         stream.flush();
+
+        if (save_solution) {
+            stream.printf ("[Solution grid]\n");
+            stream.printf (solution.to_string ());
+        }
     }
 
     /*** Writes complete information to reload game state ***/
@@ -140,8 +145,6 @@ public class Filewriter : Object {
 
         write_game_file ();
 
-        stream.printf ("[Solution grid]\n");
-        stream.printf (solution.to_string ());
         stream.printf ("[Working grid]\n");
         stream.printf (working.to_string());
         stream.printf ("[State]\n");
@@ -151,14 +154,16 @@ public class Filewriter : Object {
 
     /** PRIVATE **/
     private FileStream? stream;
+    private bool save_solution;
 
     private string? get_save_file_path (Gtk.Window? parent, string? save_dir_path) {
         return Utils.get_file_path (parent,
-            Gtk.FileChooserAction.SAVE,
+            Gnonograms.FileChooserAction.SAVE_WITH_SOLUTION,
             _("Name and save this puzzle"),
             {_("Gnonogram puzzles")},
             {"*" + Gnonograms.GAMEFILEEXTENSION},
-            save_dir_path
+            save_dir_path,
+            out save_solution
         );
     }
 }

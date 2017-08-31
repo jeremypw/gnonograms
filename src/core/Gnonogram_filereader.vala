@@ -81,11 +81,12 @@ public class Filereader : Object {
     private File? get_load_game_file (Gtk.Window? parent, string? load_dir_path) {
         string? path = Utils.get_file_path (
                             parent,
-                            Gtk.FileChooserAction.OPEN,
+                            Gnonograms.FileChooserAction.OPEN,
                             _("Choose a puzzle"),
                             {_("Gnonogram puzzles")},
                             {"*" + Gnonograms.GAMEFILEEXTENSION},
-                            load_dir_path
+                            load_dir_path,
+                            null
                         );
 
         if (path == null || path == "") {

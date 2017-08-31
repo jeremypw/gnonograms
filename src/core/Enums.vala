@@ -81,4 +81,12 @@ public enum ButtonPress {
     RIGHT_DOUBLE,
     UNDEFINED
 }
+
+public enum FileChooserAction {
+    OPEN,
+    SAVE_NO_SOLUTION,
+    SAVE_WITH_SOLUTION,
+    SELECT_FOLDER,
+    UNDEFINED
+}
 }
