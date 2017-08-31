@@ -22,11 +22,15 @@ namespace Gnonograms {
 public class CellGrid : Gtk.DrawingArea {
     public signal void cursor_moved (Cell from, Cell to);
 
-    public Model model { get; set; }
+    public Model? model { get; set; }
 
-    public My2DCellArray array {
+    public My2DCellArray? array {
         get {
-            return model.display_data;
+            if (model != null) {
+                return model.display_data;
+            } else {
+                return null;
+            }
         }
     } /* model display data */
 
@@ -157,8 +161,8 @@ public class CellGrid : Gtk.DrawingArea {
     private const double MINOR_GRID_LINE_WIDTH = 1.0;
     private Gdk.RGBA[, ] colors;
 
-    private uint rows {get { return model.rows; }}
-    private uint cols {get { return model.cols; }}
+    private uint rows {get { return model != null ? model.rows : 0; }}
+    private uint cols {get { return model != null ? model.cols : 0; }}
 
     /* Backing variable; do not assign directly */
     private Cell _current_cell;
