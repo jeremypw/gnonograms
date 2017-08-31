@@ -150,7 +150,9 @@ public class Controller : GLib.Object {
 
         load_game_dir = get_app ().build_pkg_data_dir + "/games";
         save_game_dir = Environment.get_home_dir () + "/gnonograms";
-        string data_home_folder_current = Path.build_path (Path.DIR_SEPARATOR_S,
+
+        string data_home_folder_current = Path.build_path (
+                                                Path.DIR_SEPARATOR_S,
                                                 Environment.get_user_data_dir (),
                                                 "gnonograms",
                                                 "unsaved"
@@ -256,16 +258,17 @@ public class Controller : GLib.Object {
             }
         }
 
+        string msg;
+
         if (solver_cancellable.is_cancelled ()) {
-            view.send_notification (_("Game generation was cancelled"));
+           msg = _("Game generation was cancelled");
         } else if (count >= limit) {
-            view.send_notification (_("Failed to generate game of required grade"));
+            msg = _("Failed to generate game of required grade");
         } else if (passes >= 0 && rows > 1) {
             view.update_labels_from_model ();
-            game_state = GameState.SOLVING;
-            view.send_notification (_("Difficulty: %s").printf (Utils.passes_to_grade_description (passes)));
+            msg = _("Difficulty: %s").printf (Utils.passes_to_grade_description (passes));
         } else {
-            view.send_notification (_("Error occurred in solver"));
+            msg = _("Error occurred in solver");
             game_state = GameState.SOLVING;
             for (int r = 0; r < rows; r++) {
                 for (int c = 0; c < cols; c++) {
@@ -274,6 +277,7 @@ public class Controller : GLib.Object {
             }
         }
 
+        view.send_notification (msg);
         view.hide_progress ();
     }
 
@@ -299,16 +303,18 @@ public class Controller : GLib.Object {
         return passes;
     }
 
-    /** Generate a random, soluble puzzle (simple and unique solution only) **/
+    /** Generate a random, humanly soluble puzzle **/
     private async uint generate_game (uint grd, Cancellable cancellable) {
         model.fill_random (grd);
 
-        return yield solve_game (false, // no start_grid
-                                 false, // use model
-                                 grd >= Difficulty.ADVANCED,
-                                 false, // no ultimate solutions
-                                 grd < Difficulty.MAXIMUM,
-                                 cancellable); // unique solutions only
+        return yield solve_game (
+                        false, // no start_grid
+                        false, // use model
+                        grd >= Difficulty.ADVANCED, // use advanced solver
+                        false, // no ultimate solutions (too difficult for humans)
+                        grd < Difficulty.MAXIMUM, // unique solutions only
+                        cancellable
+                    );
     }
 
 
@@ -373,25 +379,28 @@ public class Controller : GLib.Object {
         Filewriter file_writer;
 
         try {
-            file_writer = new Filewriter (window,
-                                          save_game_dir,
-                                          path,
-                                          title,
-                                          rows,
-                                          cols,
-                                          view.get_row_clues (),
-                                          view.get_col_clues ()
+            file_writer = new Filewriter (
+                                window,
+                                save_game_dir,
+                                path,
+                                title,
+                                rows,
+                                cols,
+                                view.get_row_clues (),
+                                view.get_col_clues ()
                             );
 
             file_writer.difficulty = grade;
             file_writer.game_state = game_state;
             file_writer.working = model.working_data;
             file_writer.solution = model.solution_data;
+
             if (save_state) {
                 file_writer.write_position_file ();
             } else {
                 file_writer.write_game_file ();
             }
+
         } catch (IOError e) {
             critical ("File writer error %s", e.message);
             return null;
@@ -471,12 +480,14 @@ public class Controller : GLib.Object {
             }
         } else {
             var cancellable = new Cancellable ();
-            uint passes = yield solve_game (false, // no startgrid
-                                            true, // use loaded labels, not model
-                                            true, // use advanced solver
-                                            false, // do not use ultimate solver (to time consuming for loading)
-                                            false, // do not insist unique solution exists
-                                            cancellable); // Not currently used (TODO)
+            uint passes = yield solve_game (
+                                    false, // no startgrid
+                                    true, // use loaded labels, not model
+                                    true, // use advanced solver
+                                    false, // do not use ultimate solver (to time consuming for loading)
+                                    false, // do not insist unique solution exists
+                                    cancellable // Not currently used (TODO)
+                                );
 
             if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
                 set_model_from_solver ();
@@ -719,7 +730,7 @@ public class Controller : GLib.Object {
     }
 
     private void on_save_game_as_request () {
-        var write_path = write_game (null, false); /* Will cause Filewriter to ask for a location to save */
+        var write_path = write_game (null, false); /* Filewriter will request save location */
 
         if (write_path != null) {
             game_path = write_path;
@@ -727,7 +738,7 @@ public class Controller : GLib.Object {
     }
 
     private void on_open_game_request () {
-        load_game.begin (null, true); /* Will cause Filereader to ask for a location to open */
+        load_game.begin (null, true); /* Filereader will request load location */
     }
 
     private void on_solve_this_request () {
@@ -739,46 +750,52 @@ public class Controller : GLib.Object {
         view.show_solving (solver_cancellable);
 
         /* Look for unique simple solution */
-        solve_game.begin (false, // no startgrid
-                          true, // use labels not model
-                          false, // no advanced solutions
-                          false, // no ultimate solutions
-                          true, // must be unique solution
-                          solver_cancellable,
-                          false, // not human
-                          (obj, res) => {
-            uint passes = solve_game.end (res);
+        solve_game.begin (
+            false, // no startgrid
+            true, // use labels not model
+            false, // no advanced solutions
+            false, // no ultimate solutions
+            true, // must be unique solution
+            solver_cancellable,
+            false, // not human
+            (obj, res) => {
 
-            if (solver_cancellable.is_cancelled ()) {
-                msg = _("Solving was cancelled");
-            } else if (passes > 0  && passes < Gnonograms.FAILED_PASSES) {
-                msg =  _("Simple solution found in %u passes.  Graded as %s").printf (passes, Utils.passes_to_grade_description (passes));
-                after_solve_game (msg);
-            } else {
-                msg = _("No simple solution found");
-                solve_game.begin (false, // no startgrid
-                                  true, // use labels not model
-                                  true, // use advanced solver
-                                  true, // use ultimate if necessary (option cancel given)
-                                  false, // do not insist on unique
-                                  solver_cancellable,
-                                  false, // not human
-                                  (obj, res) => {
+                uint passes = solve_game.end (res);
 
-                    passes = solve_game.end (res);
-
-                    if (solver_cancellable.is_cancelled ()) {
-                        msg = _("Solving was cancelled");
-                    } else if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
-                        msg = msg + "\n" + _("Advanced solution found in %u passes.  Graded as %s").printf (passes, Utils.passes_to_grade_description (passes));
-                    } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
-                        msg = msg + "\n" + _("No advanced solution found");
-                    }
-
+                if (solver_cancellable.is_cancelled ()) {
+                    msg = _("Solving was cancelled");
+                } else if (passes > 0  && passes < Gnonograms.FAILED_PASSES) {
+                    msg =  _("Simple solution found. %s").printf (passes, Utils.passes_to_grade_description (passes));
                     after_solve_game (msg);
-                });
+                } else {
+                    msg = _("No simple solution found");
+
+                    solve_game.begin (
+                        false, // no startgrid
+                        true, // use labels not model
+                        true, // use advanced solver
+                        true, // use ultimate if necessary (option cancel given)
+                        false, // do not insist on unique
+                        solver_cancellable,
+                        false, // not human
+                        (obj, res) => {
+
+                            passes = solve_game.end (res);
+
+                            if (solver_cancellable.is_cancelled ()) {
+                                msg = _("Solving was cancelled");
+                            } else if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
+                                msg = msg + "\n" + _("Advanced solution found. %s").printf (passes, Utils.passes_to_grade_description (passes));
+                            } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
+                                msg = msg + "\n" + _("No advanced solution found");
+                            }
+
+                            after_solve_game (msg);
+                        }
+                    );
+                }
             }
-        });
+        );
     }
 
     private void after_solve_game (string msg) {

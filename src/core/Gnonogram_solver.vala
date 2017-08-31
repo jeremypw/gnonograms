@@ -113,6 +113,7 @@ namespace Gnonograms {
         int result = yield simple_solver (debug,
                                           should_check_solution,
                                           stepwise);
+
         if (cancellable.is_cancelled ()) {
             return Gnonograms.FAILED_PASSES;
         }
