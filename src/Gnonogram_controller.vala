@@ -768,7 +768,8 @@ public class Controller : GLib.Object {
                 if (solver_cancellable.is_cancelled ()) {
                     msg = _("Solving was cancelled");
                 } else if (passes > 0  && passes < Gnonograms.FAILED_PASSES) {
-                    msg =  _("Simple solution found. %s").printf (passes, Utils.passes_to_grade_description (passes));
+                    var descr = Utils.passes_to_grade_description (passes);
+                    msg =  _("Simple solution found. %s").printf (descr);
                     after_solve_game (msg);
                 } else {
                     msg = _("No simple solution found");
@@ -788,7 +789,8 @@ public class Controller : GLib.Object {
                             if (solver_cancellable.is_cancelled ()) {
                                 msg = _("Solving was cancelled");
                             } else if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
-                                msg = msg + "\n" + _("Advanced solution found. %s").printf (passes, Utils.passes_to_grade_description (passes));
+                                var descr = Utils.passes_to_grade_description (passes);
+                                msg = msg + "\n" + _("Advanced solution found. %s").printf (descr);
                             } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
                                 msg = msg + "\n" + _("No advanced solution found");
                             }
