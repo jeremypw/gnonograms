@@ -37,7 +37,7 @@ link_directories(${DEPS_LIBRARY_DIRS})
 find_package(Vala REQUIRED)
 
 include(ValaVersion)
-ensure_vala_version("0.34" MINIMUM)
+ensure_vala_version("0.37" MINIMUM)
 
 add_subdirectory (data)
 add_subdirectory (po)

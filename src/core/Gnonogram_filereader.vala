@@ -299,7 +299,7 @@ public class Filereader : Object {
         } else if (state_string.up ().contains ("SOLVING")) {
             state = GameState.SOLVING;
         } else {
-            err_msg = _("Invalid game state '%s' in loaded game file").printf (state);
+            err_msg = _("Invalid game state '%s' in loaded game file").printf (state_string);
             return false;
         }
 

@@ -116,7 +116,7 @@ class Label : Gtk.Label {
         var freedom = size - blockextent;
         if (freedom >= 0) {
             has_tooltip = true;
-            set_tooltip_markup (attrib_start + _("Freedom = %i").printf(freedom) + "</span>");
+            set_tooltip_markup (attrib_start + _("Freedom = %u").printf (freedom) + "</span>");
         } else {
             has_tooltip = false;
         }
