@@ -1,0 +1,10 @@
+src/Gnonogram_controller.vala
+src/Gnonogram_view.vala
+src/widgets/Gnonogram_label.vala
+src/widgets/AppMenu.vala
+src/widgets/ViewModeButton.vala
+src/widgets/Progress_indicator.vala
+src/core/utils.vala
+src/core/Gnonogram_solver.vala
+src/core/Gnonogram_filereader.vala
+src/core/Gnonogram_filewriter.vala

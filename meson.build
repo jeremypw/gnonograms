@@ -51,3 +51,5 @@ executable (
         dependency ('granite')
     ]
 )
+
+subdir ('po')
