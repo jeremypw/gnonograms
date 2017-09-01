@@ -33,4 +33,4 @@
 *.su
 
 # Build files
-build/*
+*build/*
