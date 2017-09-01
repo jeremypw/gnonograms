@@ -34,6 +34,7 @@ public class App : Granite.Application {
         program_name = _("Gnonograms");
         app_years = "2017";
         app_icon = "gnonograms-elementary";
+        build_version = Build.VERSION;
 
         app_launcher = "com.github.jeremypw.gnonograms-elementary.desktop";
         main_url = "https://github.com/jeremypw/gnonograms-elementary";

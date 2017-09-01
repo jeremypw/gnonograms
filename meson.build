@@ -1,8 +1,22 @@
 project ('gnonograms-elementary', 'vala', 'c')
 
+add_project_arguments (
+    ['--vapidir', join_paths (meson.current_source_dir (), 'vapi')],
+    language: 'vala'
+)
+
 i18n = import ('i18n')
 
-add_global_arguments ('-DGETTEXT_PACKAGE="gnonograms-elementary"', language:'c')
+add_global_arguments (
+    '-DGETTEXT_PACKAGE="gnonograms-elementary"',
+    language:'c'
+)
+
+conf_data = configuration_data ()
+conf_data.set ('VERSION', '1.0')
+configure_file (input : 'config.h.meson',
+                output : 'config.h',
+                configuration : conf_data )
 
 executable (
     meson.project_name (),
@@ -28,6 +42,7 @@ executable (
     'src/core/Enums.vala',
     'src/core/Structs.vala',
     'src/core/Constants.vala',
+    'vapi/config.vapi',
     dependencies : [
         dependency ('glib-2.0'),
         dependency ('gobject-2.0'),
