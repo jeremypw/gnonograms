@@ -49,7 +49,11 @@ executable (
         dependency ('gtk+-3.0'),
         dependency ('gee-0.8'),
         dependency ('granite')
-    ]
+    ],
+    install: true
 )
 
+meson.add_install_script('meson/post_install.py')
+
 subdir ('po')
+subdir ('data')

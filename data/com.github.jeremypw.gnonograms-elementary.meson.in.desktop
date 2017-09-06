@@ -1,0 +1,16 @@
+[Desktop Entry]
+_Name=gnonograms-elementary
+_Comment=Create and solve nonogram puzzles.
+_Keywords=game;puzzle;logic;grid;pattern;
+_GenericName=Logic Game
+Exec=gnonograms-elementary %f
+Icon=gnonograms-elementary
+Terminal=false
+StartupNotify=true
+Type=Application
+MimeType=application/x-gnonogram-puzzle;
+Categories=GNOME;GTK;Game;
+X-GNOME-Gettext-Domain=gnonograms-elementary
+X-GNOME-UsesNotifications=false
+
+

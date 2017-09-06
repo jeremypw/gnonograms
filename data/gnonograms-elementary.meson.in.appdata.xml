@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <id>com.github.jeremypw.gnonograms-elementary.desktop</id>
+    <metadata_license>CC-BY-SA-3.0</metadata_license>
+    <project_group>jeremypw</project_group>
+    <project_license>GPL-3.0+</project_license>
+    <_name>Gnonograms</_name>
+    <summary>Create and solve gnonogram puzzles</summary>
+    <description>
+        <_p>
+        Gnonograms is an implementation of the Japanese logic puzzle "Nonograms", also known as "Tsunami", "Griddlers", and other names.
+        The object of the game is to discover the pattern in the grid which is encoded in the clues which are given for each row and column.
+        Random soluble pattern puzzles can be generated. New puzzles can be designed and saved.
+        </_p>
+    </description>
+    <releases>
+        <release version="0.1" date="2017-xx-xx" urgency="medium">
+            <description>
+                <p>Initial release.</p>
+                <ul>
+                    <li>Draw puzzles</li>
+                    <li>Generate random puzzles</li>
+                    <li>Check for errors while solving</li>
+                    <li>Adjust size of grid</li>
+                    <li>Adjust difficulty of generated puzzles</li>
+                    <li>Save and restore program state and settings</li>
+                </ul>
+            </description>
+        </release>
+    </releases>
+    <provides>
+        <binary>gnonograms-elementary</binary>
+    </provides>
+    <developer_name>Jeremy P Wootten</developer_name>
+    <url type="homepage">https://github.com/jeremypw/gnonograms-elementary</url>
+    <url type="bugtracker">https://github.com/jeremypw/gnonograms-elementary/issues</url>
+    <update_contact>jeremy@elementaryos.org</update_contact>
+</component>
