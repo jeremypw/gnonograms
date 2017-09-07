@@ -20,7 +20,7 @@ install_subdir (
 i18n.merge_file (
     'desktop',
     input: 'com.github.jeremypw.' + meson.project_name () + '.meson.in.desktop',
-    output: meson.project_name () + '.desktop',
+    output: 'com.github.jeremypw.' + meson.project_name () + '.desktop',
     install: true,
     install_dir: join_paths (get_option ('datadir'), 'applications'),
     po_dir: join_paths (meson.source_root (), 'po', 'extra'),
