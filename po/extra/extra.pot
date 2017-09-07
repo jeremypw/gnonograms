@@ -1,0 +1,62 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-07 17:34+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Gnonograms"
+msgstr ""
+
+msgid "game;puzzle;logic;grid;pattern;"
+msgstr ""
+
+msgid "Logic Game"
+msgstr ""
+
+msgid "About Gnonograms"
+msgstr ""
+
+msgid "Create and solve gnonogram puzzles"
+msgstr ""
+
+msgid ""
+"Gnonograms is an implementation of the Japanese logic puzzle \"Nonograms\", "
+"also known as \"Tsunami\", \"Griddlers\", and other names. The object of the "
+"game is to discover the pattern in the grid which is encoded in the clues "
+"which are given for each row and column. Random soluble pattern puzzles can "
+"be generated. New puzzles can be designed and saved."
+msgstr ""
+
+msgid "Initial release."
+msgstr ""
+
+msgid "Draw puzzles"
+msgstr ""
+
+msgid "Generate random puzzles"
+msgstr ""
+
+msgid "Check for errors while solving"
+msgstr ""
+
+msgid "Adjust size of grid"
+msgstr ""
+
+msgid "Adjust difficulty of generated puzzles"
+msgstr ""
+
+msgid "Save and restore program state and settings"
+msgstr ""

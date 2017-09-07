@@ -1,9 +1,153 @@
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To: jeremywootten@gmail.com\n"
-"POT-Creation-Date: 2017-09-01 19:15+0100\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-06 18:03+0100\n"
+"PO-Revision-Date: 2017-06-16 17:33+0000\n"
+"Last-Translator: Rajeev Kumar <irajeevankumar@gmail.com>\n"
+"Language-Team: Tamil <https://l10n.elementary.io/projects/calculator/"
+"calculator/ta/>\n"
+"Language: ta\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2.14\n"
+"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
+
+#: src/gnonograms.vala:34
+msgid "Gnonograms"
+msgstr ""
+
+#: src/gnonograms.vala:46
+msgid "translator-credits"
+msgstr ""
+"Launchpad Contributions:\n"
+"  Afrish Khan S https://launchpad.net/~ryanafrish7\n"
+"  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount\n"
+"  அவினாஷ் Avinash https://launchpad.net/~avinashachu007"
+
+#: src/core/Gnonogram_filewriter.vala:170
+msgid "Name and save this puzzle"
+msgstr ""
+
+#: src/core/Gnonogram_filewriter.vala:171 src/core/Gnonogram_filereader.vala:86
+msgid "Gnonogram puzzles"
+msgstr ""
+
+#: src/core/Enums.vala:36
+msgid "Very Easy"
+msgstr ""
+
+#: src/core/Enums.vala:38
+msgid "Easy"
+msgstr ""
+
+#: src/core/Enums.vala:40
+msgid "Moderately difficult"
+msgstr ""
+
+#: src/core/Enums.vala:42
+msgid "Difficult"
+msgstr ""
+
+#: src/core/Enums.vala:44
+msgid "Very Difficult"
+msgstr ""
+
+#: src/core/Enums.vala:46
+msgid "Advanced logic required"
+msgstr ""
+
+#: src/core/Enums.vala:48
+msgid "Possibly ambiguous"
+msgstr ""
+
+#: src/core/Constants.vala:30
+msgid "?"
+msgstr ""
+
+#: src/core/utils.vala:247
+msgid "Built in puzzles"
+msgstr ""
+
+#: src/core/utils.vala:256
+msgid "Save solution too"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:85
+msgid "Choose a puzzle"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:223
+msgid "Missing clues"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:231
+msgid "Invalid clue"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:243
+msgid "Solution grid or working grid missing"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:250
+msgid "Wrong number of rows in solution or working grid"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:257
+msgid "Wrong number of columns in solution or working grid"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:264
+msgid "Invalid cell state"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:284
+msgid "Missing game state"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:291
+msgid "Could not determine game state in loaded game file"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:302
+#, c-format
+msgid "Invalid game state '%s' in loaded game file"
+msgstr ""
+
+#: src/widgets/Gnonogram_label.vala:119
+#, c-format
+msgid "Freedom = %u"
+msgstr ""
+
+#: src/widgets/ViewModeButton.vala:49
+msgid "Draw a pattern"
+msgstr ""
+
+#: src/widgets/ViewModeButton.vala:50
+msgid "Solve a puzzle"
+msgstr ""
+
+#: src/widgets/AppMenu.vala:76
+msgid "Rows"
+msgstr ""
+
+#: src/widgets/AppMenu.vala:77
+msgid "Columns"
+msgstr ""
+
+#: src/widgets/AppMenu.vala:105
+msgid "Options"
+msgstr ""
+
+#: src/widgets/AppMenu.vala:257
+msgid "Difficulty"
+msgstr ""
+
+#: src/widgets/Progress_indicator.vala:54
+msgid "Cancel solving"
+msgstr ""
 
 #: src/Gnonogram_controller.vala:226
 msgid "Blank sheet"
@@ -89,8 +233,9 @@ msgid "Setting"
 msgstr ""
 
 #: src/Gnonogram_view.vala:126
+#, fuzzy
 msgid "Clear canvas"
-msgstr ""
+msgstr "பதிவை அழி"
 
 #: src/Gnonogram_view.vala:129 src/Gnonogram_view.vala:309
 msgid "Solving"
@@ -142,92 +287,92 @@ msgstr ""
 msgid "No errors"
 msgstr ""
 
-#: src/widgets/Gnonogram_label.vala:119
-#, c-format
-msgid "Freedom = %u"
-msgstr ""
+#~ msgid "Calculator"
+#~ msgstr "கால்குலேட்டர்"
 
-#: src/widgets/AppMenu.vala:76
-msgid "Rows"
-msgstr ""
+#~ msgid "History"
+#~ msgstr "வரலாறு"
 
-#: src/widgets/AppMenu.vala:77
-msgid "Columns"
-msgstr ""
+#~ msgid "Value to add:"
+#~ msgstr "கூட்ட வேண்டிய மதிப்புகள்:"
 
-#: src/widgets/AppMenu.vala:105
-msgid "Options"
-msgstr ""
+#~ msgid "Result"
+#~ msgstr "முடிவு"
 
-#: src/widgets/AppMenu.vala:257
-msgid "Difficulty"
-msgstr ""
+#~ msgid "Expression"
+#~ msgstr "கோவை"
 
-#: src/widgets/ViewModeButton.vala:49
-msgid "Draw a pattern"
-msgstr ""
+#~ msgid "Close"
+#~ msgstr "மூடு"
 
-#: src/widgets/ViewModeButton.vala:50
-msgid "Solve a puzzle"
-msgstr ""
+#~ msgid "Add"
+#~ msgstr "கூட்டு"
 
-#: src/widgets/Progress_indicator.vala:54
-msgid "Cancel solving"
-msgstr ""
+#~ msgid "Show extended functionality"
+#~ msgstr "நீட்டிக்கப்பட்ட செயல்பாடுகள் காட்ட"
 
-#: src/core/utils.vala:247
-msgid "Built in puzzles"
-msgstr ""
+#~ msgid "Calculate Result"
+#~ msgstr "முடிவை கணக்கிடு"
 
-#: src/core/utils.vala:256
-msgid "Save solution too"
-msgstr ""
+#~ msgid "Add last result"
+#~ msgstr "கடைசி பதிலை கூட்டு"
 
-#: src/core/Gnonogram_filereader.vala:85
-msgid "Choose a puzzle"
-msgstr ""
+#~ msgid "Backspace"
+#~ msgstr "பின்நகர்வு"
 
-#: src/core/Gnonogram_filereader.vala:86 src/core/Gnonogram_filewriter.vala:171
-msgid "Gnonogram puzzles"
-msgstr ""
+#~ msgid "Subtract"
+#~ msgstr "கழித்தல்"
 
-#: src/core/Gnonogram_filereader.vala:223
-msgid "Missing clues"
-msgstr ""
+#~ msgid "Multiply"
+#~ msgstr "பெருக்கல்"
 
-#: src/core/Gnonogram_filereader.vala:231
-msgid "Invalid clue"
-msgstr ""
+#~ msgid "Divide"
+#~ msgstr "வகுத்தல்"
 
-#: src/core/Gnonogram_filereader.vala:243
-msgid "Solution grid or working grid missing"
-msgstr ""
+#~ msgid "Percentage"
+#~ msgstr "சதவிகிதம்"
 
-#: src/core/Gnonogram_filereader.vala:250
-msgid "Wrong number of rows in solution or working grid"
-msgstr ""
+#~ msgid "Start Group"
+#~ msgstr "குழுவை ஆரம்பி"
 
-#: src/core/Gnonogram_filereader.vala:257
-msgid "Wrong number of columns in solution or working grid"
-msgstr ""
+#~ msgid "End Group"
+#~ msgstr "குழுவை முடி"
 
-#: src/core/Gnonogram_filereader.vala:264
-msgid "Invalid cell state"
-msgstr ""
+#~ msgid "Exponent"
+#~ msgstr "அடுக்குக்குறி"
 
-#: src/core/Gnonogram_filereader.vala:284
-msgid "Missing game state"
-msgstr ""
+#~ msgid "Root"
+#~ msgstr "வர்க்க மூலம்"
 
-#: src/core/Gnonogram_filereader.vala:291
-msgid "Could not determine game state in loaded game file"
-msgstr ""
+#~ msgid "Sine"
+#~ msgstr "சைன்"
 
-#: src/core/Gnonogram_filereader.vala:302
-#, c-format
-msgid "Invalid game state '%s' in loaded game file"
-msgstr ""
+#~ msgid "Hyperbolic Sine"
+#~ msgstr "குவிபிறை சைன்"
 
-#: src/core/Gnonogram_filewriter.vala:170
-msgid "Name and save this puzzle"
-msgstr ""
+#~ msgid "Cosine"
+#~ msgstr "கோசைன்"
+
+#~ msgid "Hyperbolic Cosine"
+#~ msgstr "குவிபிறை கோசைன்"
+
+#~ msgid "Tangent"
+#~ msgstr "தொடுகோடு"
+
+#~ msgid "Hyperbolic Tangent"
+#~ msgstr "குவிபிறை தொடுகோடு"
+
+#~ msgid "Pi"
+#~ msgstr "பை"
+
+#~ msgid "Euler's Number"
+#~ msgstr "ஆய்லர் எண்"
+
+#~ msgid "Hide extended functionality"
+#~ msgstr "நீட்டிக்கப்பட்ட செயல்பாடு மறை"
+
+#~ msgid "'%s' is invalid."
+#~ msgstr "'%s' தவறானது."
+
+#~ msgid "'%s' is unknown."
+#~ msgstr "'%s' அறியப்படாதது."

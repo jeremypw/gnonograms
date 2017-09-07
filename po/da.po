@@ -1,9 +1,156 @@
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To: jeremywootten@gmail.com\n"
-"POT-Creation-Date: 2017-09-01 19:15+0100\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-06 18:03+0100\n"
+"PO-Revision-Date: 2017-03-19 11:07+0000\n"
+"Last-Translator: Maxwell Barvian <Unknown>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2017-03-20 06:06+0000\n"
+"X-Generator: Launchpad (build 18332)\n"
+
+#: src/gnonograms.vala:34
+msgid "Gnonograms"
+msgstr ""
+
+#: src/gnonograms.vala:46
+msgid "translator-credits"
+msgstr ""
+"Launchpad Contributions:\n"
+"  Asger Watanabe Bertelsen https://launchpad.net/~asger-watanabe\n"
+"  Iason DeRulou https://launchpad.net/~iasonasmg\n"
+"  Jeppe Klitgaard https://launchpad.net/~jeppe-dapj\n"
+"  Jonas Pedersen https://launchpad.net/~jonasbp2011\n"
+"  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount\n"
+"  Mikkel Anker Andersen https://launchpad.net/~dasmikko\n"
+"  Ole Riis https://launchpad.net/~ole-riis-dk\n"
+"  scootergrisen https://launchpad.net/~scootergrisen"
+
+#: src/core/Gnonogram_filewriter.vala:170
+msgid "Name and save this puzzle"
+msgstr ""
+
+#: src/core/Gnonogram_filewriter.vala:171 src/core/Gnonogram_filereader.vala:86
+msgid "Gnonogram puzzles"
+msgstr ""
+
+#: src/core/Enums.vala:36
+msgid "Very Easy"
+msgstr ""
+
+#: src/core/Enums.vala:38
+msgid "Easy"
+msgstr ""
+
+#: src/core/Enums.vala:40
+msgid "Moderately difficult"
+msgstr ""
+
+#: src/core/Enums.vala:42
+msgid "Difficult"
+msgstr ""
+
+#: src/core/Enums.vala:44
+msgid "Very Difficult"
+msgstr ""
+
+#: src/core/Enums.vala:46
+msgid "Advanced logic required"
+msgstr ""
+
+#: src/core/Enums.vala:48
+msgid "Possibly ambiguous"
+msgstr ""
+
+#: src/core/Constants.vala:30
+msgid "?"
+msgstr ""
+
+#: src/core/utils.vala:247
+msgid "Built in puzzles"
+msgstr ""
+
+#: src/core/utils.vala:256
+msgid "Save solution too"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:85
+msgid "Choose a puzzle"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:223
+msgid "Missing clues"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:231
+msgid "Invalid clue"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:243
+msgid "Solution grid or working grid missing"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:250
+msgid "Wrong number of rows in solution or working grid"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:257
+msgid "Wrong number of columns in solution or working grid"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:264
+msgid "Invalid cell state"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:284
+msgid "Missing game state"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:291
+msgid "Could not determine game state in loaded game file"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:302
+#, c-format
+msgid "Invalid game state '%s' in loaded game file"
+msgstr ""
+
+#: src/widgets/Gnonogram_label.vala:119
+#, c-format
+msgid "Freedom = %u"
+msgstr ""
+
+#: src/widgets/ViewModeButton.vala:49
+msgid "Draw a pattern"
+msgstr ""
+
+#: src/widgets/ViewModeButton.vala:50
+msgid "Solve a puzzle"
+msgstr ""
+
+#: src/widgets/AppMenu.vala:76
+msgid "Rows"
+msgstr ""
+
+#: src/widgets/AppMenu.vala:77
+msgid "Columns"
+msgstr ""
+
+#: src/widgets/AppMenu.vala:105
+msgid "Options"
+msgstr ""
+
+#: src/widgets/AppMenu.vala:257
+msgid "Difficulty"
+msgstr ""
+
+#: src/widgets/Progress_indicator.vala:54
+msgid "Cancel solving"
+msgstr ""
 
 #: src/Gnonogram_controller.vala:226
 msgid "Blank sheet"
@@ -89,8 +236,9 @@ msgid "Setting"
 msgstr ""
 
 #: src/Gnonogram_view.vala:126
+#, fuzzy
 msgid "Clear canvas"
-msgstr ""
+msgstr "Ryd indtastning"
 
 #: src/Gnonogram_view.vala:129 src/Gnonogram_view.vala:309
 msgid "Solving"
@@ -142,92 +290,92 @@ msgstr ""
 msgid "No errors"
 msgstr ""
 
-#: src/widgets/Gnonogram_label.vala:119
-#, c-format
-msgid "Freedom = %u"
-msgstr ""
+#~ msgid "Calculator"
+#~ msgstr "Lommeregner"
 
-#: src/widgets/AppMenu.vala:76
-msgid "Rows"
-msgstr ""
+#~ msgid "History"
+#~ msgstr "Historik"
 
-#: src/widgets/AppMenu.vala:77
-msgid "Columns"
-msgstr ""
+#~ msgid "Value to add:"
+#~ msgstr "Værdi som skal tilføjes:"
 
-#: src/widgets/AppMenu.vala:105
-msgid "Options"
-msgstr ""
+#~ msgid "Result"
+#~ msgstr "Resultat"
 
-#: src/widgets/AppMenu.vala:257
-msgid "Difficulty"
-msgstr ""
+#~ msgid "Expression"
+#~ msgstr "Udtryk"
 
-#: src/widgets/ViewModeButton.vala:49
-msgid "Draw a pattern"
-msgstr ""
+#~ msgid "Close"
+#~ msgstr "Luk"
 
-#: src/widgets/ViewModeButton.vala:50
-msgid "Solve a puzzle"
-msgstr ""
+#~ msgid "Add"
+#~ msgstr "Tilføj"
 
-#: src/widgets/Progress_indicator.vala:54
-msgid "Cancel solving"
-msgstr ""
+#~ msgid "Show extended functionality"
+#~ msgstr "Vis udvidet funktionalitet"
 
-#: src/core/utils.vala:247
-msgid "Built in puzzles"
-msgstr ""
+#~ msgid "Calculate Result"
+#~ msgstr "Udregn resultat"
 
-#: src/core/utils.vala:256
-msgid "Save solution too"
-msgstr ""
+#~ msgid "Add last result"
+#~ msgstr "Tilføj sidste resultat"
 
-#: src/core/Gnonogram_filereader.vala:85
-msgid "Choose a puzzle"
-msgstr ""
+#~ msgid "Backspace"
+#~ msgstr "Backspace"
 
-#: src/core/Gnonogram_filereader.vala:86 src/core/Gnonogram_filewriter.vala:171
-msgid "Gnonogram puzzles"
-msgstr ""
+#~ msgid "Subtract"
+#~ msgstr "Træk fra"
 
-#: src/core/Gnonogram_filereader.vala:223
-msgid "Missing clues"
-msgstr ""
+#~ msgid "Multiply"
+#~ msgstr "Gang"
 
-#: src/core/Gnonogram_filereader.vala:231
-msgid "Invalid clue"
-msgstr ""
+#~ msgid "Divide"
+#~ msgstr "Dividér"
 
-#: src/core/Gnonogram_filereader.vala:243
-msgid "Solution grid or working grid missing"
-msgstr ""
+#~ msgid "Percentage"
+#~ msgstr "Procent"
 
-#: src/core/Gnonogram_filereader.vala:250
-msgid "Wrong number of rows in solution or working grid"
-msgstr ""
+#~ msgid "Start Group"
+#~ msgstr "Begynd gruppe"
 
-#: src/core/Gnonogram_filereader.vala:257
-msgid "Wrong number of columns in solution or working grid"
-msgstr ""
+#~ msgid "End Group"
+#~ msgstr "Afslut gruppe"
 
-#: src/core/Gnonogram_filereader.vala:264
-msgid "Invalid cell state"
-msgstr ""
+#~ msgid "Exponent"
+#~ msgstr "Eksponent"
 
-#: src/core/Gnonogram_filereader.vala:284
-msgid "Missing game state"
-msgstr ""
+#~ msgid "Root"
+#~ msgstr "Rod"
 
-#: src/core/Gnonogram_filereader.vala:291
-msgid "Could not determine game state in loaded game file"
-msgstr ""
+#~ msgid "Sine"
+#~ msgstr "Sinus"
 
-#: src/core/Gnonogram_filereader.vala:302
-#, c-format
-msgid "Invalid game state '%s' in loaded game file"
-msgstr ""
+#~ msgid "Hyperbolic Sine"
+#~ msgstr "Sinushyperbolsk"
 
-#: src/core/Gnonogram_filewriter.vala:170
-msgid "Name and save this puzzle"
-msgstr ""
+#~ msgid "Cosine"
+#~ msgstr "Cosinus"
+
+#~ msgid "Hyperbolic Cosine"
+#~ msgstr "Cosinushyperbolsk"
+
+#~ msgid "Tangent"
+#~ msgstr "Tangens"
+
+#~ msgid "Hyperbolic Tangent"
+#~ msgstr "Tangenshyperbolsk"
+
+#~ msgid "Pi"
+#~ msgstr "Pi"
+
+#~ msgid "Euler's Number"
+#~ msgstr "Eulers tal"
+
+#~ msgid "Hide extended functionality"
+#~ msgstr "Skjul udvidet funktionalitet"
+
+#~ msgid "'%s' is invalid."
+#~ msgstr "'%s' er ugydlig."
+
+#~ msgid "'%s' is unknown."
+#~ msgstr "'%s' er ukendt."
