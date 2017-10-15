@@ -194,15 +194,19 @@ public class View : Gtk.ApplicationWindow {
 
         progress_indicator = new Gnonograms.Progress_indicator ();
 
-        header_bar.pack_start (random_game_button);
         header_bar.pack_start (load_game_button);
         header_bar.pack_start (save_game_button);
-        header_bar.pack_start (check_correct_button);
+        header_bar.pack_start (new Gtk.VSeparator ());
+        header_bar.pack_start (mode_switch);
 
         header_bar.pack_end (app_menu);
-        header_bar.pack_end (mode_switch);
+        header_bar.pack_end (new Gtk.VSeparator ());
+        header_bar.pack_end (check_correct_button);
         header_bar.pack_end (auto_solve_button);
         header_bar.pack_end (restart_button);
+        header_bar.pack_end (new Gtk.VSeparator ());
+        header_bar.pack_end (random_game_button);
+
         set_titlebar (header_bar);
 
         overlay = new Gtk.Overlay ();
