@@ -141,8 +141,8 @@ public class Controller : GLib.Object {
         solver = new Solver ();
         back_stack = new Gee.LinkedList<Move> ();
         forward_stack = new Gee.LinkedList<Move> ();
-        settings = new Settings ("apps.gnonograms-elementary.settings");
-        saved_state = new Settings ("apps.gnonograms-elementary.saved-state");
+        settings = new Settings ("com.github.jeremypw.gnonograms-elementary.settings");
+        saved_state = new Settings ("com.github.jeremypw.gnonograms-elementary.saved-state");
 
         saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
         saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);

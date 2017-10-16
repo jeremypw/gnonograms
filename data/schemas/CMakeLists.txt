@@ -1,2 +1,2 @@
 include(GSettings)
-add_schema("apps.gnonograms-elementary.gschema.xml")
+add_schema("com.github.jeremypw.gnonograms-elementary.gschema.xml")

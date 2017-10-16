@@ -1,4 +1,6 @@
-project ('gnonograms-elementary', 'vala', 'c')
+project ('com.github.jeremypw.gnonograms-elementary', 'vala', 'c')
+shortname = 'gnonograms-elementary'
+domain = 'com.github.jeremypw.'
 
 add_project_arguments (
     ['--vapidir', join_paths (meson.current_source_dir (), 'vapi')],
@@ -8,7 +10,7 @@ add_project_arguments (
 i18n = import ('i18n')
 
 add_global_arguments (
-    '-DGETTEXT_PACKAGE="gnonograms-elementary"',
+    '-DGETTEXT_PACKAGE="' + meson.project_name () + '"',
     language:'c'
 )
 

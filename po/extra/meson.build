@@ -1,4 +1,4 @@
-i18n.gettext('io.elementary.calculator',
+i18n.gettext('extra',
     args: '--directory=' + meson.source_root()
 )
 

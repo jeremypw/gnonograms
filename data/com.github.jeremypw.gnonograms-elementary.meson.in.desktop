@@ -1,10 +1,10 @@
 [Desktop Entry]
 Name=gnonograms-elementary
 Comment=Create and solve nonogram puzzles.
-Keywords=game;puzzle;logic;grid;pattern
+Keywords=game;puzzle;logic;
 GenericName=Logic Game
 
-Exec=gnonograms-elementary %f;
+Exec=com.github.jeremypw.gnonograms-elementary %f
 Icon=gnonograms-elementary
 Terminal=false
 StartupNotify=true

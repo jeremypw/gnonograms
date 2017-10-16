@@ -15,7 +15,7 @@
         <value value="1" nick="solving"/>
     </enum>
 
-    <schema path="/apps/gnonograms-elementary/settings/" id="com.github.jeremypw.gnonograms-elementary.settings">
+    <schema path="/com/github/jeremypw/gnonograms-elementary/settings/" id="com.github.jeremypw.gnonograms-elementary.settings">
         <key name="grade" enum="com.github.jeremypw.gnonograms-elementary.difficulty">
           <default>'moderate'</default>
           <summary>difficulty of generated puzzles</summary>
@@ -57,7 +57,7 @@
         </key>
     </schema>
 
-    <schema path="/apps/gnonograms-elementary/saved-state/" id="com.github.jeremypw.gnonograms-elementary.saved-state">
+    <schema path="/com/github/jeremypw/gnonograms-elementary/saved-state/" id="com.github.jeremypw.gnonograms-elementary.saved-state">
         <key name="mode" enum="com.github.jeremypw.gnonograms-elementary.game-state">
           <default>'solving'</default>
           <summary>setting or solving puzzles</summary>
