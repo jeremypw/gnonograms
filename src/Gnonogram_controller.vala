@@ -556,7 +556,6 @@ public class Controller : GLib.Object {
         if (is_solving && model.is_finished ()) {
             if (model.count_errors () == 0) {
                 view.send_notification (_("Correct solution"));
-                game_state = GameState.SETTING;
             } else {
                 view.send_notification (_("There are errors"));
                 rewind_until_correct ();
