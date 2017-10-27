@@ -70,14 +70,26 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    public Difficulty grade {
+    public Difficulty game_grade {
         get {
-            return _grade;
+            return _game_grade;
         }
 
         set {
-            _grade = value;
-            app_menu.grade_val = (uint)grade;
+            _game_grade = value;
+            update_header_bar ();
+        }
+    }
+
+    public Difficulty generator_grade {
+        get {
+            return _generator_grade;
+        }
+
+        set {
+            _generator_grade = value;
+            app_menu.grade_val = (uint)generator_grade;
+            update_tooltip ();
         }
     }
 
@@ -168,7 +180,6 @@ public class View : Gtk.ApplicationWindow {
         random_game_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("list-add-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         random_game_button.image = img;
-        random_game_button.tooltip_text = _("Generate a Random Game");
 
         check_correct_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("media-seek-backward-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
@@ -243,7 +254,6 @@ public class View : Gtk.ApplicationWindow {
         });
 
         mode_switch.mode_changed.connect (on_mode_switch_changed);
-
         key_press_event.connect (on_key_press_event);
         key_release_event.connect (on_key_release_event);
 
@@ -331,7 +341,7 @@ public class View : Gtk.ApplicationWindow {
     }
 
     /**PRIVATE**/
-    private const uint NOTIFICATION_TIMEOUT_SEC = 2;
+    private const uint NOTIFICATION_TIMEOUT_SEC = 5;
     private const uint PROGRESS_DELAY_MSEC = 500;
 
     private Gnonograms.LabelBox row_clue_box;
@@ -359,7 +369,8 @@ public class View : Gtk.ApplicationWindow {
     /* Backing variables, not to be set directly */
     private Dimensions _dimensions;
     private double _fontheight;
-    private Difficulty _grade = 0;
+    private Difficulty _generator_grade = 0;
+    private Difficulty _game_grade = 0;
     private GameState _game_state;
     /* ----------------------------------------- */
 
@@ -415,7 +426,7 @@ public class View : Gtk.ApplicationWindow {
             restart_button.tooltip_text = _("Clear canvas");
         } else {
             header_bar.title = _("Solving %s").printf (game_name);
-            header_bar.subtitle = difficulty_to_string (grade);
+            header_bar.subtitle = difficulty_to_string (game_grade);
             restart_button.tooltip_text = _("Restart solving");
         }
     }
@@ -784,11 +795,17 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private void on_app_menu_apply () {
-        grade = (Difficulty)(app_menu.grade_val);
         var rows = app_menu.row_val;
         var cols = app_menu.column_val;
+        generator_grade = (Difficulty)(app_menu.grade_val);
+        update_tooltip ();
 
         dimensions = {cols, rows};
+    }
+
+    private void update_tooltip () {
+        var grade_str = Gnonograms.difficulty_to_string (generator_grade);
+        random_game_button.tooltip_text = _("New Random Game - %s").printf (grade_str); ///TRANSLATORS %s is a description of difficulty
     }
 }
 }

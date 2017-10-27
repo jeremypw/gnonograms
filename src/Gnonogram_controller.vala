@@ -90,13 +90,13 @@ public class Controller : GLib.Object {
         }
     }
 
-    private Difficulty grade {
+    private Difficulty generator_grade {
         get {
-            return view.grade;
+            return view.generator_grade;
         }
 
         set {
-            view.grade = value;
+            view.generator_grade = value;
         }
     }
 
@@ -146,7 +146,7 @@ public class Controller : GLib.Object {
 
         saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
         saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
-        settings.bind ("grade", view, "grade", SettingsBindFlags.DEFAULT);
+        settings.bind ("grade", view, "generator_grade", SettingsBindFlags.DEFAULT);
 
         load_game_dir = Build.PKGDATADIR + "/games";
         save_game_dir = Environment.get_home_dir () + "/gnonograms";
@@ -229,7 +229,7 @@ public class Controller : GLib.Object {
     private async void new_random_game() {
         uint passes = 0;
         uint count = 0;
-        uint grd = grade; //grd may be reduced but this.grade always matches spin setting
+        uint grd = generator_grade; //grd may be reduced but this.grade always matches spin setting
         /* One row used to debug */
         var limit = rows == 1 ? 1 : 100;
 
@@ -258,7 +258,7 @@ public class Controller : GLib.Object {
             }
         }
 
-        string msg;
+        string msg = "";
 
         if (solver_cancellable.is_cancelled ()) {
            msg = _("Game generation was cancelled");
@@ -267,7 +267,7 @@ public class Controller : GLib.Object {
         } else if (passes >= 0 && rows > 1) {
             game_state = GameState.SOLVING;
             view.update_labels_from_model ();
-            msg = _("Difficulty: %s").printf (Utils.passes_to_grade_description (passes));
+            view.game_grade = Utils.passes_to_grade (passes);
         } else {
             msg = _("Error occurred in solver");
             game_state = GameState.SOLVING;
@@ -279,7 +279,10 @@ public class Controller : GLib.Object {
             }
         }
 
-        view.send_notification (msg);
+        if (msg != "") {
+            view.send_notification (msg);
+        }
+
         view.hide_progress ();
         view.queue_draw ();
     }
@@ -394,7 +397,7 @@ public class Controller : GLib.Object {
                                 view.get_col_clues ()
                             );
 
-            file_writer.difficulty = grade;
+            file_writer.difficulty = view.game_grade;
             file_writer.game_state = game_state;
             file_writer.working = model.working_data;
             file_writer.solution = model.solution_data;

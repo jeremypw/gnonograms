@@ -254,7 +254,7 @@ class AppMenu : Gtk.MenuButton {
             });
 
             cb.expand = false;
-            heading = new Gtk.Label (_("Difficulty"));
+            heading = new Gtk.Label (_("Generated games"));
         }
 
         public void set_value (uint grade) {

@@ -323,6 +323,8 @@ namespace Utils {
 
     public Difficulty passes_to_grade (uint passes) {
         if (passes >= 50) {
+            return Difficulty.MAXIMUM;
+        } else if (passes >= 14) {
             return Difficulty.ADVANCED;
         } else {
             return (Difficulty)(passes / 2 - 1);
