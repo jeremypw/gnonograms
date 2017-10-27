@@ -1,5 +1,5 @@
-com.github.jeremypw.gnonograms-elementary (0.1-1) UNRELEASED; urgency=low
+com.github.jeremypw.gnonograms-elementary (0.1) UNRELEASED; urgency=medium
 
-  * Initial Release.
+  * Initial release.
 
- -- Jeremy Wootten <jeremy@elementaryos.org>  Fri, 27 Oct 2017 12:45
+ -- Jeremy Wootten <jeremywootten@gmail.com>  Fri, 27 Oct 2017 15:33:55 +0100

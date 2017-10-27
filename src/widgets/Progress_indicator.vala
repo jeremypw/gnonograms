@@ -15,7 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *  Author:
- *  Jeremy Wootten <jeremy@elementaryos.org>
+ *  Jeremy Wootten <jeremywootten@gmail.com>
  */
 
 namespace Gnonograms {
