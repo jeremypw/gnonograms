@@ -40,13 +40,15 @@ public class View : Gtk.ApplicationWindow {
 
     public Model model { get; construct; }
 
-    public string header_title {
+    private string? _game_name = null;
+    public string game_name {
         get {
-            return header_bar.title;
+            return _game_name;
         }
 
         set {
-            header_bar.title = value;
+            _game_name = value;
+            update_header_bar ();
         }
     }
 
@@ -121,13 +123,9 @@ public class View : Gtk.ApplicationWindow {
             mode_switch.mode = value;
             cell_grid.game_state = value;
 
+            update_header_bar ();
             if (value == GameState.SETTING) {
-                header_bar.subtitle = _("Setting");
-                restart_button.tooltip_text = _("Clear canvas");
                 update_labels_from_model ();
-            } else {
-                header_bar.subtitle = _("Solving");
-                restart_button.tooltip_text = _("Restart solving");
             }
         }
     }
@@ -410,6 +408,17 @@ public class View : Gtk.ApplicationWindow {
         return double.min (max_h, max_w) / 2;
     }
 
+    private void update_header_bar () {
+        if (game_state == GameState.SETTING) {
+            header_bar.title = _("Drawing");
+            header_bar.subtitle = _("Design new puzzle or edit %s").printf (game_name);
+            restart_button.tooltip_text = _("Clear canvas");
+        } else {
+            header_bar.title = _("Solving %s").printf (game_name);
+            header_bar.subtitle = difficulty_to_string (grade);
+            restart_button.tooltip_text = _("Restart solving");
+        }
+    }
 
     private void update_labels_for_cell (Cell cell) {
         if (cell == NULL_CELL) {

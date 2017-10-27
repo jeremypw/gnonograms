@@ -127,11 +127,11 @@ public class Controller : GLib.Object {
 
     private string title {
         get {
-            return view.header_title;
+            return view.game_name;
         }
 
         set {
-            view.header_title = value;
+            view.game_name = value;
         }
     }
 
@@ -148,7 +148,7 @@ public class Controller : GLib.Object {
         saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
         settings.bind ("grade", view, "grade", SettingsBindFlags.DEFAULT);
 
-        load_game_dir = get_app ().build_pkg_data_dir + "/games";
+        load_game_dir = Build.PKGDATADIR + "/games";
         save_game_dir = Environment.get_home_dir () + "/gnonograms";
 
         string data_home_folder_current = Path.build_path (
@@ -234,7 +234,7 @@ public class Controller : GLib.Object {
         var limit = rows == 1 ? 1 : 100;
 
         clear ();
-        view.header_title = _("Random pattern");
+        view.game_name = _("Random pattern");
         var solver_cancellable = new Cancellable ();
         view.show_generating (solver_cancellable);
 
@@ -425,7 +425,8 @@ public class Controller : GLib.Object {
                 if (reader != null) {
                     view.send_notification (reader.err_msg);
                 } else {
-                    critical ("Failed to create game file reader - %s", e.message);
+                    /* Maybe there is no game to restore */
+                    debug ("Failed to create game file reader for dir %s and game %s - %s", load_game_dir, game != null ? game.get_uri () : "null", e.message);
                 }
             }
 

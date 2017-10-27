@@ -16,6 +16,11 @@ add_global_arguments (
 
 conf_data = configuration_data ()
 conf_data.set ('VERSION', '1.0')
+conf_data.set ('DATADIR', join_paths (get_option ('prefix'), get_option ('datadir')))
+conf_data.set ('PKGDATADIR', join_paths (get_option ('prefix'), get_option ('datadir'), meson.project_name ()))
+conf_data.set ('PROJECT_NAME', meson.project_name ())
+conf_data.set ('PROGRAM_NAME', shortname)
+
 configure_file (input : 'config.h.meson',
                 output : 'config.h',
                 configuration : conf_data )
