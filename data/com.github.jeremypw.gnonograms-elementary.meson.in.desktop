@@ -11,7 +11,7 @@ StartupNotify=true
 Type=Application
 MimeType=application/x-gnonogram-puzzle;
 Categories=GNOME;GTK;Game;
-X-GNOME-Gettext-Domain=gnonograms-elementary
+X-GNOME-Gettext-Domain=com.github.jeremypw.gnonograms-elementary
 X-GNOME-UsesNotifications=false
 
 
