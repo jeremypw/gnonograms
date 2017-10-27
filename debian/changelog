@@ -1,5 +1,5 @@
-cmake-hello-world (0.1) precise; urgency=low
+com.github.jeremypw.gnonograms-elementary (0.1-1) UNRELEASED; urgency=low
 
   * Initial Release.
 
- -- Cody Garver <cody@elementaryos.org>  Tue, 9 Apr 2013 04:53:39 -0500
+ -- Jeremy Wootten <jeremy@elementaryos.org>  Fri, 27 Oct 2017 12:45
