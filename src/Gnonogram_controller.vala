@@ -778,7 +778,7 @@ public class Controller : GLib.Object {
                 } else if (passes > 0  && passes < Gnonograms.FAILED_PASSES) {
                     var descr = Utils.passes_to_grade_description (passes);
                     msg =  _("Simple solution found. %s").printf (descr);
-                    after_solve_game (msg);
+                    after_solve_game (msg, passes);
                 } else {
                     msg = _("No simple solution found");
 
@@ -803,7 +803,7 @@ public class Controller : GLib.Object {
                                 msg = msg + "\n" + _("No advanced solution found");
                             }
 
-                            after_solve_game (msg);
+                            after_solve_game (msg, passes);
                         }
                     );
                 }
@@ -811,8 +811,9 @@ public class Controller : GLib.Object {
         );
     }
 
-    private void after_solve_game (string msg) {
+    private void after_solve_game (string msg, uint passes) {
         view.send_notification (msg);
+        view.game_grade = Utils.passes_to_grade (passes);
 
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
