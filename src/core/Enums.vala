@@ -21,6 +21,7 @@
 namespace Gnonograms {
 public enum Difficulty {
     TRIVIAL = 0,
+    VERY_EASY = 1,
     EASY = 2,
     MODERATE = 3,
     HARD =4 ,
@@ -33,6 +34,8 @@ public enum Difficulty {
 public static string difficulty_to_string (Difficulty d) {
     switch (d) {
         case Difficulty.TRIVIAL:
+            return _("Trivial");
+        case Difficulty.VERY_EASY:
             return _("Very Easy");
         case Difficulty.EASY:
             return _("Easy");

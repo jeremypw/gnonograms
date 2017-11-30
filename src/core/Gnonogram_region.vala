@@ -248,7 +248,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
         if (count == MAXCYCLES) {
             in_error = false;
-            warning ("Excessive looping in region %s", index.to_string ());
+            critical ("Excessive looping in region %s", index.to_string ());
         }
 
         return made_changes;

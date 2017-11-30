@@ -95,13 +95,13 @@ public class View : Gtk.ApplicationWindow {
 
     public uint rows {
         get {
-            return dimensions.height;
+            return dimensions.rows ();
         }
     }
 
     public uint cols {
         get {
-            return dimensions.width;
+            return dimensions.cols ();
         }
     }
 

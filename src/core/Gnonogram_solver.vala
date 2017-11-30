@@ -101,13 +101,14 @@ namespace Gnonograms {
       * procedures. Also specify whether in debugging mode and whether to solve one step
       * at a time (used for hinting if implemented).
     **/
-    public async uint solve_it (bool debug = false,
-                                bool use_advanced = true,
-                                bool use_ultimate = true,
-                                bool unique_only = false,
-                                Cancellable cancellable,
-                                bool human = false,
-                                bool stepwise = false) {
+    public async int solve_it (bool debug = false,
+                               bool use_advanced = true,
+                               bool use_ultimate = true,
+                               bool unique_only = false,
+                               bool advanced_only = false,
+                               Cancellable cancellable,
+                               bool human = false,
+                               bool stepwise = false) {
         guesses = 0;
 
         int result = yield simple_solver (debug,
@@ -118,6 +119,10 @@ namespace Gnonograms {
             return Gnonograms.FAILED_PASSES;
         }
 
+        if (result > 0 && advanced_only) { // Do not want simple solutions
+            return 0;
+        }
+
         if (result == 0 && use_advanced) {
             CellState[] grid_backup =  new CellState[rows * cols];
 
@@ -125,16 +130,18 @@ namespace Gnonograms {
                                             cancellable,
                                             use_ultimate,
                                             debug,
-                                            9999,
+                                            human ? 6 * (rows + cols) : 9999,
                                             unique_only,
                                             human);
 
             if (cancellable.is_cancelled ()) {
-                return Gnonograms.FAILED_PASSES;
+                return -1;
             }
 
-            if (result == 0 && use_ultimate) {
-                result = yield ultimate_solver (grid_backup, cancellable);
+            if (result == 0) {
+                if (use_ultimate) {
+                    result = yield ultimate_solver (grid_backup, cancellable);
+                }
             }
         }
 
@@ -142,7 +149,7 @@ namespace Gnonograms {
             stdout.printf (regions[0].to_string ());  //used for debugging
         }
 
-        return (uint)result;
+        return result;
     }
 
     public bool solved () {
@@ -192,8 +199,8 @@ namespace Gnonograms {
     }
 
     private int do_simple_solve (bool debug,
-                                  bool should_check_solution,
-                                  bool stepwise) {
+                                 bool should_check_solution,
+                                 bool stepwise) {
         bool changed = true;
         int pass = 1;
 
@@ -219,7 +226,7 @@ namespace Gnonograms {
                         stdout.printf ("::" + r.message);
                         stdout.printf (r.to_string ());
                     }
-
+                    critical ("region in error");
                     return  -pass;
                 }
 
@@ -295,13 +302,14 @@ namespace Gnonograms {
                                        Cancellable cancellable,
                                        bool use_ultimate = true,
                                        bool debug = false,
-                                       int max_guesswork = 999,
+                                       uint max_guesswork = 999,
                                        bool unique_only = false,
                                        bool human = false) {
         int simple_result = 0;
         int wraps = 0;
         int guesses = 0;
         bool changed = false;
+        bool solution_exists = false;
         int changed_count = 0;
         uint contradiction_count = 0;
         uint initial_max_turns = 3; //stay near edges until no more changes
@@ -321,18 +329,17 @@ namespace Gnonograms {
         this.save_position (grid_backup);
 
         while (true) {
+            contradiction_count = 0;
             trial_cell = make_guess (trial_cell);
             guesses++;
 
             if (trial_cell.col == uint.MAX) { //run out of guesses
-                if (changed) {
-                    if (changed_count > max_guesswork) {
-                        return 0;
-                    }
+                if (changed && changed_count > max_guesswork) {
+                    return 0;
                 } else if (max_turns == initial_max_turns) {
                     max_turns = (uint.min (rows, cols)) / 2 + 2; //ensure full coverage
                 } else if (trial_cell.state == initial_cell_state) {
-                    trial_cell = trial_cell.invert (); //start making opposite guesses
+                    trial_cell = trial_cell.inverse (); //start making opposite guesses
                     max_turns = initial_max_turns;
                     wraps = 0;
                 } else {
@@ -358,35 +365,57 @@ namespace Gnonograms {
                                                  false, // do not check solution
                                                  false); // not stepwise
 
-            if (simple_result > 0) {
-
-                if (unique_only) { //unique solutions must be solved by contradiction.
-                    changed_count++;
-                } else {
-                    break;
-                }
-
-            }
-
             load_position (grid_backup); //back track
 
-            if (simple_result < 0 && (!human || simple_result > -1)) { //contradiction  -   insert opposite guess
+            if (simple_result > 0) {
+                solution_exists = true;
+            }
+
+            if (simple_result < 0) {
                 contradiction_count++;
-                grid.set_data_from_cell (trial_cell.invert ()); //mark opposite to guess
+            }
+
+            /* Try opposite if initial guess contradictory or must be unique result */
+            if (simple_result < 0 || unique_only) {
                 changed = true;
                 changed_count++; //worth trying another cycle
+                grid.set_data_from_cell (trial_cell.inverse ()); //mark opposite to guess
+
 
                 simple_result = yield simple_solver (false, // not debug
                                                      false, // do not check solution
                                                      false); // not stepwise
 
-                if (simple_result == 0 || simple_result == Gnonograms.FAILED_PASSES) { //no we cant
-                    this.save_position (grid_backup); //update grid store
-                    continue; //go back to start
-                } else if (simple_result > 0) {
-                    break;
-                } else {
-                    return -1; //starting point was invalid - cannot contradict both options.
+                if (simple_result == Gnonograms.FAILED_PASSES) {
+                    simple_result = 0;
+                } else if (simple_result < 0) {
+                    simple_result = -1;
+                }
+
+                switch (simple_result) {
+                    case -1:
+                        if (contradiction_count > 0) {
+                            critical ("error bothe ways");
+                            return -1; // both guess contradictory (should not happen)
+                        } else { // original guess was correct and yielded solution
+                            grid.set_data_from_cell (trial_cell);
+                            if (solution_exists) {
+                                simple_result = yield simple_solver (false, // not debug
+                                                     false, // do not check solution
+                                                     false); // not stepwise
+
+                                break;
+                            }
+                        }
+
+                        continue;
+
+                    case 0:
+                        this.save_position (grid_backup); //update grid store
+                        continue;
+
+                    default:
+                        break;
                 }
             }
         }

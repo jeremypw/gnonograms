@@ -49,7 +49,7 @@ public class Permutor {
         freedom = size - extent;
 
         if (freedom < 0) {
-            warning ("Invalid permutor");
+            critical ("Invalid permutor");
         } else {
             valid = true;
         }

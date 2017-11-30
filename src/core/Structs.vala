@@ -44,7 +44,7 @@ public struct Cell {
 
     }
 
-    public Cell invert() {
+    public Cell inverse() {
         Cell c = {row, col, CellState.UNKNOWN };
 
         if (this.state == CellState.EMPTY) {
@@ -68,5 +68,13 @@ public struct Cell {
 public struct Dimensions {
     uint width;
     uint height;
+
+    public uint rows () {
+        return height;
+    }
+
+    public uint cols () {
+        return width;
+    }
 }
 }

@@ -2,12 +2,13 @@
 <schemalist>
     <enum id="com.github.jeremypw.gnonograms-elementary.difficulty">
         <value value="0" nick="trivial"/>
-        <value value="1" nick="easy"/>
-        <value value="2" nick="moderate"/>
-        <value value="3" nick="hard"/>
-        <value value="4" nick="challenging"/>
-        <value value="5" nick="advanced"/>
-        <value value="6" nick="maximum"/>
+        <value value="1" nick="very-easy"/>
+        <value value="2" nick="easy"/>
+        <value value="3" nick="moderate"/>
+        <value value="4" nick="hard"/>
+        <value value="5" nick="challenging"/>
+        <value value="6" nick="advanced"/>
+        <value value="7" nick="maximum"/>
     </enum>
 
     <enum id="com.github.jeremypw.gnonograms-elementary.game-state">

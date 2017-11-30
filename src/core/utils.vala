@@ -308,31 +308,26 @@ namespace Utils {
                     return response;
             }
         }
-
-
     }
 
-    public int grade_to_passes (uint grd) {
+    public int grade_to_minimum_passes (uint grd, Dimensions dimensions) {
+        var avg_length = (double)(dimensions.rows () + dimensions.cols ()) / 10.0 * (double)grd + 2.0;
+
         if (grd <= Difficulty.ADVANCED) {
-            return ((int)grd + 1) * 2;
+            return (int)(avg_length);
         } else {
             return (int)(grd - (Difficulty.ADVANCED)) * 100;
         }
 
     }
 
-    public Difficulty passes_to_grade (uint passes) {
-        if (passes >= 50) {
-            return Difficulty.MAXIMUM;
-        } else if (passes >= 14) {
-            return Difficulty.ADVANCED;
-        } else {
-            return (Difficulty)(passes / 2 - 1);
-        }
+    public Difficulty passes_to_grade (uint passes, Dimensions dimensions) {
+        var level = (((double)passes - 2.0) * 10.0) / (double)(dimensions.rows () + dimensions.cols ());
+        return (Difficulty)(level + 0.5);
     }
 
-    public string passes_to_grade_description (uint passes) {
-        return difficulty_to_string (passes_to_grade (passes));
+    public string passes_to_grade_description (uint passes, Dimensions dimensions) {
+        return difficulty_to_string (passes_to_grade (passes, dimensions));
     }
 }
 }
