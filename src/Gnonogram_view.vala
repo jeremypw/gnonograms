@@ -324,13 +324,13 @@ public class View : Gtk.ApplicationWindow {
 
     public void show_generating (Cancellable cancellable) {
         blank_labels ();
-        cell_grid.model = null;
+        cell_grid.frozen = true; // Do not show model updates
         progress_indicator.text = (_("Generating"));
         schedule_show_progress (cancellable);
     }
 
     public void hide_progress () {
-        cell_grid.model = model;
+        cell_grid.frozen = false; // Show model updates again
 
         if (progress_timeout_id > 0) {
             Source.remove (progress_timeout_id);

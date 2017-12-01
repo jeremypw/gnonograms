@@ -76,9 +76,8 @@ public class Region { /* Not a GObject, to reduce weight */
         status_backup = new CellState[max_len];
 
         uint max_blocks = max_len / 2 + 2;
-
-        ranges = new int[max_blocks, 4 + max_blocks];
-        ranges_backup = new int[max_blocks, 4 + max_blocks];
+        ranges = new int[max_blocks, 4];
+        ranges_backup = new int[max_blocks, 4];
 
         blocks = new int[max_blocks];
 
@@ -189,17 +188,18 @@ public class Region { /* Not a GObject, to reduce weight */
           *
           * In hint mode, return minimal change
         * */
-
         message = "";
         in_error = false;
         this.debug = debug;
+
+        get_status ();
 
         if (is_completed) {
             return false;
         }
 
-        get_status ();
-        //has a (valid) change been made by another region
+
+        //has a (invalid) change been made by another region
         if (in_error) {
             return false;
         }
@@ -207,12 +207,14 @@ public class Region { /* Not a GObject, to reduce weight */
         if (!totals_changed ()) {
             unchanged_count++;
 
-            if (unchanged_count > 1) {
+            if (unchanged_count > 2) {
                 return false;  //allow an unchanged visit to ensure all possible changes are made.
             }
         } else {
             unchanged_count = 0;
         }
+
+
 
         if (is_completed) {
             return false;
@@ -233,7 +235,6 @@ public class Region { /* Not a GObject, to reduce weight */
 
             if (totals_changed ()) {
                 made_changes = true;
-
                 if (in_error) {
                     break;
                 }
@@ -244,11 +245,6 @@ public class Region { /* Not a GObject, to reduce weight */
 
         if ((made_changes && !in_error) || debug) {
             put_status ();
-        }
-
-        if (count == MAXCYCLES) {
-            in_error = false;
-            critical ("Excessive looping in region %s", index.to_string ());
         }
 
         return made_changes;
@@ -265,6 +261,9 @@ public class Region { /* Not a GObject, to reduce weight */
 
         for (int j = 0; j < n_blocks; j++) {
             completed_blocks_backup[j] = completed_blocks[j];
+            for (int i = 0; i < 4; i++) {
+                ranges_backup[j, i] = ranges[j, i];
+            }
         }
 
         is_completed_backup = this.is_completed;
@@ -283,11 +282,14 @@ public class Region { /* Not a GObject, to reduce weight */
 
         for (int j = 0; j < n_blocks; j++) {
             completed_blocks[j] = completed_blocks_backup[j];
+            for (int i = 0; i < 4; i++) {
+                ranges[j, i] = ranges_backup[j, i];
+            }
         }
 
-        is_completed = is_completed_backup;
-        filled = filled_backup;
-        unknown = unknown_backup;
+        this.is_completed = is_completed_backup;
+        this.filled = filled_backup;
+        this.unknown = unknown_backup;
         in_error = false;
         message = "";
         unchanged_count = 0;
@@ -415,7 +417,7 @@ public class Region { /* Not a GObject, to reduce weight */
     /** PRIVATE **/
     private My2DCellArray grid;
 
-    private static int MAXCYCLES = 20;
+    private static int MAXCYCLES = 2;
     private static int FORWARDS = 1;
     private static int BACKWARDS =  -1;
 
@@ -452,7 +454,6 @@ public class Region { /* Not a GObject, to reduce weight */
 
     private void initial_fix () {
         //finds cells that can be identified as FILLED from the start.
-        //stdout.printf ("initial_fix\n");
         int freedom = n_cells - block_extent;
         int start = 0, length = 0;
 
@@ -476,14 +477,14 @@ public class Region { /* Not a GObject, to reduce weight */
     }
 
     private bool full_fix () {
-        //stdout.printf ("Fullfix");
         // Tries each ploy in turn, returns as soon as a change is made
         // or an error detected.
-        if (filled_subregion_audit () || in_error) {
+
+        if (free_cell_audit () || in_error) {
             return true;
         }
 
-        if (free_cell_audit () || in_error) {
+        if (filled_subregion_audit () || in_error) {
             return true;
         }
 
@@ -973,7 +974,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
         if (free_cells == to_be_located) { // Set all UNKNOWN as COMPLETE
             for (int i = 0; i < n_cells; i++) {
-                if (status[i] == CellState.UNKNOWN) {
+                if (status[i] == CellState.UNKNOWN || status[i] == CellState.FILLED) {
                     set_cell_complete (i);
                 }
             }
@@ -981,8 +982,6 @@ public class Region { /* Not a GObject, to reduce weight */
             for (int i = 0; i < n_blocks; i++) {
                 completed_blocks[i] = true;
             }
-
-            return true;
         } else if (to_be_located == 0) {
             for (int i = 0; i < n_cells; i++) {
 
@@ -991,15 +990,6 @@ public class Region { /* Not a GObject, to reduce weight */
                 }
 
             }
-
-            if (match_clue ()) {
-                is_completed = true;
-            } else {
-                in_error = true;
-                return false;
-            }
-
-            return true;
         }
 
         return false;
@@ -1104,7 +1094,6 @@ public class Region { /* Not a GObject, to reduce weight */
     private bool find_edge (int limit, int direction) {
         // Edge is first FILLED or UNKNOWN cell from limit of region.
         //starting point is set in current_index and current_block_number before calling.
-        //stdout.printf (this.toString ());
         bool dir = (direction == FORWARDS);
         int loop_step = dir ? 1 : -1;
 
@@ -1280,6 +1269,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
             for (idx = start; idx < start + length; idx++) {
                 int count = 0;
+                int impossible = 0;
 
                 for (int b = 0; b < n_blocks; b++) {
 
@@ -1288,13 +1278,13 @@ public class Region { /* Not a GObject, to reduce weight */
 
                         if (blocks[b] != length) {
                             tags[idx, b] = false;
-                            count--;
+                            impossible++;
                         }
                     }
                 }
 
-                if (count == 0) {
-                    record_error ("capped range audit", "filled cell with no owners", false);
+                if (count == impossible) {
+                    record_error ("capped range audit", "start %i len %i, n_blocks %u count %i, impossible %i filled cell with no owners".printf (start, length, n_blocks, count, impossible), false);
                     return false;
                 }
             }
@@ -2053,20 +2043,20 @@ public class Region { /* Not a GObject, to reduce weight */
         //has number of filled or unknown cells changed?
 
         bool changed = false;
-        int unknown = count_cell_state (CellState.UNKNOWN);
-        int filled = count_cell_state (CellState.FILLED);
-        int completed = count_cell_state (CellState.COMPLETED);
+        int _unknown = count_cell_state (CellState.UNKNOWN);
+        int _filled = count_cell_state (CellState.FILLED);
+        int _completed = count_cell_state (CellState.COMPLETED);
 
-        if (unknown != this.unknown) {
+        if (_unknown != this.unknown) {
             changed = true;
-            this.unknown = unknown;
-            this.filled = filled;
+            this.unknown = _unknown;
+            this.filled = _filled;
 
-            if (filled + completed > block_total) {
-                record_error ("totals changed", "too many filled cells");
+            if (_filled + _completed > block_total) {
+                record_error ("totals changed", ("too many filled cells filled %i, completed %i, block total %i").printf (_filled, _completed, block_total));
             } else if (this.unknown == 0) {
-                if (filled + completed < block_total) {
-                    record_error ("totals changed", "too few filled cells  - " + filled.to_string ());
+                if (_filled + _completed < block_total) {
+                    record_error ("totals changed", ("too few filled cells filled %i, completed %i, block total %i").printf (_filled, _completed, block_total));
                 } else if (match_clue ()) {
                     this.is_completed = true;
                 } else {
@@ -2196,7 +2186,7 @@ public class Region { /* Not a GObject, to reduce weight */
             message =   message + sb.str;
         } else {
             in_error = true;
-            message = "Record error in " + method + ": " + errmessage + "\n";
+            message = "%s Region %u Record error in %s : %s \n".printf (is_column ? "COL" : "ROW", index, method, errmessage);
         }
     }
 }

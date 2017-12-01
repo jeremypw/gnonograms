@@ -104,16 +104,17 @@ namespace Gnonograms {
     public async int solve_it (bool debug = false,
                                bool use_advanced = true,
                                bool use_ultimate = true,
-                               bool unique_only = false,
+                               bool unique_only = true,
                                bool advanced_only = false,
                                Cancellable cancellable,
                                bool human = false,
                                bool stepwise = false) {
         guesses = 0;
+        int result = 0;
 
-        int result = yield simple_solver (debug,
-                                          should_check_solution,
-                                          stepwise);
+        result = yield simple_solver (debug,
+                                      should_check_solution,
+                                      stepwise);
 
         if (cancellable.is_cancelled ()) {
             return Gnonograms.FAILED_PASSES;
@@ -134,14 +135,12 @@ namespace Gnonograms {
                                             unique_only,
                                             human);
 
-            if (cancellable.is_cancelled ()) {
+            if (result < 0 || cancellable.is_cancelled ()) {
                 return -1;
             }
 
-            if (result == 0) {
-                if (use_ultimate) {
-                    result = yield ultimate_solver (grid_backup, cancellable);
-                }
+            if (result == 0 && use_ultimate) {
+                result = yield ultimate_solver (grid_backup, cancellable);
             }
         }
 
@@ -184,12 +183,13 @@ namespace Gnonograms {
     /** Returns -1 to indicate an error - TODO use throw error instead **/
     private async int simple_solver (bool debug,
                                      bool should_check_solution,
-                                     bool stepwise) {
+                                     bool stepwise,
+                                     bool initialise = true) {
 
         int result = 0;
 
         Idle.add (() => {
-            result = do_simple_solve (debug, should_check_solution, stepwise);
+            result = do_simple_solve (debug, should_check_solution, stepwise, initialise);
             simple_solver.callback ();
             return false;
         });
@@ -200,15 +200,18 @@ namespace Gnonograms {
 
     private int do_simple_solve (bool debug,
                                  bool should_check_solution,
-                                 bool stepwise) {
+                                 bool stepwise,
+                                 bool initialise = true) {
         bool changed = true;
         int pass = 1;
 
-        for (int i = 0; i < n_regions; i++) {
-            regions[i].set_to_initial_state();
+        if (initialise) {
+            for (int i = 0; i < n_regions; i++) {
+                regions[i].set_to_initial_state ();
+            }
         }
 
-        while (changed && pass < MAX_PASSES) {
+        while (changed && pass >= 0 && pass < MAX_PASSES) {
             //keep cycling through regions while at least one of them is changing
             changed = false;
 
@@ -223,25 +226,12 @@ namespace Gnonograms {
 
                 if (r.in_error) {
                     if (debug) {
-                        stdout.printf ("::" + r.message);
-                        stdout.printf (r.to_string ());
+                        stdout.printf ("ERROR::" + r.message);
                     }
-                    critical ("region in error");
-                    return  -pass;
-                }
 
-                if (should_check_solution && differs_from_solution (r)) {
-                    stdout.printf (r.to_string ());
-                    return  -Gnonograms.FAILED_PASSES;
+                    pass = -2; // So still negative after increment
+                    break;
                 }
-
-                if (debug) {
-                    stdout.printf (r.to_string ());
-                }
-            }
-
-            if (stepwise) {
-                break;
             }
 
             pass++;
@@ -249,14 +239,13 @@ namespace Gnonograms {
 
         if (solved ()) {
             solution.copy (grid);
-            return pass;
+        } else if (pass >= (int)MAX_PASSES) {
+            pass = Gnonograms.FAILED_PASSES;
+        } else  if (pass > 0) {
+            pass = 0; // not solved and not in error
         }
 
-        if (pass >= MAX_PASSES) {
-            return Gnonograms.FAILED_PASSES;
-        }
-
-        return 0;
+        return pass;
     }
 
     private bool differs_from_solution (Region r) {
@@ -303,13 +292,15 @@ namespace Gnonograms {
                                        bool use_ultimate = true,
                                        bool debug = false,
                                        uint max_guesswork = 999,
-                                       bool unique_only = false,
+                                       bool unique_only = true,
                                        bool human = false) {
+
         int simple_result = 0;
         int wraps = 0;
         int guesses = 0;
         bool changed = false;
         bool solution_exists = false;
+        bool ambiguous = false;
         int changed_count = 0;
         uint contradiction_count = 0;
         uint initial_max_turns = 3; //stay near edges until no more changes
@@ -324,11 +315,10 @@ namespace Gnonograms {
         max_turns = initial_max_turns;
         guesses = 0;
 
+        this.save_position (grid_backup);
         trial_cell = { 0, uint.MAX, initial_cell_state };
 
-        this.save_position (grid_backup);
-
-        while (true) {
+        while (simple_result <= 0) {
             contradiction_count = 0;
             trial_cell = make_guess (trial_cell);
             guesses++;
@@ -360,63 +350,74 @@ namespace Gnonograms {
             }
 
             grid.set_data_from_cell (trial_cell);
-
+            contradiction_count = 0;
             simple_result = yield simple_solver (false, // not debug
                                                  false, // do not check solution
                                                  false); // not stepwise
 
-            load_position (grid_backup); //back track
-
-            if (simple_result > 0) {
-                solution_exists = true;
-            }
+            solution_exists = simple_result > 0;
 
             if (simple_result < 0) {
                 contradiction_count++;
             }
 
-            /* Try opposite if initial guess contradictory or must be unique result */
-            if (simple_result < 0 || unique_only) {
-                changed = true;
-                changed_count++; //worth trying another cycle
-                grid.set_data_from_cell (trial_cell.inverse ()); //mark opposite to guess
+            /* Try opposite to check whether ambiguous or unique */
+            load_position (grid_backup); //back track
+            changed = true;
+            changed_count++; //worth trying another cycle
+            var inverse = trial_cell.inverse ();
+
+            grid.set_data_from_cell (inverse); //mark opposite to guess
 
 
+            simple_result = yield simple_solver (false, // not debug
+                                                 false, // do not check solution
+                                                 false, // not stepwise
+                                                 true); // do not reinitialise
+            int inverse_result = simple_result;
+            if (simple_result == Gnonograms.FAILED_PASSES) {
+                inverse_result = 0;
+            } else if (simple_result < 0) {
+                inverse_result = -1;
+            }
+
+            if (solution_exists) { // original guess was correct and yielded solution
+                // regenerate original solution
+                grid.set_data_from_cell (trial_cell);
                 simple_result = yield simple_solver (false, // not debug
                                                      false, // do not check solution
                                                      false); // not stepwise
+            }
 
-                if (simple_result == Gnonograms.FAILED_PASSES) {
-                    simple_result = 0;
-                } else if (simple_result < 0) {
-                    simple_result = -1;
-                }
+            switch (inverse_result) {
+                case -1:
+                    if (contradiction_count > 0) {
+                        critical ("error both ways");
+                        return -1; // both guess contradictory (should not happen)
 
-                switch (simple_result) {
-                    case -1:
-                        if (contradiction_count > 0) {
-                            critical ("error bothe ways");
-                            return -1; // both guess contradictory (should not happen)
-                        } else { // original guess was correct and yielded solution
-                            grid.set_data_from_cell (trial_cell);
-                            if (solution_exists) {
-                                simple_result = yield simple_solver (false, // not debug
-                                                     false, // do not check solution
-                                                     false); // not stepwise
+                    }
 
-                                break;
-                            }
-                        }
+                    break;
 
-                        continue;
+                case 0:
+                    if (unique_only) { // Cannot be unique without contradiction
+                        ambiguous = true;
+                    }
 
-                    case 0:
-                        this.save_position (grid_backup); //update grid store
-                        continue;
+                    break;
 
-                    default:
-                        break;
-                }
+                default:
+                    // INVERSE guess yielded a solution.
+                    if (solution_exists) {
+                        // If both quesses yield a solution then puzzle is ambiguous
+                        ambiguous = true;
+                    }
+                    solution_exists = true;
+                    break;
+            }
+
+            if (!solution_exists) {
+                load_position (grid_backup);
             }
         }
 
@@ -425,33 +426,25 @@ namespace Gnonograms {
             return simple_result + changed_count * 20;
         }
 
-        return 0;
+        return simple_result;
     }
 
     /** Store the grid in linearised form **/
     private void save_position (CellState[] gs) {
+        int index = 0;
         for (int r = 0; r < rows; r++) {
-
             for (int c = 0; c < cols; c++) {
-                gs[r * cols + c] = grid.get_data_from_rc (r, c);
+                gs[index++] = grid.get_data_from_rc (r, c);
             }
-        }
-
-        for (int i = 0; i < n_regions; i++) {
-            regions[i].save_state ();
         }
     }
 
     private void load_position (CellState[] gs) {
+        int index = 0;
         for (int r = 0; r < rows; r++) {
-
             for (int c = 0; c < cols; c++) {
-                grid.set_data_from_rc (r, c, gs[r * cols + c]);
+                grid.set_data_from_rc (r, c, gs[index++]);
             }
-        }
-
-        for (int i = 0; i < n_regions; i++) {
-            regions[i].restore_state ();
         }
     }
 
@@ -513,6 +506,7 @@ namespace Gnonograms {
       * have a unique solution so its utility is debatable.
     **/
     private async int ultimate_solver(CellState[] grid_store, Cancellable cancellable) {
+        return 0;
         load_position (grid_store); //return to last valid state
         return yield permute (grid_store, cancellable);
     }
@@ -574,6 +568,7 @@ namespace Gnonograms {
                                                           false); // not stepwise
 
                 if (simple_result == 0) {
+                    // Non-unique accepted
                     int advanced_result = yield advanced_solver (grid_store, cancellable, false);
 
                     if (cancellable.is_cancelled ()) {

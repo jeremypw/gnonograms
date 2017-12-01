@@ -85,6 +85,8 @@ public class CellGrid : Gtk.DrawingArea {
         }
     }
 
+    public bool frozen { get; set; }
+
     public CellGrid (Model model) {
         Object (model: model);
     }
@@ -161,7 +163,9 @@ public class CellGrid : Gtk.DrawingArea {
     private const double MINOR_GRID_LINE_WIDTH = 1.0;
     private Gdk.RGBA[, ] colors;
 
-    private uint rows {get { return model != null ? model.rows : 0; }}
+    private uint rows {get {
+        assert (model != null);
+        return model != null ? model.rows : 0; }}
     private uint cols {get { return model != null ? model.cols : 0; }}
 
     /* Backing variable; do not assign directly */
@@ -322,6 +326,11 @@ public class CellGrid : Gtk.DrawingArea {
         /*  Calculate coords of top left corner of filled part
          *  (excluding grid if present but including highlight line)
          */
+
+        if (frozen) {
+            return;
+        }
+
         double x = cell.col * cell_width;
         double y =  cell.row * cell_height;
 

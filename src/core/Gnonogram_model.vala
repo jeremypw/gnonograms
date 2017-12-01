@@ -185,7 +185,6 @@ public class Model : GLib.Object {
     public void fill_random (uint grade) {
         clear();
         double rel_g = (double)grade / (double)(Difficulty.MAXIMUM);
-        uint g = (uint) (16 * rel_g);
 
         int midcol = (int)rows / 2;
         int midrow = (int)cols / 2;
