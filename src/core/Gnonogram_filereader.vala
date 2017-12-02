@@ -119,11 +119,12 @@ public class Filereader : Object {
     }
 
     private bool parse_gnonogram_headings_and_bodies (string[] headings, string[] bodies) {
-        int n = headings.length;
         bool in_error = false;
+        int index = 0;
 
-        for (int i = 0; i < n; i++) {
-            string heading = headings[i];
+        foreach (var heading in headings) {
+            string body = bodies[index];
+            index++;
 
             if (heading == null) {
                 continue;
@@ -135,11 +136,11 @@ public class Filereader : Object {
 
             switch (heading.up ()) {
                 case "DIM":
-                    in_error = !get_gnonogram_dimensions (bodies[i]);
+                    in_error = !get_gnonogram_dimensions (body);
                     break;
 
                 case "ROW":
-                    row_clues = get_gnonogram_clues (bodies[i], cols);
+                    row_clues = get_gnonogram_clues (body, cols);
 
                     if (row_clues.length != rows) {
                         err_msg = "Wrong number of row clues - " + err_msg;
@@ -151,7 +152,8 @@ public class Filereader : Object {
                     break;
 
                 case "COL":
-                    col_clues = get_gnonogram_clues (bodies[i], rows);
+                    col_clues = get_gnonogram_clues (body, rows);
+
                     if (col_clues.length != cols) {
                         err_msg = "Wrong number of column clues -" + err_msg;
                         in_error = true;
@@ -162,23 +164,23 @@ public class Filereader : Object {
                     break;
 
                 case "SOL":
-                    in_error = !get_gnonogram_cellstate_array (bodies[i], true);
+                    in_error = !get_gnonogram_cellstate_array (body, true);
                     break;
 
                 case "WOR":
-                    in_error = !get_gnonogram_cellstate_array (bodies[i], false);
+                    in_error = !get_gnonogram_cellstate_array (body, false);
                     break;
 
                 case "STA":
-                    in_error = !get_gnonogram_state(bodies[i]);
+                    in_error = !get_gnonogram_state(body);
                     break;
 
                 case "DES":
-                    in_error = !get_game_description(bodies[i]);
+                    in_error = !get_game_description(body);
                     break;
 
                 case "LIC":
-                    in_error = !get_game_license(bodies[i]);
+                    in_error = !get_game_license(body);
                     break;
 
                 default:
@@ -212,32 +214,32 @@ public class Filereader : Object {
     }
 
     private string[] get_gnonogram_clues (string? body, int max_block) {
-        string [] arr = {};
+        string [] clues = {};
 
         if (body == null) {
             err_msg = "No clues given";
             return {};
         }
 
-        string[] s = Utils.remove_blank_lines (body.split ("\n"));
+        string[] clue_strings = Utils.remove_blank_lines (body.split ("\n"));
 
-        if (s == null || s.length < 1) {
+        if (clue_strings == null || clue_strings.length < 1) {
             err_msg = _("Missing clues");
             return {};
         }
 
-        for (int i = 0; i < s.length; i++) {
-            string? clue = parse_gnonogram_clue (s[i], max_block);
+        foreach (var clue_string in clue_strings) {
+            string? clue = parse_gnonogram_clue (clue_string, max_block);
 
             if (clue == null) {
                 err_msg = _("Invalid clue");
                 return {};
             } else {
-                arr+= clue;
+                clues += clue;
             }
         }
 
-        return arr;
+        return clues;
     }
 
     private bool get_gnonogram_cellstate_array (string? body, bool is_solution) {
@@ -246,23 +248,24 @@ public class Filereader : Object {
             return false;
         }
 
-        string[] s = Utils.remove_blank_lines (body.split ("\n"));
+        string[] row_strings = Utils.remove_blank_lines (body.split ("\n"));
 
-        if (s == null || s.length != rows) {
+        if (row_strings == null || row_strings.length != rows) {
             err_msg = _("Wrong number of rows in solution or working grid");
             return false;
         }
 
-        for (int i = 0; i < s.length; i++) {
-            CellState[] arr = Utils.cellstate_array_from_string (s[i]);
-            if (arr.length != cols) {
+        foreach (var row in row_strings) {
+            CellState[] states = Utils.cellstate_array_from_string (row);
+
+            if (states.length != cols) {
                 err_msg = _("Wrong number of columns in solution or working grid");
                 return false;
             }
 
             if (is_solution) {
-                for (int c = 0; c < cols; c++) {
-                    if (arr[c] != CellState.EMPTY && arr[c] != CellState.FILLED) {
+                foreach (var state in states) {
+                    if (!(state in (CellState.EMPTY | CellState.FILLED))) {
                         err_msg = _("Invalid cell state");
                         return false;
                     }
@@ -271,10 +274,10 @@ public class Filereader : Object {
         }
 
         if (is_solution) {
-            solution = s;
+            solution = row_strings;
             has_solution = true;
         } else {
-            working = s;
+            working = row_strings;
             has_working = true;
         }
 
@@ -353,9 +356,9 @@ public class Filereader : Object {
     }
 
     private string? parse_gnonogram_clue (string line, int maxblock) {
-        string[] s = Utils.remove_blank_lines (line.split_set (", "));
+        string[] blocks = Utils.remove_blank_lines (line.split_set (", "));
 
-        if (s == null) {
+        if (blocks == null) {
             return null;
         }
 
@@ -363,8 +366,8 @@ public class Filereader : Object {
         int remaining_space = maxblock;
         StringBuilder sb = new StringBuilder ();
 
-        for (int i = 0; i < s.length; i++) {
-            b = int.parse(s[i]);
+        foreach (var block in blocks) {
+            b = int.parse (block);
 
             if (b == 0 && zero_count > 0) {
                 continue;
@@ -382,10 +385,10 @@ public class Filereader : Object {
                 remaining_space -= (b + 1);
             }
 
-            if (i < s.length - 1) {
-                sb.append (Gnonograms.BLOCKSEPARATOR);
-            }
+            sb.append (Gnonograms.BLOCKSEPARATOR);
         }
+
+        sb.truncate (sb.len - BLOCKSEPARATOR.length); // remove trailing seperator
 
         return sb.str;
     }

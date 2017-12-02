@@ -33,18 +33,19 @@ namespace Utils {
     }
 
     public int[] block_array_from_clue (string s) {
-        string[] clues = remove_blank_lines (s.split_set (", "));
+        string[] blocks = remove_blank_lines (s.split_set (", "));
 
-        if (clues.length == 0) {
+        if (blocks.length == 0) {
             return {0};
         } else {
-            int[] blocks = new int[clues.length];
+            int[] block_array = new int[blocks.length];
             int index = 0;
-            foreach (string clue in clues) {
-                blocks[index++] = int.parse (clue);
+
+            foreach (string block in blocks) {
+                block_array[index++] = int.parse (block);
             }
 
-            return blocks;
+            return block_array;
         }
     }
 
