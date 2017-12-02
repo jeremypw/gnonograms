@@ -60,36 +60,41 @@ namespace Utils {
         return extent;
     }
 
-    public string block_string_from_cellstate_array (CellState[] cs) {
+    public string block_string_from_cellstate_array (CellState[] cellstates) {
         StringBuilder sb = new StringBuilder ("");
         int count = 0, blocks = 0;
         bool counting = false;
 
-        for (int i = 0; i < cs.length; i++) {
-            if (cs[i] == CellState.EMPTY) {
-                if (counting) {
-                    sb.append (count.to_string() + BLOCKSEPARATOR);
-                    counting = false;
-                    count = 0;
-                    blocks++;
-                }
-            } else if (cs[i] == CellState.FILLED) {
-                counting = true;
-                count++;
-            } else {
-                return BLANKLABELTEXT;
+        foreach (var state in cellstates) {
+            switch (state) {
+                case CellState.EMPTY:
+                    if (counting) {
+                        sb.append (count.to_string() + BLOCKSEPARATOR);
+                        counting = false;
+                        count = 0;
+                        blocks++;
+                    }
+
+                    break;
+
+                case CellState.FILLED:
+                    counting = true;
+                    count++;
+
+                    break;
+
+                default:
+                    return BLANKLABELTEXT;
             }
         }
 
         if (counting) {
-            sb.append (count.to_string () + BLOCKSEPARATOR);
+            sb.append (count.to_string ());
             blocks++;
-        }
-
-        if (blocks == 0) {
+        } else if (blocks == 0) {
             sb.append ("0");
         } else {
-            sb.truncate (sb.len - BLOCKSEPARATOR.length);
+            sb.truncate (sb.len - BLOCKSEPARATOR.length); // remove trailing seperator
         }
 
         return sb.str;
@@ -97,57 +102,24 @@ namespace Utils {
 
     public CellState[] cellstate_array_from_string (string s) {
         CellState[] cs = {};
-        string[] data = remove_blank_lines (s.split_set (BLOCKSEPARATOR));
+        string[] blocks = remove_blank_lines (s.split_set (BLOCKSEPARATOR));
 
-        for (int i = 0; i < data.length; i++) {
-            cs += (CellState)(int.parse (data[i]).clamp (0, 6));
+        foreach (var block in blocks) {
+            cs += (CellState)(int.parse (block)).clamp (0, CellState.UNDEFINED);
         }
 
         return cs;
     }
 
     public string string_from_cellstate_array (CellState[] cs) {
-        if (cs == null) {
-            return "";
-        }
-
         StringBuilder sb = new StringBuilder();
 
-        for (int i = 0; i < cs.length; i++) {
-            sb.append (((int)cs[i]).to_string ());
+        foreach (uint state in cs) {
+            sb.append (state.to_string ());
             sb.append (" ");
         }
 
         return sb.str;
-    }
-
-    public string hex_string_from_cellstate_array (CellState[] sa) {
-        StringBuilder sb = new StringBuilder ("");
-        int length = sa.length;
-        int e = 0, m = 1, count = 0;
-
-        for (int i = length - 1; i >= 0; i--) {
-            count++;
-            e += ((int)(sa[i]) - 1) * m;
-            m = m * 2;
-            if (count == 4 || i == 0) {
-                sb.prepend (int2hex (e));
-                count = 0; m = 1; e = 0;
-            }
-        }
-
-        return sb.str;
-    }
-
-    private const string[] letters = {"A","B","C","D","E","F"};
-    private string int2hex (int i) {
-        if (i > 15 || i < 0) {
-            return "X";
-        } else if (i <= 9) {
-            return i.to_string ();
-        } else {
-            return letters[i - 10];
-        }
     }
 
     public static int show_dlg (string msg, Gtk.MessageType type, Gtk.ButtonsType buttons, Gtk.Window? parent = null) {
@@ -185,18 +157,13 @@ namespace Utils {
     public static string? get_file_path (Gtk.Window? parent,
                                           Gnonograms.FileChooserAction action,
                                           string dialogname,
-                                          string[]? filternames,
-                                          string[]? filters,
+                                          FilterInfo [] filters,
                                           string? start_path,
                                           out bool save_solution) {
 
         string? file_path = null;
 
         save_solution = (action == Gnonograms.FileChooserAction.SAVE_WITH_SOLUTION);
-
-        if (filternames != null) {
-            assert (filternames.length == filters.length);
-        }
 
         string button = "Error";
         Gtk.FileChooserAction gtk_action = Gtk.FileChooserAction.SAVE;
@@ -231,14 +198,12 @@ namespace Utils {
                         null
                     );
 
-        if (filternames != null) {
-            for (int i = 0; i < filternames.length; i++) {
+            foreach (var info in filters) {
                 var fc = new Gtk.FileFilter();
-                fc.set_filter_name (filternames[i]);
-                fc.add_pattern (filters[i]);
+                fc.set_filter_name (info.name);
+                fc.add_pattern (info.pattern);
                 dialog.add_filter (fc);
             }
-        }
 
         dialog.local_only = false;
 

@@ -164,12 +164,12 @@ public class Filewriter : Object {
         }
 
         bool with_solution;
-
+        FilterInfo info = {_("Gnonogram puzzles"), "*" + Gnonograms.GAMEFILEEXTENSION};
+        FilterInfo [] filters = {info};
         var path = Utils.get_file_path (parent,
             action,
             _("Name and save this puzzle"),
-            {_("Gnonogram puzzles")},
-            {"*" + Gnonograms.GAMEFILEEXTENSION},
+            filters,
             save_dir_path,
             out with_solution  // cannot use save_solution directly (will not compile)
         );

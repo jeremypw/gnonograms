@@ -77,4 +77,9 @@ public struct Dimensions {
         return width;
     }
 }
+
+public struct FilterInfo {
+    string name;
+    string pattern;
+}
 }
