@@ -62,10 +62,7 @@ public enum CellState {
     UNKNOWN,
     EMPTY,
     FILLED,
-    ERROR,
     COMPLETED,
-    ERROR_EMPTY,
-    ERROR_FILLED,
     UNDEFINED;
 }
 

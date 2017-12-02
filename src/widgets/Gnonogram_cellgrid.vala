@@ -93,7 +93,7 @@ public class CellGrid : Gtk.DrawingArea {
 
     construct {
         _current_cell = NULL_CELL;
-        colors = new Gdk.RGBA[2, 4];
+        colors = new Gdk.RGBA[2, 3];
         grid_color.parse ("GREY");
         game_state = GameState.SETTING;
         cell_pattern_type = CellPatternType.CELL;
@@ -193,13 +193,11 @@ public class CellGrid : Gtk.DrawingArea {
         colors[setting, (int)CellState.UNKNOWN].parse ("LIGHT GREY");
         colors[setting, (int)CellState.EMPTY].parse ("WHITE");
         colors[setting, (int)CellState.FILLED].parse ("DARK GREY");
-        colors[setting, (int)CellState.ERROR].parse ("RED");
 
         int solving = (int)GameState.SOLVING;
         colors[solving, (int)CellState.UNKNOWN].parse ("LIGHT GREY");
         colors[solving, (int)CellState.EMPTY].parse ("YELLOW");
         colors[solving, (int)CellState.FILLED].parse ("BLUE");
-        colors[solving, (int)CellState.ERROR].parse ("RED");
     }
 
 /*** Signal Handlers ***/
@@ -338,16 +336,12 @@ public class CellGrid : Gtk.DrawingArea {
         CellPattern cell_pattern;
 
         switch (cell.state) {
-            case CellState.ERROR_EMPTY:
             case CellState.EMPTY:
                 cell_pattern = empty_cell_pattern;
-                error = (cell.state == CellState.ERROR_EMPTY);
                 break;
 
-            case CellState.ERROR_FILLED:
             case CellState.FILLED:
                 cell_pattern = filled_cell_pattern;
-                error = (cell.state == CellState.ERROR_FILLED);
                 break;
 
             default :

@@ -240,10 +240,10 @@ public class Controller : GLib.Object {
 
         int target = Utils.grade_to_minimum_passes (grd, dimensions);
         int next_target = Utils.grade_to_minimum_passes (grd + 1, dimensions);
-
+        uint gen_grd = grd >= Difficulty.ADVANCED ? grd : grd;
         while (count < limit) {
             count++;
-            passes = yield try_generate_game (grd, solver_cancellable); //tries max tries times
+            passes = yield try_generate_game (gen_grd, solver_cancellable); //tries max tries times
             if (solver_cancellable.is_cancelled ()) {
                 break;
             } else if (passes >= target && passes < Gnonograms.FAILED_PASSES) {
@@ -252,8 +252,8 @@ public class Controller : GLib.Object {
                 } else {
                     continue;
                 }
-            } else if (passes > 0  && passes < Gnonograms.FAILED_PASSES && grd < Difficulty.CHALLENGING) {
-                grd++;
+            } else if (passes > 0  && passes < Gnonograms.FAILED_PASSES && gen_grd < Difficulty.CHALLENGING) {
+                gen_grd++;
             }
         }
 
@@ -268,7 +268,7 @@ public class Controller : GLib.Object {
 
             if (passes >= 0 && rows > 1) {
                 game_state = GameState.SOLVING;
-                view.update_labels_from_model ();
+                view.update_labels_from_solution ();
                 model.blank_working ();
 
                 grd = Utils.passes_to_grade (passes, dimensions);
@@ -497,9 +497,7 @@ public class Controller : GLib.Object {
         model.game_state = GameState.SETTING; /* Selects the solution grid */
 
         if (reader.has_solution) {
-            for (int i = 0; i < rows; i++) {
-                model.set_row_data_from_string (i, reader.solution[i]);
-            }
+            model.set_row_data_from_string_array (reader.solution);
         } else {
             var cancellable = new Cancellable ();
             int passes = yield solve_game (
@@ -514,7 +512,7 @@ public class Controller : GLib.Object {
 
             if (passes > 0) {
                 set_model_from_solver ();
-                view.update_labels_from_model ();
+                view.update_labels_from_solution ();
             } else if (passes < 0) {
                 reader.err_msg = (_("Clues contradictory or insoluble"));
                 return false;
@@ -542,10 +540,7 @@ public class Controller : GLib.Object {
     private bool load_position_extra (Filereader reader) {
         if (reader.has_working) {
             model.game_state = GameState.SOLVING; /* Selects the working grid */
-
-            for (int i = 0; i < rows; i++) {
-                model.set_row_data_from_string (i, reader.working[i]);
-            }
+            model.set_row_data_from_string_array (reader.working);
         }
 
         return true;
@@ -567,9 +562,11 @@ public class Controller : GLib.Object {
         update_history_view ();
 
         /* Check if puzzle finished */
-        if (is_solving && model.is_finished ()) {
+        if (is_solving && model.is_finished) {
             if (model.count_errors () == 0) {
                 view.send_notification (_("Correct solution"));
+            } else if (view.model_matches_labels) {
+                view.send_notification (_("Alternative solution found"));
             } else {
                 view.send_notification (_("There are errors"));
                 rewind_until_correct ();
@@ -586,6 +583,11 @@ public class Controller : GLib.Object {
     private void rewind_until_correct () {
         while (on_previous_move_request () && model.count_errors () > 0) {
             continue;
+        }
+
+        if (model.count_errors () > 0) { // Only happens for completed erroneous solution without history.
+            model.blank_working (); // have to restart solving
+            clear_history (); // just in case - should not be necessary.
         }
     }
 
@@ -666,11 +668,11 @@ public class Controller : GLib.Object {
             var col_clues = new string [cols];
 
             for (int i = 0; i < rows; i++) {
-                row_clues[i] = model.get_label_text (i, false);
+                row_clues[i] = model.get_label_text_from_solution (i, false);
             }
 
             for (int i = 0; i < cols; i++) {
-                col_clues[i] = model.get_label_text (i, true);
+                col_clues[i] = model.get_label_text_from_solution (i, true);
             }
 
             res = solver.initialize (row_clues, col_clues, startgrid, null);

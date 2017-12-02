@@ -137,7 +137,7 @@ public class View : Gtk.ApplicationWindow {
 
             update_header_bar ();
             if (value == GameState.SETTING) {
-                update_labels_from_model ();
+                update_labels_from_solution ();
             }
         }
     }
@@ -145,6 +145,34 @@ public class View : Gtk.ApplicationWindow {
     public bool can_go_back {
         set {
             check_correct_button.sensitive = value && is_solving;
+        }
+    }
+
+    public bool model_matches_labels {
+        get {
+            if (model == null || row_clue_box == null || column_clue_box == null) {
+                return false;
+            }
+
+            int index = 0;
+            foreach (string clue in get_row_clues ()) {
+                if (clue != model.get_label_text_from_working (index, false)) {
+                    return false;
+                }
+
+                index++;
+            }
+
+            index = 0;
+            foreach (string clue in get_col_clues ()) {
+                if (clue != model.get_label_text_from_working (index, true)) {
+                    return false;
+                }
+
+                index++;
+            }
+
+            return true;
         }
     }
 
@@ -249,7 +277,7 @@ public class View : Gtk.ApplicationWindow {
 
         /* Connect signal handlers */
         realize.connect (() => {
-            update_labels_from_model ();
+            update_labels_from_solution ();
             fontheight = get_default_fontheight_from_dimensions ();
         });
 
@@ -291,13 +319,13 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    public void update_labels_from_model () {
+    public void update_labels_from_solution () {
         for (int r = 0; r < rows; r++) {
-            row_clue_box.update_label_text (r, model.get_label_text (r, false));
+            row_clue_box.update_label_text (r, model.get_label_text_from_solution (r, false));
         }
 
         for (int c = 0; c < cols; c++) {
-            column_clue_box.update_label_text (c, model.get_label_text (c, true));
+            column_clue_box.update_label_text (c, model.get_label_text_from_solution (c, true));
         }
     }
 
@@ -431,13 +459,13 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private void update_labels_for_cell (Cell cell) {
+    private void update_solution_labels_for_cell (Cell cell) {
         if (cell == NULL_CELL) {
             return;
         }
 
-        row_clue_box.update_label_text (cell.row, model.get_label_text (cell.row, false));
-        column_clue_box.update_label_text (cell.col, model.get_label_text (cell.col, true));
+        row_clue_box.update_label_text (cell.row, model.get_label_text_from_solution (cell.row, false));
+        column_clue_box.update_label_text (cell.col, model.get_label_text_from_solution (cell.col, true));
     }
 
     private void highlight_labels (Cell c, bool is_highlight) {
@@ -468,7 +496,7 @@ public class View : Gtk.ApplicationWindow {
 
     private void mark_cell (Cell cell) {
         if (!is_solving && cell.state != CellState.UNDEFINED) {
-            update_labels_for_cell (cell);
+            update_solution_labels_for_cell (cell);
         }
     }
 

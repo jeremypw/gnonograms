@@ -45,6 +45,12 @@ public class Model : GLib.Object {
         }
     }
 
+    public bool is_finished {
+        get {
+            return count_unsolved () == 0;
+        }
+    }
+
     construct {
         rand_gen = new Rand ();
         solution_data = new My2DCellArray ({ MAXSIZE, MAXSIZE }, CellState.EMPTY);
@@ -52,30 +58,7 @@ public class Model : GLib.Object {
         data = new CellState[MAXSIZE];
     }
 
-    public void clear_errors() {
-        CellState cs;
-
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
-                cs = working_data.get_data_from_rc (r,c);
-
-                switch (cs) {
-                    case CellState.ERROR_EMPTY:
-                        working_data.set_data_from_rc (r, c, CellState.EMPTY);
-                        break;
-
-                    case CellState.ERROR_FILLED:
-                        working_data.set_data_from_rc (r, c, CellState.FILLED);
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-        }
-    }
-
-    public int count_errors() {
+    public int count_errors () {
         CellState cs;
         int count = 0;
 
@@ -84,12 +67,6 @@ public class Model : GLib.Object {
                 cs = working_data.get_data_from_rc (r,c);
 
                 if (cs != CellState.UNKNOWN && cs != solution_data.get_data_from_rc (r, c)) {
-                    if (cs == CellState.EMPTY) {
-                        working_data.set_data_from_rc (r, c, CellState.ERROR_EMPTY);
-                    } else if (cs == CellState.FILLED) {
-                        working_data.set_data_from_rc (r,c,CellState.ERROR_FILLED);
-                    }
-
                     count++;
                 }
             }
@@ -105,28 +82,14 @@ public class Model : GLib.Object {
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
                 cs = working_data.get_data_from_rc (r,c);
-                if (cs == CellState.UNKNOWN || cs == CellState.ERROR) {
+
+                if (cs == CellState.UNKNOWN) {
                     count++;
                 }
             }
         }
 
         return count;
-    }
-
-    public bool is_finished () {
-        CellState cs;
-
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
-                cs = working_data.get_data_from_rc (r,c);
-                if (cs == CellState.UNKNOWN || cs == CellState.ERROR) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 
     public void clear () {
@@ -142,9 +105,14 @@ public class Model : GLib.Object {
         working_data.set_all (CellState.UNKNOWN);
     }
 
-    public string get_label_text (uint idx, bool is_column) {
+    public string get_label_text_from_solution (uint idx, bool is_column) {
         uint length = is_column ? rows : cols;
         return solution_data.data2text (idx, length, is_column);
+    }
+
+    public string get_label_text_from_working (uint idx, bool is_column) {
+        uint length = is_column ? rows : cols;
+        return working_data.data2text (idx, length, is_column);
     }
 
     public void set_data_from_cell (Cell cell) {
@@ -163,20 +131,16 @@ public class Model : GLib.Object {
         return display_data.get_data_from_rc (r, c);
     }
 
-    public bool set_row_data_from_string (int r, string s) {
-        CellState[] cs = Utils.cellstate_array_from_string (s);
-        return set_row_data_from_data_array (r, cs);
-    }
-
-    public bool set_row_data_from_data_array (int r, CellState[] cs) {
-        if (cs.length != cols) {
-            critical ("Wrong number of columns in data cs length %u, cols %u", cs.length, cols);
-            return false;
-        } else {
-            display_data.set_row (r, cs);
+    public void set_row_data_from_string_array (string[] row_clues) {
+        if (row_clues.length < cols) {
+            return;
         }
 
-        return true;
+        int row = 0;
+        foreach (var clue in row_clues) {
+            display_data.set_row (row, Utils.cellstate_array_from_string (clue));
+            row++;
+        }
     }
 
     /*** Generate a pseudo-random pattern which is adjusted to be more likely to
