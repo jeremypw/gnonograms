@@ -529,7 +529,7 @@ namespace Gnonograms {
             permute_region = choose_permute_region ();
 
             if (permute_region == uint.MAX) {
-                stdout.printf ("No more permute regions found\n");
+                warning ("No more permute regions found\n");
                 break;
             }
 

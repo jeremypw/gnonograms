@@ -406,8 +406,8 @@ public class Region { /* Not a GObject, to reduce weight */
 
         int[] ablocks = get_blocks_available ();
 
-        for (int b = 0; b < ablocks.length; b++) {
-            clue = clue + blocks[ablocks[b]].to_string () + ", ";
+        foreach (var ablock in ablocks) {
+            clue = clue + blocks[ablock].to_string () + ", ";
         }
 
         start = ranges[0, 0];
