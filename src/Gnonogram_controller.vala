@@ -497,7 +497,7 @@ public class Controller : GLib.Object {
         model.game_state = GameState.SETTING; /* Selects the solution grid */
 
         if (reader.has_solution) {
-            model.set_row_data_from_string_array (reader.solution);
+            model.set_row_data_from_string_array (reader.solution[0 : rows]);
         } else {
             var cancellable = new Cancellable ();
             int passes = yield solve_game (
@@ -540,7 +540,7 @@ public class Controller : GLib.Object {
     private bool load_position_extra (Filereader reader) {
         if (reader.has_working) {
             model.game_state = GameState.SOLVING; /* Selects the working grid */
-            model.set_row_data_from_string_array (reader.working);
+            model.set_row_data_from_string_array (reader.working[0 : rows]);
         }
 
         return true;

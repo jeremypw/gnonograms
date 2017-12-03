@@ -132,10 +132,7 @@ public class Model : GLib.Object {
     }
 
     public void set_row_data_from_string_array (string[] row_clues) {
-        if (row_clues.length < cols) {
-            return;
-        }
-
+        assert (row_clues.length == rows);
         int row = 0;
         foreach (var clue in row_clues) {
             display_data.set_row (row, Utils.cellstate_array_from_string (clue));
