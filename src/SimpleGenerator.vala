@@ -21,6 +21,7 @@ namespace Gnonograms {
 public class SimpleGenerator : AbstractGenerator {
 
     int threshold = 40;
+    int min_freedom = 0;
 
     public SimpleGenerator (Dimensions dim, Difficulty grade) {
         Object (dimensions: dim,
@@ -49,27 +50,35 @@ public class SimpleGenerator : AbstractGenerator {
         switch (grade) {
             case Difficulty.TRIVIAL:
                     threshold = 50;
+                    min_freedom = 0;
                     break;
             case Difficulty.VERY_EASY:
                     threshold = 60;
+                    min_freedom = 0;
                     break;
             case Difficulty.EASY:
                     threshold = 60;
+                    min_freedom = 0;
                     break;
             case Difficulty.MODERATE:
                     threshold = 67;
+                    min_freedom = 1;
                     break;
             case Difficulty.HARD:
                     threshold = 70;
+                    min_freedom = 2;
                     break;
             case Difficulty.CHALLENGING:
                     threshold = 75;
+                    min_freedom = 3;
                     break;
             case Difficulty.ADVANCED:
                     threshold = 70;
+                    min_freedom = 3;
                     break;
             case Difficulty.MAXIMUM:
                     threshold = 70;
+                    min_freedom = 4;
                     break;
             default:
                 threshold = 40;
@@ -121,9 +130,47 @@ public class SimpleGenerator : AbstractGenerator {
                 if (cs == CellState.FILLED) {
                     grid.set_data_from_rc (r, c, cs);
                 }
+
                 index++;
             }
         }
+
+        /* Adjust freedom of each row and col if necessary */
+        if (rows >= 10 && min_freedom > 0) {
+            CellState[] sa = new CellState[rows];
+            int df, filled, blocks;
+
+            for (uint r = 0; r < rows; r++) {
+                grid.get_array (r, false, ref sa);
+                df = Utils.freedom_from_array (sa, out filled, out blocks);
+                /* Insert random empty cells until enough freedom */
+                while (df < min_freedom) {
+                    var ptr = rand_gen.int_range (0, (int)cols);
+                    if (sa[ptr] == CellState.FILLED) {
+                        sa[ptr] = CellState.EMPTY;
+                        df++;
+                    }
+                }
+            }
+        }
+        if (cols >= 10 && min_freedom > 0) {
+            CellState[] sa = new CellState[cols];
+            int df, filled, blocks;
+
+            for (uint c = 0; c < cols; c++) {
+                grid.get_array (c, true, ref sa);
+                df = Utils.freedom_from_array (sa, out filled, out blocks);
+                /* Insert random empty cells until enough freedom */
+                while (df < min_freedom) {
+                    var ptr = rand_gen.int_range (0, (int)rows);
+                    if (sa[ptr] == CellState.FILLED) {
+                        sa[ptr] = CellState.EMPTY;
+                        df++;
+                    }
+                }
+            }
+        }
+
     }
 }
 }

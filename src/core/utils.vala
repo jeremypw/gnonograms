@@ -61,6 +61,25 @@ namespace Utils {
         return extent;
     }
 
+    public int freedom_from_array (CellState[] arr, out int filled, out int blocks) {
+        filled = 0; // count of filled cells
+        blocks = 0; // count of filled blocks
+        int df = 0; // degrees of freedom
+        int length = arr.length;
+
+        for (int i = 0; i < length; i++) {
+            if (arr[i] == CellState.FILLED) {
+                filled++;
+
+                if (i == 0 || arr[i - 1] == CellState.EMPTY) {
+                    blocks++;
+                }
+            }
+        }
+
+        return (length - filled - blocks + 1);
+    }
+
     public string block_string_from_cellstate_array (CellState[] cellstates) {
         StringBuilder sb = new StringBuilder ("");
         int count = 0, blocks = 0;
