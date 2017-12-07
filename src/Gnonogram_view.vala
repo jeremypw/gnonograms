@@ -70,7 +70,7 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    public Difficulty game_grade {
+    public Difficulty game_grade { // Difficulty of game actually loaded
         get {
             return _game_grade;
         }
@@ -81,7 +81,7 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    public Difficulty generator_grade {
+    public Difficulty generator_grade { // Grade setting
         get {
             return _generator_grade;
         }

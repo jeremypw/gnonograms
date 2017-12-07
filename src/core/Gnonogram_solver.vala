@@ -131,7 +131,7 @@ namespace Gnonograms {
                                             cancellable,
                                             use_ultimate,
                                             debug,
-                                            human ? 6 * (rows + cols) : 9999,
+                                            human ? 10 * (rows + cols) : 9999,
                                             unique_only,
                                             human);
 
@@ -297,7 +297,6 @@ namespace Gnonograms {
 
         int simple_result = 0;
         int wraps = 0;
-        int guesses = 0;
         bool changed = false;
         bool solution_exists = false;
         bool ambiguous = false;
@@ -313,20 +312,18 @@ namespace Gnonograms {
 
         turn = 0;
         max_turns = initial_max_turns;
-        guesses = 0;
 
         this.save_position (grid_backup);
         trial_cell = { 0, uint.MAX, initial_cell_state };
 
-        while (simple_result <= 0) {
+        while (simple_result <= 0 && changed_count <= max_guesswork)  {
             contradiction_count = 0;
+            solution_exists = false;
+            ambiguous = true;
             trial_cell = make_guess (trial_cell);
-            guesses++;
 
             if (trial_cell.col == uint.MAX) { //run out of guesses
-                if (changed && changed_count > max_guesswork) {
-                    return 0;
-                } else if (max_turns == initial_max_turns) {
+                if (max_turns == initial_max_turns) {
                     max_turns = (uint.min (rows, cols)) / 2 + 2; //ensure full coverage
                 } else if (trial_cell.state == initial_cell_state) {
                     trial_cell = trial_cell.inverse (); //start making opposite guesses
@@ -350,7 +347,6 @@ namespace Gnonograms {
             }
 
             grid.set_data_from_cell (trial_cell);
-            contradiction_count = 0;
             simple_result = yield simple_solver (false, // not debug
                                                  false, // do not check solution
                                                  false); // not stepwise
@@ -384,9 +380,9 @@ namespace Gnonograms {
             if (solution_exists) { // original guess was correct and yielded solution
                 // regenerate original solution
                 grid.set_data_from_cell (trial_cell);
-                simple_result = yield simple_solver (false, // not debug
-                                                     false, // do not check solution
-                                                     false); // not stepwise
+                yield simple_solver (false, // not debug
+                                     false, // do not check solution
+                                     false); // not stepwise
             }
 
             switch (inverse_result) {
@@ -395,35 +391,36 @@ namespace Gnonograms {
                         critical ("error both ways");
                         return -1; // both guess contradictory (should not happen)
 
+                    } else if (solution_exists) {
+                        ambiguous = false;
                     }
 
                     break;
 
                 case 0:
-                    if (unique_only) { // Cannot be unique without contradiction
-                        ambiguous = true;
-                    }
-
                     break;
 
                 default:
                     // INVERSE guess yielded a solution.
-                    if (solution_exists) {
+                    if (contradiction_count > 0) {
                         // If both quesses yield a solution then puzzle is ambiguous
-                        ambiguous = true;
+                        ambiguous = false;
                     }
+
                     solution_exists = true;
                     break;
             }
 
             if (!solution_exists) {
                 load_position (grid_backup);
+            } else if (unique_only && ambiguous) {
+                simple_result = -1;
             }
         }
 
         //return vague measure of difficulty
         if (simple_result > 0) {
-            return simple_result + changed_count * 20;
+            return simple_result + changed_count * (ambiguous ? 10 : 2);
         }
 
         return simple_result;

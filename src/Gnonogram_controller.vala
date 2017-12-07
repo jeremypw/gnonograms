@@ -73,7 +73,6 @@ public class Controller : GLib.Object {
     private GLib.Settings saved_state;
     private Gee.Deque<Move> back_stack;
     private Gee.Deque<Move> forward_stack;
-    private const int MAX_TRIES_PER_GRADE = 1000;
     private string save_game_dir;
     private string current_game_path;
     private string? game_path = null;
@@ -229,7 +228,7 @@ public class Controller : GLib.Object {
     private async void new_random_game() {
         int passes = 0;
         uint count = 0;
-        uint grd = generator_grade; //grd may be reduced but this.grade always matches spin setting
+        uint gen_grd = ((uint)(generator_grade)).clamp (1, 8) - 1; //grd may be reduced but this.grade always matches spin setting
         /* One row used to debug */
         var limit = rows == 1 ? 1 : 1000;
 
@@ -238,22 +237,31 @@ public class Controller : GLib.Object {
         var solver_cancellable = new Cancellable ();
         view.show_generating (solver_cancellable);
 
-        int target = Utils.grade_to_minimum_passes (grd, dimensions);
-        int next_target = Utils.grade_to_minimum_passes (grd + 1, dimensions);
-        uint gen_grd = grd >= Difficulty.ADVANCED ? grd : grd;
+        int target = Utils.grade_to_minimum_passes (generator_grade, dimensions);
+        int next_target = Utils.grade_to_minimum_passes (generator_grade + 1, dimensions);
+
         while (count < limit) {
             count++;
             passes = yield try_generate_game (gen_grd, solver_cancellable); //tries max tries times
+
             if (solver_cancellable.is_cancelled ()) {
                 break;
-            } else if (passes >= target && passes < Gnonograms.FAILED_PASSES) {
-                if (passes < next_target || grd >= Difficulty.ADVANCED) {
+            } else if (passes >= target * 0.9 && passes < Gnonograms.FAILED_PASSES) {
+                if (passes <= next_target) {
                     break;
                 } else {
                     continue;
                 }
-            } else if (passes > 0  && passes < Gnonograms.FAILED_PASSES && gen_grd < Difficulty.CHALLENGING) {
-                gen_grd++;
+            } else if (passes > 0  && passes < Gnonograms.FAILED_PASSES) {
+                // Do not increase from simple to advanced or advanced to ambiguous
+                if (gen_grd < Difficulty.CHALLENGING ||
+                    gen_grd < generator_grade) {
+warning ("INC");
+                    gen_grd++;
+                }
+            } else if (gen_grd > 0) {
+warning ("DEC");
+                gen_grd--;
             }
         }
 
@@ -270,13 +278,7 @@ public class Controller : GLib.Object {
                 game_state = GameState.SOLVING;
                 view.update_labels_from_solution ();
                 model.blank_working ();
-
-                grd = Utils.passes_to_grade (passes, dimensions);
-                if (grd >= Difficulty.ADVANCED && generator_grade < Difficulty.ADVANCED) {
-                    grd = Difficulty.ADVANCED - 1;
-                }
-
-                view.game_grade = (Difficulty)grd;
+                view.game_grade = Utils.passes_to_grade (passes, dimensions, generator_grade <= Difficulty.ADVANCED);
             } else {
                 msg = _("Error occurred in solver");
                 game_state = GameState.SOLVING;
@@ -322,7 +324,7 @@ public class Controller : GLib.Object {
 
     /** Generate a random, humanly soluble puzzle **/
     private async int generate_game (uint grd, Cancellable cancellable) {
-        model.fill_random (grd);
+        model.fill_random ((int)grd);
 
         // solve from clues
         return yield solve_game (
@@ -330,9 +332,10 @@ public class Controller : GLib.Object {
                         false, // use model
                         grd >= Difficulty.ADVANCED, // use advanced solver
                         false, // no ultimate solutions (too difficult for humans)
-                        true, // unique solutions only
+                        grd > Difficulty.ADVANCED, // unique solutions only
                         grd >= Difficulty.ADVANCED, // no simple solutions needed
-                        cancellable
+                        cancellable,
+                        true // Want human soluble
                     );
     }
 
@@ -507,7 +510,8 @@ public class Controller : GLib.Object {
                             false, // do not use ultimate solver (to time consuming for loading)
                             false, // do not insist unique solution exists
                             false, // Simple solutions allowed
-                            cancellable // Not currently used (TODO)
+                            cancellable, // Not currently used (TODO)
+                            false // Not necessarily human soluble
                         );
 
             if (passes > 0) {
@@ -569,7 +573,6 @@ public class Controller : GLib.Object {
                 view.send_notification (_("Alternative solution found"));
             } else {
                 view.send_notification (_("There are errors"));
-                rewind_until_correct ();
             }
         }
     }
@@ -793,22 +796,23 @@ public class Controller : GLib.Object {
             (obj, res) => {
 
                 int passes = solve_game.end (res);
-                after_solve_game (msg, passes);
+                after_solve_game (msg, passes, true);
 
                 if (solver_cancellable.is_cancelled ()) {
                     msg = _("Solving was cancelled");
                 } else if (passes > 0  && passes < Gnonograms.FAILED_PASSES) {
-                    var descr = Utils.passes_to_grade_description (passes, dimensions);
+                    var descr = Utils.passes_to_grade_description (passes, dimensions, true);
                     msg =  _("Simple solution found. %s").printf (descr);
                 } else {
-                    msg = _("No unique solution found");
+                    msg = _("No simple solution found");
                     if (generator_grade >= Difficulty.ADVANCED) {
+                        bool unique_only = generator_grade <= Difficulty.ADVANCED;
                         solve_game.begin (
                             false, // no startgrid
                             true, // use labels not model
                             true, // use advanced solver
                             true, // use ultimate if necessary (option cancel given)
-                            false, // do not insist on unique
+                            unique_only,
                             true, // must be advanced (simple already excluded)
                             solver_cancellable,
                             false, // not human
@@ -819,13 +823,16 @@ public class Controller : GLib.Object {
                                 if (solver_cancellable.is_cancelled ()) {
                                     msg = _("Solving was cancelled");
                                 } else if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
-                                    var descr = Utils.passes_to_grade_description (passes, dimensions);
+                                    var descr = Utils.passes_to_grade_description (passes, dimensions, unique_only);
                                     msg = msg + "\n" + _("Advanced solution found. %s").printf (descr);
+                                    if (!unique_only) {
+                                        msg = msg + "\n" + _("Possibly ambiguous");
+                                    }
                                 } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
                                     msg = msg + "\n" + _("No advanced solution found");
                                 }
 
-                                after_solve_game (msg, passes);
+                                after_solve_game (msg, passes, unique_only);
                             }
                         );
                     }
@@ -834,12 +841,12 @@ public class Controller : GLib.Object {
         );
     }
 
-    private void after_solve_game (string msg, uint passes) {
+    private void after_solve_game (string msg, uint passes, bool unique_only) {
         if (msg != "") {
             view.send_notification (msg);
         }
 
-        view.game_grade = Utils.passes_to_grade (passes, dimensions);
+        view.game_grade = Utils.passes_to_grade (passes, dimensions, unique_only);
 
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {

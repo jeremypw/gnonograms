@@ -277,7 +277,7 @@ namespace Utils {
     }
 
     public int grade_to_minimum_passes (uint grd, Dimensions dimensions) {
-        var avg_length = (double)(dimensions.rows () + dimensions.cols ()) / 10.0 * (double)grd + 2.0;
+        var avg_length = (double)(dimensions.rows () + dimensions.cols ()) / 10.0 * (double)grd + 4.0;
 
         if (grd <= Difficulty.ADVANCED) {
             return (int)(avg_length);
@@ -287,13 +287,19 @@ namespace Utils {
 
     }
 
-    public Difficulty passes_to_grade (uint passes, Dimensions dimensions) {
+    public Difficulty passes_to_grade (uint passes, Dimensions dimensions, bool unique_only) {
         var level = (((double)passes - 2.0) * 10.0) / (double)(dimensions.rows () + dimensions.cols ());
-        return (Difficulty)(level + 0.5);
+        var diff = (Difficulty)(level + 0.5);
+        if (unique_only && diff > Difficulty.ADVANCED) { // Cannot be "POSSIBLY AMBIGUOUS"
+            diff = Difficulty.ADVANCED;
+        }
+
+        return diff;
     }
 
-    public string passes_to_grade_description (uint passes, Dimensions dimensions) {
-        return difficulty_to_string (passes_to_grade (passes, dimensions));
+    public string passes_to_grade_description (uint passes, Dimensions dimensions, bool unique_only) {
+        var diff = passes_to_grade (passes, dimensions, unique_only);
+        return Gnonograms.difficulty_to_string (diff);
     }
 }
 }

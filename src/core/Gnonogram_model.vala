@@ -143,9 +143,10 @@ public class Model : GLib.Object {
     /*** Generate a pseudo-random pattern which is adjusted to be more likely to
        * give a solvable game of the desired difficulty.
     ***/
-    public void fill_random (uint grade) {
+    public void fill_random (int grade) {
+        assert (grade >= 0);
         clear();
-        double rel_g = (double)grade / (double)(Difficulty.MAXIMUM);
+        double rel_g = ((double)grade / (double)(Difficulty.MAXIMUM)).clamp (0, 0.8);
 
         int midcol = (int)rows / 2;
         int midrow = (int)cols / 2;
@@ -154,7 +155,7 @@ public class Model : GLib.Object {
             data[e] = CellState.EMPTY;
         }
 
-        int maxb = 2 + (int)((double)cols * (1.0 - rel_g));
+        int maxb = 3 + (int)((double)cols * (1.0 - rel_g));
         int minrdf = (int)(((double)maxb * rel_g)) - 2;
 
         for (int r = 0; r < rows; r++) {
@@ -163,7 +164,7 @@ public class Model : GLib.Object {
             solution_data.set_row (r, data);
         }
 
-        maxb = 2 + (int)((double)rows * (1.0 - rel_g));
+        maxb = 3 + (int)((double)rows * (1.0 - rel_g));
         int mincdf = (int)(((double)maxb * rel_g)) - 2;
 
         for (int c = 0; c < cols; c++) {
