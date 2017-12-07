@@ -288,6 +288,10 @@ namespace Utils {
     }
 
     public Difficulty passes_to_grade (uint passes, Dimensions dimensions, bool unique_only, bool advanced) {
+        if (passes < 1 || passes == Gnonograms.FAILED_PASSES) {
+            return Difficulty.UNDEFINED;
+        }
+
         var level = (((double)passes - 2.0) * 10.0) / (double)(dimensions.rows () + dimensions.cols ());
         var diff = (Difficulty)(level + 0.5);
 

@@ -228,10 +228,10 @@ public class Controller : GLib.Object {
     private async void new_random_game() {
         int passes = 0;
         uint count = 0;
-        Difficulty gen_grd = (Difficulty)(((uint)(generator_grade)).clamp (1, 8) - 1); //grd may be reduced but this.grade always matches spin setting
+
         /* One row used to debug */
         var limit = rows == 1 ? 1 : 1000;
-
+        Difficulty game_grade = Difficulty.UNDEFINED;
         clear ();
         view.game_name = _("Random pattern");
         var solver_cancellable = new Cancellable ();
@@ -240,24 +240,26 @@ public class Controller : GLib.Object {
         AbstractGenerator gen;
 
         if (generator_grade < Difficulty.ADVANCED) {
-            gen = new SimpleGenerator (dimensions, gen_grd);
+            gen = new SimpleGenerator (dimensions, generator_grade);
         } else {
-            gen = new SimpleGenerator (dimensions, gen_grd); // TODO other generators
+            gen = new SimpleGenerator (dimensions, generator_grade); // TODO other generators
         }
-
-        int target = Utils.grade_to_minimum_passes (generator_grade, dimensions);
 
         while (count < limit) {
             count++;
-            passes = yield try_generate_game (gen, solver_cancellable); //tries max tries times
+            game_grade = Utils.passes_to_grade (yield try_generate_game (gen, solver_cancellable),
+                                                dimensions,
+                                                generator_grade <= Difficulty.ADVANCED,
+                                                generator_grade >= Difficulty.ADVANCED
+                                               ); //tries max tries times
 
             if (solver_cancellable.is_cancelled ()) {
                 break;
-            } else if (passes >= target * 0.9 && passes < target * 1.1) {
-                    break;
-            } else if (passes > 0  && passes < target * 0.9) {
-                    gen.harder ();
-            } else if (passes < Gnonograms.FAILED_PASSES && gen_grd > 0) {
+            } else if (game_grade == generator_grade) {
+                break;
+            } else if (game_grade < generator_grade) {
+                gen.harder ();
+            } else if (game_grade > generator_grade) {
                 gen.easier ();
             }
         }
@@ -276,10 +278,7 @@ public class Controller : GLib.Object {
                 view.update_labels_from_solution ();
                 model.blank_working ();
 
-                view.game_grade = Utils.passes_to_grade (passes,
-                                                         dimensions,
-                                                         generator_grade <= Difficulty.ADVANCED,
-                                                         generator_grade >= Difficulty.ADVANCED);
+                view.game_grade = game_grade;
             } else {
                 msg = _("Error occurred in solver");
                 game_state = GameState.SOLVING;

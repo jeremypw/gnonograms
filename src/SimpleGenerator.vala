@@ -20,6 +20,8 @@
 namespace Gnonograms {
 public class SimpleGenerator : AbstractGenerator {
 
+    int threshold = 4;
+
     public SimpleGenerator (Dimensions dim, Difficulty grade) {
         Object (dimensions: dim,
                 grade: grade
@@ -35,8 +37,44 @@ public class SimpleGenerator : AbstractGenerator {
         return grid;
     }
 
-    protected override void set_parameters () {
+    public override void easier () {
+        threshold--;
+    }
 
+    public override void harder () {
+        threshold++;
+    }
+
+    protected override void set_parameters () {
+        switch (grade) {
+            case Difficulty.TRIVIAL:
+                    threshold = 1;
+                    break;
+            case Difficulty.VERY_EASY:
+                    threshold = 2;
+                    break;
+            case Difficulty.EASY:
+                    threshold = 3;
+                    break;
+            case Difficulty.MODERATE:
+                    threshold = 4;
+                    break;
+            case Difficulty.HARD:
+                    threshold = 5;
+                    break;
+            case Difficulty.CHALLENGING:
+                    threshold = 6;
+                    break;
+            case Difficulty.ADVANCED:
+                    threshold = 7;
+                    break;
+            case Difficulty.MAXIMUM:
+                    threshold = 8;
+                    break;
+            default:
+                threshold = 4;
+                break;
+        }
     }
 
     private void new_pattern (ref My2DCellArray grid) {
@@ -44,7 +82,7 @@ public class SimpleGenerator : AbstractGenerator {
 
         for (int r = 0; r < dimensions.rows (); r++) {
             for (int c = 0; c < dimensions.cols (); c++) {
-                cs = rand_gen.int_range (0, 9) > 4 ? CellState.FILLED : CellState.EMPTY;
+                cs = rand_gen.int_range (0, 9) > threshold ? CellState.FILLED : CellState.EMPTY;
                 grid.set_data_from_rc (r, c, cs);
             }
         }
