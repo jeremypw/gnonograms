@@ -245,7 +245,8 @@ class AppMenu : Gtk.MenuButton {
 
         construct {
             cb = new Gtk.ComboBoxText ();
-            for (uint u = 0; u <= Difficulty.MAXIMUM; u++) {
+            /* TRIVIAL and VERY EASY GRADES not worth supporting */
+            for (uint u = Difficulty.EASY; u <= Difficulty.MAXIMUM; u++) {
                 cb.append (null, Gnonograms.difficulty_to_string ((Difficulty)u));
             }
 

@@ -20,7 +20,7 @@
 namespace Gnonograms {
 public class SimpleGenerator : AbstractGenerator {
 
-    int threshold = 4;
+    int threshold = 40;
 
     public SimpleGenerator (Dimensions dim, Difficulty grade) {
         Object (dimensions: dim,
@@ -48,42 +48,80 @@ public class SimpleGenerator : AbstractGenerator {
     protected override void set_parameters () {
         switch (grade) {
             case Difficulty.TRIVIAL:
-                    threshold = 1;
+                    threshold = 50;
                     break;
             case Difficulty.VERY_EASY:
-                    threshold = 2;
+                    threshold = 60;
                     break;
             case Difficulty.EASY:
-                    threshold = 3;
+                    threshold = 60;
                     break;
             case Difficulty.MODERATE:
-                    threshold = 4;
+                    threshold = 67;
                     break;
             case Difficulty.HARD:
-                    threshold = 5;
+                    threshold = 70;
                     break;
             case Difficulty.CHALLENGING:
-                    threshold = 6;
+                    threshold = 75;
                     break;
             case Difficulty.ADVANCED:
-                    threshold = 7;
+                    threshold = 70;
                     break;
             case Difficulty.MAXIMUM:
-                    threshold = 8;
+                    threshold = 70;
                     break;
             default:
-                threshold = 4;
+                threshold = 40;
                 break;
         }
     }
 
     private void new_pattern (ref My2DCellArray grid) {
-        CellState cs = CellState.EMPTY;
+        var total = rows * cols;
+        CellState[] state = new CellState[total];
 
-        for (int r = 0; r < dimensions.rows (); r++) {
-            for (int c = 0; c < dimensions.cols (); c++) {
-                cs = rand_gen.int_range (0, 9) > threshold ? CellState.FILLED : CellState.EMPTY;
-                grid.set_data_from_rc (r, c, cs);
+        int index = 0;
+        while (index < total) {
+            var cs = rand_gen.int_range (0, 99) > threshold ? CellState.FILLED : CellState.EMPTY;
+            var length = rand_gen.int_range (1, 3);
+
+            while (length > 0 && index < total) {
+                state[index] = cs;
+                index++;
+                length--;
+            }
+        }
+
+        index = 0;
+        for (uint r = 0; r < rows; r++) {
+            for (uint c = 0; c < cols; c++) {
+                grid.set_data_from_rc (r, c, state[index]);
+                index++;
+            }
+        }
+
+        /* Make more even pattern */
+        index = 0;
+        while (index < total) {
+            var cs = rand_gen.int_range (0, 99) > threshold ? CellState.FILLED : CellState.EMPTY;
+            var length = rand_gen.int_range (1, 3);
+
+            while (length > 0 && index < total) {
+                state[index] = cs;
+                index++;
+                length--;
+            }
+        }
+
+        index = 0;
+        for (uint c = 0; c < cols; c++) {
+            for (uint r = 0; r < rows; r++) {
+                var cs = state[index];
+                if (cs == CellState.FILLED) {
+                    grid.set_data_from_rc (r, c, cs);
+                }
+                index++;
             }
         }
     }

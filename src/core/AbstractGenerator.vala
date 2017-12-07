@@ -32,6 +32,14 @@ public abstract class AbstractGenerator : GLib.Object {
         }
     }
 
+    protected uint rows {
+        get { return dimensions.rows (); }
+    }
+
+    protected uint cols {
+        get { return dimensions.cols (); }
+    }
+
     private Difficulty _grade = Difficulty.UNDEFINED;
     public Difficulty grade {
         get {
