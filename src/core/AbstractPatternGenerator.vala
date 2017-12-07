@@ -18,7 +18,7 @@
  *  Jeremy Wootten <jeremywootten@gmail.com>
  */
 namespace Gnonograms {
-public abstract class AbstractGenerator : GLib.Object {
+public abstract class AbstractPatternGenerator : GLib.Object {
     protected Rand rand_gen;
     private Dimensions _dimensions = Dimensions () { width = 0, height = 0 };
     public Dimensions dimensions {

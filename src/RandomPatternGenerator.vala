@@ -18,12 +18,12 @@
  *  Jeremy Wootten <jeremywootten@gmail.com>
  */
 namespace Gnonograms {
-public class SimpleGenerator : AbstractGenerator {
+public class RandomPatternGenerator : AbstractPatternGenerator {
 
     int threshold = 40;
     int min_freedom = 0;
 
-    public SimpleGenerator (Dimensions dim, Difficulty grade) {
+    public RandomPatternGenerator (Dimensions dim, Difficulty grade) {
         Object (dimensions: dim,
                 grade: grade
         );

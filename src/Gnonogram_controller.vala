@@ -237,12 +237,12 @@ public class Controller : GLib.Object {
         var solver_cancellable = new Cancellable ();
         view.show_generating (solver_cancellable);
 
-        AbstractGenerator gen;
+        AbstractPatternGenerator gen;
 
         if (generator_grade < Difficulty.ADVANCED) {
-            gen = new SimpleGenerator (dimensions, generator_grade);
+            gen = new RandomPatternGenerator (dimensions, generator_grade);
         } else {
-            gen = new SimpleGenerator (dimensions, generator_grade); // TODO other generators
+            gen = new RandomPatternGenerator (dimensions, generator_grade); // TODO other generators
         }
 
         while (count < limit) {
@@ -300,7 +300,7 @@ public class Controller : GLib.Object {
         view.queue_draw ();
     }
 
-    private async int try_generate_game (AbstractGenerator gen, Cancellable cancellable) {
+    private async int try_generate_game (AbstractPatternGenerator gen, Cancellable cancellable) {
         /* returns 0 - failed to generate solvable game
          * returns value > 1 - generated game took value passes to solve
          * returns uint.MAX - an error occurred in the solver
@@ -323,7 +323,7 @@ public class Controller : GLib.Object {
     }
 
     /** Generate a random, humanly soluble puzzle **/
-    private async int generate_game (AbstractGenerator gen, Cancellable cancellable) {
+    private async int generate_game (AbstractPatternGenerator gen, Cancellable cancellable) {
         model.set_from_array (gen.generate ());
         var grd = gen.grade;
 
