@@ -294,7 +294,6 @@ namespace Gnonograms {
                                        uint max_guesswork = 999,
                                        bool unique_only = true,
                                        bool human = false) {
-
         int simple_result = 0;
         int wraps = 0;
         bool changed = false;

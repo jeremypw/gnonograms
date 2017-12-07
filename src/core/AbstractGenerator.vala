@@ -19,8 +19,7 @@
  */
 namespace Gnonograms {
 public abstract class AbstractGenerator : GLib.Object {
-    protected My2DCellArray grid;
-
+    protected Rand rand_gen;
     private Dimensions _dimensions = Dimensions () { width = 0, height = 0 };
     public Dimensions dimensions {
         get {
@@ -29,7 +28,6 @@ public abstract class AbstractGenerator : GLib.Object {
 
         set {
             _dimensions = value;
-            grid = new My2DCellArray (value);
             set_parameters ();
         }
     }
@@ -46,7 +44,13 @@ public abstract class AbstractGenerator : GLib.Object {
         }
     }
 
-    public abstract CellState[] generate ();
+    public abstract My2DCellArray generate ();
+    public virtual void harder () {}
+    public virtual void easier () {}
     protected abstract void set_parameters ();
+
+    construct {
+        rand_gen = new Rand ();
+    }
 }
 }

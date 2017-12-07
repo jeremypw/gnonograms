@@ -287,18 +287,21 @@ namespace Utils {
 
     }
 
-    public Difficulty passes_to_grade (uint passes, Dimensions dimensions, bool unique_only) {
+    public Difficulty passes_to_grade (uint passes, Dimensions dimensions, bool unique_only, bool advanced) {
         var level = (((double)passes - 2.0) * 10.0) / (double)(dimensions.rows () + dimensions.cols ());
         var diff = (Difficulty)(level + 0.5);
-        if (unique_only && diff > Difficulty.ADVANCED) { // Cannot be "POSSIBLY AMBIGUOUS"
+
+        if (!advanced && diff > Difficulty.CHALLENGING) {
+            diff = Difficulty.CHALLENGING;
+        } else if (unique_only && diff > Difficulty.ADVANCED) { // Cannot be "POSSIBLY AMBIGUOUS"
             diff = Difficulty.ADVANCED;
         }
 
         return diff;
     }
 
-    public string passes_to_grade_description (uint passes, Dimensions dimensions, bool unique_only) {
-        var diff = passes_to_grade (passes, dimensions, unique_only);
+    public string passes_to_grade_description (uint passes, Dimensions dimensions, bool unique_only, bool advanced) {
+        var diff = passes_to_grade (passes, dimensions, unique_only, advanced);
         return Gnonograms.difficulty_to_string (diff);
     }
 }

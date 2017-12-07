@@ -228,7 +228,7 @@ public class Controller : GLib.Object {
     private async void new_random_game() {
         int passes = 0;
         uint count = 0;
-        uint gen_grd = ((uint)(generator_grade)).clamp (1, 8) - 1; //grd may be reduced but this.grade always matches spin setting
+        Difficulty gen_grd = (Difficulty)(((uint)(generator_grade)).clamp (1, 8) - 1); //grd may be reduced but this.grade always matches spin setting
         /* One row used to debug */
         var limit = rows == 1 ? 1 : 1000;
 
@@ -237,31 +237,28 @@ public class Controller : GLib.Object {
         var solver_cancellable = new Cancellable ();
         view.show_generating (solver_cancellable);
 
+        AbstractGenerator gen;
+
+        if (generator_grade < Difficulty.ADVANCED) {
+            gen = new SimpleGenerator (dimensions, gen_grd);
+        } else {
+            gen = new SimpleGenerator (dimensions, gen_grd); // TODO other generators
+        }
+
         int target = Utils.grade_to_minimum_passes (generator_grade, dimensions);
-        int next_target = Utils.grade_to_minimum_passes (generator_grade + 1, dimensions);
 
         while (count < limit) {
             count++;
-            passes = yield try_generate_game (gen_grd, solver_cancellable); //tries max tries times
+            passes = yield try_generate_game (gen, solver_cancellable); //tries max tries times
 
             if (solver_cancellable.is_cancelled ()) {
                 break;
-            } else if (passes >= target * 0.9 && passes < Gnonograms.FAILED_PASSES) {
-                if (passes <= next_target) {
+            } else if (passes >= target * 0.9 && passes < target * 1.1) {
                     break;
-                } else {
-                    continue;
-                }
-            } else if (passes > 0  && passes < Gnonograms.FAILED_PASSES) {
-                // Do not increase from simple to advanced or advanced to ambiguous
-                if (gen_grd < Difficulty.CHALLENGING ||
-                    gen_grd < generator_grade) {
-warning ("INC");
-                    gen_grd++;
-                }
-            } else if (gen_grd > 0) {
-warning ("DEC");
-                gen_grd--;
+            } else if (passes > 0  && passes < target * 0.9) {
+                    gen.harder ();
+            } else if (passes < Gnonograms.FAILED_PASSES && gen_grd > 0) {
+                gen.easier ();
             }
         }
 
@@ -278,7 +275,11 @@ warning ("DEC");
                 game_state = GameState.SOLVING;
                 view.update_labels_from_solution ();
                 model.blank_working ();
-                view.game_grade = Utils.passes_to_grade (passes, dimensions, generator_grade <= Difficulty.ADVANCED);
+
+                view.game_grade = Utils.passes_to_grade (passes,
+                                                         dimensions,
+                                                         generator_grade <= Difficulty.ADVANCED,
+                                                         generator_grade >= Difficulty.ADVANCED);
             } else {
                 msg = _("Error occurred in solver");
                 game_state = GameState.SOLVING;
@@ -300,7 +301,7 @@ warning ("DEC");
         view.queue_draw ();
     }
 
-    private async int try_generate_game (uint grd, Cancellable cancellable) {
+    private async int try_generate_game (AbstractGenerator gen, Cancellable cancellable) {
         /* returns 0 - failed to generate solvable game
          * returns value > 1 - generated game took value passes to solve
          * returns uint.MAX - an error occurred in the solver
@@ -312,7 +313,7 @@ warning ("DEC");
 
         while (passes == 0 && tries <= limit) {
             tries++;
-            passes = yield generate_game (grd, cancellable);
+            passes = yield generate_game (gen, cancellable);
 
             if (cancellable.is_cancelled ()) {
                 break;
@@ -323,10 +324,10 @@ warning ("DEC");
     }
 
     /** Generate a random, humanly soluble puzzle **/
-    private async int generate_game (uint grd, Cancellable cancellable) {
-        model.fill_random ((int)grd);
+    private async int generate_game (AbstractGenerator gen, Cancellable cancellable) {
+        model.set_from_array (gen.generate ());
+        var grd = gen.grade;
 
-        // solve from clues
         return yield solve_game (
                         false, // no start_grid
                         false, // use model
@@ -796,12 +797,12 @@ warning ("DEC");
             (obj, res) => {
 
                 int passes = solve_game.end (res);
-                after_solve_game (msg, passes, true);
+                after_solve_game (msg, passes, true, false);
 
                 if (solver_cancellable.is_cancelled ()) {
                     msg = _("Solving was cancelled");
                 } else if (passes > 0  && passes < Gnonograms.FAILED_PASSES) {
-                    var descr = Utils.passes_to_grade_description (passes, dimensions, true);
+                    var descr = Utils.passes_to_grade_description (passes, dimensions, true, false);
                     msg =  _("Simple solution found. %s").printf (descr);
                 } else {
                     msg = _("No simple solution found");
@@ -823,7 +824,7 @@ warning ("DEC");
                                 if (solver_cancellable.is_cancelled ()) {
                                     msg = _("Solving was cancelled");
                                 } else if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
-                                    var descr = Utils.passes_to_grade_description (passes, dimensions, unique_only);
+                                    var descr = Utils.passes_to_grade_description (passes, dimensions, unique_only, true);
                                     msg = msg + "\n" + _("Advanced solution found. %s").printf (descr);
                                     if (!unique_only) {
                                         msg = msg + "\n" + _("Possibly ambiguous");
@@ -832,7 +833,7 @@ warning ("DEC");
                                     msg = msg + "\n" + _("No advanced solution found");
                                 }
 
-                                after_solve_game (msg, passes, unique_only);
+                                after_solve_game (msg, passes, unique_only, true);
                             }
                         );
                     }
@@ -841,12 +842,12 @@ warning ("DEC");
         );
     }
 
-    private void after_solve_game (string msg, uint passes, bool unique_only) {
+    private void after_solve_game (string msg, uint passes, bool unique_only, bool advanced) {
         if (msg != "") {
             view.send_notification (msg);
         }
 
-        view.game_grade = Utils.passes_to_grade (passes, dimensions, unique_only);
+        view.game_grade = Utils.passes_to_grade (passes, dimensions, unique_only, advanced);
 
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {

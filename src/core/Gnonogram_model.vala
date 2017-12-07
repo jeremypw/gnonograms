@@ -123,6 +123,10 @@ public class Model : GLib.Object {
         display_data.set_data_from_rc (r, c, state);
     }
 
+    public void set_from_array (My2DCellArray array) {
+        display_data.copy (array);
+    }
+
     public CellState get_data_for_cell (Cell cell) {
         return display_data.get_data_for_cell (cell);
     }

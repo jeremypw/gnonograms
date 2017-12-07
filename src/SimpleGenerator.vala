@@ -26,25 +26,28 @@ public class SimpleGenerator : AbstractGenerator {
         );
     }
 
-    public override CellState[] generate () {
-        new_pattern ();
+    public override My2DCellArray generate () {
+        var grid = new My2DCellArray (dimensions);
 
-        var csa = new CellState[dimensions.rows () * dimensions.cols ()];
-        int i = 0;
+        new_pattern (ref grid);
 
-        foreach (var cell in grid) {
-            csa[i++] = cell.state;
-        }
 
-        return csa;
+        return grid;
     }
 
     protected override void set_parameters () {
 
     }
 
-    private void new_pattern () {
+    private void new_pattern (ref My2DCellArray grid) {
+        CellState cs = CellState.EMPTY;
 
+        for (int r = 0; r < dimensions.rows (); r++) {
+            for (int c = 0; c < dimensions.cols (); c++) {
+                cs = rand_gen.int_range (0, 9) > 4 ? CellState.FILLED : CellState.EMPTY;
+                grid.set_data_from_rc (r, c, cs);
+            }
+        }
     }
 }
 }
