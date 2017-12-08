@@ -101,18 +101,18 @@ namespace Gnonograms {
       * procedures. Also specify whether in debugging mode and whether to solve one step
       * at a time (used for hinting if implemented).
     **/
-    public async int solve_it (bool debug = false,
+    public int solve_it (bool debug = false,
                                bool use_advanced = true,
                                bool use_ultimate = true,
                                bool unique_only = true,
                                bool advanced_only = false,
-                               Cancellable cancellable,
+                               Cancellable? cancellable = null,
                                bool human = false,
                                bool stepwise = false) {
         guesses = 0;
         int result = 0;
 
-        result = yield simple_solver (debug,
+        result = simple_solver (debug,
                                       should_check_solution,
                                       stepwise);
 
@@ -127,7 +127,7 @@ namespace Gnonograms {
         if (result == 0 && use_advanced) {
             CellState[] grid_backup =  new CellState[rows * cols];
 
-            result = yield advanced_solver (grid_backup,
+            result = advanced_solver (grid_backup,
                                             cancellable,
                                             use_ultimate,
                                             debug,
@@ -140,7 +140,7 @@ namespace Gnonograms {
             }
 
             if (result == 0 && use_ultimate) {
-                result = yield ultimate_solver (grid_backup, cancellable);
+                result = ultimate_solver (grid_backup, cancellable);
             }
         }
 
@@ -181,20 +181,15 @@ namespace Gnonograms {
     static uint MAX_PASSES = 1000;
 
     /** Returns -1 to indicate an error - TODO use throw error instead **/
-    private async int simple_solver (bool debug,
+    private int simple_solver (bool debug,
                                      bool should_check_solution,
                                      bool stepwise,
                                      bool initialise = true) {
 
         int result = 0;
 
-        Idle.add (() => {
             result = do_simple_solve (debug, should_check_solution, stepwise, initialise);
-            simple_solver.callback ();
-            return false;
-        });
 
-        yield;
         return result;
     }
 
@@ -287,7 +282,7 @@ namespace Gnonograms {
         continue simple solve and if still no solution, continue with another guess.
         If first guess does not lead to solution leave unknown and choose another cell
     **/
-    private async int advanced_solver (CellState[] grid_backup,
+    private int advanced_solver (CellState[] grid_backup,
                                        Cancellable cancellable,
                                        bool use_ultimate = true,
                                        bool debug = false,
@@ -346,7 +341,7 @@ namespace Gnonograms {
             }
 
             grid.set_data_from_cell (trial_cell);
-            simple_result = yield simple_solver (false, // not debug
+            simple_result = simple_solver (false, // not debug
                                                  false, // do not check solution
                                                  false); // not stepwise
 
@@ -365,7 +360,7 @@ namespace Gnonograms {
             grid.set_data_from_cell (inverse); //mark opposite to guess
 
 
-            simple_result = yield simple_solver (false, // not debug
+            simple_result = simple_solver (false, // not debug
                                                  false, // do not check solution
                                                  false, // not stepwise
                                                  true); // do not reinitialise
@@ -379,7 +374,7 @@ namespace Gnonograms {
             if (solution_exists) { // original guess was correct and yielded solution
                 // regenerate original solution
                 grid.set_data_from_cell (trial_cell);
-                yield simple_solver (false, // not debug
+                simple_solver (false, // not debug
                                      false, // do not check solution
                                      false); // not stepwise
             }
@@ -501,19 +496,19 @@ namespace Gnonograms {
       * Puzzles requiring this method are unlikely to solvable by a human and are unlikely to
       * have a unique solution so its utility is debatable.
     **/
-    private async int ultimate_solver(CellState[] grid_store, Cancellable cancellable) {
+    private int ultimate_solver(CellState[] grid_store, Cancellable cancellable) {
         return 0;
         load_position (grid_store); //return to last valid state
-        return yield permute (grid_store, cancellable);
+        return permute (grid_store, cancellable);
     }
 
-    private async int permute (CellState[] grid_store, Cancellable cancellable) {
+    private int permute (CellState[] grid_store, Cancellable cancellable) {
         uint permute_region;
 
         CellState[] grid_backup2 = new CellState[rows * cols];
         CellState[] guess = {};
 
-        yield simple_solver (false, // not debug
+        simple_solver (false, // not debug
                              false, // do not check solution
                              false); // not stepwise
 
@@ -559,13 +554,13 @@ namespace Gnonograms {
 
                 grid.set_array (idx, is_column, guess, start);
 
-                int simple_result = yield simple_solver (false, // not debug
+                int simple_result = simple_solver (false, // not debug
                                                           false, // do not check solution
                                                           false); // not stepwise
 
                 if (simple_result == 0) {
                     // Non-unique accepted
-                    int advanced_result = yield advanced_solver (grid_store, cancellable, false);
+                    int advanced_result = advanced_solver (grid_store, cancellable, false);
 
                     if (cancellable.is_cancelled ()) {
                         return Gnonograms.FAILED_PASSES;
@@ -591,7 +586,7 @@ namespace Gnonograms {
                 regions[i].set_to_initial_state();
             }
 
-            yield simple_solver (false,
+            simple_solver (false,
                                  false,
                                  false);
         }
