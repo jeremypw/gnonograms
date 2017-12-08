@@ -21,7 +21,7 @@
 namespace Gnonograms {
 
 class AppMenu : Gtk.MenuButton {
-    private const Difficulty MIN_GRADE = Difficulty.EASY;
+    private const Difficulty MIN_GRADE = Difficulty.EASY; /* TRIVIAL and VERY EASY GRADES not worth supporting */
     private AppPopover app_popover;
     private AppSetting grade_setting;
     private AppSetting row_setting;
@@ -74,8 +74,8 @@ class AppMenu : Gtk.MenuButton {
         popover.add (grid);
 
         grade_setting = new GradeChooser ();
-        row_setting = new ScaleGrid (_("Rows"), 5, 50, 5);
-        column_setting = new ScaleGrid (_("Columns"), 5, 50, 5);
+        row_setting = new ScaleGrid (_("Rows"), 10, 50, 5);
+        column_setting = new ScaleGrid (_("Columns"), 10, 50, 5);
 
         int pos = 0;
         add_setting (ref pos, grade_setting);
@@ -246,7 +246,7 @@ class AppMenu : Gtk.MenuButton {
 
         construct {
             cb = new Gtk.ComboBoxText ();
-            /* TRIVIAL and VERY EASY GRADES not worth supporting */
+
             for (uint u = MIN_GRADE; u <= Difficulty.MAXIMUM; u++) {
                 cb.append (null, Gnonograms.difficulty_to_string ((Difficulty)u));
             }
