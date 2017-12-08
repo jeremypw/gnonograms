@@ -76,6 +76,14 @@ public struct Dimensions {
     public uint cols () {
         return width;
     }
+
+    public uint area () {
+        return width * height;
+    }
+
+    public uint length () {
+        return width + height;
+    }
 }
 
 public struct FilterInfo {

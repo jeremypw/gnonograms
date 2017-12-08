@@ -1,5 +1,4 @@
-
-/* Entry point for gnonograms-elementary  - initialises application and launches game
+/* Handles working and solution data for gnonograms-elementary
  * Copyright (C) 2010-2017  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
@@ -18,17 +17,32 @@
  *  Author:
  *  Jeremy Wootten <jeremywootten@gmail.com>
  */
-
 namespace Gnonograms {
-    public const Cell NULL_CELL = { uint.MAX, uint.MAX, CellState.UNDEFINED };
-    public static int MAXSIZE = 50; // max number rows or columns
-    public static int MINSIZE = 5; // Change to 1 when debugging
-    public static double MINFONTSIZE = 3.0;
-    public static double MAXFONTSIZE = 72.0;
-    public static int FAILED_PASSES = 0;
-    public const string BLOCKSEPARATOR = ", ";
-    public const string BLANKLABELTEXT = _("?");
-    public const string GAMEFILEEXTENSION = ".gno";
-    public const string UNSAVED_FILENAME = "Unsaved Game" + GAMEFILEEXTENSION;
-    public const int MAX_TRIES_PER_GRADE = 1000;
+public abstract class AbstractGameGenerator : GLib.Object {
+    protected AbstractPatternGenerator pattern_gen;
+    protected Solver solver;
+    protected Cancellable? cancellable;
+
+    protected Dimensions dimensions {
+        get {
+            return pattern_gen.dimensions;
+        }
+    }
+
+    protected Difficulty grade {
+        get {
+            return pattern_gen.grade;
+        }
+    }
+
+    construct {
+        solver = new Solver ();
+    }
+
+    public Difficulty solution_grade { get; protected set; }
+
+    public abstract async bool generate ();
+    public abstract My2DCellArray get_solution ();
+    public virtual bool is_cancelled () { return cancellable != null ? cancellable.is_cancelled () : false; }
+}
 }

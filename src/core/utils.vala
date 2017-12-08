@@ -80,6 +80,29 @@ namespace Utils {
         return (length - filled - blocks + 1);
     }
 
+    public string[] row_clues_from_2D_array (My2DCellArray array) {
+        var rows = array.rows;
+        var cols = array.cols;
+        var clues = new string[rows];
+
+        for (int r = 0; r < rows; r++) {
+            clues[r] = array.data2text (r, cols, false);
+        }
+
+        return clues;
+    }
+    public string[] col_clues_from_2D_array (My2DCellArray array) {
+        var rows = array.rows;
+        var cols = array.cols;
+        var clues = new string[cols];
+
+        for (int c = 0; c < cols; c++) {
+            clues[c] = array.data2text (c, rows, true);
+        }
+
+        return clues;
+    }
+
     public string block_string_from_cellstate_array (CellState[] cellstates) {
         StringBuilder sb = new StringBuilder ("");
         int count = 0, blocks = 0;
@@ -307,12 +330,28 @@ namespace Utils {
     }
 
     public Difficulty passes_to_grade (uint passes, Dimensions dimensions, bool unique_only, bool advanced) {
-        if (passes < 1 || passes == Gnonograms.FAILED_PASSES) {
-            return Difficulty.UNDEFINED;
+        var diff = Difficulty.UNDEFINED;
+        if (passes < 1) {
+            return diff;
         }
 
         var level = (((double)passes - 2.0) * 10.0) / (double)(dimensions.rows () + dimensions.cols ());
-        var diff = (Difficulty)(level + 0.5);
+        var cells_per_pass = (double)(dimensions.length ()) / ((double)passes - 2);
+
+        if (cells_per_pass < 1 ) {
+            diff = Difficulty.ADVANCED;
+        } else if (cells_per_pass < 2 ) {
+            diff = Difficulty.CHALLENGING;
+        }
+        else if (cells_per_pass < 4 ) {
+            diff = Difficulty.HARD;
+        }
+        else if (cells_per_pass < 6 ) {
+            diff = Difficulty.MODERATE;
+        }
+        else {
+            diff = Difficulty.EASY;
+        }
 
         if (!advanced && diff > Difficulty.CHALLENGING) {
             diff = Difficulty.CHALLENGING;

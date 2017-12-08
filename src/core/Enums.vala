@@ -72,6 +72,11 @@ public enum CellPatternType {
     UNDEFINED
 }
 
+public enum GamePatternType {
+    SIMPLE_RANDOM,
+    UNDEFINED
+}
+
 public enum ButtonPress {
     LEFT_SINGLE,
     LEFT_DOUBLE,

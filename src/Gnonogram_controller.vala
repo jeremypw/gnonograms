@@ -53,7 +53,7 @@ public class Controller : GLib.Object {
 
     private void new_or_random_game () {
         if (is_solving && title == null) {
-            new_random_game.begin ();
+            on_new_random_request ();
         } else {
             new_game ();
         }
@@ -226,82 +226,52 @@ public class Controller : GLib.Object {
     }
 
     private void on_new_random_request () {
-        new_random_game.begin ();
-    }
-
-    private async void new_random_game() {
-        int passes = 0;
-        uint count = 0;
-
-        /* One row used to debug */
-        var limit = rows == 1 ? 1 : MAX_TRIES_PER_GRADE;
-        Difficulty game_grade = Difficulty.UNDEFINED;
         clear ();
-        view.game_name = _("Random pattern");
-        var solver_cancellable = new Cancellable ();
-        view.show_generating (solver_cancellable);
-
-        AbstractPatternGenerator gen;
+        AbstractGameGenerator gen;
+        var cancellable = new Cancellable ();
 
         if (generator_grade < Difficulty.ADVANCED) {
-            gen = new RandomPatternGenerator (dimensions, generator_grade);
+            gen = new SimpleRandomGameGenerator (dimensions, generator_grade, GamePatternType.SIMPLE_RANDOM, cancellable);
         } else {
-            gen = new RandomPatternGenerator (dimensions, generator_grade); // TODO other generators
+            gen = new SimpleRandomGameGenerator (dimensions, generator_grade,  GamePatternType.SIMPLE_RANDOM, cancellable); // TODO other generators
         }
 
-        while (count < limit) {
-            count++;
 
-            Idle.add (() => {
-                game_grade = Utils.passes_to_grade (try_generate_game (gen, solver_cancellable),
-                                                    dimensions,
-                                                    generator_grade <= Difficulty.ADVANCED,
-                                                    generator_grade >= Difficulty.ADVANCED
-                                                   ); //tries max tries times
+        view.game_name = _("Random pattern");
+        view.show_generating (cancellable);
 
-                new_random_game.callback ();
-                return false;
-            });
+        new_random_game.begin (gen);
+    }
 
-            yield;
-
-            if (solver_cancellable.is_cancelled ()) {
-                break;
-            } else if (game_grade == generator_grade) {
-                break;
-            } else if (game_grade < generator_grade) {
-                gen.harder ();
-            } else if (game_grade > generator_grade) {
-                gen.easier ();
-            }
-        }
-
+    private async void new_random_game (AbstractGameGenerator gen) {
+        /* One row used to debug */
+        bool success = false;
         string msg = "";
 
-        if (solver_cancellable.is_cancelled ()) {
-           msg = _("Game generation was cancelled");
-        } else {
-            if (count >= limit) {
-                msg = _("Failed to generate game of required grade");
-            }
+        success = yield gen.generate ();
 
-            if (passes >= 0 && rows > 1) {
-                game_state = GameState.SOLVING;
-                view.update_labels_from_solution ();
-                model.blank_working ();
-
-                view.game_grade = game_grade;
-            } else {
-                msg = _("Error occurred in solver");
-                game_state = GameState.SOLVING;
-
-                for (int r = 0; r < rows; r++) {
-                    for (int c = 0; c < cols; c++) {
-                        model.set_data_from_rc (r, c, solver.grid.get_data_from_rc (r, c));
-                    }
-                }
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                model.set_from_array (gen.get_solution ());
             }
         }
+
+        view.game_grade = Difficulty.UNDEFINED;
+
+        if (gen.is_cancelled ()) {
+           msg = _("Game generation was cancelled");
+        } else {
+            if (success && rows > 1) {
+                model.blank_working ();
+                view.game_grade = gen.solution_grade;
+                game_state = GameState.SOLVING;
+            } else {
+                msg = _("Failed to generate game of required grade");
+                game_state = GameState.SETTING;
+            }
+        }
+
+        view.update_labels_from_solution ();
 
         if (msg != "") {
             view.send_notification (msg);
@@ -311,46 +281,6 @@ public class Controller : GLib.Object {
         view.hide_progress ();
         view.queue_draw ();
     }
-
-    private int try_generate_game (AbstractPatternGenerator gen, Cancellable cancellable) {
-        /* returns 0 - failed to generate solvable game
-         * returns value > 1 - generated game took value passes to solve
-         * returns uint.MAX - an error occurred in the solver
-        */
-        uint tries = 0;
-        int passes = 0;
-
-        uint limit = rows == 1 ? 1 : Gnonograms.MAX_TRIES_PER_GRADE;
-
-        while (passes == 0 && tries <= limit) {
-            tries++;
-            passes = generate_game (gen, cancellable);
-
-            if (cancellable.is_cancelled ()) {
-                break;
-            }
-        }
-
-        return passes;
-    }
-
-    /** Generate a random, humanly soluble puzzle **/
-    private int generate_game (AbstractPatternGenerator gen, Cancellable cancellable) {
-        model.set_from_array (gen.generate ());
-        var grd = gen.grade;
-
-        return solve_game (
-                        false, // no start_grid
-                        false, // use model
-                        grd >= Difficulty.ADVANCED, // use advanced solver
-                        false, // no ultimate solutions (too difficult for humans)
-                        grd > Difficulty.ADVANCED, // unique solutions only
-                        grd >= Difficulty.ADVANCED, // no simple solutions needed
-                        cancellable,
-                        true // Want human soluble
-                    );
-    }
-
 
     private void save_game_state () {
         int x, y;
@@ -811,7 +741,7 @@ public class Controller : GLib.Object {
 
             if (solver_cancellable.is_cancelled ()) {
                 msg = _("Solving was cancelled");
-            } else if (passes > 0  && passes < Gnonograms.FAILED_PASSES) {
+            } else if (passes > 0) {
                 var descr = Utils.passes_to_grade_description (passes, dimensions, true, false);
                 msg =  _("Simple solution found. %s").printf (descr);
             } else {
@@ -831,13 +761,13 @@ public class Controller : GLib.Object {
 
                     if (solver_cancellable.is_cancelled ()) {
                         msg = _("Solving was cancelled");
-                    } else if (passes > 0 && passes < Gnonograms.FAILED_PASSES) {
+                    } else if (passes > 0) {
                         var descr = Utils.passes_to_grade_description (passes, dimensions, unique_only, true);
                         msg = msg + "\n" + _("Advanced solution found. %s").printf (descr);
                         if (!unique_only) {
                             msg = msg + "\n" + _("Possibly ambiguous");
                         }
-                    } else if (passes == 0 || passes == Gnonograms.FAILED_PASSES) {
+                    } else if (passes == 0) {
                         msg = msg + "\n" + _("No advanced solution found");
                     }
 

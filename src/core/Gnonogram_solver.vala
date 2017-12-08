@@ -162,8 +162,8 @@ namespace Gnonograms {
     }
 
     /** PRIVATE **/
-    private uint rows;
-    private uint cols;
+    public uint rows;
+    public uint cols;
     private Region[] regions;
     private uint n_regions;
 

@@ -43,7 +43,9 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
     }
 
     public override void harder () {
-        threshold++;
+        if (threshold > 80) {
+            threshold++;
+        }
     }
 
     protected override void set_parameters () {
@@ -58,19 +60,19 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
                     break;
             case Difficulty.EASY:
                     threshold = 60;
-                    min_freedom = 0;
+                    min_freedom = 1;
                     break;
             case Difficulty.MODERATE:
                     threshold = 67;
-                    min_freedom = 1;
+                    min_freedom = 2;
                     break;
             case Difficulty.HARD:
                     threshold = 70;
-                    min_freedom = 2;
+                    min_freedom = 3;
                     break;
             case Difficulty.CHALLENGING:
                     threshold = 75;
-                    min_freedom = 3;
+                    min_freedom = 4;
                     break;
             case Difficulty.ADVANCED:
                     threshold = 70;

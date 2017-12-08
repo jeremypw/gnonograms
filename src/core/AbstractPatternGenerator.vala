@@ -32,11 +32,11 @@ public abstract class AbstractPatternGenerator : GLib.Object {
         }
     }
 
-    protected uint rows {
+    public uint rows {
         get { return dimensions.rows (); }
     }
 
-    protected uint cols {
+    public uint cols {
         get { return dimensions.cols (); }
     }
 
