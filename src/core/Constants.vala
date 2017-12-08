@@ -30,5 +30,5 @@ namespace Gnonograms {
     public const string BLANKLABELTEXT = _("?");
     public const string GAMEFILEEXTENSION = ".gno";
     public const string UNSAVED_FILENAME = "Unsaved Game" + GAMEFILEEXTENSION;
-    public const int MAX_TRIES_PER_GRADE = 200;
+    public const int MAX_TRIES_PER_GRADE = 100;
 }

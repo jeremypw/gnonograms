@@ -164,7 +164,7 @@ public class Controller : GLib.Object {
         view.next_move_request.connect (on_next_move_request);
         view.previous_move_request.connect (on_previous_move_request);
         view.game_state_changed.connect (on_state_changed);
-        view.random_game_request.connect (new_random_game);
+        view.random_game_request.connect (on_new_random_request);
         view.check_errors_request.connect (on_check_errors_request);
         view.rewind_request.connect (on_rewind_request);
         view.delete_event.connect (on_view_deleted);
@@ -225,12 +225,16 @@ public class Controller : GLib.Object {
         title = _("Blank sheet");
     }
 
+    private void on_new_random_request () {
+        new_random_game.begin ();
+    }
+
     private async void new_random_game() {
         int passes = 0;
         uint count = 0;
 
         /* One row used to debug */
-        var limit = rows == 1 ? 1 : 1000;
+        var limit = rows == 1 ? 1 : MAX_TRIES_PER_GRADE;
         Difficulty game_grade = Difficulty.UNDEFINED;
         clear ();
         view.game_name = _("Random pattern");
@@ -247,12 +251,14 @@ public class Controller : GLib.Object {
 
         while (count < limit) {
             count++;
+
             Idle.add (() => {
                 game_grade = Utils.passes_to_grade (try_generate_game (gen, solver_cancellable),
                                                     dimensions,
                                                     generator_grade <= Difficulty.ADVANCED,
                                                     generator_grade >= Difficulty.ADVANCED
                                                    ); //tries max tries times
+
                 new_random_game.callback ();
                 return false;
             });

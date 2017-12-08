@@ -32,7 +32,7 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
     public override My2DCellArray generate () {
         var grid = new My2DCellArray (dimensions);
 
-        new_pattern (ref grid);
+        new_pattern (grid);
 
 
         return grid;
@@ -86,7 +86,7 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
         }
     }
 
-    private void new_pattern (ref My2DCellArray grid) {
+    private void new_pattern (My2DCellArray grid) {
         var total = rows * cols;
         CellState[] state = new CellState[total];
 
@@ -137,15 +137,18 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
 
         /* Adjust freedom of each row and col if necessary */
         if (rows >= 10 && min_freedom > 0) {
-            CellState[] sa = new CellState[rows];
+            CellState[] sa = new CellState[cols];
             int df, filled, blocks;
 
             for (uint r = 0; r < rows; r++) {
                 grid.get_array (r, false, ref sa);
+
                 df = Utils.freedom_from_array (sa, out filled, out blocks);
+
                 /* Insert random empty cells until enough freedom */
+                uint count = 0;
                 while (df < min_freedom) {
-                    var ptr = rand_gen.int_range (0, (int)cols);
+                    var ptr = rand_gen.int_range (0, (int)cols - 1);
                     if (sa[ptr] == CellState.FILLED) {
                         sa[ptr] = CellState.EMPTY;
                         df++;
@@ -153,16 +156,19 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
                 }
             }
         }
+
+
         if (cols >= 10 && min_freedom > 0) {
-            CellState[] sa = new CellState[cols];
+            CellState[] sa = new CellState[rows];
             int df, filled, blocks;
 
             for (uint c = 0; c < cols; c++) {
                 grid.get_array (c, true, ref sa);
                 df = Utils.freedom_from_array (sa, out filled, out blocks);
+
                 /* Insert random empty cells until enough freedom */
                 while (df < min_freedom) {
-                    var ptr = rand_gen.int_range (0, (int)rows);
+                    var ptr = rand_gen.int_range (0, (int)rows - 1);
                     if (sa[ptr] == CellState.FILLED) {
                         sa[ptr] = CellState.EMPTY;
                         df++;
