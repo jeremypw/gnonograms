@@ -174,8 +174,9 @@ public class Controller : GLib.Object {
         view.solve_this_request.connect (on_solve_this_request);
         view.restart_request.connect (on_restart_request);
 
-        restore_settings (); /* May change load_game_dir and save_game_dir */
         restore_saved_state ();
+        restore_settings (); /* May change load_game_dir and save_game_dir */
+
 
         /* Ensure load save and data directories exist */
         File file;
@@ -384,8 +385,8 @@ public class Controller : GLib.Object {
         x = saved_state.get_int ("window-x");
         y = saved_state.get_int ("window-y");
         game_path = saved_state.get_string ("current-game-path");
-
         window.move (x, y);
+        view.fontheight = saved_state.get_double ("font-height");
     }
 
     private void restore_settings () {

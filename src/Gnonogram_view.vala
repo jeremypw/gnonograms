@@ -276,11 +276,6 @@ public class View : Gtk.ApplicationWindow {
         add (overlay);
 
         /* Connect signal handlers */
-        realize.connect (() => {
-            update_labels_from_solution ();
-            fontheight = get_default_fontheight_from_dimensions ();
-        });
-
         mode_switch.mode_changed.connect (on_mode_switch_changed);
         key_press_event.connect (on_key_press_event);
         key_release_event.connect (on_key_release_event);
