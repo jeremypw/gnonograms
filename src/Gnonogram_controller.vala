@@ -227,6 +227,7 @@ public class Controller : GLib.Object {
 
     private void on_new_random_request () {
         clear ();
+
         AbstractGameGenerator gen;
         var cancellable = new Cancellable ();
 
@@ -238,45 +239,29 @@ public class Controller : GLib.Object {
 
 
         view.game_name = _("Random pattern");
+        view.game_grade = Difficulty.UNDEFINED;
         view.show_generating (cancellable);
 
         new_random_game.begin (gen);
     }
 
     private async void new_random_game (AbstractGameGenerator gen) {
-        /* One row used to debug */
-        bool success = false;
-        string msg = "";
-
-        success = yield gen.generate ();
-
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
-                model.set_from_array (gen.get_solution ());
-            }
-        }
-
-        view.game_grade = Difficulty.UNDEFINED;
+        bool success = yield gen.generate ();
+        /* Show last generated game regardless */
+        model.set_from_array (gen.get_solution ());
+        view.update_labels_from_solution ();
 
         if (gen.is_cancelled ()) {
-           msg = _("Game generation was cancelled");
+           view.send_notification (_("Game generation was cancelled"));
         } else {
-            if (success && rows > 1) {
-                model.blank_working ();
+            if (success) {
                 view.game_grade = gen.solution_grade;
                 game_state = GameState.SOLVING;
             } else {
-                msg = _("Failed to generate game of required grade");
+                view.send_notification (_("Failed to generate game of required grade"));
                 game_state = GameState.SETTING;
             }
         }
-
-        view.update_labels_from_solution ();
-
-        if (msg != "") {
-            view.send_notification (msg);
-        }
-
 
         view.hide_progress ();
         view.queue_draw ();
