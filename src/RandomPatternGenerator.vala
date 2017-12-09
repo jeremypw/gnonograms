@@ -43,7 +43,7 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
     }
 
     public override void harder () {
-        if (threshold > 80) {
+        if (threshold < 80) {
             threshold++;
         }
     }
