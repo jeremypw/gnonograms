@@ -235,7 +235,7 @@ public class Controller : GLib.Object {
         if (generator_grade < Difficulty.ADVANCED) {
             gen = new SimpleRandomGameGenerator (dimensions, generator_grade, GamePatternType.SIMPLE_RANDOM, cancellable);
         } else {
-            gen = new SimpleRandomGameGenerator (dimensions, generator_grade,  GamePatternType.SIMPLE_RANDOM, cancellable); // TODO other generators
+            gen = new AdvancedRandomGameGenerator (dimensions, generator_grade,  GamePatternType.SIMPLE_RANDOM, cancellable); // TODO other generators
         }
 
 

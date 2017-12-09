@@ -39,6 +39,7 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
     }
 
     public override void easier () {
+warning ("THRESHOLD %u", threshold);
         threshold--;
     }
 
