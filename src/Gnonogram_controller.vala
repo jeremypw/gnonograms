@@ -287,7 +287,7 @@ public class Controller : GLib.Object {
             var current_game = File.new_for_path (current_game_path);
             current_game.@delete ();
         } catch (GLib.Error e) {
-            warning ("Error deleting current game file - %s", e.message);
+            debug ("Error deleting current game file - %s", e.message);
         } finally {
             /* Save solution and current state */
             write_game (current_game_path, true, true);
@@ -334,16 +334,15 @@ public class Controller : GLib.Object {
                                 save_game_dir,
                                 path,
                                 title,
-                                rows,
-                                cols,
+                                dimensions,
                                 view.get_row_clues (),
                                 view.get_col_clues ()
                             );
 
             file_writer.difficulty = view.game_grade;
             file_writer.game_state = game_state;
-            file_writer.working = model.working_data;
-            file_writer.solution = model.solution_data;
+            file_writer.working.copy (model.working_data);
+            file_writer.solution.copy (model.solution_data);
             file_writer.save_solution = save_solution;
 
             if (save_state) {
@@ -581,12 +580,7 @@ public class Controller : GLib.Object {
 
         if (use_startgrid) {
             startgrid = new My2DCellArray (dimensions, CellState.UNKNOWN);
-
-            for (int r = 0; r < rows; r++) {
-                for (int c = 0; c < cols; c++) {
-                    startgrid.set_data_from_rc (r, c, model.get_data_from_rc (r, c));
-                }
-            }
+            startgrid.copy (model.display_data);
         }
 
         bool res;
@@ -594,16 +588,8 @@ public class Controller : GLib.Object {
         if (use_labels) {
             res = solver.initialize (view.get_row_clues (), view.get_col_clues (), startgrid, null);
         } else {
-            var row_clues = new string [rows];
-            var col_clues = new string [cols];
-
-            for (int i = 0; i < rows; i++) {
-                row_clues[i] = model.get_label_text_from_solution (i, false);
-            }
-
-            for (int i = 0; i < cols; i++) {
-                col_clues[i] = model.get_label_text_from_solution (i, true);
-            }
+            var row_clues = Utils.row_clues_from_2D_array (model.solution_data);
+            var col_clues = Utils.col_clues_from_2D_array (model.solution_data);
 
             res = solver.initialize (row_clues, col_clues, startgrid, null);
         }
@@ -770,12 +756,7 @@ public class Controller : GLib.Object {
         }
 
         view.game_grade = Utils.passes_to_grade (passes, dimensions, unique_only, advanced);
-
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
-                model.set_data_from_rc (r, c, solver.grid.get_data_from_rc (r, c));
-            }
-        }
+        model.display_data.copy (solver.grid);
 
         view.hide_progress ();
         view.queue_draw ();

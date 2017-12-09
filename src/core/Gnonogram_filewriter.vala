@@ -42,15 +42,14 @@ public class Filewriter : Object {
                        string? save_dir_path,
                        string? path,
                        string name,
-                       uint rows,
-                       uint cols,
+                       Dimensions dimensions,
                        string[] row_clues,
                        string[] col_clues) throws IOError {
 
         Object (
             name: name,
-            rows: rows,
-            cols: cols,
+            rows: dimensions.rows (),
+            cols: dimensions.cols (),
             row_clues: row_clues,
             col_clues: col_clues
         );
@@ -67,6 +66,9 @@ public class Filewriter : Object {
 
             game_path = game_path + Gnonograms.GAMEFILEEXTENSION;
         }
+
+        working = new My2DCellArray (dimensions);
+        solution = new My2DCellArray (dimensions);
     }
 
     construct {
