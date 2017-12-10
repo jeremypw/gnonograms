@@ -172,7 +172,7 @@ public class Region { /* Not a GObject, to reduce weight */
         put_status ();
     }
 
-    public bool solve (bool debug, bool hint) {
+    public bool solve () {
         /**if change has occurred since last visit (due to change in an intersecting
          * region), runs full -fix () to see whether any inferences possible.
          * as soon as any change is made by full_fix (), updates status of
@@ -183,40 +183,26 @@ public class Region { /* Not a GObject, to reduce weight */
          * and error" method of solution when straight logic fails. An error
          * is produced when an intersecting region makes a change incompatible
          * with this region.
-         *
-          Ignores single cell regions for testing purposes ...
-          *
-          * In hint mode, return minimal change
-        * */
+         * */
         message = "";
         in_error = false;
-        this.debug = debug;
 
+        // Get external changes
         get_status ();
 
-        if (is_completed) {
-            return false;
-        }
-
-
-        //has a (invalid) change been made by another region
+        //Is complete or has a (invalid) change been made by another region
         if (in_error) {
             return false;
         }
 
-        if (!totals_changed ()) {
+        // Allow two passes without external changes to ensure all solutions are found
+        if (!totals_changed ()) {// checks if completed
             unchanged_count++;
-
-            if (unchanged_count > 2) {
-                return false;  //allow an unchanged visit to ensure all possible changes are made.
-            }
         } else {
             unchanged_count = 0;
         }
 
-
-
-        if (is_completed) {
+        if (is_completed || unchanged_count > 2) {
             return false;
         }
 
@@ -233,19 +219,14 @@ public class Region { /* Not a GObject, to reduce weight */
 
             tags_to_status ();
 
-            if (totals_changed ()) {
-                made_changes = true;
-                if (in_error) {
-                    break;
-                }
-            } else {
-                break;  // no further changes made
+            if (!totals_changed () || in_error) {
+                break;
             }
+
+            made_changes = true;
         }
 
-        if ((made_changes && !in_error) || debug) {
-            put_status ();
-        }
+        put_status ();
 
         return made_changes;
     }
@@ -421,7 +402,6 @@ public class Region { /* Not a GObject, to reduce weight */
     private static int FORWARDS = 1;
     private static int BACKWARDS =  -1;
 
-    private bool debug;
     private bool is_completed_backup;
     private bool[] completed_blocks;
     private bool[] completed_blocks_backup;
@@ -982,6 +962,8 @@ public class Region { /* Not a GObject, to reduce weight */
             for (int i = 0; i < n_blocks; i++) {
                 completed_blocks[i] = true;
             }
+
+            return true;
         } else if (to_be_located == 0) {
             for (int i = 0; i < n_cells; i++) {
 
@@ -990,6 +972,8 @@ public class Region { /* Not a GObject, to reduce weight */
                 }
 
             }
+
+            return true;
         }
 
         return false;
@@ -1109,7 +1093,7 @@ public class Region { /* Not a GObject, to reduce weight */
                 current_block_number += loop_step;  //Increment or decrement current block as appropriate
 
                 if (current_block_number < 0 || current_block_number == n_blocks) {
-                    record_error ("FindEdge", "Invalid BlockNum");
+                    record_error ("FindEdge", "Invalid BlockNum %u n_blocks %u clue %s".printf (current_block_number, n_blocks, clue));
                     return false;
                 }
             } else {
@@ -1284,7 +1268,7 @@ public class Region { /* Not a GObject, to reduce weight */
                 }
 
                 if (count == impossible) {
-                    record_error ("capped range audit", "start %i len %i, n_blocks %u count %i, impossible %i filled cell with no owners".printf (start, length, n_blocks, count, impossible), false);
+                    record_error ("capped range audit", "start %i len %i, n_blocks %u count %i, impossible %i filled cell with no owners".printf (start, length, n_blocks, count, impossible));
                     return false;
                 }
             }
@@ -1424,6 +1408,7 @@ public class Region { /* Not a GObject, to reduce weight */
         //Unambiguous assignment possible
         if (region_count > candidates_count) {
             in_error = true;
+            message = "region_count > candidates_count";
             return false;
         }
 
@@ -1448,6 +1433,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
         if (limit < -1 || limit > n_cells) {
             in_error = true;
+            message = "limit < -1 || limit > n_cells";
             return 0;
         }
 
@@ -1487,6 +1473,7 @@ public class Region { /* Not a GObject, to reduce weight */
             }
         } else {
             in_error = true;
+            message = "count_consecutive_with_state_from";
         }
 
         return count;
@@ -1505,6 +1492,7 @@ public class Region { /* Not a GObject, to reduce weight */
             }
         } else {
             in_error = true;
+            message = "count_contiguous_with_same_owner_from";
         }
 
         return count;
@@ -1649,6 +1637,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
         if (is_invalid_data (cell)) {
             in_error = true;
+            message = "count_possible_owners_and_can_be_empty 1";
         } else {
             for (int j = 0; j < n_blocks; j++) {
                 if (tags[cell, j]) {
@@ -1663,6 +1652,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
         if (count == 0) {
             in_error = true;
+            message = "count_possible_owners_and_can_be_empty 2";
         }
 
         return count;
@@ -1706,6 +1696,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
         if (cell1 < 0 || cell1 >= n_cells || cell2 < 0 || cell2 >= n_cells) {
             in_error = true;
+            message = "have_same_owner";
         } else {
 
             for (int i = 0; i < n_blocks; i++) {
@@ -1749,13 +1740,14 @@ public class Region { /* Not a GObject, to reduce weight */
         bool changed = false;
 
         if (is_invalid_data (start, block, length)) {
-          in_error = true;
+            in_error = true;
+            message = "fix_block_in_range";
         } else {
             int blocklength = blocks[block];
             int freedom = length - blocklength;
 
             if (freedom < 0) {
-                record_error ("Fix block in range", "block longer than range", false);
+                record_error ("Fix block in range", "block longer than range");
                 return false;
             }
 
@@ -1845,6 +1837,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
         if (is_invalid_data (start, block, length)) {
             in_error = true;
+            message = "remove_block_from_range";
         } else  {
 
             for (int i = start; i < start + length; i++) {
@@ -1865,11 +1858,13 @@ public class Region { /* Not a GObject, to reduce weight */
 
         if (is_invalid_data (start, block, length)) {
             in_error = true;
+            message = "set_block_complete_and_cap 1";
             return false;
         }
 
         if (completed_blocks[block] == true && tags[start, block] == false) {
             in_error = true;
+            message = "set_block_complete_and_cap 2";
             return false;
         }
 
@@ -1922,6 +1917,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
         if (is_invalid_data (start, owner, length)) {
             in_error = true;
+            message = "set_range_owner 1";
             return false;
         } else {
             int blocklength = blocks[owner];
@@ -1934,6 +1930,7 @@ public class Region { /* Not a GObject, to reduce weight */
                 //remove block and out of sequence from regions out of reach if exclusive
                 if (blocklength < length && !can_be_empty) {
                     in_error = true;
+                    message = "set_range_owner 2";
                     return false;
                 }
 
@@ -1974,6 +1971,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
         if (is_invalid_data (cell, owner)) {
             in_error = true;
+            message = "set_cell_owner";
         } else if (status[cell] == CellState.EMPTY) {// do nothing  - not necessarily an error
         } else if (status[cell] == CellState.COMPLETED && tags[cell, owner] == false) {
             record_error ("set_cell_owner", "contradiction cell " + cell.to_string () + " filled but cannot be owner");
@@ -2061,6 +2059,7 @@ public class Region { /* Not a GObject, to reduce weight */
                     this.is_completed = true;
                 } else {
                     in_error = true;
+                    message = "totals_changed";
                     return false;
                 }
             }
@@ -2172,22 +2171,9 @@ public class Region { /* Not a GObject, to reduce weight */
         }
     }
 
-    private void record_error (string method, string errmessage, bool debug = true) {
-        if (debug) {
-            var sb  = new StringBuilder ("");
-            sb.append (":  ");
-            sb.append (is_column ? "column" : "row");
-            sb.append (index.to_string ());
-            sb.append (" in method ");
-            sb.append (method);
-            sb.append ("\n");
-            sb.append (errmessage);
-            sb.append (this.to_string ());
-            message =   message + sb.str;
-        } else {
-            in_error = true;
-            message = "%s Region %u Record error in %s : %s \n".printf (is_column ? "COL" : "ROW", index, method, errmessage);
-        }
+    private void record_error (string method, string errmessage) {
+        in_error = true;
+        message = "%s Region %u Record error in %s : %s \n".printf (is_column ? "COL" : "ROW", index, method, errmessage);
     }
 }
 }

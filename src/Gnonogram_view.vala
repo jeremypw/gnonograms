@@ -266,10 +266,9 @@ public class View : Gtk.ApplicationWindow {
         cell_grid.button_release_event.connect (on_grid_button_release);
         cell_grid.scroll_event.connect (on_scroll_event);
 
-        main_grid.row_spacing = 0;
-        main_grid.column_spacing = 0;
-        main_grid.row_spacing = 0;
-        main_grid.border_width = 0;
+        main_grid.row_spacing = 6;
+        main_grid.column_spacing = 6;
+        main_grid.border_width = 6;
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for rows */
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
         overlay.add (main_grid);
