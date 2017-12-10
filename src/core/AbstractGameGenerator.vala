@@ -23,6 +23,11 @@ public abstract class AbstractGameGenerator : GLib.Object {
     protected Solver solver;
     protected Cancellable? cancellable;
 
+    /* These default to a Simple Unique Game */
+    protected bool use_advanced { get; set; default = false; }
+    protected bool unique_only { get; set; default = true; }
+    protected bool advanced_only { get; set; default = false; }
+
     protected Dimensions dimensions {
         get {
             return pattern_gen.dimensions;

@@ -561,13 +561,7 @@ public class Controller : GLib.Object {
 
         if (prepare_to_solve (use_startgrid, use_labels)) {
             /* Single row puzzles used for development and debugging */
-            passes = solver.solve_it (rows == 1,
-                                            use_advanced,
-                                            use_ultimate,
-                                            unique_only,
-                                            advanced_only,
-                                            cancellable,
-                                            human);
+            passes = solver.solve_it (cancellable, use_advanced, unique_only, advanced_only);
         } else {
             critical ("could not prepare solver");
         }

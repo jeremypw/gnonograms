@@ -47,13 +47,7 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
                 passes = -1;
                 if (solver.initialize (row_clues, col_clues, null, null)) {
 
-                    passes = solver.solve_it (false,
-                                              false,
-                                              false,
-                                              true,
-                                              false,
-                                              cancellable,
-                                              true);
+                    passes = solver.solve_it (cancellable, use_advanced, unique_only, advanced_only);
                 }
 
                 generate.callback ();
