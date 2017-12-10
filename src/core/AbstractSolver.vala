@@ -58,10 +58,10 @@ namespace Gnonograms {
     /** Set up solver for a particular puzzle. In addition to the clues, a starting point
       * and/or the correct solution may be provided (useful for debugging).
     **/
-    public virtual bool initialize (string[] row_clues,
-                                     string[] col_clues,
-                                     My2DCellArray? start_grid = null,
-                                     My2DCellArray? solution_grid = null) {
+    protected virtual bool initialize (string[] row_clues,
+                                       string[] col_clues,
+                                       My2DCellArray? start_grid = null,
+                                       My2DCellArray? solution_grid = null) {
 
         assert (row_clues.length == rows && col_clues.length == cols);
         should_check_solution = solution_grid != null;
@@ -158,10 +158,27 @@ namespace Gnonograms {
       * procedures. Also specify whether in debugging mode and whether to solve one step
       * at a time (used for hinting if implemented).
     **/
-    public abstract int solve_it (Cancellable cancellable,
-                                  bool use_advanced,
-                                  bool unique_only,
-                                  bool advanced_only);
+    public int solve_clues (Cancellable cancellable,
+                            bool use_advanced,
+                            bool unique_only,
+                            bool advanced_only,
+                            string[] row_clues,
+                            string[] col_clues,
+                            My2DCellArray? start_grid = null,
+                            My2DCellArray? solution_grid = null) {
+
+        if (initialize (row_clues, col_clues, start_grid, solution_grid)) {
+            return solve_it (cancellable, use_advanced, unique_only, advanced_only);
+        } else {
+            state = SolverState.ERROR;
+            return -1;
+        }
+    }
+
+    protected abstract int solve_it (Cancellable cancellable,
+                                     bool use_advanced,
+                                     bool unique_only,
+                                     bool advanced_only);
 
 }
 }

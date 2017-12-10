@@ -550,27 +550,15 @@ public class Controller : GLib.Object {
       * @unique_only: Only accept unique solutions (otherwise puzzle regarded insoluble).
     **/
     private int solve_game (bool use_startgrid,
-                                   bool use_labels,
-                                   bool use_advanced,
-                                   bool use_ultimate,
-                                   bool unique_only,
-                                   bool advanced_only,
-                                   Cancellable cancellable,
-                                   bool human = false) {
+                            bool use_labels,
+                            bool use_advanced,
+                            bool use_ultimate,
+                            bool unique_only,
+                            bool advanced_only,
+                            Cancellable cancellable,
+                            bool human = false) {
+
         int passes = -1; //indicates error - TODO use throw error
-
-        if (prepare_to_solve (use_startgrid, use_labels)) {
-            /* Single row puzzles used for development and debugging */
-            passes = solver.solve_it (cancellable, use_advanced, unique_only, advanced_only);
-        } else {
-            critical ("could not prepare solver");
-        }
-
-        return passes;
-    }
-
-    /** Initialize solver **/
-    private bool prepare_to_solve (bool use_startgrid, bool use_labels = false) {
         My2DCellArray? startgrid = null;
 
         if (use_startgrid) {
@@ -578,18 +566,19 @@ public class Controller : GLib.Object {
             startgrid.copy (model.display_data);
         }
 
-        bool res;
+        string[] row_clues;
+        string[] col_clues;
 
         if (use_labels) {
-            res = solver.initialize (view.get_row_clues (), view.get_col_clues (), startgrid, null);
+            row_clues = view.get_row_clues ();
+            col_clues = view.get_col_clues ();
         } else {
-            var row_clues = Utils.row_clues_from_2D_array (model.solution_data);
-            var col_clues = Utils.col_clues_from_2D_array (model.solution_data);
-
-            res = solver.initialize (row_clues, col_clues, startgrid, null);
+            row_clues = Utils.row_clues_from_2D_array (model.solution_data);
+            col_clues = Utils.col_clues_from_2D_array (model.solution_data);
         }
 
-        return res;
+        return solver.solve_clues (cancellable, use_advanced, unique_only, advanced_only,
+                                   row_clues, col_clues, startgrid, null);
     }
 
 /*** Signal Handlers ***/
@@ -693,15 +682,14 @@ public class Controller : GLib.Object {
 
         Idle.add (() => {
         /* Look for unique simple solution */
-            int passes = solve_game (
-                false, // no startgrid
-                true, // use labels not model
-                false, // no advanced solutions
-                false, // no ultimate solutions
-                true, // must be unique solution
-                false, // simple solutions allowed
-                solver_cancellable,
-                false); // not human
+            int passes = solve_game (false, // no startgrid
+                                     true, // use labels not model
+                                     false, // no advanced solutions
+                                     false, // no ultimate solutions
+                                     true, // must be unique solution
+                                     false, // simple solutions allowed
+                                     solver_cancellable,
+                                     false); // not human
 
             after_solve_game (msg, passes, true, false);
 
@@ -714,16 +702,15 @@ public class Controller : GLib.Object {
                 msg = _("No simple solution found");
                 if (generator_grade >= Difficulty.ADVANCED) {
                     bool unique_only = generator_grade <= Difficulty.ADVANCED;
-                    passes = solve_game (
-                        false, // no startgrid
-                        true, // use labels not model
-                        true, // use advanced solver
-                        true, // use ultimate if necessary (option cancel given)
-                        unique_only,
-                        true, // must be advanced (simple already excluded)
-                        solver_cancellable,
-                        false // not human
-                        );
+                    passes = solve_game (false, // no startgrid
+                                         true, // use labels not model
+                                         true, // use advanced solver
+                                         true, // use ultimate if necessary (option cancel given)
+                                         unique_only,
+                                         true, // must be advanced (simple already excluded)
+                                         solver_cancellable,
+                                         false // not human
+                                         );
 
                     if (solver_cancellable.is_cancelled ()) {
                         msg = _("Solving was cancelled");

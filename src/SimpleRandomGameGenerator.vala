@@ -49,11 +49,9 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
                 var pattern = pattern_gen.generate ();
                 var row_clues = Utils.row_clues_from_2D_array (pattern);
                 var col_clues = Utils.col_clues_from_2D_array (pattern);
-                passes = -1;
 
-                if (solver.initialize (row_clues, col_clues, null, null)) {
-                    passes = solver.solve_it (cancellable, use_advanced, unique_only, advanced_only);
-                }
+                passes = solver.solve_clues (cancellable, use_advanced, unique_only, advanced_only,
+                                             row_clues, col_clues, null, null);
 
                 generate.callback ();
                 return false;

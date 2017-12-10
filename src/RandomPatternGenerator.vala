@@ -34,12 +34,10 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
 
         new_pattern (grid);
 
-
         return grid;
     }
 
     public override void easier () {
-warning ("THRESHOLD %u", threshold);
         threshold--;
     }
 
