@@ -90,7 +90,7 @@ namespace Gnonograms {
         return valid ();
     }
 
-    public virtual bool valid () {
+    protected virtual bool valid () {
         foreach (Region r in regions) {
             if (r.in_error) {
                 return false;

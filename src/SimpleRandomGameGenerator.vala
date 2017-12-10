@@ -20,7 +20,11 @@
 namespace Gnonograms {
 public class SimpleRandomGameGenerator : AbstractGameGenerator {
 
-    public SimpleRandomGameGenerator (Dimensions dimensions, Difficulty grade, GamePatternType pattern, Cancellable? _cancellable) {
+    public SimpleRandomGameGenerator (Dimensions dimensions,
+                                      Difficulty grade,
+                                      GamePatternType pattern,
+                                      AbstractSolver _solver,
+                                      Cancellable? _cancellable) {
         switch (pattern) {
             case GamePatternType.SIMPLE_RANDOM:
                 pattern_gen = new RandomPatternGenerator (dimensions, grade);
@@ -30,6 +34,7 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
                 assert_not_reached ();
         }
 
+        solver = _solver;
         solver.dimensions = dimensions;
         cancellable = _cancellable;
     }

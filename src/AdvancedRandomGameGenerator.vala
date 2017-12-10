@@ -19,8 +19,13 @@
  */
 namespace Gnonograms {
 public class AdvancedRandomGameGenerator : SimpleRandomGameGenerator {
-    public AdvancedRandomGameGenerator (Dimensions dimensions, Difficulty grade, GamePatternType pattern, Cancellable? _cancellable) {
-        base (dimensions, grade, pattern, _cancellable);
+    public AdvancedRandomGameGenerator (Dimensions dimensions,
+                                        Difficulty grade,
+                                        GamePatternType pattern,
+                                        AbstractSolver solver,
+                                        Cancellable? _cancellable) {
+
+        base (dimensions, grade, pattern, solver, _cancellable);
         use_advanced = true;
     }
 

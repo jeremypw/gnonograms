@@ -233,9 +233,9 @@ public class Controller : GLib.Object {
         var cancellable = new Cancellable ();
 
         if (generator_grade < Difficulty.ADVANCED) {
-            gen = new SimpleRandomGameGenerator (dimensions, generator_grade, GamePatternType.SIMPLE_RANDOM, cancellable);
+            gen = new SimpleRandomGameGenerator (dimensions, generator_grade, GamePatternType.SIMPLE_RANDOM, solver, cancellable);
         } else {
-            gen = new AdvancedRandomGameGenerator (dimensions, generator_grade,  GamePatternType.SIMPLE_RANDOM, cancellable); // TODO other generators
+            gen = new AdvancedRandomGameGenerator (dimensions, generator_grade,  GamePatternType.SIMPLE_RANDOM, solver, cancellable); // TODO other generators
         }
 
 
