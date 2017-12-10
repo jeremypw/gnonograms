@@ -20,7 +20,7 @@
 namespace Gnonograms {
 public abstract class AbstractGameGenerator : GLib.Object {
     protected AbstractPatternGenerator pattern_gen;
-    protected Solver solver;
+    protected AbstractSolver solver;
     protected Cancellable? cancellable;
 
     /* These default to a Simple Unique Game */
@@ -38,10 +38,6 @@ public abstract class AbstractGameGenerator : GLib.Object {
         get {
             return pattern_gen.grade;
         }
-    }
-
-    construct {
-        solver = new Solver ();
     }
 
     public Difficulty solution_grade { get; protected set; }

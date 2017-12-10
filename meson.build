@@ -41,6 +41,7 @@ executable (
     'src/widgets/Progress_indicator.vala',
     'src/core/AbstractPatternGenerator.vala',
     'src/core/AbstractGameGenerator.vala',
+    'src/core/AbstractSolver.vala',
     'src/core/utils.vala',
     'src/core/Gnonogram_model.vala',
     'src/core/My2DCellArray.vala',
