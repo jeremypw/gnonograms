@@ -31,6 +31,10 @@ namespace Gnonograms {
     private int clim;
     private int turn;
     private uint max_turns;
+    private const uint initial_max_turns = 3;
+    private CellState initial_cell_state = CellState.EMPTY;
+    private const uint max_guesswork = 9999;
+
     private uint guesses = 0;
 
     private bool should_check_solution;
@@ -38,7 +42,7 @@ namespace Gnonograms {
     static uint MAX_PASSES = 200;
     /** PUBLIC **/
 
-    public My2DCellArray grid {get; private set;}
+    public My2DCellArray grid {get; private set;} // Shared with Regions which can update the contents
     public My2DCellArray solution {get; private set;}
     private CellState[] grid_backup;
 
@@ -66,6 +70,8 @@ namespace Gnonograms {
             grid_backup =  new CellState[rows * cols];
         }
     }
+
+    public SolverState state { get; set; }
 
     /** Set up solver for a particular puzzle. In addition to the clues, a starting point
       * and/or the correct solution may be provided (useful for debugging).
@@ -97,6 +103,8 @@ namespace Gnonograms {
         for (int c = 0; c < cols; c++) {
             regions[index++].initialize (c, true, rows, col_clues[c]);
         }
+
+        state = SolverState.UNDEFINED;
 
         return valid ();
     }
@@ -142,13 +150,17 @@ namespace Gnonograms {
         }
 
         if (result == 0 && use_advanced) {
-            result = advanced_solver (cancellable, unique_only);
+            result = advanced_solver (cancellable, unique_only); // Sets state if solution found
 
             if (result < 0 || cancellable.is_cancelled ()) {
+                state = SolverState.ERROR;
                 return -1;
             }
         }
 
+        if (result > 0) {
+
+        }
         return result;
     }
 
@@ -188,6 +200,7 @@ namespace Gnonograms {
                 if (r.in_error) {
                     /* TODO Use conditional compilation to print out error if required */
                     pass = -2; // So still negative after increment
+                    state = SolverState.ERROR;
                     break;
                 }
             }
@@ -198,9 +211,9 @@ namespace Gnonograms {
         solution.copy (grid);
 
         if (solved ()) {
-        } else if (pass >= (int)MAX_PASSES) {
-            pass = Gnonograms.FAILED_PASSES;
+            state = SolverState.SIMPLE;
         } else  if (pass > 0) {
+            state = SolverState.NO_SOLUTION;
             pass = 0; // not solved and not in error
         }
 
@@ -254,22 +267,10 @@ namespace Gnonograms {
         bool ambiguous = false;
         int changed_count = 0;
         uint contradiction_count = 0;
-        uint initial_max_turns = 3; //stay near edges until no more changes
-        CellState initial_cell_state = CellState.EMPTY;
-
-        var max_guesswork = 999;
         var grid_backup = new CellState[dimensions.area ()];
 
-        rdir = 0;
-        cdir = 1;
-        rlim = (int)rows;
-        clim = (int)cols;
 
-        turn = 0;
-        max_turns = initial_max_turns;
-
-        this.save_position (grid_backup);
-        trial_cell = { 0, uint.MAX, initial_cell_state };
+        prepare_to_guess ();
 
         while (simple_result <= 0 && changed_count <= max_guesswork)  {
             contradiction_count = 0;
@@ -286,6 +287,7 @@ namespace Gnonograms {
                     wraps = 0;
                 } else {
                     simple_result = 0;
+                    state = SolverState.NO_SOLUTION;
                     break; //cannot make progress
                 }
 
@@ -301,12 +303,13 @@ namespace Gnonograms {
                 continue;
             }
 
+            this.save_position (grid_backup);
             grid.set_data_from_cell (trial_cell);
-            simple_result = simple_solver ();
+            simple_result = simple_solver (false, false);
             solution_exists = simple_result > 0;
 
             if (simple_result < 0) {
-                contradiction_count++;
+                contradiction_count = 1;
             }
 
             /* Try opposite to check whether ambiguous or unique */
@@ -314,13 +317,11 @@ namespace Gnonograms {
             changed = true;
             changed_count++; //worth trying another cycle
             var inverse = trial_cell.inverse ();
-
             grid.set_data_from_cell (inverse); //mark opposite to guess
 
-
-            simple_result = simple_solver (false, false) ;// do not check solution or initialize
-
+            simple_result = simple_solver (false, false) ;
             int inverse_result = simple_result;
+
             if (simple_result == Gnonograms.FAILED_PASSES) {
                 inverse_result = 0;
             } else if (simple_result < 0) {
@@ -329,28 +330,39 @@ namespace Gnonograms {
 
             if (solution_exists) { // original guess was correct and yielded solution
                 // regenerate original solution
+                load_position (grid_backup);
                 grid.set_data_from_cell (trial_cell);
-                simple_solver ();
+                simple_result = simple_solver (false, false);
             }
 
             switch (inverse_result) {
                 case -1:
                     if (contradiction_count > 0) {
                         critical ("error both ways");
+                        state = SolverState.ERROR;
                         return -1; // both guess contradictory (should not happen)
-
                     } else if (solution_exists) {
                         ambiguous = false;
+                        state = SolverState.ADVANCED;
+                    } else {
+                        load_position (grid_backup);
+                        grid.set_data_from_cell (trial_cell);
+                        simple_solver (false, false);
                     }
 
                     break;
 
                 case 0:
+                    if (contradiction_count == 1) {
+                        save_position (grid_backup);
+                    }
+
                     break;
 
                 default:
                     // INVERSE guess yielded a solution.
-                    if (contradiction_count > 0) {
+                    state = contradiction_count == 1 ? SolverState.AMBIGUOUS : SolverState.AMBIGUOUS;
+                    if (contradiction_count == 1) {
                         // If both quesses yield a solution then puzzle is ambiguous
                         ambiguous = false;
                     }
@@ -361,8 +373,6 @@ namespace Gnonograms {
 
             if (!solution_exists) {
                 load_position (grid_backup);
-            } else if (unique_only && ambiguous) {
-                simple_result = -1;
             }
         }
 
@@ -391,6 +401,28 @@ namespace Gnonograms {
                 grid.set_data_from_rc (r, c, gs[index++]);
             }
         }
+
+        index = 0;
+        for (int r = 0; r < rows; r++) {
+            regions[index++].set_to_initial_state ();
+        }
+
+        for (int c = 0; c < cols; c++) {
+            regions[index++].set_to_initial_state ();
+        }
+    }
+
+    private void prepare_to_guess () {
+        rdir = 0;
+        cdir = 1;
+        rlim = (int)rows;
+        clim = (int)cols;
+
+        turn = 0;
+        max_turns = initial_max_turns;
+
+        this.save_position (grid_backup);
+        trial_cell = { 0, uint.MAX, initial_cell_state };
     }
 
     /** Used by advanced solver. Scans in a spiral pattern from edges

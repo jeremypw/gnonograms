@@ -66,6 +66,15 @@ public enum CellState {
     UNDEFINED;
 }
 
+public enum SolverState {
+    ERROR,
+    NO_SOLUTION,
+    SIMPLE,
+    ADVANCED,
+    AMBIGUOUS,
+    UNDEFINED;
+}
+
 public enum CellPatternType {
     CELL,
     HIGHLIGHT,
