@@ -68,6 +68,7 @@ public enum CellState {
 
 public enum SolverState {
     ERROR,
+    CANCELLED,
     NO_SOLUTION,
     SIMPLE,
     ADVANCED,

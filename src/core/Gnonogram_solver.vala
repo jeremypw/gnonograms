@@ -21,49 +21,24 @@
 
 namespace Gnonograms {
  public class Solver : AbstractSolver {
-    private Cell trial_cell;
-    private int rdir;
-    private int cdir;
-    private int rlim;
-    private int clim;
-    private int turn;
-    private uint max_turns;
-    private const uint initial_max_turns = 3;
-    private CellState initial_cell_state = CellState.EMPTY;
-    private const uint max_guesswork = 9999;
-    private uint guesses = 0;
-
     /** Initiate solving, specifying whether or not to use the advanced
       * procedures. Also specify whether in debugging mode and whether to solve one step
       * at a time (used for hinting if implemented).
     **/
 
-    public override int solve_it (Cancellable cancellable,
-                                  bool use_advanced,
+    protected override int solve_it (bool use_advanced,
                                   bool unique_only,
                                   bool advanced_only) {
 
         int result = simple_solver (should_check_solution);
-
-        if (cancellable.is_cancelled ()) {
-            return Gnonograms.FAILED_PASSES;
-        }
-
-        if (result > 0 && advanced_only) { // Do not want simple solutions
-            return 0;
-        }
-
-        if (result == 0 && use_advanced) {
-            result = advanced_solver (cancellable, unique_only); // Sets state if solution found
-
-            if (result < 0 || cancellable.is_cancelled ()) {
-                state = SolverState.ERROR;
-                return -1;
+        if (state == SolverState.SIMPLE) {
+            if (advanced_only) { // Do not want simple solutions
+                return 0;
             }
         }
 
-        if (result > 0) {
-
+        if (state == SolverState.NO_SOLUTION && use_advanced) {
+            result = advanced_solver (cancellable, unique_only); // Sets state if solution found
         }
 
         return result;
@@ -81,6 +56,7 @@ namespace Gnonograms {
 
         bool changed = true;
         int pass = 1;
+
         while (changed && pass >= 0 && pass < MAX_PASSES) {
             //keep cycling through regions while at least one of them is changing
             changed = false;
@@ -101,6 +77,12 @@ namespace Gnonograms {
             }
 
             pass++;
+
+            if (cancellable.is_cancelled () ) {
+                state = SolverState.CANCELLED;
+                pass = 0;
+                break;
+            }
         }
 
         solution.copy (grid);
@@ -122,224 +104,236 @@ namespace Gnonograms {
         If first guess does not lead to solution leave unknown and choose another cell
     **/
     private int advanced_solver (Cancellable cancellable, bool unique_only = true) {
-        int simple_result = 0;
-        int wraps = 0;
         bool changed = false;
-        bool solution_exists = false;
-        bool ambiguous = false;
         int changed_count = 0;
-        uint contradiction_count = 0;
-        var grid_backup = new CellState[dimensions.area ()];
+        int result = 0;
 
+        var guesser = new Guesser (grid);
+        state = SolverState.UNDEFINED;
 
-        prepare_to_guess ();
-
-        while (simple_result <= 0 && changed_count <= max_guesswork)  {
-            contradiction_count = 0;
-            solution_exists = false;
-            ambiguous = true;
-            trial_cell = make_guess (trial_cell);
-
-            if (trial_cell.col == uint.MAX) { //run out of guesses
-                if (max_turns == initial_max_turns) {
-                    max_turns = (uint.min (rows, cols)) / 2 + 2; //ensure full coverage
-                } else if (trial_cell.state == initial_cell_state) {
-                    trial_cell = trial_cell.inverse (); //start making opposite guesses
-                    max_turns = initial_max_turns;
-                    wraps = 0;
-                } else {
-                    simple_result = 0;
-                    state = SolverState.NO_SOLUTION;
-                    break; //cannot make progress
-                }
-
-                rdir = 0;
-                cdir = 1;
-                rlim = (int)rows;
-                clim = (int)cols;
-                turn = 0;
-
-                changed = false;
-
-                wraps++;
-                continue;
+        while (state == SolverState.UNDEFINED)  {
+            if (!guesser.next_guess ()) {
+                break;
             }
 
-            this.save_position (grid_backup);
-            grid.set_data_from_cell (trial_cell);
-            simple_result = simple_solver (false, false);
-            solution_exists = simple_result > 0;
-
-            if (simple_result < 0) {
-                contradiction_count = 1;
-            }
+            changed_count++;
+            result = simple_solver (false, false);
+            var initial_state = state;
 
             /* Try opposite to check whether ambiguous or unique */
-            load_position (grid_backup); //back track
-            changed = true;
-            changed_count++; //worth trying another cycle
-            var inverse = trial_cell.inverse ();
-            grid.set_data_from_cell (inverse); //mark opposite to guess
+            guesser.invert_previous_guess ();
+            reinitialize_regions ();
+            result = simple_solver (false, false) ;
 
-            simple_result = simple_solver (false, false) ;
-            int inverse_result = simple_result;
+            var inverse_state = state;
 
-            if (simple_result == Gnonograms.FAILED_PASSES) {
-                inverse_result = 0;
-            } else if (simple_result < 0) {
-                inverse_result = -1;
-            }
-
-            if (solution_exists) { // original guess was correct and yielded solution
-                // regenerate original solution
-                load_position (grid_backup);
-                grid.set_data_from_cell (trial_cell);
-                simple_result = simple_solver (false, false);
-            }
-
-            switch (inverse_result) {
-                case -1:
-                    if (contradiction_count > 0) {
+            switch (inverse_state) {
+                case SolverState.ERROR:
+                    if (initial_state == SolverState.ERROR) {
                         critical ("error both ways");
-                        state = SolverState.ERROR;
-                        return -1; // both guess contradictory (should not happen)
-                    } else if (solution_exists) {
-                        ambiguous = false;
+                    } else if (initial_state == SolverState.SIMPLE) {
+                        // regenerate original position
+                        guesser.invert_previous_guess ();
+                        reinitialize_regions ();
+                        result = simple_solver (false, false);
                         state = SolverState.ADVANCED;
-                    } else {
-                        load_position (grid_backup);
-                        grid.set_data_from_cell (trial_cell);
-                        simple_solver (false, false);
+                    } else if (initial_state == SolverState.NO_SOLUTION) {
+                        // regenerate original position and continue
+                        guesser.invert_previous_guess ();
+                        reinitialize_regions ();
+                        result = simple_solver (false, false);
+                        state = SolverState.UNDEFINED;
                     }
 
                     break;
 
-                case 0:
-                    if (contradiction_count == 1) {
-                        save_position (grid_backup);
+                case SolverState.NO_SOLUTION:
+                        if (initial_state == SolverState.SIMPLE) {
+                            if (unique_only) {
+                                state = SolverState.NO_SOLUTION;
+                            } else {
+                                state = SolverState.AMBIGUOUS;
+                                // regenerate original solution
+                                guesser.invert_previous_guess ();
+                                reinitialize_regions ();
+                                result = simple_solver (false, false);
+                            }
+                        } else if (initial_state == SolverState.ERROR) {
+                            /* Continue from this position */
+                            state = SolverState.NO_SOLUTION;
+                        } else if (initial_state == SolverState.NO_SOLUTION) {
+                            state = SolverState.UNDEFINED;
+                        }
+
+                    break;
+
+                case SolverState.SIMPLE:
+                    // INVERSE guess yielded a solution.
+                    if (initial_state == SolverState.ERROR) {
+                        state = SolverState.ADVANCED;
+                    } else if (initial_state == SolverState.NO_SOLUTION) {
+                        if (unique_only) {
+                            state = SolverState.NO_SOLUTION;
+                        } else {
+                            state = SolverState.AMBIGUOUS;
+                        }
                     }
 
                     break;
 
                 default:
-                    // INVERSE guess yielded a solution.
-                    state = contradiction_count == 1 ? SolverState.AMBIGUOUS : SolverState.AMBIGUOUS;
-                    if (contradiction_count == 1) {
-                        // If both quesses yield a solution then puzzle is ambiguous
-                        ambiguous = false;
-                    }
-
-                    solution_exists = true;
-                    break;
+                    assert_not_reached ();
             }
 
-            if (!solution_exists) {
-                load_position (grid_backup);
-            }
 
             if (cancellable.is_cancelled ()) {
+                state = SolverState.CANCELLED;
                 break;
             }
         }
 
         //return vague measure of difficulty
-        if (simple_result > 0) {
-            return simple_result + changed_count * (ambiguous ? 10 : 2);
-        }
+        switch (state) {
+            case SolverState.CANCELLED:
+            case SolverState.NO_SOLUTION:
+                return 0;
 
-        return simple_result;
+            case SolverState.ADVANCED:
+                return result + changed_count * 2;
+
+            case SolverState.AMBIGUOUS:
+                return result + changed_count * 10;
+
+            default:
+                assert_not_reached ();
+        }
     }
 
+
+
+    private class Guesser {
+        private Cell trial_cell;
+        private int rdir;
+        private int cdir;
+        private int rlim;
+        private int clim;
+        private int turn;
+        private uint max_turns;
+        private const uint initial_max_turns = 3;
+        private CellState initial_cell_state = CellState.EMPTY;
+        private const uint max_guesswork = 9999;
+        private uint guesses = 0;
     /** Store the grid in linearised form **/
-    private void save_position (CellState[] gs) {
-        int index = 0;
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
-                gs[index++] = grid.get_data_from_rc (r, c);
+        private CellState[] gs;
+        private  My2DCellArray _grid;
+        public  My2DCellArray grid {
+            get {
+                return _grid;
             }
-        }
-    }
 
-    private void load_position (CellState[] gs) {
-        int index = 0;
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
-                grid.set_data_from_rc (r, c, gs[index++]);
+            private set {
+                _grid = value;
+                 gs = new CellState[_grid.dimensions.area ()];
             }
         }
 
-        index = 0;
-        for (int r = 0; r < rows; r++) {
-            regions[index++].set_to_initial_state ();
+        public uint rows { get {return _grid.dimensions.rows (); }}
+        public uint cols { get {return _grid.dimensions.cols (); }}
+
+        public Guesser (My2DCellArray _grid) {
+            grid = _grid;
+
+            rdir = 0;
+            cdir = 1;
+            rlim = (int)rows;
+            clim = (int)cols;
+            turn = 0;
+            max_turns = initial_max_turns;
+            trial_cell = { 0, uint.MAX, initial_cell_state };
         }
 
-        for (int c = 0; c < cols; c++) {
-            regions[index++].set_to_initial_state ();
+        public bool next_guess () {
+            save_position ();
+            return make_guess ();
         }
-    }
 
-    private void prepare_to_guess () {
-        rdir = 0;
-        cdir = 1;
-        rlim = (int)rows;
-        clim = (int)cols;
+        public void invert_previous_guess () {
+            load_position ();
+            trial_cell = trial_cell.inverse ();
+            grid.set_data_from_cell (trial_cell);
+        }
 
-        turn = 0;
-        max_turns = initial_max_turns;
-
-        this.save_position (grid_backup);
-        trial_cell = { 0, uint.MAX, initial_cell_state };
-    }
-
-    /** Used by advanced solver. Scans in a spiral pattern from edges
-      * as critical cells most likely in this region.
-    **/
-    private Cell make_guess (Cell cell) {
-        int r = (int)(cell.row);
-        int c = (int)(cell.col);
-
-        while (true) {
-            r += rdir;
-            c += cdir; //only one changes at any one time
-
-            if (cdir == 1 && c >= clim) {
-                c--;
-                cdir = 0;
-                rdir = 1;
-                r++;
-            } else if (rdir == 1 && r >= rlim) { //across top  -  rh edge reached
-                r--;
-                rdir = 0;
-                cdir = -1;
-                c--;
-            } else if (cdir == -1 && c < turn) { //down rh side  -  bottom reached
-                c++;
-                cdir = 0;
-                rdir = -1;
-                 r--;
-            } else if (rdir == -1 && r <= turn) { //back across bottom lh edge reached
-                r++;
-                turn++;
-                rlim--;
-                clim--;
-                rdir = 0;
-                cdir = 1;
-            } //up lh side  -  top edge reached
-
-            if (turn > max_turns) { //stay near edge until no more changes
-                cell.row = 0;
-                cell.col = uint.MAX;
-                break;
-            }
-
-            if (grid.get_data_from_rc (r, c) == CellState.UNKNOWN) {
-                cell.row = (uint)r;
-                cell.col = (uint)c;
-                break;
+        private void save_position () {
+            int index = 0;
+            for (int r = 0; r < rows; r++) {
+                for (int c = 0; c < cols; c++) {
+                    gs[index++] = grid.get_data_from_rc (r, c);
+                }
             }
         }
 
-        return cell;
+        private void load_position () {
+            int index = 0;
+            for (int r = 0; r < rows; r++) {
+                for (int c = 0; c < cols; c++) {
+                    grid.set_data_from_rc (r, c, gs[index++]);
+                }
+            }
+        }
+
+        /** Used by advanced solver. Scans in a spiral pattern from edges
+          * as critical cells most likely in this region.
+        **/
+        private bool make_guess () {
+            int r = (int)(trial_cell.row);
+            int c = (int)(trial_cell.col);
+
+            while (true) {
+                r += rdir;
+                c += cdir; //only one changes at any one time
+
+                if (cdir == 1 && c >= clim) {
+                    c--;
+                    cdir = 0;
+                    rdir = 1;
+                    r++;
+                } else if (rdir == 1 && r >= rlim) { //across top  -  rh edge reached
+                    r--;
+                    rdir = 0;
+                    cdir = -1;
+                    c--;
+                } else if (cdir == -1 && c < turn) { //down rh side  -  bottom reached
+                    c++;
+                    cdir = 0;
+                    rdir = -1;
+                     r--;
+                } else if (rdir == -1 && r <= turn) { //back across bottom lh edge reached
+                    r++;
+                    turn++;
+                    rlim--;
+                    clim--;
+                    rdir = 0;
+                    cdir = 1;
+                } //up lh side  -  top edge reached
+
+                if (turn > max_turns) { //stay near edge until no more changes
+                    trial_cell.row = 0;
+                    trial_cell.col = uint.MAX;
+                    return false;
+                }
+
+                if (grid.get_data_from_rc (r, c) == CellState.UNKNOWN) {
+warning ("trial r c %u, %u", (uint)r, (uint)c);
+                    trial_cell.row = (uint)r;
+                    trial_cell.col = (uint)c;
+                    break;
+                }
+            }
+
+            grid.set_data_from_cell (trial_cell);
+            return true;
+        }
+
     }
 }
 }

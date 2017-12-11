@@ -29,7 +29,7 @@ namespace Gnonograms {
 
     public My2DCellArray grid {get; protected set;} // Shared with Regions which can update the contents
     public My2DCellArray solution {get; protected set;}
-    protected CellState[] grid_backup;
+    protected Cancellable cancellable;
 
     public uint rows { get { return dimensions.height; }}
     public uint cols { get { return dimensions.width; }}
@@ -48,8 +48,6 @@ namespace Gnonograms {
             for (int i = 0; i < n_regions; i++) {
                 regions[i] = new Region (grid);
             }
-
-            grid_backup =  new CellState[rows * cols];
         }
     }
 
@@ -88,6 +86,17 @@ namespace Gnonograms {
         state = SolverState.UNDEFINED;
 
         return valid ();
+    }
+
+    protected virtual void reinitialize_regions () {
+        int index = 0;
+        for (int r = 0; r < rows; r++) {
+            regions[index++].set_to_initial_state ();
+        }
+
+        for (int c = 0; c < cols; c++) {
+            regions[index++].set_to_initial_state ();
+        }
     }
 
     protected virtual bool valid () {
@@ -158,7 +167,7 @@ namespace Gnonograms {
       * procedures. Also specify whether in debugging mode and whether to solve one step
       * at a time (used for hinting if implemented).
     **/
-    public int solve_clues (Cancellable cancellable,
+    public int solve_clues (Cancellable _cancellable,
                                   bool use_advanced,
                                   bool unique_only,
                                   bool advanced_only,
@@ -167,16 +176,17 @@ namespace Gnonograms {
                                   My2DCellArray? start_grid = null,
                                   My2DCellArray? solution_grid = null) {
 
+        cancellable = _cancellable;
+
         if (initialize (row_clues, col_clues, start_grid, solution_grid)) {
-            return solve_it (cancellable, use_advanced, unique_only, advanced_only);
+            return solve_it (use_advanced, unique_only, advanced_only);
         } else {
             state = SolverState.ERROR;
             return -1;
         }
     }
 
-    protected abstract int solve_it (Cancellable cancellable,
-                                     bool use_advanced,
+    protected abstract int solve_it (bool use_advanced,
                                      bool unique_only,
                                      bool advanced_only);
 
