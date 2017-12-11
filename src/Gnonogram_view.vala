@@ -339,15 +339,9 @@ public class View : Gtk.ApplicationWindow {
         });
     }
 
-    public void show_solving (Cancellable cancellable) {
-        progress_indicator.text = (_("Solving"));
-        schedule_show_progress (cancellable);
-    }
-
-    public void show_generating (Cancellable cancellable) {
-        blank_labels ();
+    public void show_working (Cancellable cancellable, string text = "") {
         cell_grid.frozen = true; // Do not show model updates
-        progress_indicator.text = (_("Generating"));
+        progress_indicator.text = text;
         schedule_show_progress (cancellable);
     }
 
@@ -548,7 +542,7 @@ public class View : Gtk.ApplicationWindow {
 
     private uint progress_timeout_id = 0;
     private void schedule_show_progress (Cancellable cancellable) {
-        progress_timeout_id = Timeout.add (PROGRESS_DELAY_MSEC, () => {
+        progress_timeout_id = Timeout.add_full (Priority.HIGH_IDLE, PROGRESS_DELAY_MSEC, () => {
             progress_indicator.cancellable = cancellable;
             header_bar.set_custom_title (progress_indicator);
             this.queue_draw ();

@@ -39,25 +39,19 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
         cancellable = _cancellable;
     }
 
-    public override async bool generate () {
+    public override bool generate () {
         /* returns true if a game of correct grade was generated otherwise false  */
         int passes = -1;
         uint count = 0;
 
         while (solution_grade != grade && !cancellable.is_cancelled ()) {
-            Idle.add (() => {
-                var pattern = pattern_gen.generate ();
-                var row_clues = Utils.row_clues_from_2D_array (pattern);
-                var col_clues = Utils.col_clues_from_2D_array (pattern);
+            var pattern = pattern_gen.generate ();
+            var row_clues = Utils.row_clues_from_2D_array (pattern);
+            var col_clues = Utils.col_clues_from_2D_array (pattern);
 
-                passes = solver.solve_clues (cancellable, use_advanced, unique_only, advanced_only,
-                                             row_clues, col_clues, null, null);
+            passes = solver.solve_clues (cancellable, use_advanced, unique_only, advanced_only,
+                                               row_clues, col_clues, null, null);
 
-                generate.callback ();
-                return false;
-            });
-
-            yield;
 
             solution_grade = Utils.passes_to_grade (passes, dimensions, true, true);
 
@@ -74,7 +68,9 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
             }
         }
 
-        return solution_grade == grade && !cancellable.is_cancelled ();
+        var result = solution_grade == grade && !cancellable.is_cancelled ();
+
+        return result;
     }
 
     public override My2DCellArray get_solution () {

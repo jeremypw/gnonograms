@@ -241,31 +241,36 @@ public class Controller : GLib.Object {
 
         view.game_name = _("Random pattern");
         view.game_grade = Difficulty.UNDEFINED;
-        view.show_generating (cancellable);
-
-        new_random_game.begin (gen);
+        view.show_working (cancellable, "Generating");
+        start_generating.begin (cancellable, gen);
     }
 
-    private async void new_random_game (AbstractGameGenerator gen) {
-        bool success = yield gen.generate ();
+    private async void start_generating (Cancellable cancellable, AbstractGameGenerator gen) {
+        bool success = false;
+
+        var thread = new Thread<void*> (null, () => {
+            success = gen.generate ();
+
         /* Show last generated game regardless */
-        model.set_from_array (gen.get_solution ());
-        view.update_labels_from_solution ();
+            model.set_from_array (gen.get_solution ());
+            view.update_labels_from_solution ();
 
-        if (gen.is_cancelled ()) {
-           view.send_notification (_("Game generation was cancelled"));
-        } else {
-            if (success) {
-                view.game_grade = gen.solution_grade;
-                game_state = GameState.SOLVING;
+            if (gen.is_cancelled ()) {
+               view.send_notification (_("Game generation was cancelled"));
             } else {
-                view.send_notification (_("Failed to generate game of required grade"));
-                game_state = GameState.SETTING;
+                if (success) {
+                    view.game_grade = gen.solution_grade;
+                    game_state = GameState.SOLVING;
+                } else {
+                    view.send_notification (_("Failed to generate game of required grade"));
+                    game_state = GameState.SETTING;
+                }
             }
-        }
 
-        view.hide_progress ();
-        view.queue_draw ();
+            view.hide_progress ();
+            view.queue_draw ();
+            return null;
+        });
     }
 
     private void save_game_state () {
@@ -578,7 +583,7 @@ public class Controller : GLib.Object {
         }
 
         return solver.solve_clues (cancellable, use_advanced, unique_only, advanced_only,
-                                   row_clues, col_clues, startgrid, null);
+                                         row_clues, col_clues, startgrid, null);
     }
 
 /*** Signal Handlers ***/
@@ -673,75 +678,55 @@ public class Controller : GLib.Object {
     }
 
     private void on_solve_this_request () {
-        string msg = "";
-        model.blank_working ();
+        var cancellable = new Cancellable ();
+        view.show_working (cancellable, "Solving");
         game_state = GameState.SOLVING;
-
-        var solver_cancellable = new Cancellable ();
-        view.show_solving (solver_cancellable);
-
-        Idle.add (() => {
-        /* Look for unique simple solution */
-            int passes = solve_game (false, // no startgrid
-                                     true, // use labels not model
-                                     false, // no advanced solutions
-                                     false, // no ultimate solutions
-                                     true, // must be unique solution
-                                     false, // simple solutions allowed
-                                     solver_cancellable,
-                                     false); // not human
-
-            after_solve_game (msg, passes, true, false);
-
-            if (solver_cancellable.is_cancelled ()) {
-                msg = _("Solving was cancelled");
-            } else if (passes > 0) {
-                var descr = Utils.passes_to_grade_description (passes, dimensions, true, false);
-                msg =  _("Simple solution found. %s").printf (descr);
-            } else {
-                msg = _("No simple solution found");
-                if (generator_grade >= Difficulty.ADVANCED) {
-                    bool unique_only = generator_grade <= Difficulty.ADVANCED;
-                    passes = solve_game (false, // no startgrid
-                                         true, // use labels not model
-                                         true, // use advanced solver
-                                         true, // use ultimate if necessary (option cancel given)
-                                         unique_only,
-                                         true, // must be advanced (simple already excluded)
-                                         solver_cancellable,
-                                         false // not human
-                                         );
-
-                    if (solver_cancellable.is_cancelled ()) {
-                        msg = _("Solving was cancelled");
-                    } else if (passes > 0) {
-                        var descr = Utils.passes_to_grade_description (passes, dimensions, unique_only, true);
-                        msg = msg + "\n" + _("Advanced solution found. %s").printf (descr);
-                        if (!unique_only) {
-                            msg = msg + "\n" + _("Possibly ambiguous");
-                        }
-                    } else if (passes == 0) {
-                        msg = msg + "\n" + _("No advanced solution found");
-                    }
-
-                    after_solve_game (msg, passes, unique_only, true);
-                }
-            }
-
-            return false;
-        });
+        start_solving.begin (cancellable);
     }
 
-    private void after_solve_game (string msg, uint passes, bool unique_only, bool advanced) {
-        if (msg != "") {
-            view.send_notification (msg);
-        }
+    private async void start_solving (Cancellable cancellable) {
+        /* Need new thread else blocks spinner */
+        /* Try as hard as possible to find solution, regardless of grade setting */
 
-        view.game_grade = Utils.passes_to_grade (passes, dimensions, unique_only, advanced);
-        model.display_data.copy (solver.grid);
+        new Thread<void*> (null, () => {
+            var unique_only = false;
+            var advanced = true;
 
-        view.hide_progress ();
-        view.queue_draw ();
+            int passes = solve_game (false, // no startgrid
+                                     true, // use labels not model
+                                     advanced, // allow advanced solutions
+                                     false, // no ultimate solutions (TODO)
+                                     unique_only, // allow ambiguous solution
+                                     false, // simple solutions allowed
+                                     cancellable,
+                                     false);
+
+
+                string msg = "";
+
+                if (cancellable.is_cancelled ()) {
+                    msg = _("Solving was cancelled");
+                } else if (passes > 0) {
+                    var descr = Utils.passes_to_grade_description (passes, dimensions, unique_only, advanced);
+                    msg =  _("Solution found. %s").printf (descr);
+                } else{
+                    msg = _("No solution found");
+                }
+
+                if (msg != "") {
+                    view.send_notification (msg);
+                }
+
+                view.game_grade = Utils.passes_to_grade (passes, dimensions, unique_only, advanced);
+                model.display_data.copy (solver.grid);
+
+                view.hide_progress ();
+                view.queue_draw ();
+
+            return null;
+        });
+
+        yield;
     }
 
     private void on_restart_request () {

@@ -159,13 +159,13 @@ namespace Gnonograms {
       * at a time (used for hinting if implemented).
     **/
     public int solve_clues (Cancellable cancellable,
-                            bool use_advanced,
-                            bool unique_only,
-                            bool advanced_only,
-                            string[] row_clues,
-                            string[] col_clues,
-                            My2DCellArray? start_grid = null,
-                            My2DCellArray? solution_grid = null) {
+                                  bool use_advanced,
+                                  bool unique_only,
+                                  bool advanced_only,
+                                  string[] row_clues,
+                                  string[] col_clues,
+                                  My2DCellArray? start_grid = null,
+                                  My2DCellArray? solution_grid = null) {
 
         if (initialize (row_clues, col_clues, start_grid, solution_grid)) {
             return solve_it (cancellable, use_advanced, unique_only, advanced_only);

@@ -42,7 +42,7 @@ public abstract class AbstractGameGenerator : GLib.Object {
 
     public Difficulty solution_grade { get; protected set; }
 
-    public abstract async bool generate ();
+    public abstract bool generate ();
     public abstract My2DCellArray get_solution ();
     public virtual bool is_cancelled () { return cancellable != null ? cancellable.is_cancelled () : false; }
 }

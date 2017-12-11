@@ -39,9 +39,9 @@ namespace Gnonograms {
     **/
 
     public override int solve_it (Cancellable cancellable,
-                         bool use_advanced,
-                         bool unique_only,
-                         bool advanced_only) {
+                                  bool use_advanced,
+                                  bool unique_only,
+                                  bool advanced_only) {
 
         int result = simple_solver (should_check_solution);
 
@@ -65,6 +65,7 @@ namespace Gnonograms {
         if (result > 0) {
 
         }
+
         return result;
     }
 
@@ -234,6 +235,10 @@ namespace Gnonograms {
 
             if (!solution_exists) {
                 load_position (grid_backup);
+            }
+
+            if (cancellable.is_cancelled ()) {
+                break;
             }
         }
 

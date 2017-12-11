@@ -28,11 +28,5 @@ public class AdvancedRandomGameGenerator : SimpleRandomGameGenerator {
         base (dimensions, grade, pattern, solver, _cancellable);
         use_advanced = true;
     }
-
-    public override async bool generate () {
-        /* returns true if a game of correct grade was generated otherwise false  */
-        return yield base.generate ();
-    }
-
 }
 }
