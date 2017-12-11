@@ -242,33 +242,36 @@ public class Controller : GLib.Object {
         view.game_name = _("Random pattern");
         view.game_grade = Difficulty.UNDEFINED;
         view.show_working (cancellable, "Generating");
-        start_generating.begin (cancellable, gen);
+        start_generating (cancellable, gen);
     }
 
-    private async void start_generating (Cancellable cancellable, AbstractGameGenerator gen) {
-        bool success = false;
-
+    private void start_generating (Cancellable cancellable, AbstractGameGenerator gen) {
         var thread = new Thread<void*> (null, () => {
-            success = gen.generate ();
+            var success = gen.generate ();
+            /* Gtk is not thread-safe so must invoke in the main loop */
+            MainContext.@default ().invoke (() => {
+            /* Show last generated game regardless */
+                model.set_from_array (gen.get_solution ());
+                view.update_labels_from_solution ();
 
-        /* Show last generated game regardless */
-            model.set_from_array (gen.get_solution ());
-            view.update_labels_from_solution ();
-
-            if (gen.is_cancelled ()) {
-               view.send_notification (_("Game generation was cancelled"));
-            } else {
-                if (success) {
-                    view.game_grade = gen.solution_grade;
-                    game_state = GameState.SOLVING;
+                if (gen.is_cancelled ()) {
+                   view.send_notification (_("Game generation was cancelled"));
                 } else {
-                    view.send_notification (_("Failed to generate game of required grade"));
-                    game_state = GameState.SETTING;
+                    if (success) {
+                        view.game_grade = gen.solution_grade;
+                        game_state = GameState.SOLVING;
+                    } else {
+                        view.send_notification (_("Failed to generate game of required grade"));
+                        game_state = GameState.SETTING;
+                    }
                 }
-            }
 
-            view.hide_progress ();
-            view.queue_draw ();
+                view.hide_progress ();
+                view.queue_draw ();
+
+                return false;
+            });
+
             return null;
         });
     }
@@ -713,15 +716,18 @@ public class Controller : GLib.Object {
                     msg = _("No solution found");
                 }
 
-                if (msg != "") {
-                    view.send_notification (msg);
-                }
+                MainContext.@default ().invoke (() => {
+                    if (msg != "") {
+                        view.send_notification (msg);
+                    }
 
-                view.game_grade = Utils.passes_to_grade (passes, dimensions, unique_only, advanced);
-                model.display_data.copy (solver.grid);
+                    view.game_grade = Utils.passes_to_grade (passes, dimensions, unique_only, advanced);
+                    model.display_data.copy (solver.grid);
 
-                view.hide_progress ();
-                view.queue_draw ();
+                    view.hide_progress ();
+                    view.queue_draw ();
+                    return false;
+                });
 
             return null;
         });

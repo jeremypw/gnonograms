@@ -51,8 +51,6 @@ namespace Gnonograms {
         }
     }
 
-
-
     /** Set up solver for a particular puzzle. In addition to the clues, a starting point
       * and/or the correct solution may be provided (useful for debugging).
     **/

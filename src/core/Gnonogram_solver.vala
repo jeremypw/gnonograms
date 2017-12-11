@@ -124,7 +124,6 @@ namespace Gnonograms {
             guesser.invert_previous_guess ();
             reinitialize_regions ();
             result = simple_solver (false, false) ;
-
             var inverse_state = state;
 
             switch (inverse_state) {
@@ -132,12 +131,12 @@ namespace Gnonograms {
                     if (initial_state == SolverState.ERROR) {
                         critical ("error both ways");
                     } else if (initial_state == SolverState.SIMPLE) {
-                        // regenerate original position
+                        // regenerate original solution
                         guesser.invert_previous_guess ();
                         reinitialize_regions ();
                         result = simple_solver (false, false);
                         state = SolverState.ADVANCED;
-                    } else if (initial_state == SolverState.NO_SOLUTION) {
+                    } else if (initial_state == SolverState.NO_SOLUTION) { // original cannot be in error
                         // regenerate original position and continue
                         guesser.invert_previous_guess ();
                         reinitialize_regions ();
@@ -160,8 +159,11 @@ namespace Gnonograms {
                             }
                         } else if (initial_state == SolverState.ERROR) {
                             /* Continue from this position */
-                            state = SolverState.NO_SOLUTION;
-                        } else if (initial_state == SolverState.NO_SOLUTION) {
+                            state = SolverState.UNDEFINED;
+                        } else if (initial_state == SolverState.NO_SOLUTION) { // could be erroneous
+                            // regenerate original position
+                            guesser.cancel_previous_guess ();
+                            reinitialize_regions ();
                             state = SolverState.UNDEFINED;
                         }
 
@@ -185,7 +187,6 @@ namespace Gnonograms {
                     assert_not_reached ();
             }
 
-
             if (cancellable.is_cancelled ()) {
                 state = SolverState.CANCELLED;
                 break;
@@ -208,8 +209,6 @@ namespace Gnonograms {
                 assert_not_reached ();
         }
     }
-
-
 
     private class Guesser {
         private Cell trial_cell;
@@ -261,6 +260,12 @@ namespace Gnonograms {
             load_position ();
             trial_cell = trial_cell.inverse ();
             grid.set_data_from_cell (trial_cell);
+        }
+
+        public void cancel_previous_guess () {
+            load_position ();
+            trial_cell = trial_cell.inverse ();
+            grid.set_data_from_rc (trial_cell.row, trial_cell.col, CellState.UNKNOWN);
         }
 
         private void save_position () {
@@ -323,14 +328,13 @@ namespace Gnonograms {
                 }
 
                 if (grid.get_data_from_rc (r, c) == CellState.UNKNOWN) {
-warning ("trial r c %u, %u", (uint)r, (uint)c);
                     trial_cell.row = (uint)r;
                     trial_cell.col = (uint)c;
+                    grid.set_data_from_cell (trial_cell);
                     break;
                 }
             }
 
-            grid.set_data_from_cell (trial_cell);
             return true;
         }
 
