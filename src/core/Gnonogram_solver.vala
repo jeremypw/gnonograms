@@ -80,7 +80,7 @@ namespace Gnonograms {
 
             if (cancellable.is_cancelled () ) {
                 state = SolverState.CANCELLED;
-                pass = 0;
+                pass = -1;
                 break;
             }
         }
@@ -89,7 +89,7 @@ namespace Gnonograms {
 
         if (solved ()) {
             state = SolverState.SIMPLE;
-        } else  if (pass > 0) {
+        } else  if (pass >= 0) {
             state = SolverState.NO_SOLUTION;
             pass = 0; // not solved and not in error
         }
@@ -128,52 +128,55 @@ namespace Gnonograms {
 
             switch (inverse_state) {
                 case SolverState.ERROR:
+                    /* Regenerate original result */
+                    guesser.invert_previous_guess ();
+                    reinitialize_regions ();
+                    result = simple_solver (false, false);
+
                     if (initial_state == SolverState.ERROR) {
                         critical ("error both ways");
                     } else if (initial_state == SolverState.SIMPLE) {
                         // regenerate original solution
-                        guesser.invert_previous_guess ();
-                        reinitialize_regions ();
-                        result = simple_solver (false, false);
                         state = SolverState.ADVANCED;
                     } else if (initial_state == SolverState.NO_SOLUTION) { // original cannot be in error
-                        // regenerate original position and continue
-                        guesser.invert_previous_guess ();
-                        reinitialize_regions ();
-                        result = simple_solver (false, false);
+                        /* continue from here */
                         state = SolverState.UNDEFINED;
+                    } else {
+                        assert_not_reached ();
                     }
 
                     break;
 
                 case SolverState.NO_SOLUTION:
-                        if (initial_state == SolverState.SIMPLE) {
-                            if (unique_only) {
-                                state = SolverState.NO_SOLUTION;
-                            } else {
-                                state = SolverState.AMBIGUOUS;
-                                // regenerate original solution
-                                guesser.invert_previous_guess ();
-                                reinitialize_regions ();
-                                result = simple_solver (false, false);
-                            }
-                        } else if (initial_state == SolverState.ERROR) {
-                            /* Continue from this position */
-                            state = SolverState.UNDEFINED;
-                        } else if (initial_state == SolverState.NO_SOLUTION) { // could be erroneous
-                            // regenerate original position
-                            guesser.cancel_previous_guess ();
+                    if (initial_state == SolverState.SIMPLE) {
+                        if (unique_only) { /* reject ambiguous solution */
+                            state = SolverState.NO_SOLUTION;
+                        } else {
+                            // regenerate original solution
+                            guesser.invert_previous_guess ();
                             reinitialize_regions ();
-                            state = SolverState.UNDEFINED;
+                            result = simple_solver (false, false);
+                            state = SolverState.AMBIGUOUS;
                         }
+                    } else if (initial_state == SolverState.ERROR) {
+                        /* Continue from this position */
+                        state = SolverState.UNDEFINED;
+                    } else if (initial_state == SolverState.NO_SOLUTION) { // could be erroneous
+                        // regenerate original position
+                        guesser.cancel_previous_guess ();
+                        reinitialize_regions ();
+                        state = SolverState.UNDEFINED;
+                    } else {
+                        assert_not_reached ();
+                    }
 
                     break;
 
                 case SolverState.SIMPLE:
                     // INVERSE guess yielded a solution.
-                    if (initial_state == SolverState.ERROR) {
-                        state = SolverState.ADVANCED;
-                    } else if (initial_state == SolverState.NO_SOLUTION) {
+                    state = SolverState.ADVANCED;
+
+                    if (initial_state == SolverState.NO_SOLUTION) {
                         if (unique_only) {
                             state = SolverState.NO_SOLUTION;
                         } else {
@@ -185,6 +188,7 @@ namespace Gnonograms {
 
                 default:
                     assert_not_reached ();
+                    break;
             }
 
             if (cancellable.is_cancelled ()) {
@@ -205,9 +209,15 @@ namespace Gnonograms {
             case SolverState.AMBIGUOUS:
                 return result + changed_count * 10;
 
+            case SolverState.UNDEFINED:
+                state = SolverState.NO_SOLUTION;
+                return 0;
+
             default:
                 assert_not_reached ();
         }
+
+        return -1;
     }
 
     private class Guesser {
@@ -247,7 +257,7 @@ namespace Gnonograms {
             rlim = (int)rows;
             clim = (int)cols;
             turn = 0;
-            max_turns = initial_max_turns;
+            max_turns = uint.min (rows, cols) / 2;
             trial_cell = { 0, uint.MAX, initial_cell_state };
         }
 
