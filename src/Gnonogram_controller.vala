@@ -566,7 +566,6 @@ public class Controller : GLib.Object {
                             Cancellable cancellable,
                             bool human = false) {
 
-        int passes = -1; //indicates error - TODO use throw error
         My2DCellArray? startgrid = null;
 
         if (use_startgrid) {

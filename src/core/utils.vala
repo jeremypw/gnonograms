@@ -64,7 +64,6 @@ namespace Utils {
     public int freedom_from_array (CellState[] arr, out int filled, out int blocks) {
         filled = 0; // count of filled cells
         blocks = 0; // count of filled blocks
-        int df = 0; // degrees of freedom
         int length = arr.length;
 
         for (int i = 0; i < length; i++) {
@@ -335,7 +334,6 @@ namespace Utils {
             return diff;
         }
 
-        var level = (((double)passes - 2.0) * 10.0) / (double)(dimensions.rows () + dimensions.cols ());
         var cells_per_pass = (double)(dimensions.length ()) / ((double)passes - 2);
 
         if (cells_per_pass < 1 ) {

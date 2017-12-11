@@ -104,7 +104,6 @@ namespace Gnonograms {
         If first guess does not lead to solution leave unknown and choose another cell
     **/
     private int advanced_solver (Cancellable cancellable, bool unique_only = true) {
-        bool changed = false;
         int changed_count = 0;
         int result = 0;
 
@@ -188,7 +187,6 @@ namespace Gnonograms {
 
                 default:
                     assert_not_reached ();
-                    break;
             }
 
             if (cancellable.is_cancelled ()) {
@@ -216,8 +214,6 @@ namespace Gnonograms {
             default:
                 assert_not_reached ();
         }
-
-        return -1;
     }
 
     private class Guesser {
@@ -231,7 +227,7 @@ namespace Gnonograms {
         private const uint initial_max_turns = 3;
         private CellState initial_cell_state = CellState.EMPTY;
         private const uint max_guesswork = 9999;
-        private uint guesses = 0;
+
     /** Store the grid in linearised form **/
         private CellState[] gs;
         private  My2DCellArray _grid;

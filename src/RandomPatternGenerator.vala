@@ -147,7 +147,6 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
                 df = Utils.freedom_from_array (sa, out filled, out blocks);
 
                 /* Insert random empty cells until enough freedom */
-                uint count = 0;
                 while (df < min_freedom) {
                     var ptr = rand_gen.int_range (0, (int)cols - 1);
                     if (sa[ptr] == CellState.FILLED) {

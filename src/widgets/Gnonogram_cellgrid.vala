@@ -332,7 +332,6 @@ public class CellGrid : Gtk.DrawingArea {
         double x = cell.col * cell_width;
         double y =  cell.row * cell_height;
 
-        bool error = false;
         CellPattern cell_pattern;
 
         switch (cell.state) {
