@@ -380,7 +380,7 @@ public class Controller : GLib.Object {
             return false;
         }
 
-        if (reader.valid && (yield load_common (reader)) && load_position_extra (reader)) {
+        if (reader.valid && (yield load_common (reader))) {
             if (reader.state != GameState.UNDEFINED) {
                 game_state = reader.state;
             } else {
@@ -426,21 +426,22 @@ public class Controller : GLib.Object {
         }
 
         model.game_state = GameState.SETTING; /* Selects the solution grid */
+        var state = yield start_solving (); // Sets difficulty in header bar.
+        model.blank_working (); // Do not reveal solution on load
 
         if (reader.has_solution) {
             model.set_row_data_from_string_array (reader.solution[0 : rows]);
-        } else { // no solution in file
-            var state = yield start_solving (null);
-            if (state in (SolverState.SIMPLE | SolverState.ADVANCED | SolverState.AMBIGUOUS)) { // successful solution
-                model.solution_data.copy (model.working_data);
-            }
         }
-
 
         if (reader.name.length > 1) {
             title = reader.name;
         } else if (reader.game_file != null) {
             title = reader.game_file.get_basename ();
+        }
+
+        if (reader.has_working) {
+            model.game_state = GameState.SOLVING; /* Selects the working grid */
+            model.set_row_data_from_string_array (reader.working[0 : rows]);
         }
 
 #if 0 //To be implemented (maybe)
@@ -449,15 +450,6 @@ public class Controller : GLib.Object {
         view.set_license(reader.license);
         view.set_score(reader.score);
 #endif
-
-        return true;
-    }
-
-    private bool load_position_extra (Filereader reader) {
-        if (reader.has_working) {
-            model.game_state = GameState.SOLVING; /* Selects the working grid */
-            model.set_row_data_from_string_array (reader.working[0 : rows]);
-        }
 
         return true;
     }
@@ -624,16 +616,16 @@ public class Controller : GLib.Object {
     }
 
     private void on_solve_this_request () {
-        var cancellable = new Cancellable ();
-        view.show_working (cancellable, "Solving");
-        start_solving.begin (cancellable);
+        start_solving.begin ();
     }
 
-    private async SolverState start_solving (Cancellable? cancellable) {
+    private async SolverState start_solving () {
         /* Need new thread else blocks spinner */
         /* Try as hard as possible to find solution, regardless of grade setting */
-        game_state = GameState.SOLVING;
         var state = SolverState.UNDEFINED;
+
+        var cancellable = new Cancellable ();
+        view.show_working (cancellable, "Solving");
 
         new Thread<void*> (null, () => {
             var unique_only = false;
@@ -660,7 +652,8 @@ public class Controller : GLib.Object {
                 }
 
                 view.game_grade = Utils.passes_to_grade (passes, dimensions, unique_only, advanced);
-                model.display_data.copy (solver.grid);
+
+                model.solution_data.copy (solver.grid);
 
                 view.hide_progress ();
                 view.queue_draw ();

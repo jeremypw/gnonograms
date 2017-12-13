@@ -71,7 +71,11 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
                     threshold = 70;
                     min_freedom = 4;
                     break;
+            case Difficulty.UNDEFINED:
+                    /* May not be defined on creation */
+                    break;
             default:
+                critical ("unexpected grade %s", grade.to_string ());
                 assert_not_reached ();
         }
     }

@@ -40,7 +40,7 @@ public abstract class AbstractPatternGenerator : GLib.Object {
         get { return dimensions.cols (); }
     }
 
-    private Difficulty _grade = Difficulty.UNDEFINED;
+    private Difficulty _grade = Difficulty.EASY;
     public Difficulty grade {
         get {
             return _grade;

@@ -141,9 +141,6 @@ public class View : Gtk.ApplicationWindow {
             cell_grid.game_state = value;
 
             update_header_bar ();
-            if (value == GameState.SETTING) {
-                update_labels_from_solution ();
-            }
         }
     }
 

@@ -72,7 +72,7 @@ namespace Gnonograms {
 
                 if (r.in_error) {
                     /* TODO Use conditional compilation to print out error if required */
-                    pass = -2; // So still negative after increment
+                    pass = -pass - 1; // So still negative after increment
                     state = SolverState.ERROR;
                     break;
                 }
@@ -109,6 +109,7 @@ namespace Gnonograms {
         /* Simple solver must have already been run */
         int changed_count = 0;
         int result = 0;
+        uint max_pass_to_contradiction = human_only ? 5 : MAX_PASSES; // Humans cannot 'see' deep contradictions
 
         var guesser = new Guesser (grid);
         state = SolverState.UNDEFINED;
@@ -122,6 +123,13 @@ namespace Gnonograms {
             result = simple_solver ();
             var initial_state = state;
 
+            /* Reject too difficult solution path */
+            if (-result > max_pass_to_contradiction) {
+                state = SolverState.UNDEFINED;
+                reinitialize_regions ();
+                continue;
+            }
+
             /* Try opposite to check whether ambiguous or unique */
             guesser.invert_previous_guess ();
             reinitialize_regions ();
@@ -130,20 +138,24 @@ namespace Gnonograms {
 
             switch (inverse_state) {
                 case SolverState.ERROR:
+                    reinitialize_regions ();
+                    if (initial_state == SolverState.ERROR || -result > max_pass_to_contradiction) { // contradiction returns negative passes
+                        guesser.cancel_previous_guess (); //
+                        state = SolverState.UNDEFINED; // Continue (may be easier contradiction later)
+                        break;
+                    }
+
                     /* Regenerate original result */
                     guesser.invert_previous_guess ();
-                    reinitialize_regions ();
                     result = simple_solver ();
 
-                    if (initial_state == SolverState.ERROR) {
-                        critical ("error both ways");
-                    } else if (initial_state == SolverState.SIMPLE) {
-                        // regenerate original solution
+                    if (initial_state == SolverState.SIMPLE) {
                         state = SolverState.ADVANCED;
                     } else if (initial_state == SolverState.NO_SOLUTION) { // original cannot be in error
                         /* continue from here */
                         state = SolverState.UNDEFINED;
                     } else {
+                        critical ("unexpected sinitial tate %s", initial_state.to_string ());
                         assert_not_reached ();
                     }
 
@@ -160,7 +172,7 @@ namespace Gnonograms {
                             result = simple_solver ();
                             state = SolverState.AMBIGUOUS;
                         }
-                    } else if (initial_state == SolverState.ERROR) {
+                    } else if (initial_state == SolverState.ERROR) { // already checked for too may passes to contradiction.
                         /* Continue from this position */
                         state = SolverState.UNDEFINED;
                     } else if (initial_state == SolverState.NO_SOLUTION) { // could be erroneous
@@ -169,6 +181,7 @@ namespace Gnonograms {
                         reinitialize_regions ();
                         state = SolverState.UNDEFINED;
                     } else {
+                        critical ("unexpected sinitial tate %s", initial_state.to_string ());
                         assert_not_reached ();
                     }
 
@@ -176,9 +189,9 @@ namespace Gnonograms {
 
                 case SolverState.SIMPLE:
                     // INVERSE guess yielded a solution.
-                    state = SolverState.ADVANCED;
-
-                    if (initial_state == SolverState.NO_SOLUTION) {
+                    if (initial_state == SolverState.ERROR) {
+                        state = SolverState.ADVANCED;
+                    } else {
                         if (unique_only) {
                             state = SolverState.NO_SOLUTION;
                         } else {
@@ -189,6 +202,7 @@ namespace Gnonograms {
                     break;
 
                 default:
+                    critical ("unexpected state %s", inverse_state.to_string ());
                     assert_not_reached ();
             }
 
@@ -215,6 +229,7 @@ namespace Gnonograms {
                 return 0;
 
             default:
+                critical ("unexpected state %s", state.to_string ());
                 assert_not_reached ();
         }
     }

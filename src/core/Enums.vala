@@ -50,9 +50,12 @@ public enum Difficulty {
             case Difficulty.MAXIMUM:
                 return _("Possibly ambiguous");
             case Difficulty.COMPUTER:
-                return _("Super sshuman");
-            default:
+                return _("Super human");
+            case Difficulty.UNDEFINED:
                 return _("Undefined");
+            default:
+                critical ("grade to string - unexpected grade");
+                assert_not_reached ();
         }
     }
 
