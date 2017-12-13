@@ -362,7 +362,54 @@ namespace Utils {
 
     public string passes_to_grade_description (uint passes, Dimensions dimensions, bool unique_only, bool advanced) {
         var diff = passes_to_grade (passes, dimensions, unique_only, advanced);
-        return Gnonograms.difficulty_to_string (diff);
+        return diff.to_string ();
     }
+
+    public SolverSettings grade_to_solver_settings (Difficulty grade) {
+        SolverSettings settings;
+
+        switch (grade) {
+            case Difficulty.EASY:
+            case Difficulty.MODERATE:
+            case Difficulty.HARD:
+            case Difficulty.CHALLENGING:
+                settings = SolverSettings () {
+                    use_advanced = false,
+                    unique_only = true,
+                    advanced_only = false,
+                    human_only = true
+                };
+                break;
+            case Difficulty.ADVANCED:
+                settings = SolverSettings () {
+                    use_advanced = true,
+                    unique_only = true,
+                    advanced_only = true,
+                    human_only = true
+                };
+                break;
+            case Difficulty.MAXIMUM:
+                settings = SolverSettings () {
+                    use_advanced = true,
+                    unique_only = false,
+                    advanced_only = true,
+                    human_only = true
+                };
+                break;
+            case Difficulty.COMPUTER:
+                settings = SolverSettings () {
+                    use_advanced = true,
+                    unique_only = false,
+                    advanced_only = false,
+                    human_only = false
+                };
+                break;
+            default:
+                assert_not_reached ();
+        }
+
+        return settings;
+    }
+
 }
 }

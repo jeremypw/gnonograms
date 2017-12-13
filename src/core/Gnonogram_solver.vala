@@ -26,11 +26,19 @@ namespace Gnonograms {
       * at a time (used for hinting if implemented).
     **/
 
-    protected override int solve_it (bool use_advanced,
-                                  bool unique_only,
-                                  bool advanced_only) {
+    public Solver (Dimensions _dimensions, Cancellable? _cancellable) {
+        Object (dimensions: _dimensions,
+                cancellable: _cancellable
+        );
+    }
 
-        int result = simple_solver (should_check_solution);
+    protected override int solve_it () {
+        for (int i = 0; i < n_regions; i++) {
+            regions[i].set_to_initial_state ();
+        }
+
+        int result = simple_solver ();
+
         if (state == SolverState.SIMPLE) {
             if (advanced_only) { // Do not want simple solutions
                 return 0;
@@ -38,7 +46,7 @@ namespace Gnonograms {
         }
 
         if (state == SolverState.NO_SOLUTION && use_advanced) {
-            result = advanced_solver (cancellable, unique_only); // Sets state if solution found
+            result = advanced_solver (); // Sets state if solution found
         }
 
         return result;
@@ -47,13 +55,7 @@ namespace Gnonograms {
     /** PRIVATE **/
 
     /** Returns -1 to indicate an error - TODO use throw error instead **/
-    private int simple_solver (bool should_check_solution = false,  bool initialise = true) {
-        if (initialise) {
-            for (int i = 0; i < n_regions; i++) {
-                regions[i].set_to_initial_state ();
-            }
-        }
-
+    private int simple_solver () {
         bool changed = true;
         int pass = 1;
 
@@ -103,7 +105,8 @@ namespace Gnonograms {
         continue simple solve and if still no solution, continue with another guess.
         If first guess does not lead to solution leave unknown and choose another cell
     **/
-    private int advanced_solver (Cancellable cancellable, bool unique_only = true) {
+    private int advanced_solver () {
+        /* Simple solver must have already been run */
         int changed_count = 0;
         int result = 0;
 
@@ -116,13 +119,13 @@ namespace Gnonograms {
             }
 
             changed_count++;
-            result = simple_solver (false, false);
+            result = simple_solver ();
             var initial_state = state;
 
             /* Try opposite to check whether ambiguous or unique */
             guesser.invert_previous_guess ();
             reinitialize_regions ();
-            result = simple_solver (false, false) ;
+            result = simple_solver () ;
             var inverse_state = state;
 
             switch (inverse_state) {
@@ -130,7 +133,7 @@ namespace Gnonograms {
                     /* Regenerate original result */
                     guesser.invert_previous_guess ();
                     reinitialize_regions ();
-                    result = simple_solver (false, false);
+                    result = simple_solver ();
 
                     if (initial_state == SolverState.ERROR) {
                         critical ("error both ways");
@@ -154,7 +157,7 @@ namespace Gnonograms {
                             // regenerate original solution
                             guesser.invert_previous_guess ();
                             reinitialize_regions ();
-                            result = simple_solver (false, false);
+                            result = simple_solver ();
                             state = SolverState.AMBIGUOUS;
                         }
                     } else if (initial_state == SolverState.ERROR) {

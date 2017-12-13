@@ -52,6 +52,7 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
+    private Dimensions _dimensions;
     public Dimensions dimensions {
         get {
             return _dimensions;
@@ -70,6 +71,7 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
+    private Difficulty _game_grade = Difficulty.UNDEFINED;
     public Difficulty game_grade { // Difficulty of game actually loaded
         get {
             return _game_grade;
@@ -80,15 +82,16 @@ public class View : Gtk.ApplicationWindow {
             update_header_bar ();
         }
     }
-
+    private Difficulty _generator_grade;
     public Difficulty generator_grade { // Grade setting
+
         get {
             return _generator_grade;
         }
 
         set {
             _generator_grade = value;
-            app_menu.grade_val = (uint)generator_grade;
+            app_menu.grade_val = (uint)_generator_grade;
             update_tooltip ();
         }
     }
@@ -105,6 +108,7 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
+    private double _fontheight;
     public double fontheight {
         get {
             return _fontheight;
@@ -125,6 +129,7 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
+    private GameState _game_state;
     public GameState game_state {
         get {
             return _game_state;
@@ -381,13 +386,6 @@ public class View : Gtk.ApplicationWindow {
     private bool other_mod_pressed = false;
     private bool shift_pressed = false;
     private bool only_control_pressed = false;
-
-    /* Backing variables, not to be set directly */
-    private Dimensions _dimensions;
-    private double _fontheight;
-    private Difficulty _generator_grade = 0;
-    private Difficulty _game_grade = 0;
-    private GameState _game_state;
     /* ----------------------------------------- */
 
     private CellState drawing_with_state;
@@ -442,7 +440,7 @@ public class View : Gtk.ApplicationWindow {
             restart_button.tooltip_text = _("Clear canvas");
         } else {
             header_bar.title = _("Solving %s").printf (game_name);
-            header_bar.subtitle = difficulty_to_string (game_grade);
+            header_bar.subtitle = game_grade.to_string ();
             restart_button.tooltip_text = _("Restart solving");
         }
     }
@@ -820,8 +818,7 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private void update_tooltip () {
-        var grade_str = Gnonograms.difficulty_to_string (generator_grade);
-        random_game_button.tooltip_text = _("New Random Game - %s").printf (grade_str); ///TRANSLATORS %s is a description of difficulty
+        random_game_button.tooltip_text = _("New Random Game - %s").printf (generator_grade.to_string ()); ///TRANSLATORS %s is a description of difficulty
     }
 }
 }

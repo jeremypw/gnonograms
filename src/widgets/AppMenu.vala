@@ -247,12 +247,12 @@ class AppMenu : Gtk.MenuButton {
         construct {
             cb = new Gtk.ComboBoxText ();
 
-            for (uint u = MIN_GRADE; u <= Difficulty.MAXIMUM; u++) {
-                cb.append (null, Gnonograms.difficulty_to_string ((Difficulty)u));
+            foreach (Difficulty d in Difficulty.all_human ()) {
+                cb.append (((uint)d).to_string (), d.to_string ());
             }
 
             cb.changed.connect (() => {
-                value_changed ((uint)(cb.active) + MIN_GRADE);
+                value_changed ((uint)(cb.active));
             });
 
             cb.expand = false;
@@ -260,15 +260,15 @@ class AppMenu : Gtk.MenuButton {
         }
 
         public void set_value (uint grade) {
-            if (grade < MIN_GRADE) {
-                cb.active = MIN_GRADE;
-            } else {
-                cb.active = (int)grade - MIN_GRADE;
-            }
+            cb.active_id = grade.clamp (MIN_GRADE, Difficulty.MAXIMUM).to_string ();
+        }
+
+        public Difficulty get_difficulty () {
+            return (Difficulty)(get_value ());
         }
 
         public uint get_value () {
-            return cb.active + MIN_GRADE;
+            return (uint)(int.parse (cb.active_id));
         }
 
         public Gtk.Label get_heading () {

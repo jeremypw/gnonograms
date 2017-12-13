@@ -20,23 +20,9 @@
 namespace Gnonograms {
 public class SimpleRandomGameGenerator : AbstractGameGenerator {
 
-    public SimpleRandomGameGenerator (Dimensions dimensions,
-                                      Difficulty grade,
-                                      GamePatternType pattern,
-                                      AbstractSolver _solver,
-                                      Cancellable? _cancellable) {
-        switch (pattern) {
-            case GamePatternType.SIMPLE_RANDOM:
-                pattern_gen = new RandomPatternGenerator (dimensions, grade);
-                break;
-
-            default:
-                assert_not_reached ();
-        }
-
-        solver = _solver;
-        solver.dimensions = dimensions;
-        cancellable = _cancellable;
+    public SimpleRandomGameGenerator (Dimensions _dimensions, Cancellable? _cancellable) {
+        pattern_gen = new RandomPatternGenerator (_dimensions);
+        solver = new Solver (_dimensions, _cancellable);
     }
 
     public override bool generate () {
@@ -44,15 +30,12 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
         int passes = -1;
         uint count = 0;
 
-        while (solution_grade != grade && !cancellable.is_cancelled ()) {
+        while (solution_grade != grade && !cancelled) {
             var pattern = pattern_gen.generate ();
             var row_clues = Utils.row_clues_from_2D_array (pattern);
             var col_clues = Utils.col_clues_from_2D_array (pattern);
 
-            passes = solver.solve_clues (cancellable, use_advanced, unique_only, advanced_only,
-                                               row_clues, col_clues, null, null);
-
-
+            passes = solver.solve_clues (row_clues, col_clues, null, null);
             solution_grade = Utils.passes_to_grade (passes, dimensions, true, true);
 
             if (passes <= 0 || solution_grade > grade + 1) {
@@ -68,7 +51,7 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
             }
         }
 
-        var result = solution_grade == grade && !cancellable.is_cancelled ();
+        var result = solution_grade == grade && !cancelled;
 
         return result;
     }

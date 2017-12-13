@@ -27,28 +27,38 @@ public enum Difficulty {
     HARD =4 ,
     CHALLENGING = 5,
     ADVANCED = 6,
-    MAXIMUM = 7,
+    MAXIMUM = 7, /* Max grade for generated puzzles */
+    COMPUTER = 8, /* Grade for requested computer solving */
     UNDEFINED = 99;
-}
 
-public static string difficulty_to_string (Difficulty d) {
-    switch (d) {
-        case Difficulty.TRIVIAL:
-            return _("Trivial");
-        case Difficulty.VERY_EASY:
-            return _("Very Easy");
-        case Difficulty.EASY:
-            return _("Easy");
-        case Difficulty.MODERATE:
-            return _("Moderately difficult");
-        case Difficulty.HARD:
-            return _("Difficult");
-        case Difficulty.CHALLENGING:
-            return _("Very Difficult");
-        case Difficulty.ADVANCED:
-            return _("Advanced logic required");
-        default:
-            return _("Possibly ambiguous");
+    public string to_string () {
+        switch (this) {
+            case Difficulty.TRIVIAL:
+                return _("Trivial");
+            case Difficulty.VERY_EASY:
+                return _("Very Easy");
+            case Difficulty.EASY:
+                return _("Easy");
+            case Difficulty.MODERATE:
+                return _("Moderately difficult");
+            case Difficulty.HARD:
+                return _("Difficult");
+            case Difficulty.CHALLENGING:
+                return _("Very Difficult");
+            case Difficulty.ADVANCED:
+                return _("Advanced logic required");
+            case Difficulty.MAXIMUM:
+                return _("Possibly ambiguous");
+            case Difficulty.COMPUTER:
+                return _("Super sshuman");
+            default:
+                return _("Undefined");
+        }
+    }
+
+
+    public static Difficulty[] all_human () {
+        return { EASY, MODERATE, HARD, CHALLENGING, ADVANCED, MAXIMUM };
     }
 }
 

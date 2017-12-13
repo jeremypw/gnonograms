@@ -68,7 +68,6 @@ public class Controller : GLib.Object {
 /** PRIVATE **/
     private View view;
     private Model model;
-    private Solver solver;
     private GLib.Settings settings;
     private GLib.Settings saved_state;
     private Gee.Deque<Move> back_stack;
@@ -137,7 +136,6 @@ public class Controller : GLib.Object {
     construct {
         model = new Model ();
         view = new View (model);
-        solver = new Solver ();
         back_stack = new Gee.LinkedList<Move> ();
         forward_stack = new Gee.LinkedList<Move> ();
         settings = new Settings ("com.github.jeremypw.gnonograms-elementary.settings");
@@ -231,13 +229,8 @@ public class Controller : GLib.Object {
 
         AbstractGameGenerator gen;
         var cancellable = new Cancellable ();
-
-        if (generator_grade < Difficulty.ADVANCED) {
-            gen = new SimpleRandomGameGenerator (dimensions, generator_grade, GamePatternType.SIMPLE_RANDOM, solver, cancellable);
-        } else {
-            gen = new AdvancedRandomGameGenerator (dimensions, generator_grade,  GamePatternType.SIMPLE_RANDOM, solver, cancellable); // TODO other generators
-        }
-
+        gen = new SimpleRandomGameGenerator (dimensions, cancellable);
+        gen.grade = generator_grade;
 
         view.game_name = _("Random pattern");
         view.game_grade = Difficulty.UNDEFINED;
@@ -254,7 +247,7 @@ public class Controller : GLib.Object {
                 model.set_from_array (gen.get_solution ());
                 view.update_labels_from_solution ();
 
-                if (gen.is_cancelled ()) {
+                if (cancellable.is_cancelled ()) {
                    view.send_notification (_("Game generation was cancelled"));
                 } else {
                     if (success) {
@@ -436,29 +429,13 @@ public class Controller : GLib.Object {
 
         if (reader.has_solution) {
             model.set_row_data_from_string_array (reader.solution[0 : rows]);
-        } else {
-            var cancellable = new Cancellable ();
-            int passes = solve_game (
-                            false, // no startgrid
-                            true, // use loaded labels, not model
-                            true, // use advanced solver
-                            false, // do not use ultimate solver (to time consuming for loading)
-                            false, // do not insist unique solution exists
-                            false, // Simple solutions allowed
-                            cancellable, // Not currently used (TODO)
-                            false // Not necessarily human soluble
-                        );
-
-            if (passes > 0) {
-                set_model_from_solver ();
-                view.update_labels_from_solution ();
-            } else if (passes < 0) {
-                reader.err_msg = (_("Clues contradictory or insoluble"));
-                return false;
-            } else {
-                view.send_notification (_("Puzzle not solved by computer - may not be possible"));
+        } else { // no solution in file
+            var state = yield start_solving (null);
+            if (state in (SolverState.SIMPLE | SolverState.ADVANCED | SolverState.AMBIGUOUS)) { // successful solution
+                model.solution_data.copy (model.working_data);
             }
         }
+
 
         if (reader.name.length > 1) {
             title = reader.name;
@@ -512,12 +489,6 @@ public class Controller : GLib.Object {
         }
     }
 
-    private void set_model_from_solver () {
-        foreach (Cell c in solver.solution) {
-            model.set_data_from_cell (c);
-        }
-    }
-
     private void rewind_until_correct () {
         while (on_previous_move_request () && model.count_errors () > 0) {
             continue;
@@ -549,43 +520,17 @@ public class Controller : GLib.Object {
     /*** Solver related functions ***/
     /********************************/
 
-    /** Solve a puzzle
-      * @use_startgrid: continue solving partially filled grid.
-      * @use_labels: use text clues from view labels rather than from model (used
-      * for solving manually entered games (if implemented).
-      * @use_advanced: If simple solver fails, continue with advanced solver.
-      * @use_ultimate: I advanced solver fails continue with ultimate solver (time consuming).
-      * @unique_only: Only accept unique solutions (otherwise puzzle regarded insoluble).
+    /** Solve clues by computer using all available techniques
     **/
-    private int solve_game (bool use_startgrid,
-                            bool use_labels,
-                            bool use_advanced,
-                            bool use_ultimate,
-                            bool unique_only,
-                            bool advanced_only,
-                            Cancellable cancellable,
-                            bool human = false) {
-
-        My2DCellArray? startgrid = null;
-
-        if (use_startgrid) {
-            startgrid = new My2DCellArray (dimensions, CellState.UNKNOWN);
-            startgrid.copy (model.display_data);
-        }
-
+    private int computer_solve_clues (AbstractSolver solver) {
         string[] row_clues;
         string[] col_clues;
+        row_clues = view.get_row_clues ();
+        col_clues = view.get_col_clues ();
 
-        if (use_labels) {
-            row_clues = view.get_row_clues ();
-            col_clues = view.get_col_clues ();
-        } else {
-            row_clues = Utils.row_clues_from_2D_array (model.solution_data);
-            col_clues = Utils.col_clues_from_2D_array (model.solution_data);
-        }
+        solver.settings = Utils.grade_to_solver_settings (Difficulty.COMPUTER);
 
-        return solver.solve_clues (cancellable, use_advanced, unique_only, advanced_only,
-                                         row_clues, col_clues, startgrid, null);
+        return solver.solve_clues (row_clues, col_clues);
     }
 
 /*** Signal Handlers ***/
@@ -637,7 +582,6 @@ public class Controller : GLib.Object {
 
     private void on_view_resized () {
         model.dimensions = dimensions;
-        solver.dimensions = dimensions;
 
         model.clear ();
         game_state = GameState.SETTING;
@@ -682,56 +626,53 @@ public class Controller : GLib.Object {
     private void on_solve_this_request () {
         var cancellable = new Cancellable ();
         view.show_working (cancellable, "Solving");
-        game_state = GameState.SOLVING;
         start_solving.begin (cancellable);
     }
 
-    private async void start_solving (Cancellable cancellable) {
+    private async SolverState start_solving (Cancellable? cancellable) {
         /* Need new thread else blocks spinner */
         /* Try as hard as possible to find solution, regardless of grade setting */
+        game_state = GameState.SOLVING;
+        var state = SolverState.UNDEFINED;
 
         new Thread<void*> (null, () => {
             var unique_only = false;
             var advanced = true;
 
-            int passes = solve_game (false, // no startgrid
-                                     true, // use labels not model
-                                     advanced, // allow advanced solutions
-                                     false, // no ultimate solutions (TODO)
-                                     unique_only, // allow ambiguous solution
-                                     false, // simple solutions allowed
-                                     cancellable,
-                                     false);
+            AbstractSolver solver = new Solver (dimensions, cancellable);
+            int passes = computer_solve_clues (solver);
 
+            state = solver.state;
+            string msg = "";
 
-                string msg = "";
+            if (cancellable != null && cancellable.is_cancelled ()) {
+                msg = _("Solving was cancelled");
+            } else if (passes > 0) {
+                var descr = Utils.passes_to_grade_description (passes, dimensions, unique_only, advanced);
+                msg =  _("Solution found. %s").printf (descr);
+            } else{
+                msg = _("No solution found");
+            }
 
-                if (cancellable.is_cancelled ()) {
-                    msg = _("Solving was cancelled");
-                } else if (passes > 0) {
-                    var descr = Utils.passes_to_grade_description (passes, dimensions, unique_only, advanced);
-                    msg =  _("Solution found. %s").printf (descr);
-                } else{
-                    msg = _("No solution found");
+            MainContext.@default ().invoke (() => {
+                if (msg != "") {
+                    view.send_notification (msg);
                 }
 
-                MainContext.@default ().invoke (() => {
-                    if (msg != "") {
-                        view.send_notification (msg);
-                    }
+                view.game_grade = Utils.passes_to_grade (passes, dimensions, unique_only, advanced);
+                model.display_data.copy (solver.grid);
 
-                    view.game_grade = Utils.passes_to_grade (passes, dimensions, unique_only, advanced);
-                    model.display_data.copy (solver.grid);
-
-                    view.hide_progress ();
-                    view.queue_draw ();
-                    return false;
-                });
+                view.hide_progress ();
+                view.queue_draw ();
+                start_solving.callback (); // Needed to continue after yield;
+                return false;
+            });
 
             return null;
         });
 
         yield;
+        return state;
     }
 
     private void on_restart_request () {

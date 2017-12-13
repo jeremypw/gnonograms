@@ -90,4 +90,11 @@ public struct FilterInfo {
     string name;
     string pattern;
 }
+
+public struct SolverSettings {
+    bool use_advanced;
+    bool unique_only;
+    bool advanced_only;
+    bool human_only;
+}
 }

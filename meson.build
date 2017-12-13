@@ -31,7 +31,6 @@ executable (
     'src/Gnonogram_controller.vala',
     'src/Gnonogram_view.vala',
     'src/RandomPatternGenerator.vala',
-    'src/AdvancedRandomGameGenerator.vala',
     'src/SimpleRandomGameGenerator.vala',
     'src/widgets/Gnonogram_labelbox.vala',
     'src/widgets/Gnonogram_label.vala',

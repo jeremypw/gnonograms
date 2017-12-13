@@ -23,10 +23,8 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
     int threshold = 40;
     int min_freedom = 0;
 
-    public RandomPatternGenerator (Dimensions dim, Difficulty grade) {
-        Object (dimensions: dim,
-                grade: grade
-        );
+    public RandomPatternGenerator (Dimensions dim) {
+        Object (dimensions: dim);
     }
 
     public override My2DCellArray generate () {
@@ -49,14 +47,6 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
 
     protected override void set_parameters () {
         switch (grade) {
-            case Difficulty.TRIVIAL:
-                    threshold = 50;
-                    min_freedom = 0;
-                    break;
-            case Difficulty.VERY_EASY:
-                    threshold = 60;
-                    min_freedom = 0;
-                    break;
             case Difficulty.EASY:
                     threshold = 60;
                     min_freedom = 1;
@@ -82,8 +72,7 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
                     min_freedom = 4;
                     break;
             default:
-                threshold = 40;
-                break;
+                assert_not_reached ();
         }
     }
 

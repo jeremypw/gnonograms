@@ -21,12 +21,11 @@ namespace Gnonograms {
 public abstract class AbstractGameGenerator : GLib.Object {
     protected AbstractPatternGenerator pattern_gen;
     protected AbstractSolver solver;
-    protected Cancellable? cancellable;
-
-    /* These default to a Simple Unique Game */
-    protected bool use_advanced { get; set; default = false; }
-    protected bool unique_only { get; set; default = true; }
-    protected bool advanced_only { get; set; default = false; }
+    protected bool cancelled {
+        get {
+            return solver.cancelled;
+        }
+    }
 
     protected Dimensions dimensions {
         get {
@@ -34,9 +33,14 @@ public abstract class AbstractGameGenerator : GLib.Object {
         }
     }
 
-    protected Difficulty grade {
+    public Difficulty grade {
         get {
             return pattern_gen.grade;
+        }
+
+        set {
+            pattern_gen.grade = value;
+            solver.settings = Utils.grade_to_solver_settings (value);
         }
     }
 
@@ -44,6 +48,5 @@ public abstract class AbstractGameGenerator : GLib.Object {
 
     public abstract bool generate ();
     public abstract My2DCellArray get_solution ();
-    public virtual bool is_cancelled () { return cancellable != null ? cancellable.is_cancelled () : false; }
 }
 }

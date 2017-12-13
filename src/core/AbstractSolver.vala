@@ -25,11 +25,31 @@ namespace Gnonograms {
     protected Region[] regions;
     protected uint n_regions { get { return dimensions.length(); }}
     protected bool should_check_solution;
+
     public SolverState state { get; set; }
 
     public My2DCellArray grid {get; protected set;} // Shared with Regions which can update the contents
     public My2DCellArray solution {get; protected set;}
-    protected Cancellable cancellable;
+    public Cancellable? cancellable { get; protected set; }
+    public bool cancelled {
+        get {
+            return cancellable != null ? cancellable.is_cancelled () : false;
+        }
+    }
+
+    public bool unique_only { get; set; default = true;} /* Do not allow ambiguus solutions */
+    public bool use_advanced { get; set; default = false;} /* Use advanced logic (trial and error) */
+    public bool advanced_only { get; set; default = false;} /* Must need advanced logic */
+    public bool human_only { get; set; default = true;} /* Limit solutions to those humanly achievable */
+
+    public SolverSettings settings {
+        set {
+            unique_only = value.unique_only;
+            use_advanced = value.use_advanced;
+            advanced_only = value.advanced_only;
+            human_only = value.human_only;
+        }
+    }
 
     public uint rows { get { return dimensions.height; }}
     public uint cols { get { return dimensions.width; }}
@@ -165,28 +185,22 @@ namespace Gnonograms {
       * procedures. Also specify whether in debugging mode and whether to solve one step
       * at a time (used for hinting if implemented).
     **/
-    public int solve_clues (Cancellable _cancellable,
-                                  bool use_advanced,
-                                  bool unique_only,
-                                  bool advanced_only,
-                                  string[] row_clues,
-                                  string[] col_clues,
-                                  My2DCellArray? start_grid = null,
-                                  My2DCellArray? solution_grid = null) {
+    public int solve_clues (string[] row_clues,
+                            string[] col_clues,
+                            My2DCellArray? start_grid = null,
+                            My2DCellArray? solution_grid = null) {
 
         cancellable = _cancellable;
 
         if (initialize (row_clues, col_clues, start_grid, solution_grid)) {
-            return solve_it (use_advanced, unique_only, advanced_only);
+            return solve_it ();
         } else {
             state = SolverState.ERROR;
             return -1;
         }
     }
 
-    protected abstract int solve_it (bool use_advanced,
-                                     bool unique_only,
-                                     bool advanced_only);
+    protected abstract int solve_it ();
 
 }
 }
