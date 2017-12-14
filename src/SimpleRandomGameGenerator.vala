@@ -36,23 +36,24 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
             var col_clues = Utils.col_clues_from_2D_array (pattern);
 
             passes = solver.solve_clues (row_clues, col_clues, null, null);
-            solution_grade = Utils.passes_to_grade (passes, dimensions, true, true);
+            if (solver.state.solved ()) {
+                solution_grade = Utils.passes_to_grade (passes, dimensions, true, true);
 
-            if (passes <= 0 || solution_grade > grade + 1) {
-                if (++count > 200 ) {
-                    count = 0;
-                    pattern_gen.easier ();
-                }
-            } else {
-                if (solution_grade < grade) {
-                    count = 0;
-                    pattern_gen.harder ();
+                if (solution_grade > grade + 1) {
+                    if (++count > 200 ) {
+                        count = 0;
+                        pattern_gen.easier ();
+                    }
+                } else {
+                    if (solution_grade < grade) {
+                        count = 0;
+                        pattern_gen.harder ();
+                    }
                 }
             }
         }
 
         var result = solution_grade == grade && !cancelled;
-
         return result;
     }
 

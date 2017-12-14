@@ -159,6 +159,7 @@ public class LabelBox : Gtk.Grid {
 
         size = new_size;
         other_size = new_other_size;
+        blank_labels ();
     }
 }
 }

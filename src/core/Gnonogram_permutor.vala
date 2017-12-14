@@ -55,7 +55,7 @@ public class Permutor {
         }
     }
 
-    public void initialise () {
+    public void initialize () {
         int start = 0;
 
         for (int b = 0; b < n_blocks; b++) {

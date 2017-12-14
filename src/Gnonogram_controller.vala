@@ -244,7 +244,7 @@ public class Controller : GLib.Object {
             /* Gtk is not thread-safe so must invoke in the main loop */
             MainContext.@default ().invoke (() => {
             /* Show last generated game regardless */
-                model.set_from_array (gen.get_solution ());
+                model.set_solution_from_array (gen.get_solution ());
                 view.update_labels_from_solution ();
 
                 if (cancellable.is_cancelled ()) {
@@ -616,10 +616,10 @@ public class Controller : GLib.Object {
     }
 
     private void on_solve_this_request () {
-        start_solving.begin ();
+        start_solving.begin (true);
     }
 
-    private async SolverState start_solving () {
+    private async SolverState start_solving (bool copy_to_working = false, bool copy_to_solution = true) {
         /* Need new thread else blocks spinner */
         /* Try as hard as possible to find solution, regardless of grade setting */
         var state = SolverState.UNDEFINED;
@@ -639,7 +639,7 @@ public class Controller : GLib.Object {
 
             if (cancellable != null && cancellable.is_cancelled ()) {
                 msg = _("Solving was cancelled");
-            } else if (passes > 0) {
+            } else if (state.solved ()) {
                 var descr = Utils.passes_to_grade_description (passes, dimensions, unique_only, advanced);
                 msg =  _("Solution found. %s").printf (descr);
             } else{
@@ -653,7 +653,13 @@ public class Controller : GLib.Object {
 
                 view.game_grade = Utils.passes_to_grade (passes, dimensions, unique_only, advanced);
 
-                model.solution_data.copy (solver.grid);
+                if (copy_to_solution) {
+                    model.solution_data.copy (solver.grid);
+                }
+
+                if (copy_to_working) {
+                    model.working_data.copy (solver.grid);
+                }
 
                 view.hide_progress ();
                 view.queue_draw ();

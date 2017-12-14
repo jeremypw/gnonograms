@@ -330,7 +330,7 @@ namespace Utils {
 
     public Difficulty passes_to_grade (uint passes, Dimensions dimensions, bool unique_only, bool advanced) {
         var diff = Difficulty.UNDEFINED;
-        if (passes < 1) {
+        if (passes == 0) {
             return diff;
         }
 
@@ -366,43 +366,41 @@ namespace Utils {
     }
 
     public SolverSettings grade_to_solver_settings (Difficulty grade) {
-        SolverSettings settings;
+        var settings = SolverSettings () {
+                use_advanced = false,
+                unique_only = true,
+                advanced_only = false,
+                human_only = true
+            };
 
         switch (grade) {
             case Difficulty.EASY:
             case Difficulty.MODERATE:
             case Difficulty.HARD:
             case Difficulty.CHALLENGING:
-                settings = SolverSettings () {
-                    use_advanced = false,
-                    unique_only = true,
-                    advanced_only = false,
-                    human_only = true
-                };
+
                 break;
+
             case Difficulty.ADVANCED:
-                settings = SolverSettings () {
-                    use_advanced = true,
-                    unique_only = true,
-                    advanced_only = true,
-                    human_only = true
-                };
+                settings.use_advanced = true;
+                settings.advanced_only = true;
+
                 break;
+
             case Difficulty.MAXIMUM:
-                settings = SolverSettings () {
-                    use_advanced = true,
-                    unique_only = false,
-                    advanced_only = true,
-                    human_only = true
-                };
+                settings.use_advanced = true;
+                settings.unique_only = false;
+                settings.advanced_only = true;
+                settings.human_only = true;
+
                 break;
+
             case Difficulty.COMPUTER:
-                settings = SolverSettings () {
-                    use_advanced = true,
-                    unique_only = false,
-                    advanced_only = false,
-                    human_only = false
-                };
+                settings.use_advanced = true;
+                settings.unique_only = false;
+                settings.advanced_only = false;
+                settings.human_only = false;
+
                 break;
             default:
                 assert_not_reached ();

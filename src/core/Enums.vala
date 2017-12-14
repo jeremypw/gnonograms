@@ -1,4 +1,4 @@
-/* Entry point for gnonograms-elementary  - initialises application and launches game
+/* Entry point for gnonograms-elementary  - initializes application and launches game
  * Copyright (C) 2010-2017  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
@@ -87,6 +87,10 @@ public enum SolverState {
     ADVANCED,
     AMBIGUOUS,
     UNDEFINED;
+
+    public bool solved () {
+        return this in (SIMPLE | ADVANCED | AMBIGUOUS );
+    }
 }
 
 public enum CellPatternType {

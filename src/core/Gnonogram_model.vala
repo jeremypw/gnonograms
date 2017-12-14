@@ -121,8 +121,11 @@ public class Model : GLib.Object {
         display_data.set_data_from_rc (r, c, state);
     }
 
-    public void set_from_array (My2DCellArray array) {
-        display_data.copy (array);
+    public void set_solution_from_array (My2DCellArray array) {
+        solution_data.copy (array);
+    }
+    public void set_working_from_array (My2DCellArray array) {
+        working_data.copy (array);
     }
 
     public CellState get_data_for_cell (Cell cell) {
