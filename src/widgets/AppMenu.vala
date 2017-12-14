@@ -263,10 +263,6 @@ class AppMenu : Gtk.MenuButton {
             cb.active_id = grade.clamp (MIN_GRADE, Difficulty.MAXIMUM).to_string ();
         }
 
-        public Difficulty get_difficulty () {
-            return (Difficulty)(get_value ());
-        }
-
         public uint get_value () {
             return (uint)(int.parse (cb.active_id));
         }

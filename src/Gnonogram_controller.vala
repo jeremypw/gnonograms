@@ -239,7 +239,7 @@ public class Controller : GLib.Object {
     }
 
     private void start_generating (Cancellable cancellable, AbstractGameGenerator gen) {
-        var thread = new Thread<void*> (null, () => {
+        new Thread<void*> (null, () => {
             var success = gen.generate ();
             /* Gtk is not thread-safe so must invoke in the main loop */
             MainContext.@default ().invoke (() => {
@@ -426,7 +426,7 @@ public class Controller : GLib.Object {
         }
 
         model.game_state = GameState.SETTING; /* Selects the solution grid */
-        var state = yield start_solving (); // Sets difficulty in header bar.
+        yield start_solving (); // Sets difficulty in header bar.
         model.blank_working (); // Do not reveal solution on load
 
         if (reader.has_solution) {
