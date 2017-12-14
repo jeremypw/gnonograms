@@ -147,6 +147,7 @@ public class View : Gtk.ApplicationWindow {
     public bool can_go_back {
         set {
             check_correct_button.sensitive = value && is_solving;
+            undo_button.sensitive = value;
         }
     }
 
@@ -211,10 +212,16 @@ public class View : Gtk.ApplicationWindow {
         img = new Gtk.Image.from_icon_name ("list-add-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         random_game_button.image = img;
 
+        undo_button = new Gtk.Button ();
+        img = new Gtk.Image.from_icon_name ("edit-undo-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
+        undo_button.image = img;
+        undo_button.tooltip_text = _("Undo Last Move");
+        undo_button.sensitive = false;
+
         check_correct_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("media-seek-backward-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         check_correct_button.image = img;
-        check_correct_button.tooltip_text = _("Undo Any Errors");
+        check_correct_button.tooltip_text = _("Go Back to Last Correct Position");
         check_correct_button.sensitive = false;
 
         restart_button = new Gtk.Button ();
@@ -240,6 +247,7 @@ public class View : Gtk.ApplicationWindow {
 
         header_bar.pack_end (app_menu);
         header_bar.pack_end (new Gtk.VSeparator ());
+        header_bar.pack_end (undo_button);
         header_bar.pack_end (check_correct_button);
         header_bar.pack_end (auto_solve_button);
         header_bar.pack_end (restart_button);
@@ -288,6 +296,7 @@ public class View : Gtk.ApplicationWindow {
         save_game_button.button_release_event.connect (on_save_game_button_release_event);
         random_game_button.clicked.connect (on_random_game_button_clicked);
         check_correct_button.clicked.connect (on_check_button_pressed);
+        undo_button.clicked.connect (on_undo_button_pressed);
         restart_button.clicked.connect (on_restart_button_pressed);
         auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
     }
@@ -375,6 +384,7 @@ public class View : Gtk.ApplicationWindow {
     private Gtk.Button load_game_button;
     private Gtk.Button save_game_button;
     private Gtk.Button random_game_button;
+    private Gtk.Button undo_button;
     private Gtk.Button check_correct_button;
     private Gtk.Button auto_solve_button;
     private Gtk.Button restart_button;
@@ -795,6 +805,10 @@ public class View : Gtk.ApplicationWindow {
         if (errors > 0) {
             rewind_request ();
         }
+    }
+
+    private void on_undo_button_pressed () {
+        previous_move_request ();
     }
 
     private void on_auto_solve_button_pressed () {

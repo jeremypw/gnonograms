@@ -163,7 +163,7 @@ public class Controller : GLib.Object {
         view.previous_move_request.connect (on_previous_move_request);
         view.game_state_changed.connect (on_state_changed);
         view.random_game_request.connect (on_new_random_request);
-        view.check_errors_request.connect (on_check_errors_request);
+        view.check_errors_request.connect (on_count_errors_request);
         view.rewind_request.connect (on_rewind_request);
         view.delete_event.connect (on_view_deleted);
         view.save_game_request.connect (on_save_game_request);
@@ -527,7 +527,7 @@ public class Controller : GLib.Object {
 
 /*** Signal Handlers ***/
 
-    private uint on_check_errors_request () {
+    private uint on_count_errors_request () {
         return model.count_errors ();
     }
 
@@ -680,6 +680,7 @@ public class Controller : GLib.Object {
         } else {
             model.blank_working ();
             clear_history ();
+            view.update_labels_from_solution ();
             view.queue_draw ();
         }
     }
