@@ -141,10 +141,6 @@ public class Controller : GLib.Object {
         settings = new Settings ("com.github.jeremypw.gnonograms-elementary.settings");
         saved_state = new Settings ("com.github.jeremypw.gnonograms-elementary.saved-state");
 
-        saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
-        saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
-        settings.bind ("grade", view, "generator_grade", SettingsBindFlags.DEFAULT);
-
         load_game_dir = Build.PKGDATADIR + "/games";
         save_game_dir = Environment.get_home_dir () + "/gnonograms";
 
@@ -205,7 +201,6 @@ public class Controller : GLib.Object {
                                              data_home_folder_current,
                                              Gnonograms.UNSAVED_FILENAME);
 
-        restore_saved_state ();
         restore_settings (); /* May change load_game_dir and save_game_dir */
     }
 
@@ -295,15 +290,6 @@ public class Controller : GLib.Object {
         }
     }
 
-    private void restore_saved_state () {
-        int x, y;
-        x = saved_state.get_int ("window-x");
-        y = saved_state.get_int ("window-y");
-        game_path = saved_state.get_string ("current-game-path");
-        window.move (x, y);
-        view.fontheight = saved_state.get_double ("font-height");
-    }
-
     private void restore_settings () {
         var rows = settings.get_uint ("rows");
         var cols = settings.get_uint ("columns");
@@ -319,6 +305,18 @@ public class Controller : GLib.Object {
         if (dir.length > 0) {
             save_game_dir = dir;
         }
+
+        int x, y;
+        x = saved_state.get_int ("window-x");
+        y = saved_state.get_int ("window-y");
+        game_path = saved_state.get_string ("current-game-path");
+        window.move (x, y);
+        view.fontheight = saved_state.get_double ("font-height");
+
+
+        saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
+        saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
+        settings.bind ("grade", view, "generator_grade", SettingsBindFlags.DEFAULT);
     }
 
     private async bool restore_game () {
