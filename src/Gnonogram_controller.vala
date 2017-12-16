@@ -172,10 +172,6 @@ public class Controller : GLib.Object {
         view.solve_this_request.connect (on_solve_this_request);
         view.restart_request.connect (on_restart_request);
 
-        restore_saved_state ();
-        restore_settings (); /* May change load_game_dir and save_game_dir */
-
-
         /* Ensure load save and data directories exist */
         File file;
         try {
@@ -208,6 +204,9 @@ public class Controller : GLib.Object {
         current_game_path = Path.build_path (Path.DIR_SEPARATOR_S,
                                              data_home_folder_current,
                                              Gnonograms.UNSAVED_FILENAME);
+
+        restore_saved_state ();
+        restore_settings (); /* May change load_game_dir and save_game_dir */
     }
 
     private void clear () {
@@ -578,8 +577,9 @@ public class Controller : GLib.Object {
         model.clear ();
         game_state = GameState.SETTING;
 
-        settings.set_uint ("rows", rows);
-        settings.set_uint ("columns", cols);
+        if (view.get_realized ()) { /* No need to save if just constructing */
+            save_game_state (); /* Forget previous game settings */
+        }
 
         view.queue_draw ();
     }
