@@ -123,9 +123,11 @@ public class View : Gtk.ApplicationWindow {
             _fontheight = value;
             row_clue_box.fontheight = _fontheight;
             column_clue_box.fontheight = _fontheight;
-            /* Allow space for lengthening clues on game generation  (typical longest clue) */
-            column_clue_box.set_size_request(-1, (int)(fontheight * rows * 0.75));
-            row_clue_box.set_size_request((int)(fontheight * cols * 0.5), -1);
+            /* Avoid window resizing as clues change */
+            /* Typical longest row clue width approx cols * 0.45 char) */
+            row_clue_box.set_size_request((int)(cols * 0.45 * fontheight), -1);
+            /* Typical longest col clue width approx rows * 0.55) */
+            column_clue_box.set_size_request(-1, (int)(rows * 0.55 * fontheight));
         }
     }
 
@@ -434,10 +436,15 @@ public class View : Gtk.ApplicationWindow {
         var monitor = screen.get_monitor_at_window (get_window ());
         screen.get_monitor_geometry (monitor, out rect);
 #endif
-        max_h = (double)(rect.height) / ((double)(rows * 2));
-        max_w = (double)(rect.width) / ((double)(cols * 2));
+        /* Window height excluding header is approx 1.33 * grid height
+         * Window width approx 1.25 * grid width.
+         * Cell dimensions approx 2.0 * font height
+         * Make allowance for unusable monitor height -approx 64px;
+         */
+        max_h = (double)(rect.height - 64) / 1.33 / (double)rows / 2.0;
+        max_w = (double)(rect.width) / 1.25 / (double)cols / 2.0;
 
-        return double.min (max_h, max_w) / 2;
+        return double.min (max_h, max_w);
     }
 
     private void update_header_bar () {
