@@ -22,13 +22,14 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
 
     int threshold = 40;
     int min_freedom = 0;
+    int edge_bias = 0; /* Extra freedom for edge ranges */
 
     public RandomPatternGenerator (Dimensions dim) {
         Object (dimensions: dim);
     }
 
     public override My2DCellArray generate () {
-        var grid = new My2DCellArray (dimensions);
+        var grid = new My2DCellArray (dimensions, CellState.EMPTY);
 
         new_pattern (grid);
 
@@ -46,6 +47,8 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
     }
 
     protected override void set_parameters () {
+        edge_bias = 0;
+
         switch (grade) {
             case Difficulty.EASY:
                     threshold = 60;
@@ -58,10 +61,12 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
             case Difficulty.HARD:
                     threshold = 70;
                     min_freedom = 3;
+                    edge_bias = 1;
                     break;
             case Difficulty.CHALLENGING:
                     threshold = 75;
-                    min_freedom = 4;
+                    min_freedom = 3;
+                    edge_bias = 2;
                     break;
             case Difficulty.ADVANCED:
                     threshold = 70;
@@ -84,92 +89,104 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
         var total = rows * cols;
         CellState[] state = new CellState[total];
 
-        int index = 0;
-        while (index < total) {
-            var cs = rand_gen.int_range (0, 99) > threshold ? CellState.FILLED : CellState.EMPTY;
-            var length = rand_gen.int_range (1, 3);
-
-            while (length > 0 && index < total) {
-                state[index] = cs;
-                index++;
-                length--;
-            }
-        }
-
-        index = 0;
-        for (uint r = 0; r < rows; r++) {
-            for (uint c = 0; c < cols; c++) {
-                grid.set_data_from_rc (r, c, state[index]);
-                index++;
-            }
-        }
-
-        /* Make more even pattern */
-        index = 0;
-        while (index < total) {
-            var cs = rand_gen.int_range (0, 99) > threshold ? CellState.FILLED : CellState.EMPTY;
-            var length = rand_gen.int_range (1, 3);
-
-            while (length > 0 && index < total) {
-                state[index] = cs;
-                index++;
-                length--;
-            }
-        }
-
-        index = 0;
-        for (uint c = 0; c < cols; c++) {
-            for (uint r = 0; r < rows; r++) {
-                var cs = state[index];
-                if (cs == CellState.FILLED) {
-                    grid.set_data_from_rc (r, c, cs);
-                }
-
-                index++;
-            }
-        }
+        insert_random (state, false, grid); /* Insert random row patterns */
+        insert_random (state, true, grid); /* Overlay with random column patterns */
 
         /* Adjust freedom of each row and col if necessary */
-        if (rows >= 10 && min_freedom > 0) {
-            CellState[] sa = new CellState[cols];
-            int df, filled, blocks;
+        if (min_freedom > 0) {
+            adjust_region (false, grid);
+            adjust_region (true, grid);
+        }
+    }
 
-            for (uint r = 0; r < rows; r++) {
-                grid.get_array (r, false, ref sa);
+    private void insert_random (CellState[] sa, bool column_wise, My2DCellArray grid) {
+        int total = sa.length;
+        int index = 0;
 
-                df = Utils.freedom_from_array (sa, out filled, out blocks);
+        /* Create linear array of random filled and empty blocks */
+        while (index < total) {
+            var cs = rand_gen.int_range (0, 99) > threshold ? CellState.FILLED : CellState.EMPTY;
+            var length = rand_gen.int_range (1, 3);
 
-                /* Insert random empty cells until enough freedom */
-                while (df < min_freedom) {
-                    var ptr = rand_gen.int_range (0, (int)cols - 1);
-                    if (sa[ptr] == CellState.FILLED) {
-                        sa[ptr] = CellState.EMPTY;
-                        df++;
-                    }
-                }
+            while (length > 0 && index < total) {
+                sa[index] = cs;
+                index++;
+                length--;
             }
         }
 
-
-        if (cols >= 10 && min_freedom > 0) {
-            CellState[] sa = new CellState[rows];
-            int df, filled, blocks;
-
+        /* Copy into grid either row-wise or column-wise */
+        index = 0;
+        if (column_wise) {
             for (uint c = 0; c < cols; c++) {
-                grid.get_array (c, true, ref sa);
-                df = Utils.freedom_from_array (sa, out filled, out blocks);
-
-                /* Insert random empty cells until enough freedom */
-                while (df < min_freedom) {
-                    var ptr = rand_gen.int_range (0, (int)rows - 1);
-                    if (sa[ptr] == CellState.FILLED) {
-                        sa[ptr] = CellState.EMPTY;
-                        df++;
+                for (uint r = 0; r < rows; r++) {
+                    var cs = sa[index];
+                    if (cs == CellState.FILLED) {
+                        grid.set_data_from_rc (r, c, cs);
                     }
+                    index++;
+                }
+            }
+        } else {
+            for (uint r = 0; r < rows; r++) {
+                for (uint c = 0; c < cols; c++) {
+                    grid.set_data_from_rc (r, c, sa[index]);
+                    index++;
                 }
             }
         }
+    }
 
+    /** Tweak rows or columns to comply with desired minimum degrees of freedom
+      * The edges are made more sparse for more difficult puzzles.
+      **/
+    private void adjust_region (bool is_column, My2DCellArray grid) {
+        uint lim = is_column ? cols : rows;
+        uint size = is_column ? rows : cols;
+        CellState[] sa = new CellState[size];
+        int df, filled, blocks, min;
+
+        for (uint i = 0; i < lim; i++) {
+            grid.get_array (i, is_column, ref sa);
+
+            df = Utils.freedom_from_array (sa, out filled, out blocks);
+            /* Do not want to produce totally empty regions */
+            min = int.min ((int)size - 1, min_freedom + (i < 2 || i > lim - 3 ? edge_bias : 0));
+
+            if (df >= min) {
+                continue;
+            }
+
+            insert_empty (min - df, sa);
+
+            grid.set_array (i, is_column, sa);
+        }
+    }
+
+    /** Randomly replace @replace filled cells with empty cells to increase degrees of freedom.
+      * Work in from the ends so corners sparser.
+     **/
+    private void insert_empty (uint replace, CellState[] sa) {
+        uint count = 0;
+        uint lim = sa.length - 1;
+
+        for (uint i = 0; i <= lim / 2 + 1; i++) {
+            var ptr = i;
+            if (sa[ptr] == CellState.FILLED) {
+                sa[ptr] = CellState.EMPTY;
+                if (++count == replace) {
+                    break;
+                }
+            }
+
+            ptr = lim - ptr;
+            if (sa[ptr] == CellState.FILLED) {
+                sa[ptr] = CellState.EMPTY;
+                if (++count == replace) {
+                    break;
+                }
+            }
+        }
     }
 }
 }
