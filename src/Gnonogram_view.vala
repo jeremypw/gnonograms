@@ -579,27 +579,11 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private bool on_grid_button_press (Gdk.EventButton event) {
-        switch (event.button) {
-            case Gdk.BUTTON_PRIMARY:
-            case Gdk.BUTTON_MIDDLE:
-                if (event.type == Gdk.EventType.@2BUTTON_PRESS || event.button == Gdk.BUTTON_MIDDLE) {
-                    if (is_solving) {
-                        drawing_with_state = CellState.UNKNOWN;
-                        break;
-                    } else {
-                        return true;
-                    }
-                } else {
-                    drawing_with_state = CellState.FILLED;
-                }
-                break;
 
-            case Gdk.BUTTON_SECONDARY:
-                drawing_with_state = CellState.EMPTY;
-                break;
-
-            default:
-                return false;
+        if (event.type == Gdk.EventType.@2BUTTON_PRESS || event.button == Gdk.BUTTON_MIDDLE) {
+            drawing_with_state = is_solving ? CellState.UNKNOWN : CellState.EMPTY;
+        } else {
+            drawing_with_state = event.button == Gdk.BUTTON_PRIMARY ? CellState.FILLED : CellState.EMPTY;
         }
 
         make_move_at_cell ();
