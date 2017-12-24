@@ -579,7 +579,6 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private bool on_grid_button_press (Gdk.EventButton event) {
-
         if (event.type == Gdk.EventType.@2BUTTON_PRESS || event.button == Gdk.BUTTON_MIDDLE) {
             drawing_with_state = is_solving ? CellState.UNKNOWN : CellState.EMPTY;
         } else {

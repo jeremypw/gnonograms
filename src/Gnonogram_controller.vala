@@ -678,9 +678,10 @@ public class Controller : GLib.Object {
         } else {
             model.blank_working ();
             clear_history ();
-            view.update_labels_from_solution ();
-            view.queue_draw ();
         }
+
+        view.update_labels_from_solution ();
+        view.queue_draw ();
     }
 }
 }
