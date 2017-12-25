@@ -37,7 +37,9 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
 
             passes = solver.solve_clues (row_clues, col_clues, null, null);
             if (solver.state.solved ()) {
-                solution_grade = Utils.passes_to_grade (passes, dimensions, true, true);
+                solution_grade = Utils.passes_to_grade (passes, dimensions,
+                                                        solver.unique_only,
+                                                        solver.use_advanced);
 
                 if (solution_grade > grade + 1) {
                     if (++count > 200 ) {
@@ -53,7 +55,7 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
             }
         }
 
-        var result = solution_grade == grade && !cancelled;
+        var result = (grade in solution_grade) && !cancelled;
         return result;
     }
 

@@ -621,25 +621,25 @@ public class Controller : GLib.Object {
         /* Need new thread else blocks spinner */
         /* Try as hard as possible to find solution, regardless of grade setting */
         var state = SolverState.UNDEFINED;
-
+        Difficulty diff = Difficulty.UNDEFINED;
+        string msg = "";
         var cancellable = new Cancellable ();
         view.show_working (cancellable, "Solving");
 
         new Thread<void*> (null, () => {
-            var unique_only = false;
-            var advanced = true;
-
             AbstractSolver solver = new Solver (dimensions, cancellable);
             int passes = computer_solve_clues (solver);
 
             state = solver.state;
-            string msg = "";
 
             if (cancellable != null && cancellable.is_cancelled ()) {
                 msg = _("Solving was cancelled");
             } else if (state.solved ()) {
-                var descr = Utils.passes_to_grade_description (passes, dimensions, unique_only, advanced);
-                msg =  _("Solution found. %s").printf (descr);
+                diff = Utils.passes_to_grade (passes, dimensions,
+                                              state != SolverState.AMBIGUOUS,
+                                              state != SolverState.SIMPLE);
+
+                msg =  _("Solution found. %s").printf (diff.to_string ());
             } else{
                 msg = _("No solution found");
             }
@@ -649,7 +649,7 @@ public class Controller : GLib.Object {
                     view.send_notification (msg);
                 }
 
-                view.game_grade = Utils.passes_to_grade (passes, dimensions, unique_only, advanced);
+                view.game_grade = diff;
 
                 if (copy_to_solution) {
                     model.solution_data.copy (solver.grid);

@@ -337,7 +337,7 @@ namespace Utils {
         var cells_per_pass = (double)(dimensions.length ()) / ((double)passes - 2);
 
         if (cells_per_pass < 1 ) {
-            diff = Difficulty.ADVANCED;
+            diff = unique_only ? Difficulty.ADVANCED : Difficulty.MAXIMUM;
         } else if (cells_per_pass < 2 ) {
             diff = Difficulty.CHALLENGING;
         }

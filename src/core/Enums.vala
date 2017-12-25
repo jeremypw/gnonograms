@@ -27,7 +27,7 @@ public enum Difficulty {
     HARD =4 ,
     CHALLENGING = 5,
     ADVANCED = 6,
-    MAXIMUM = 7, /* Max grade for generated puzzles */
+    MAXIMUM = 7, /* Max grade for generated puzzles (possibly ambiguous)*/
     COMPUTER = 8, /* Grade for requested computer solving */
     UNDEFINED = 99;
 
@@ -80,16 +80,16 @@ public enum CellState {
 }
 
 public enum SolverState {
-    ERROR,
-    CANCELLED,
-    NO_SOLUTION,
-    SIMPLE,
-    ADVANCED,
-    AMBIGUOUS,
-    UNDEFINED;
+    ERROR = 0,
+    CANCELLED = 1,
+    NO_SOLUTION = 1 << 1,
+    SIMPLE = 1 << 2,
+    ADVANCED = 1 << 3,
+    AMBIGUOUS = 1 << 4,
+    UNDEFINED = 1 << 5;
 
     public bool solved () {
-        return this in (SIMPLE | ADVANCED | AMBIGUOUS );
+        return this in SIMPLE | ADVANCED | AMBIGUOUS;
     }
 }
 

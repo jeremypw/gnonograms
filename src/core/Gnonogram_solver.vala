@@ -141,7 +141,6 @@ namespace Gnonograms {
 
             switch (inverse_state) {
                 case SolverState.ERROR:
-
                     if (initial_state == SolverState.ERROR || result < min_to_contradiction) {
                         guesser.cancel_previous_guess (); //
                         state = SolverState.UNDEFINED; // Continue (may be easier contradiction later)
@@ -188,7 +187,7 @@ namespace Gnonograms {
                         reinitialize_regions ();
                         state = SolverState.UNDEFINED;
                     } else {
-                        critical ("unexpected sinitial tate %s", initial_state.to_string ());
+                        critical ("unexpected initial sState %s", initial_state.to_string ());
                         assert_not_reached ();
                     }
 
