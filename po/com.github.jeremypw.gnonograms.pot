@@ -1,7 +1,7 @@
 # POT file for the com.github.jeremypw.gnonograms package
 # Copyright (C) 2017
 # This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
-# FIRST AUTHOR <jeremywootten@gmail.com>, 2017.
+# Jeremy Wootten <jeremywootten@gmail.com>, 2017.
 #
 #, fuzzy
 msgid ""
