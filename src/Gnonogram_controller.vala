@@ -1,4 +1,4 @@
-/* Controller class for gnonograms-elementary - creates model and view, handles user input and settings.
+/* Controller class for gnonograms - creates model and view, handles user input and settings.
  * Copyright (C) 2010-2017  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
@@ -138,8 +138,8 @@ public class Controller : GLib.Object {
         view = new View (model);
         back_stack = new Gee.LinkedList<Move> ();
         forward_stack = new Gee.LinkedList<Move> ();
-        settings = new Settings ("com.github.jeremypw.gnonograms-elementary.settings");
-        saved_state = new Settings ("com.github.jeremypw.gnonograms-elementary.saved-state");
+        settings = new Settings ("com.github.jeremypw.gnonograms.settings");
+        saved_state = new Settings ("com.github.jeremypw.gnonograms.saved-state");
 
         load_game_dir = Build.PKGDATADIR + "/games";
         save_game_dir = Environment.get_home_dir () + "/gnonograms";

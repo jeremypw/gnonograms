@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-    <enum id="com.github.jeremypw.gnonograms-elementary.difficulty">
+    <enum id="com.github.jeremypw.gnonograms.difficulty">
         <value value="0" nick="trivial"/>
         <value value="1" nick="very-easy"/>
         <value value="2" nick="easy"/>
@@ -11,13 +11,13 @@
         <value value="7" nick="maximum"/>
     </enum>
 
-    <enum id="com.github.jeremypw.gnonograms-elementary.game-state">
+    <enum id="com.github.jeremypw.gnonograms.game-state">
         <value value="0" nick="setting"/>
         <value value="1" nick="solving"/>
     </enum>
 
-    <schema path="/com/github/jeremypw/gnonograms-elementary/settings/" id="com.github.jeremypw.gnonograms-elementary.settings">
-        <key name="grade" enum="com.github.jeremypw.gnonograms-elementary.difficulty">
+    <schema path="/com/github/jeremypw/gnonograms/settings/" id="com.github.jeremypw.gnonograms.settings">
+        <key name="grade" enum="com.github.jeremypw.gnonograms.difficulty">
           <default>'moderate'</default>
           <summary>difficulty of generated puzzles</summary>
           <description>
@@ -58,8 +58,8 @@
         </key>
     </schema>
 
-    <schema path="/com/github/jeremypw/gnonograms-elementary/saved-state/" id="com.github.jeremypw.gnonograms-elementary.saved-state">
-        <key name="mode" enum="com.github.jeremypw.gnonograms-elementary.game-state">
+    <schema path="/com/github/jeremypw/gnonograms/saved-state/" id="com.github.jeremypw.gnonograms.saved-state">
+        <key name="mode" enum="com.github.jeremypw.gnonograms.game-state">
           <default>'solving'</default>
           <summary>setting or solving puzzles</summary>
           <description>

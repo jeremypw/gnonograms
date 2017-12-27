@@ -1,4 +1,4 @@
-/* View class for gnonograms-elementary - displays user interface
+/* View class for gnonograms - displays user interface
  * Copyright (C) 2010-2017  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify

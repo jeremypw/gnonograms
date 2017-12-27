@@ -1,5 +1,5 @@
-project ('com.github.jeremypw.gnonograms-elementary', 'vala', 'c')
-shortname = 'gnonograms-elementary'
+project ('com.github.jeremypw.gnonograms', 'vala', 'c')
+shortname = 'gnonograms'
 domain = 'com.github.jeremypw.'
 
 add_project_arguments (

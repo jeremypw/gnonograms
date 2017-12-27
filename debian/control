@@ -1,4 +1,4 @@
-Source: com.github.jeremypw.gnonograms-elementary
+Source: com.github.jeremypw.gnonograms
 Section: x11
 Priority: extra
 Maintainer: Jeremy Wootten <jeremywootten@gmail.com>
@@ -11,7 +11,7 @@ Build-Depends: meson (>= 0.43),
                libgranite-dev (>= 0.4.1)
 
 Standards-Version: 4.1.1
-Package: com.github.jeremypw.gnonograms-elementary
+Package: com.github.jeremypw.gnonograms
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Description: Japanese Logic Puzzle

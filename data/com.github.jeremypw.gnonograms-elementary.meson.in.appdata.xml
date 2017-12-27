@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-    <id>com.github.jeremypw.gnonograms-elementary.desktop</id>
+    <id>com.github.jeremypw.gnonograms.desktop</id>
     <metadata_license>CC-BY-SA-3.0</metadata_license>
     <project_group>jeremypw</project_group>
     <project_license>GPL-3.0+</project_license>
@@ -29,10 +29,10 @@
         </release>
     </releases>
     <provides>
-        <binary>com.github.jeremypw.gnonograms-elementary</binary>
+        <binary>com.github.jeremypw.gnonograms</binary>
     </provides>
     <developer_name>Jeremy P Wootten</developer_name>
-    <url type="homepage">https://github.com/jeremypw/gnonograms-elementary</url>
-    <url type="bugtracker">https://github.com/jeremypw/gnonograms-elementary/issues</url>
+    <url type="homepage">https://github.com/jeremypw/gnonograms</url>
+    <url type="bugtracker">https://github.com/jeremypw/gnonograms/issues</url>
     <update_contact>jeremywootten@gmail.com</update_contact>
 </component>

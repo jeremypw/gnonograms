@@ -14,12 +14,12 @@ msgstr ""
 "X-Generator: Launchpad (build 18298)\n"
 
 #. (itstool) path: component/summary
-#: data/gnonograms-elementary.meson.in.appdata.xml:8
+#: data/gnonograms.meson.in.appdata.xml:8
 msgid "Create and solve gnonogram puzzles"
 msgstr ""
 
 #. (itstool) path: description/_p
-#: data/gnonograms-elementary.meson.in.appdata.xml:10
+#: data/gnonograms.meson.in.appdata.xml:10
 msgid ""
 "Gnonograms is an implementation of the Japanese logic puzzle \"Nonograms\", "
 "also known as \"Tsunami\", \"Griddlers\", and other names. The object of the "
@@ -29,25 +29,25 @@ msgid ""
 msgstr ""
 
 #. (itstool) path: component/developer_name
-#: data/gnonograms-elementary.meson.in.appdata.xml:34
+#: data/gnonograms.meson.in.appdata.xml:34
 msgid "Jeremy P Wootten"
 msgstr ""
 
-#: data/com.github.jeremypw.gnonograms-elementary.meson.in.desktop:8
-#: data/com.github.jeremypw.gnonograms-elementary.meson.in.desktop:12
-#: data/com.github.jeremypw.gnonograms-elementary.meson.in.desktop:3
-#: data/com.github.jeremypw.gnonograms-elementary.meson.in.desktop:9
-msgid "gnonograms-elementary"
+#: data/com.github.jeremypw.gnonograms.meson.in.desktop:8
+#: data/com.github.jeremypw.gnonograms.meson.in.desktop:12
+#: data/com.github.jeremypw.gnonograms.meson.in.desktop:3
+#: data/com.github.jeremypw.gnonograms.meson.in.desktop:9
+msgid "gnonograms"
 msgstr ""
 
-#: data/com.github.jeremypw.gnonograms-elementary.meson.in.desktop:4
+#: data/com.github.jeremypw.gnonograms.meson.in.desktop:4
 msgid "Create and solve nonogram puzzles."
 msgstr ""
 
-#: data/com.github.jeremypw.gnonograms-elementary.meson.in.desktop:5
+#: data/com.github.jeremypw.gnonograms.meson.in.desktop:5
 msgid "game;puzzle;logic;grid;pattern"
 msgstr ""
 
-#: data/com.github.jeremypw.gnonograms-elementary.meson.in.desktop:6
+#: data/com.github.jeremypw.gnonograms.meson.in.desktop:6
 msgid "Logic Game"
 msgstr ""

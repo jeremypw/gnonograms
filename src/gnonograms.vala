@@ -1,4 +1,4 @@
-/* Entry point for gnonograms-elementary  - initializes application and launches game
+/* Entry point for gnonograms  - initializes application and launches game
  * Copyright (C) 2010-2017  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
@@ -28,17 +28,17 @@ public class App : Granite.Application {
     }
 
     construct {
-        application_id = "com.github.jeremypw.gnonograms-elementary";
+        application_id = "com.github.jeremypw.gnonograms";
         flags = ApplicationFlags.HANDLES_OPEN;
 
         program_name = _("Gnonograms");
         app_years = "2017";
-        app_icon = "gnonograms-elementary";
+        app_icon = "gnonograms";
         build_version = Build.VERSION;
 
-        app_launcher = "com.github.jeremypw.gnonograms-elementary.desktop";
-        main_url = "https://github.com/jeremypw/gnonograms-elementary";
-        bug_url = "https://github.com/jeremypw/gnonograms-elementary/issues";
+        app_launcher = "com.github.jeremypw.gnonograms.desktop";
+        main_url = "https://github.com/jeremypw/gnonograms";
+        bug_url = "https://github.com/jeremypw/gnonograms/issues";
         help_url = "";
         translate_url = "";
         about_authors = { "Jeremy Wootten <jeremywootten@gmail.com" };

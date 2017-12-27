@@ -1,4 +1,4 @@
-/* Handles working and solution data for gnonograms-elementary
+/* Handles working and solution data for gnonograms
  * Copyright (C) 2010-2017  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
