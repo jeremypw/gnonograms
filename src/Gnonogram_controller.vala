@@ -68,8 +68,8 @@ public class Controller : GLib.Object {
 /** PRIVATE **/
     private View view;
     private Model model;
-    private GLib.Settings settings;
-    private GLib.Settings saved_state;
+    private GLib.Settings? settings;
+    private GLib.Settings? saved_state;
     private Gee.Deque<Move> back_stack;
     private Gee.Deque<Move> forward_stack;
     private string save_game_dir;
@@ -138,8 +138,14 @@ public class Controller : GLib.Object {
         view = new View (model);
         back_stack = new Gee.LinkedList<Move> ();
         forward_stack = new Gee.LinkedList<Move> ();
-        settings = new Settings ("com.github.jeremypw.gnonograms.settings");
-        saved_state = new Settings ("com.github.jeremypw.gnonograms.saved-state");
+
+        var schema_source = GLib.SettingsSchemaSource.get_default ();
+        if (schema_source.lookup ("com.github.jeremypw.gnonograms.settings", true) != null &&
+            schema_source.lookup ("com.github.jeremypw.gnonograms.saved-state", true) != null) {
+
+            settings = new Settings ("com.github.jeremypw.gnonograms.settings");
+            saved_state = new Settings ("com.github.jeremypw.gnonograms.saved-state");
+        }
 
         load_game_dir = Build.PKGDATADIR + "/games";
         save_game_dir = Environment.get_home_dir () + "/gnonograms";
@@ -205,8 +211,8 @@ public class Controller : GLib.Object {
     }
 
     private void clear () {
-        view.blank_labels ();
         model.clear ();
+        view.update_labels_from_solution ();
         clear_history ();
         game_path = "";
 
@@ -264,6 +270,10 @@ public class Controller : GLib.Object {
     }
 
     private void save_game_state () {
+        if (saved_state == null) {
+            return;
+        }
+
         int x, y;
         window.get_position (out x, out y);
         saved_state.set_int ("window-x", x);
@@ -274,11 +284,19 @@ public class Controller : GLib.Object {
     }
 
     private void save_settings () {
+        if (settings == null) {
+            return;
+        }
+
         settings.set_string ("save-game-dir", save_game_dir);
         settings.set_string ("load-game-dir", load_game_dir);
     }
 
     private void save_current_game () {
+        if (current_game_path == null) {
+            return;
+        }
+
         try {
             var current_game = File.new_for_path (current_game_path);
             current_game.@delete ();
@@ -291,32 +309,38 @@ public class Controller : GLib.Object {
     }
 
     private void restore_settings () {
-        var rows = settings.get_uint ("rows");
-        var cols = settings.get_uint ("columns");
-        view.dimensions = {cols, rows};
+        if (settings != null) {
+            var rows = settings.get_uint ("rows");
+            var cols = settings.get_uint ("columns");
+            view.dimensions = {cols, rows};
 
-        var dir = settings.get_string ("load-game-dir");
-        if (dir.length > 0) {
-            load_game_dir = dir;
+            var dir = settings.get_string ("load-game-dir");
+            if (dir.length > 0) {
+                load_game_dir = dir;
+            }
+
+            dir = settings.get_string ("save-game-dir");
+
+            if (dir.length > 0) {
+                save_game_dir = dir;
+            }
+
+            int x, y;
+            x = saved_state.get_int ("window-x");
+            y = saved_state.get_int ("window-y");
+            game_path = saved_state.get_string ("current-game-path");
+            window.move (x, y);
+            view.fontheight = saved_state.get_double ("font-height");
+
+
+            saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
+            saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
+            settings.bind ("grade", view, "generator_grade", SettingsBindFlags.DEFAULT);
+        } else {
+            view.dimensions = {15, 10};
+            view.fontheight = 24;
+            view.generator_grade = Difficulty.MODERATE;
         }
-
-        dir = settings.get_string ("save-game-dir");
-
-        if (dir.length > 0) {
-            save_game_dir = dir;
-        }
-
-        int x, y;
-        x = saved_state.get_int ("window-x");
-        y = saved_state.get_int ("window-y");
-        game_path = saved_state.get_string ("current-game-path");
-        window.move (x, y);
-        view.fontheight = saved_state.get_double ("font-height");
-
-
-        saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
-        saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
-        settings.bind ("grade", view, "generator_grade", SettingsBindFlags.DEFAULT);
     }
 
     private async bool restore_game () {
@@ -572,7 +596,7 @@ public class Controller : GLib.Object {
     private void on_view_resized () {
         model.dimensions = dimensions;
 
-        model.clear ();
+        clear ();
         game_state = GameState.SETTING;
 
         if (view.get_realized ()) { /* No need to save if just constructing */
