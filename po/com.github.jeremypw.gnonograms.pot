@@ -1,0 +1,286 @@
+# POT file for the com.github.jeremypw.gnonograms package
+# Copyright (C) 2017
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# FIRST AUTHOR <jeremywootten@gmail.com>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-27 16:50+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/gnonograms.vala:34
+msgid "Gnonograms"
+msgstr ""
+
+#: src/gnonograms.vala:46
+msgid "translator-credits"
+msgstr ""
+
+#: src/Gnonogram_controller.vala:224
+msgid "Blank sheet"
+msgstr ""
+
+#: src/Gnonogram_controller.vala:235
+msgid "Random pattern"
+msgstr ""
+
+#: src/Gnonogram_controller.vala:251
+msgid "Game generation was cancelled"
+msgstr ""
+
+#: src/Gnonogram_controller.vala:257
+msgid "Failed to generate game of required grade"
+msgstr ""
+
+#: src/Gnonogram_controller.vala:428
+msgid "Dimensions too large"
+msgstr ""
+
+#: src/Gnonogram_controller.vala:431
+msgid "Dimensions too small"
+msgstr ""
+
+#: src/Gnonogram_controller.vala:437
+msgid "Dimensions missing"
+msgstr ""
+
+#: src/Gnonogram_controller.vala:445
+msgid "Clues missing"
+msgstr ""
+
+#: src/Gnonogram_controller.vala:496
+msgid "Correct solution"
+msgstr ""
+
+#: src/Gnonogram_controller.vala:498
+msgid "Alternative solution found"
+msgstr ""
+
+#: src/Gnonogram_controller.vala:500
+msgid "There are errors"
+msgstr ""
+
+#: src/Gnonogram_controller.vala:660
+msgid "Solving was cancelled"
+msgstr ""
+
+#: src/Gnonogram_controller.vala:666
+#, c-format
+msgid "Solution found. %s"
+msgstr ""
+
+#: src/Gnonogram_controller.vala:668
+msgid "No solution found"
+msgstr ""
+
+#: src/Gnonogram_view.vala:202
+msgid "Gnonograms for Elementary"
+msgstr ""
+
+#: src/Gnonogram_view.vala:207
+msgid "Load a Game from File"
+msgstr ""
+
+#: src/Gnonogram_view.vala:212
+msgid "Save a Game to File"
+msgstr ""
+
+#: src/Gnonogram_view.vala:221
+msgid "Undo Last Move"
+msgstr ""
+
+#: src/Gnonogram_view.vala:227
+msgid "Go Back to Last Correct Position"
+msgstr ""
+
+#: src/Gnonogram_view.vala:238
+msgid "Solve by Computer"
+msgstr ""
+
+#: src/Gnonogram_view.vala:453
+msgid "Drawing"
+msgstr ""
+
+#: src/Gnonogram_view.vala:454
+#, c-format
+msgid "Design new puzzle or edit %s"
+msgstr ""
+
+#: src/Gnonogram_view.vala:455
+msgid "Clear canvas"
+msgstr ""
+
+#: src/Gnonogram_view.vala:457
+#, c-format
+msgid "Solving %s"
+msgstr ""
+
+#: src/Gnonogram_view.vala:459
+msgid "Restart solving"
+msgstr ""
+
+#: src/Gnonogram_view.vala:790
+#, c-format
+msgid "%u error found"
+msgstr ""
+
+#: src/Gnonogram_view.vala:790
+#, c-format
+msgid "%u errors found"
+msgstr ""
+
+#: src/Gnonogram_view.vala:793
+msgid "No errors"
+msgstr ""
+
+#: src/Gnonogram_view.vala:823
+#, c-format
+msgid "New Random Game - %s"
+msgstr ""
+
+#: src/widgets/Gnonogram_label.vala:119
+#, c-format
+msgid "Freedom = %u"
+msgstr ""
+
+#: src/widgets/AppMenu.vala:77
+msgid "Rows"
+msgstr ""
+
+#: src/widgets/AppMenu.vala:78
+msgid "Columns"
+msgstr ""
+
+#: src/widgets/AppMenu.vala:106
+msgid "Options"
+msgstr ""
+
+#: src/widgets/AppMenu.vala:259
+msgid "Generated games"
+msgstr ""
+
+#: src/widgets/ViewModeButton.vala:49
+msgid "Draw a pattern"
+msgstr ""
+
+#: src/widgets/ViewModeButton.vala:50
+msgid "Solve a puzzle"
+msgstr ""
+
+#: src/widgets/Progress_indicator.vala:54
+msgid "Cancel solving"
+msgstr ""
+
+#: src/core/utils.vala:254
+msgid "Built in puzzles"
+msgstr ""
+
+#: src/core/utils.vala:263
+msgid "Save solution too"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:83 src/core/Gnonogram_filewriter.vala:169
+msgid "Gnonogram puzzles"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:88
+msgid "Choose a puzzle"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:227
+msgid "Missing clues"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:235
+msgid "Invalid clue"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:247
+msgid "Solution grid or working grid missing"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:254
+msgid "Wrong number of rows in solution or working grid"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:262
+msgid "Wrong number of columns in solution or working grid"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:269
+msgid "Invalid cell state"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:289
+msgid "Missing game state"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:296
+msgid "Could not determine game state in loaded game file"
+msgstr ""
+
+#: src/core/Gnonogram_filereader.vala:307
+#, c-format
+msgid "Invalid game state '%s' in loaded game file"
+msgstr ""
+
+#: src/core/Gnonogram_filewriter.vala:50
+msgid "Untitled"
+msgstr ""
+
+#: src/core/Gnonogram_filewriter.vala:173
+msgid "Name and save this puzzle"
+msgstr ""
+
+#: src/core/Enums.vala:37
+msgid "Trivial"
+msgstr ""
+
+#: src/core/Enums.vala:39
+msgid "Very Easy"
+msgstr ""
+
+#: src/core/Enums.vala:41
+msgid "Easy"
+msgstr ""
+
+#: src/core/Enums.vala:43
+msgid "Moderately difficult"
+msgstr ""
+
+#: src/core/Enums.vala:45
+msgid "Difficult"
+msgstr ""
+
+#: src/core/Enums.vala:47
+msgid "Very Difficult"
+msgstr ""
+
+#: src/core/Enums.vala:49
+msgid "Advanced logic required"
+msgstr ""
+
+#: src/core/Enums.vala:51
+msgid "Possibly ambiguous"
+msgstr ""
+
+#: src/core/Enums.vala:53
+msgid "Super human"
+msgstr ""
+
+#: src/core/Enums.vala:55
+msgid "Undefined"
+msgstr ""
+
+#: src/core/Constants.vala:30
+msgid "?"
+msgstr ""
