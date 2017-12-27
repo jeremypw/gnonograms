@@ -1,2 +1,2 @@
-# gnonograms-elementary
-A rewrite of the existing gnonograms program in Vala according to elementaryos design principles
+# gnonograms
+Nonograms puzzle game written in Vala and intended primarily for elementaryos.
