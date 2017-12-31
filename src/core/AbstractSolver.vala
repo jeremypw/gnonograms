@@ -185,10 +185,10 @@ namespace Gnonograms {
       * procedures. Also specify whether in debugging mode and whether to solve one step
       * at a time (used for hinting if implemented).
     **/
-    public int solve_clues (string[] row_clues,
-                            string[] col_clues,
-                            My2DCellArray? start_grid = null,
-                            My2DCellArray? solution_grid = null) {
+    public Difficulty solve_clues (string[] row_clues,
+                                   string[] col_clues,
+                                   My2DCellArray? start_grid = null,
+                                   My2DCellArray? solution_grid = null) {
 
         cancellable = _cancellable;
 
@@ -196,11 +196,12 @@ namespace Gnonograms {
             return solve_it ();
         } else {
             state = SolverState.ERROR;
-            return -1;
+            return Difficulty.UNDEFINED;
         }
     }
 
-    protected abstract int solve_it ();
+    protected abstract Difficulty solve_it ();
+
 
 }
 }

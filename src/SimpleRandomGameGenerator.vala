@@ -27,48 +27,33 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
 
     public override bool generate () {
         /* returns true if a game of correct grade was generated otherwise false  */
-        int passes = -1;
         uint count = 0;
 
-        while (solution_grade != grade && !cancelled) {
+        while (!cancelled) {
             var pattern = pattern_gen.generate ();
             var row_clues = Utils.row_clues_from_2D_array (pattern);
             var col_clues = Utils.col_clues_from_2D_array (pattern);
 
-            passes = solver.solve_clues (row_clues, col_clues, null, null);
+            var solution_grade = solver.solve_clues (row_clues, col_clues, null, null);
 
             if (solver.state.solved ()) {
-                switch (solver.state) {
-                    case SolverState.ADVANCED:
-                        solution_grade = Difficulty.ADVANCED;
-                        break;
-
-
-                    case SolverState.AMBIGUOUS:
-                        solution_grade = Difficulty.MAXIMUM;
-                        break;
-
-                    default:
-                        solution_grade = Utils.passes_to_grade (passes, dimensions,
-                                                                solver.unique_only,
-                                                                solver.use_advanced);
-                        break;
-                }
-
                 if (solution_grade > grade + 1) {
-                    if (++count > 200 ) {
+                    if (++count > 20 ) {
                         count = 0;
                         pattern_gen.easier ();
                     }
                 } else if (solution_grade < grade) {
                         count = 0;
                         pattern_gen.harder ();
+                } else {
+                    break;
                 }
             }
+
+
         }
 
-        var result = (grade in solution_grade) && !cancelled;
-        return result;
+        return !cancelled;
     }
 
     public override My2DCellArray get_solution () {

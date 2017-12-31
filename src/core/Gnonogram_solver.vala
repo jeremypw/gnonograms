@@ -32,22 +32,20 @@ namespace Gnonograms {
         );
     }
 
-    protected override int solve_it () {
+    protected override Difficulty solve_it () {
         for (int i = 0; i < n_regions; i++) {
             regions[i].set_to_initial_state ();
         }
 
         int result = simple_solver ();
 
-        if (state == SolverState.SIMPLE) {
-            if (advanced_only) { // Do not want simple solutions
-                return 0;
-            }
-        } else if (use_advanced) {
+        if (state == SolverState.SIMPLE && advanced_only) {
+            result = 0;
+        } else if (state != SolverState.SIMPLE && use_advanced) {
             result = advanced_solver (); // Sets state if solution found
         }
 
-        return result;
+        return passes_to_grade (result);
     }
 
     /** PRIVATE **/
@@ -244,6 +242,30 @@ namespace Gnonograms {
         }
     }
 
+
+    /** Only call if simple solver used **/
+    private Difficulty passes_to_grade (uint passes) {
+        if (passes == 0) {
+            return Difficulty.UNDEFINED;
+        } else if (state == SolverState.ADVANCED) {
+            return Difficulty.ADVANCED;
+        } else if (state == SolverState.AMBIGUOUS) {
+            return Difficulty.MAXIMUM;
+        }
+
+        var cells_per_pass = (double)(dimensions.length ()) / ((double)passes - 2);
+
+        if (cells_per_pass < 2 ) {
+            return Difficulty.CHALLENGING;
+        } else if (cells_per_pass < 4 ) {
+            return Difficulty.HARD;
+        } else if (cells_per_pass < 6 ) {
+            return Difficulty.MODERATE;
+        } else {
+            return Difficulty.EASY;
+        }
+    }
+
     private class Guesser {
         private Cell trial_cell;
         private int rdir;
@@ -384,7 +406,6 @@ namespace Gnonograms {
 
             return true;
         }
-
     }
 }
 }

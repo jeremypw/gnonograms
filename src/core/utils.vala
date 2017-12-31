@@ -317,54 +317,6 @@ namespace Utils {
         }
     }
 
-    public int grade_to_minimum_passes (uint grd, Dimensions dimensions) {
-        var avg_length = (double)(dimensions.rows () + dimensions.cols ()) / 10.0 * (double)grd + 4.0;
-
-        if (grd <= Difficulty.ADVANCED) {
-            return (int)(avg_length);
-        } else {
-            return (int)(grd - (Difficulty.ADVANCED)) * 100;
-        }
-
-    }
-
-    public Difficulty passes_to_grade (uint passes, Dimensions dimensions, bool unique_only, bool advanced) {
-        var diff = Difficulty.UNDEFINED;
-        if (passes == 0) {
-            return diff;
-        }
-
-        var cells_per_pass = (double)(dimensions.length ()) / ((double)passes - 2);
-
-        if (cells_per_pass < 1 ) {
-            diff = unique_only ? Difficulty.ADVANCED : Difficulty.MAXIMUM;
-        } else if (cells_per_pass < 2 ) {
-            diff = Difficulty.CHALLENGING;
-        }
-        else if (cells_per_pass < 4 ) {
-            diff = Difficulty.HARD;
-        }
-        else if (cells_per_pass < 6 ) {
-            diff = Difficulty.MODERATE;
-        }
-        else {
-            diff = Difficulty.EASY;
-        }
-
-        if (!advanced && diff > Difficulty.CHALLENGING) {
-            diff = Difficulty.CHALLENGING;
-        } else if (unique_only && diff > Difficulty.ADVANCED) { // Cannot be "POSSIBLY AMBIGUOUS"
-            diff = Difficulty.ADVANCED;
-        }
-
-        return diff;
-    }
-
-    public string passes_to_grade_description (uint passes, Dimensions dimensions, bool unique_only, bool advanced) {
-        var diff = passes_to_grade (passes, dimensions, unique_only, advanced);
-        return diff.to_string ();
-    }
-
     public SolverSettings grade_to_solver_settings (Difficulty grade) {
         var settings = SolverSettings () {
                 use_advanced = false,

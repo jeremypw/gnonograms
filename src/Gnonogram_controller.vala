@@ -535,7 +535,7 @@ public class Controller : GLib.Object {
 
     /** Solve clues by computer using all available techniques
     **/
-    private int computer_solve_clues (AbstractSolver solver) {
+    private Difficulty computer_solve_clues (AbstractSolver solver) {
         string[] row_clues;
         string[] col_clues;
         row_clues = view.get_row_clues ();
@@ -652,29 +652,11 @@ public class Controller : GLib.Object {
 
         new Thread<void*> (null, () => {
             AbstractSolver solver = new Solver (dimensions, cancellable);
-            int passes = computer_solve_clues (solver);
-
-            state = solver.state;
+            diff = computer_solve_clues (solver);
 
             if (cancellable != null && cancellable.is_cancelled ()) {
                 msg = _("Solving was cancelled");
-            } else if (state.solved ()) {
-                switch (state) {
-                    case SolverState.ADVANCED:
-                        diff = Difficulty.ADVANCED;
-                        break;
-
-                    case SolverState.AMBIGUOUS:
-                        diff = Difficulty.MAXIMUM;
-                        break;
-
-                    default:
-                        diff = Utils.passes_to_grade (passes, dimensions,
-                                              state != SolverState.AMBIGUOUS,
-                                              state != SolverState.SIMPLE);
-                        break;
-                }
-
+            } else if (solver.state.solved ()) {
                 msg =  _("Solution found. %s").printf (diff.to_string ());
             } else{
                 msg = _("No solution found");
