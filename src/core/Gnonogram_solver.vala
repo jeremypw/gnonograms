@@ -43,9 +43,7 @@ namespace Gnonograms {
             if (advanced_only) { // Do not want simple solutions
                 return 0;
             }
-        }
-
-        if (state == SolverState.NO_SOLUTION && use_advanced) {
+        } else if (use_advanced) {
             result = advanced_solver (); // Sets state if solution found
         }
 
@@ -58,6 +56,9 @@ namespace Gnonograms {
     private int simple_solver () {
         bool changed = true;
         int pass = 1;
+        reinitialize_regions ();
+
+        state = SolverState.UNDEFINED;
 
         while (changed && pass >= 0 && pass < MAX_PASSES) {
             //keep cycling through regions while at least one of them is changing
@@ -109,16 +110,19 @@ namespace Gnonograms {
         /* Simple solver must have already been run */
         int result = 0;
         int changed_count = 0;
-        int min_to_contradiction = human_only ? -5 : -(int)MAX_PASSES; // Humans cannot 'see' deep contradictions
+        int min_to_contradiction = human_only ? 5 : (int)MAX_PASSES; // Humans cannot 'see' deep contradictions
         var guesser = new Guesser (grid, human_only);
-        state = SolverState.UNDEFINED;
+
         var initial_state = SolverState.UNDEFINED;
         var inverse_state = SolverState.UNDEFINED;
+        int contra = 0;
 
+        state = SolverState.UNDEFINED;
         while (state == SolverState.UNDEFINED)  {
             changed_count++;
 
             if (!guesser.next_guess ()) {
+                state = SolverState.NO_SOLUTION;
                 break;
             }
 
@@ -126,37 +130,41 @@ namespace Gnonograms {
             initial_state = state;
 
             /* Reject too difficult solution path */
-            if (state == SolverState.ERROR && result < min_to_contradiction) {
+            if (state == SolverState.ERROR && result > min_to_contradiction) {
                 state = SolverState.UNDEFINED;
                 guesser.cancel_previous_guess ();
-                reinitialize_regions ();
                 continue;
             }
 
+            contra = result;
+
             /* Try opposite to check whether ambiguous or unique */
             guesser.invert_previous_guess ();
-            reinitialize_regions ();
             result = simple_solver () ;
             inverse_state = state;
 
+            if (initial_state == SolverState.ERROR && inverse_state == SolverState.ERROR) {
+                state = SolverState.NO_SOLUTION;
+                assert_not_reached ();
+            }
+
             switch (inverse_state) {
                 case SolverState.ERROR:
-                    if (initial_state == SolverState.ERROR || result < min_to_contradiction) {
+                    if (initial_state == SolverState.ERROR || result > min_to_contradiction) {
                         guesser.cancel_previous_guess (); //
                         state = SolverState.UNDEFINED; // Continue (may be easier contradiction later)
                         break;
                     }
 
+                    contra = result;
                     /* Regenerate original result */
                     guesser.invert_previous_guess ();
-                    reinitialize_regions ();
                     result = simple_solver ();
 
                     if (initial_state == SolverState.SIMPLE) {
                         state = SolverState.ADVANCED;
                     } else if (initial_state == SolverState.NO_SOLUTION) { // original cannot be in error
-                        /* continue from here */
-                        reinitialize_regions ();
+                        /* continue from original result here */
                         guesser.initialize ();
                         state = SolverState.UNDEFINED;
                     } else {
@@ -173,7 +181,6 @@ namespace Gnonograms {
                         } else {
                             // regenerate original solution
                             guesser.invert_previous_guess ();
-                            reinitialize_regions ();
                             result = simple_solver ();
                             state = SolverState.AMBIGUOUS;
                         }
@@ -184,7 +191,6 @@ namespace Gnonograms {
                     } else if (initial_state == SolverState.NO_SOLUTION) { // could be erroneous
                         // regenerate original position
                         guesser.cancel_previous_guess ();
-                        reinitialize_regions ();
                         state = SolverState.UNDEFINED;
                     } else {
                         critical ("unexpected initial sState %s", initial_state.to_string ());
@@ -229,14 +235,8 @@ namespace Gnonograms {
                 return 0;
 
             case SolverState.ADVANCED:
-                return result + changed_count;
-
             case SolverState.AMBIGUOUS:
-                return result + changed_count;
-
-            case SolverState.UNDEFINED:
-                state = SolverState.NO_SOLUTION;
-                return 0;
+                return result;
 
             default:
                 critical ("unexpected state %s", state.to_string ());
@@ -297,16 +297,19 @@ namespace Gnonograms {
 
         public bool next_guess () {
             save_position ();
-            return make_guess ();
+            var guessed = make_guess ();
+            return guessed;
         }
 
         public void invert_previous_guess () {
             load_position ();
             trial_cell = trial_cell.inverse ();
+
             grid.set_data_from_cell (trial_cell);
         }
 
         public void cancel_previous_guess () {
+
             load_position ();
             trial_cell = trial_cell.inverse ();
             grid.set_data_from_rc (trial_cell.row, trial_cell.col, CellState.UNKNOWN);

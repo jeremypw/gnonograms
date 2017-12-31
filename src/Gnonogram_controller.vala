@@ -659,9 +659,21 @@ public class Controller : GLib.Object {
             if (cancellable != null && cancellable.is_cancelled ()) {
                 msg = _("Solving was cancelled");
             } else if (state.solved ()) {
-                diff = Utils.passes_to_grade (passes, dimensions,
+                switch (state) {
+                    case SolverState.ADVANCED:
+                        diff = Difficulty.ADVANCED;
+                        break;
+
+                    case SolverState.AMBIGUOUS:
+                        diff = Difficulty.MAXIMUM;
+                        break;
+
+                    default:
+                        diff = Utils.passes_to_grade (passes, dimensions,
                                               state != SolverState.AMBIGUOUS,
                                               state != SolverState.SIMPLE);
+                        break;
+                }
 
                 msg =  _("Solution found. %s").printf (diff.to_string ());
             } else{
