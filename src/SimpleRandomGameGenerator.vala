@@ -34,23 +34,25 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
             var row_clues = Utils.row_clues_from_2D_array (pattern);
             var col_clues = Utils.col_clues_from_2D_array (pattern);
 
-            var solution_grade = solver.solve_clues (row_clues, col_clues, null, null);
+            solution_grade = solver.solve_clues (row_clues, col_clues, null, null);
 
             if (solver.state.solved ()) {
-                if (solution_grade > grade + 1) {
-                    if (++count > 20 ) {
-                        count = 0;
-                        pattern_gen.easier ();
-                    }
-                } else if (solution_grade < grade) {
-                        count = 0;
-                        pattern_gen.harder ();
-                } else {
+                if (solution_grade == grade) {
                     break;
+                } else {
+                    count++;
+                    if (count < 20) {
+                        continue;
+                    } else {
+                        count = 0;
+                        if (solution_grade > grade) {
+                            pattern_gen.easier ();
+                        } else {
+                            pattern_gen.harder ();
+                        }
+                    }
                 }
             }
-
-
         }
 
         return !cancelled;
