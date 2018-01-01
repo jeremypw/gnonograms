@@ -1,0 +1,11 @@
+#!/usr/bin/env python3
+
+import os
+import subprocess
+
+schemadir = "@schema_install_dir@"
+schemapath = "@schema_path@"
+
+print('Compiling gsettings schemas...')
+subprocess.call(['glib-compile-schemas', schemadir])
+subprocess.call(['dconf', 'reset', '-f', schemapath])

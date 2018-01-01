@@ -173,17 +173,7 @@ public class Controller : GLib.Object {
         view.solve_this_request.connect (on_solve_this_request);
         view.restart_request.connect (on_restart_request);
 
-        /* Ensure load save and data directories exist */
         File file;
-        try {
-            file = File.new_for_path (save_game_dir);
-            file.make_directory_with_parents (null);
-        } catch (GLib.Error e) {
-            if (!(e is IOError.EXISTS)) {
-                warning ("Could not make %s - %s",file.get_uri (), e.message);
-            }
-        }
-
         try {
             file = File.new_for_path (data_home_folder_current);
             file.make_directory_with_parents (null);
@@ -198,6 +188,25 @@ public class Controller : GLib.Object {
                                              Gnonograms.UNSAVED_FILENAME);
 
         restore_settings (); /* May change load_game_dir and save_game_dir */
+
+        /* Ensure load save and data directories exist */
+        try {
+            file = File.new_for_path (save_game_dir);
+            file.make_directory_with_parents (null);
+        } catch (GLib.Error e) {
+            if (!(e is IOError.EXISTS)) {
+                warning ("Could not make %s - %s",file.get_uri (), e.message);
+            }
+        }
+
+        try {
+            file = File.new_for_path (load_game_dir);
+            file.make_directory_with_parents (null);
+        } catch (GLib.Error e) {
+            if (!(e is IOError.EXISTS)) {
+                warning ("Could not make %s - %s",file.get_uri (), e.message);
+            }
+        }
     }
 
     private void clear () {

@@ -1,6 +1,7 @@
 project ('com.github.jeremypw.gnonograms', 'vala', 'c')
 shortname = 'gnonograms'
 domain = 'com.github.jeremypw.'
+schema_path = '/com/github/jeremypw/' + shortname + '/'
 
 add_project_arguments (
     ['--vapidir', join_paths (meson.current_source_dir (), 'vapi')],
@@ -65,6 +66,16 @@ executable (
 )
 
 meson.add_install_script('meson/post_install.py')
+
+schema_uninstall_data = configuration_data()
+schema_uninstall_data.set('schema_install_dir', join_paths(get_option('prefix'), get_option('datadir'), 'glib-2.0', 'schemas'))
+schema_uninstall_data.set('schema_path', schema_path)
+
+configure_file (
+    input: join_paths (meson.source_root (), 'data', 'post_uninstall.py.in'),
+    output: 'post_uninstall.py',
+    configuration: schema_uninstall_data
+)
 
 subdir ('po')
 subdir ('data')
