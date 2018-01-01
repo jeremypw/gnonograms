@@ -31,8 +31,6 @@ public class Controller : GLib.Object {
         }
     }
 
-    public string load_game_dir { get; private set; }
-
     public Controller (File? game = null) {
         if (game != null) {
             load_game.begin (game, true, (obj, res) => {
@@ -73,6 +71,7 @@ public class Controller : GLib.Object {
     private Gee.Deque<Move> back_stack;
     private Gee.Deque<Move> forward_stack;
     private string save_game_dir;
+    private string load_game_dir;
     private string current_game_path;
     private string? game_path = null;
 
@@ -147,8 +146,8 @@ public class Controller : GLib.Object {
             saved_state = new Settings ("com.github.jeremypw.gnonograms.saved-state");
         }
 
-        load_game_dir = Build.PKGDATADIR + "/games";
         save_game_dir = Environment.get_home_dir () + "/gnonograms";
+        load_game_dir = save_game_dir;
 
         string data_home_folder_current = Path.build_path (
                                                 Path.DIR_SEPARATOR_S,
@@ -178,15 +177,6 @@ public class Controller : GLib.Object {
         File file;
         try {
             file = File.new_for_path (save_game_dir);
-            file.make_directory_with_parents (null);
-        } catch (GLib.Error e) {
-            if (!(e is IOError.EXISTS)) {
-                warning ("Could not make %s - %s",file.get_uri (), e.message);
-            }
-        }
-
-        try {
-            file = File.new_for_path (load_game_dir);
             file.make_directory_with_parents (null);
         } catch (GLib.Error e) {
             if (!(e is IOError.EXISTS)) {

@@ -41,11 +41,6 @@ install_data (
     install_dir: join_paths(get_option('datadir'), 'glib-2.0', 'schemas')
 )
 
-install_subdir (
-    'games',
-    install_dir: join_paths (get_option ('datadir'), meson.project_name ())
-)
-
 icon_sizes = ['32', '48', '64', '128']
 
 foreach i : icon_sizes

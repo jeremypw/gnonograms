@@ -200,7 +200,7 @@ namespace Utils {
                                           Gnonograms.FileChooserAction action,
                                           string dialogname,
                                           FilterInfo [] filters,
-                                          string? start_path,
+                                          string start_path,
                                           out bool save_solution) {
 
         string? file_path = null;
@@ -250,9 +250,7 @@ namespace Utils {
         dialog.local_only = false;
 
         //only need access to built-in puzzle directory if loading a .gno puzzle
-        if (action == Gnonograms.FileChooserAction.OPEN) {
-             dialog.add_button (_("Built in puzzles"), Gtk.ResponseType.APPLY);
-        } else {
+        if (action != Gnonograms.FileChooserAction.OPEN) {
             var grid = new Gtk.Grid ();
             grid.orientation = Gtk.Orientation.HORIZONTAL;
             grid.column_spacing = 6;
@@ -265,21 +263,15 @@ namespace Utils {
             grid.add (save_solution_label);
             grid.add (save_solution_switch);
 
-            dialog.add_action_widget (grid, Gtk.ResponseType.NONE);
+            ((Gtk.Container)(dialog.get_action_area ())).add (grid);
 
             grid.show_all ();
         }
 
-        File start;
-        if (start_path != null) {
-            start = File.new_for_commandline_arg (start_path);
-        } else {
-            start = File.new_for_commandline_arg (get_app ().load_game_dir);
-        }
-
+        var start = File.new_for_commandline_arg (start_path);
         dialog.set_current_folder (start.get_path ());
 
-        var response = run_dialog (dialog);
+        var response = dialog.run ();
 
         if (response == Gtk.ResponseType.ACCEPT) {
             if (gtk_action == Gtk.FileChooserAction.SAVE) {
@@ -295,26 +287,6 @@ namespace Utils {
         dialog.destroy ();
 
         return file_path;
-    }
-
-    private int run_dialog (Gtk.FileChooserDialog dialog) {
-        int response;
-
-        while (true) {
-            response = dialog.run ();
-
-            switch (response) {
-                case Gtk.ResponseType.APPLY:
-                    dialog.set_current_folder (get_app ().load_game_dir);
-                    break;
-
-                case Gtk.ResponseType.NONE:
-                    break;
-
-                default:
-                    return response;
-            }
-        }
     }
 
     public SolverSettings grade_to_solver_settings (Difficulty grade) {

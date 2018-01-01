@@ -21,11 +21,6 @@
 namespace Gnonograms {
 public class App : Granite.Application {
     public Controller controller;
-    public string load_game_dir {
-        get {
-            return controller.load_game_dir;
-        }
-    }
 
     construct {
         application_id = "com.github.jeremypw.gnonograms";
