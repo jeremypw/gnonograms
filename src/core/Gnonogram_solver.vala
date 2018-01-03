@@ -294,11 +294,11 @@ namespace Gnonograms {
 
         var cells_per_pass = (double)(dimensions.length ()) / ((double)passes - 2);
 
-        if (cells_per_pass < 2 ) {
+        if (cells_per_pass < 1.5 ) {
             return Difficulty.CHALLENGING;
-        } else if (cells_per_pass < 4 ) {
+        } else if (cells_per_pass < 3 ) {
             return Difficulty.HARD;
-        } else if (cells_per_pass < 6 ) {
+        } else if (cells_per_pass < 5 ) {
             return Difficulty.MODERATE;
         } else {
             return Difficulty.EASY;
