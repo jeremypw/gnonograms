@@ -61,8 +61,8 @@ namespace Gnonograms {
 
         set {
             _dimensions = value;
-            grid = new My2DCellArray (value);
-            solution = new My2DCellArray (value);
+            grid = new My2DCellArray (_dimensions);
+            solution = new My2DCellArray (_dimensions);
             regions = new Region[n_regions];
 
             for (int i = 0; i < n_regions; i++) {

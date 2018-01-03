@@ -190,6 +190,7 @@ public class Controller : GLib.Object {
         restore_settings (); /* May change load_game_dir and save_game_dir */
 
         /* Ensure load save and data directories exist */
+
         try {
             file = File.new_for_path (save_game_dir);
             file.make_directory_with_parents (null);

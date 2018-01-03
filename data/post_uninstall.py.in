@@ -6,6 +6,8 @@ import subprocess
 schemadir = "@schema_install_dir@"
 schemapath = "@schema_path@"
 
-print('Compiling gsettings schemas...')
+print('Compiling gsettings schemas...' + schemadir)
 subprocess.call(['glib-compile-schemas', schemadir])
+print('Resetting dconf path ...' + schemapath)
 subprocess.call(['dconf', 'reset', '-f', schemapath])
+print ('You must manually remove any games directories created')

@@ -83,7 +83,6 @@ public class Region { /* Not a GObject, to reduce weight */
 
         completed_blocks = new bool[max_blocks];
         completed_blocks_backup = new bool[max_blocks];
-
         tags = new bool[max_len, max_blocks + 2];
         tags_backup = new bool[max_len, max_blocks + 2];
         //two extra flags for "can be empty" and "is finished".
