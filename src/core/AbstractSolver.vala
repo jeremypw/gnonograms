@@ -42,15 +42,6 @@ namespace Gnonograms {
     public bool advanced_only { get; set; default = false;} /* Must need advanced logic */
     public bool human_only { get; set; default = true;} /* Limit solutions to those humanly achievable */
 
-    public SolverSettings settings {
-        set {
-            unique_only = value.unique_only;
-            use_advanced = value.use_advanced;
-            advanced_only = value.advanced_only;
-            human_only = value.human_only;
-        }
-    }
-
     public uint rows { get { return dimensions.height; }}
     public uint cols { get { return dimensions.width; }}
     protected Dimensions _dimensions;
@@ -201,6 +192,7 @@ namespace Gnonograms {
     }
 
     protected abstract Difficulty solve_it ();
+    public abstract void configure_from_grade (Difficulty grade);
 
 
 }

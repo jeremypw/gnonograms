@@ -288,50 +288,5 @@ namespace Utils {
 
         return file_path;
     }
-
-    public SolverSettings grade_to_solver_settings (Difficulty grade) {
-        var settings = SolverSettings () {
-                use_advanced = false,
-                unique_only = true,
-                advanced_only = false,
-                human_only = true
-            };
-
-        switch (grade) {
-            case Difficulty.EASY:
-            case Difficulty.MODERATE:
-            case Difficulty.HARD:
-            case Difficulty.CHALLENGING:
-
-                break;
-
-            case Difficulty.ADVANCED:
-                settings.use_advanced = true;
-                settings.advanced_only = true;
-
-                break;
-
-            case Difficulty.MAXIMUM:
-                settings.use_advanced = true;
-                settings.unique_only = false;
-                settings.advanced_only = true;
-                settings.human_only = true;
-
-                break;
-
-            case Difficulty.COMPUTER:
-                settings.use_advanced = true;
-                settings.unique_only = false;
-                settings.advanced_only = false;
-                settings.human_only = false;
-
-                break;
-            default:
-                assert_not_reached ();
-        }
-
-        return settings;
-    }
-
 }
 }

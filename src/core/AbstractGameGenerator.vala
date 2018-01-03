@@ -40,7 +40,7 @@ public abstract class AbstractGameGenerator : GLib.Object {
 
         set {
             pattern_gen.grade = value;
-            solver.settings = Utils.grade_to_solver_settings (value);
+            solver.configure_from_grade (value);
         }
     }
 

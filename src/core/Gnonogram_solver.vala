@@ -32,6 +32,45 @@ namespace Gnonograms {
         );
     }
 
+    public override void configure_from_grade (Difficulty grade) {
+        use_advanced = false;
+        unique_only = true;
+        advanced_only = false;
+        human_only = true;
+
+        switch (grade) {
+            case Difficulty.EASY:
+            case Difficulty.MODERATE:
+            case Difficulty.HARD:
+            case Difficulty.CHALLENGING:
+
+                break;
+
+            case Difficulty.ADVANCED:
+                use_advanced = true;
+                advanced_only = true;
+
+                break;
+
+            case Difficulty.MAXIMUM:
+                use_advanced = true;
+                unique_only = false;
+                advanced_only = true;
+
+                break;
+
+            case Difficulty.COMPUTER:
+                use_advanced = true;
+                unique_only = false;
+                advanced_only = false;
+                human_only = false;
+
+                break;
+            default:
+                assert_not_reached ();
+        }
+    }
+
     protected override Difficulty solve_it () {
         for (int i = 0; i < n_regions; i++) {
             regions[i].set_to_initial_state ();

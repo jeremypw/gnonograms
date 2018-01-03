@@ -541,7 +541,7 @@ public class Controller : GLib.Object {
         row_clues = view.get_row_clues ();
         col_clues = view.get_col_clues ();
 
-        solver.settings = Utils.grade_to_solver_settings (Difficulty.COMPUTER);
+        solver.configure_from_grade (Difficulty.COMPUTER);
 
         return solver.solve_clues (row_clues, col_clues);
     }
