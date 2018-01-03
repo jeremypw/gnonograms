@@ -84,7 +84,7 @@
         </key>
 
         <key type="d" name="font-height">
-          <default>-100</default>
+          <default>16</default>
           <summary>Font height for clue labels</summary>
           <description>
             The height of the font used for clues, or -100 for default for screen and grid.
