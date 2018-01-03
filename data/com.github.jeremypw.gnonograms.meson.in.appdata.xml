@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component type="desktop-application">
+<component type="desktop">
     <id>com.github.jeremypw.gnonograms.desktop</id>
     <metadata_license>CC-BY-SA-3.0</metadata_license>
     <project_group>jeremypw</project_group>
@@ -13,6 +13,9 @@
         Random soluble pattern puzzles can be generated. New puzzles can be designed and saved.
         </p>
     </description>
+    <categories>
+        <category>Games</category>
+    </categories>
     <releases>
         <release version="0.1" date="2017-xx-xx" urgency="medium">
             <description>
