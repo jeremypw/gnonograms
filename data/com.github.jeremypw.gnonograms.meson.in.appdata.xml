@@ -34,8 +34,10 @@
     <provides>
         <binary>com.github.jeremypw.gnonograms</binary>
     </provides>
+
     <developer_name>Jeremy P Wootten</developer_name>
     <url type="homepage">https://github.com/jeremypw/gnonograms</url>
     <url type="bugtracker">https://github.com/jeremypw/gnonograms/issues</url>
+    <url type="help">https://github.com/jeremypw/gnonograms</url>
     <update_contact>jeremywootten@gmail.com</update_contact>
 </component>
