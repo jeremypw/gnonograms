@@ -50,7 +50,7 @@ public class Controller : GLib.Object {
     }
 
     private void new_or_random_game () {
-        if (is_solving && title == null) {
+        if (is_solving && game_name == null) {
             on_new_random_request ();
         } else {
             new_game ();
@@ -64,7 +64,7 @@ public class Controller : GLib.Object {
     }
 
 /** PRIVATE **/
-    private const string BLANK_NAME =  _("Blank sheet");
+    private const string BLANK_NAME =  _("Untitled");
     private View view;
     private Model model;
     private GLib.Settings? settings;
@@ -131,7 +131,7 @@ public class Controller : GLib.Object {
         }
     }
 
-    private string title {
+    private string game_name {
         get {
             return view.game_name;
         }
@@ -227,12 +227,12 @@ public class Controller : GLib.Object {
         clear_history ();
 
         game_state = GameState.SETTING;
-        is_readonly = false;
+        is_readonly = true; // Force Save As when saving new design
     }
 
     private void new_game () {
         clear ();
-        title = BLANK_NAME;
+        game_name = BLANK_NAME;
     }
 
     private void on_new_random_request () {
@@ -243,7 +243,7 @@ public class Controller : GLib.Object {
         gen = new SimpleRandomGameGenerator (dimensions, cancellable);
         gen.grade = generator_grade;
 
-        view.game_name = _("Random pattern");
+        game_name = _("Random pattern");
         view.game_grade = Difficulty.UNDEFINED;
         view.show_working (cancellable, "Generating");
         start_generating (cancellable, gen);
@@ -361,7 +361,7 @@ public class Controller : GLib.Object {
                                 window,
                                 save_game_dir,
                                 path,
-                                title,
+                                game_name,
                                 dimensions,
                                 view.get_row_clues (),
                                 view.get_col_clues ()
@@ -455,15 +455,14 @@ public class Controller : GLib.Object {
         model.blank_working (); // Do not reveal solution on load
 
         if (reader.has_solution) {
+            model.game_state = GameState.SETTING; /* Selects the working grid */
             model.set_row_data_from_string_array (reader.solution[0 : rows]);
         } else {
             yield start_solving (false, true); // Sets difficulty in header bar; copies any solution found to solution grid.
         }
 
-        if (reader.name.length > 1 && reader.name != BLANK_NAME) {
-            title = reader.name;
-        } else if (reader.game_file != null) {
-            title = reader.game_file.get_basename ();
+        if (reader.name.length > 1 && reader.name != "") {
+            game_name = reader.name;
         }
 
         if (reader.has_working) {
@@ -633,7 +632,11 @@ public class Controller : GLib.Object {
         if (is_readonly) {
             on_save_game_as_request ();
         } else {
-            current_game_path = write_game (current_game_path, true, false);
+            var path = write_game (current_game_path, true, false);
+            if (path != null && path != "") {
+                current_game_path = path;
+                view.send_notification (_("Saved to %s").printf (path));
+            }
         }
     }
 

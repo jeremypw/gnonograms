@@ -219,9 +219,14 @@ public class View : Gtk.ApplicationWindow {
         load_game_button.tooltip_text = _("Load a Game from File");
 
         save_game_button = new Gtk.Button ();
-        img = new Gtk.Image.from_icon_name ("document-save-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
+        img = new Gtk.Image.from_icon_name ("document-save", Gtk.IconSize.LARGE_TOOLBAR);
         save_game_button.image = img;
-        save_game_button.tooltip_text = _("Save a Game to File");
+        save_game_button.tooltip_text = _("Save Game");
+
+        save_game_as_button = new Gtk.Button ();
+        img = new Gtk.Image.from_icon_name ("document-save-as", Gtk.IconSize.LARGE_TOOLBAR);
+        save_game_as_button.image = img;
+        save_game_as_button.tooltip_text = _("Save Game to Different File");
 
         random_game_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("list-add-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
@@ -257,6 +262,7 @@ public class View : Gtk.ApplicationWindow {
 
         header_bar.pack_start (load_game_button);
         header_bar.pack_start (save_game_button);
+        header_bar.pack_start (save_game_as_button);
         header_bar.pack_start (new Gtk.VSeparator ());
         header_bar.pack_start (mode_switch);
 
@@ -308,7 +314,7 @@ public class View : Gtk.ApplicationWindow {
 
         load_game_button.clicked.connect (on_load_game_button_clicked);
         save_game_button.clicked.connect (on_save_game_button_clicked);
-        save_game_button.button_release_event.connect (on_save_game_button_release_event);
+        save_game_as_button.clicked.connect (on_save_game_as_button_clicked);
         random_game_button.clicked.connect (on_random_game_button_clicked);
         check_correct_button.clicked.connect (on_check_button_pressed);
         undo_button.clicked.connect (on_undo_button_pressed);
@@ -383,7 +389,7 @@ public class View : Gtk.ApplicationWindow {
     }
 
     /**PRIVATE**/
-    private const uint NOTIFICATION_TIMEOUT_SEC = 5;
+    private const uint NOTIFICATION_TIMEOUT_SEC = 10;
     private const uint PROGRESS_DELAY_MSEC = 500;
 
     private Gnonograms.LabelBox row_clue_box;
@@ -398,6 +404,7 @@ public class View : Gtk.ApplicationWindow {
     private ViewModeButton mode_switch;
     private Gtk.Button load_game_button;
     private Gtk.Button save_game_button;
+    private Gtk.Button save_game_as_button;
     private Gtk.Button random_game_button;
     private Gtk.Button undo_button;
     private Gtk.Button check_correct_button;
@@ -781,9 +788,8 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private bool on_save_game_button_release_event (Gdk.EventButton event) {
-        set_mods (event.state);
-        return false;
+    private void on_save_game_as_button_clicked () {
+        save_game_as_request ();
     }
 
     private void on_load_game_button_clicked () {
