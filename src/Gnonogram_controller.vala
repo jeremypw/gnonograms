@@ -447,11 +447,12 @@ public class Controller : GLib.Object {
         }
 
         model.game_state = GameState.SETTING; /* Selects the solution grid */
-        yield start_solving (); // Sets difficulty in header bar.
         model.blank_working (); // Do not reveal solution on load
 
         if (reader.has_solution) {
             model.set_row_data_from_string_array (reader.solution[0 : rows]);
+        } else {
+            yield start_solving (false, true); // Sets difficulty in header bar; copies any solution found to solution grid.
         }
 
         if (reader.name.length > 1) {
@@ -638,10 +639,11 @@ public class Controller : GLib.Object {
     }
 
     private void on_solve_this_request () {
+        game_state = GameState.SOLVING;
         start_solving.begin (true);
     }
 
-    private async SolverState start_solving (bool copy_to_working = false, bool copy_to_solution = true) {
+    private async SolverState start_solving (bool copy_to_working = false, bool copy_to_solution = false) {
         /* Need new thread else blocks spinner */
         /* Try as hard as possible to find solution, regardless of grade setting */
         var state = SolverState.UNDEFINED;
@@ -669,7 +671,7 @@ public class Controller : GLib.Object {
 
                 view.game_grade = diff;
 
-                if (copy_to_solution) {
+                if (solver.state.solved () && copy_to_solution) {
                     model.solution_data.copy (solver.grid);
                 }
 
