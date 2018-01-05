@@ -64,7 +64,6 @@ public class Controller : GLib.Object {
     }
 
 /** PRIVATE **/
-    private const string BLANK_NAME =  _("Untitled");
     private View view;
     private Model model;
     private GLib.Settings? settings;
@@ -232,7 +231,7 @@ public class Controller : GLib.Object {
 
     private void new_game () {
         clear ();
-        game_name = BLANK_NAME;
+        game_name = Gnonograms.UNTITLED_NAME;
     }
 
     private void on_new_random_request () {
@@ -341,10 +340,6 @@ public class Controller : GLib.Object {
             saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
             saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
             settings.bind ("grade", view, "generator_grade", SettingsBindFlags.DEFAULT);
-        } else {
-            view.dimensions = {15, 10};
-            view.fontheight = 24;
-            view.generator_grade = Difficulty.MODERATE;
         }
     }
 

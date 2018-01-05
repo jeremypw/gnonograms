@@ -21,7 +21,6 @@
 
 namespace Gnonograms {
 public class Filewriter : Object {
-    private const string UNTITLED_NAME = _("Untitled");
     /** PUBLIC **/
     public DateTime date {get; construct;}
     public uint rows {get; construct;}
@@ -49,7 +48,7 @@ public class Filewriter : Object {
                        string[] col_clues) throws IOError {
 
         Object (
-            name: name ?? UNTITLED_NAME,
+            name: name ?? Gnonograms.UNTITLED_NAME,
             rows: dimensions.rows (),
             cols: dimensions.cols (),
             row_clues: row_clues,
@@ -158,7 +157,7 @@ public class Filewriter : Object {
         stream.printf ("[State]\n");
         stream.printf (game_state.to_string() + "\n");
 
-        if (name != UNTITLED_NAME) {
+        if (name != Gnonograms.UNTITLED_NAME) {
             stream.printf ("[Original path]");
             stream.printf (game_path.to_string ());
         }

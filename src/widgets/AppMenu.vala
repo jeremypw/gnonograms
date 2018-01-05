@@ -26,6 +26,7 @@ class AppMenu : Gtk.MenuButton {
     private AppSetting grade_setting;
     private AppSetting row_setting;
     private AppSetting column_setting;
+    private AppSetting title_setting;
     private Gtk.Grid grid;
 
     private uint _grade_val;
@@ -64,6 +65,8 @@ class AppMenu : Gtk.MenuButton {
         }
     }
 
+    public string title {get; set; default = "";}
+
     public signal void apply ();
 
     construct {
@@ -76,11 +79,13 @@ class AppMenu : Gtk.MenuButton {
         grade_setting = new GradeChooser ();
         row_setting = new ScaleGrid (_("Rows"), 10, 50, 5);
         column_setting = new ScaleGrid (_("Columns"), 10, 50, 5);
+        title_setting = new TitleEntry ();
 
         int pos = 0;
         add_setting (ref pos, grade_setting);
         add_setting (ref pos, row_setting);
         add_setting (ref pos, column_setting);
+        add_setting (ref pos, title_setting);
 
         grid.margin = 12;
         grid.row_spacing = 6;
@@ -110,12 +115,14 @@ class AppMenu : Gtk.MenuButton {
         grade_val = (uint)(grade_setting.get_value ());
         row_val = (uint)(row_setting.get_value ());
         column_val = (uint)(column_setting.get_value ());
+        title = title_setting.get_text ();
     }
 
     private void restore_values () {
         grade_setting.set_value (grade_val);
         row_setting.set_value (row_val);
         column_setting.set_value (column_val);
+        title_setting.set_text (title);
     }
 
     private void add_setting (ref int pos, AppSetting setting) {
@@ -159,7 +166,8 @@ class AppMenu : Gtk.MenuButton {
     }
 
     /** Setting Widget using a Scale limited to integral values separated by step (interface uses uint) **/
-    protected class ScaleGrid :Object, AppSetting {
+//~     protected class ScaleGrid :Object, AppSetting {
+    protected class ScaleGrid : AppSetting {
         public string heading {get; set;}
         public Gtk.Grid chooser {get; set;}
         public Gtk.Label heading_label {get; set;}
@@ -182,7 +190,7 @@ class AppMenu : Gtk.MenuButton {
             scale.value_changed.connect (() => {
                 var val = (uint)(scale.get_value ());
                 val_label.label = val.to_string ();
-                value_changed (val);
+                value_changed ();
             });
 
             heading_label = new Gtk.Label (heading);
@@ -192,20 +200,20 @@ class AppMenu : Gtk.MenuButton {
             chooser.attach (val_label, 1, 0, 1, 1);
         }
 
-        public void set_value (uint val) {
+        public override void set_value (uint val) {
             scale.set_value (val);
             val_label.label = scale.get_value ().to_string ();
         }
 
-        public uint get_value () {
+        public override uint get_value () {
             return scale.get_value ();
         }
 
-        public Gtk.Label get_heading () {
+        public override Gtk.Label get_heading () {
             return heading_label;
         }
 
-        public Gtk.Widget get_chooser () {
+        public override Gtk.Widget get_chooser () {
             return chooser;
         }
 
@@ -216,8 +224,7 @@ class AppMenu : Gtk.MenuButton {
                 var start = (double)_start / (double)_step;
                 var end = (double)_end / (double)_step + 1.0;
                 step = _step;
-                var _adjustment = new Gtk.Adjustment (start, start, end, 1.0, 1.0, 1.0);
-                this.adjustment = _adjustment;
+                adjustment = new Gtk.Adjustment (start, start, end, 1.0, 1.0, 1.0);
 
                 for (var val = start; val <= end; val += 1.0) {
                     add_mark (val, Gtk.PositionType.BOTTOM, null);
@@ -240,7 +247,8 @@ class AppMenu : Gtk.MenuButton {
         }
     }
 
-    protected class GradeChooser : Object, AppSetting {
+//~     protected class GradeChooser : Object, AppSetting {
+    protected class GradeChooser : AppSetting {
         Gtk.ComboBoxText cb;
         Gtk.Label heading;
 
@@ -252,37 +260,69 @@ class AppMenu : Gtk.MenuButton {
             }
 
             cb.changed.connect (() => {
-                value_changed ((uint)(cb.active));
+//~                 value_changed ((uint)(cb.active));
+                value_changed ();
             });
 
             cb.expand = false;
             heading = new Gtk.Label (_("Generated games"));
         }
 
-        public void set_value (uint grade) {
+        public override void set_value (uint grade) {
             cb.active_id = grade.clamp (MIN_GRADE, Difficulty.MAXIMUM).to_string ();
         }
 
-        public uint get_value () {
+        public override uint get_value () {
             return (uint)(int.parse (cb.active_id));
         }
 
-        public Gtk.Label get_heading () {
+        public override Gtk.Label get_heading () {
             return heading;
         }
 
-        public Gtk.Widget get_chooser () {
+        public override Gtk.Widget get_chooser () {
             return cb;
         }
 
     }
+
+//~     protected class TitleEntry : Object, AppSetting {
+    protected class TitleEntry : AppSetting {
+        Gtk.Entry entry;
+        Gtk.Label heading;
+
+        construct {
+            entry = new Gtk.Entry ();
+            entry.placeholder_text = _("Enter title of game here");
+            heading = new Gtk.Label (_("Title"));
+        }
+
+        public override Gtk.Label get_heading () {return heading;}
+
+        public override Gtk.Widget get_chooser () {return entry;}
+
+        public override string get_text () {return entry.text;}
+        public override void set_text (string text) {entry.text = text;}
+    }
+
+    protected abstract class AppSetting : Object {
+        public signal void value_changed ();
+        public virtual void set_value (uint val) {return;}
+        public virtual uint get_value () {return 0;}
+        public virtual void set_text (string text) {}
+        public virtual string get_text () {return "";}
+        public abstract Gtk.Label get_heading ();
+        public abstract Gtk.Widget get_chooser ();
+    }
 }
 
-public interface AppSetting : Object {
-    public signal void value_changed (uint val);
-    public abstract void set_value (uint val);
-    public abstract uint get_value ();
-    public abstract Gtk.Label get_heading ();
-    public abstract Gtk.Widget get_chooser ();
-}
+//~ public interface AppSetting : Object {
+//~     public signal void value_changed ();
+//~     public void set_value (uint val) {return;}
+//~     public uint get_value () {return 0;}
+//~     public void set_text (string text) {}
+//~     public string get_text () {return "";}
+//~     public abstract Gtk.Label get_heading ();
+//~     public abstract Gtk.Widget get_chooser ();
+//~ }
 }

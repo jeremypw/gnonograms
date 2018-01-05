@@ -320,6 +320,10 @@ public class View : Gtk.ApplicationWindow {
         undo_button.clicked.connect (on_undo_button_pressed);
         restart_button.clicked.connect (on_restart_button_pressed);
         auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
+
+        dimensions = {15, 10};
+        fontheight = 24;
+        generator_grade = Difficulty.MODERATE;
     }
 
     public void blank_labels () {
@@ -832,9 +836,9 @@ public class View : Gtk.ApplicationWindow {
         var rows = app_menu.row_val;
         var cols = app_menu.column_val;
         generator_grade = (Difficulty)(app_menu.grade_val);
-        update_tooltip ();
-
+        game_name = app_menu.title;
         dimensions = {cols, rows};
+        update_tooltip ();
     }
 
     private void update_tooltip () {
