@@ -208,7 +208,7 @@ namespace Utils {
         save_solution = (action == Gnonograms.FileChooserAction.SAVE_WITH_SOLUTION);
 
         string button = "Error";
-        Gtk.FileChooserAction gtk_action = Gtk.FileChooserAction.SAVE;
+        var gtk_action = Gtk.FileChooserAction.SAVE;
 
         switch (action) {
             case Gnonograms.FileChooserAction.OPEN:
@@ -285,6 +285,15 @@ namespace Utils {
         }
 
         dialog.destroy ();
+
+        if (gtk_action == Gtk.FileChooserAction.SAVE && file_path != null) {
+            var file = File.new_for_commandline_arg (file_path);
+            if (file.query_exists () &&
+                !show_confirm_dialog (_("Confirm overwrite file name %s").printf (file_path))) {
+
+                file_path = null;
+            }
+        }
 
         return file_path;
     }

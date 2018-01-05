@@ -173,7 +173,7 @@ class AppMenu : Gtk.MenuButton {
         }
     }
 
-    /** Setting Widget using a Scale limited to integral values separated by step (interface uses uint) **/
+    /** Setting Widget using a Scale limited to integral values separated by step **/
     protected class ScaleGrid : AppSetting {
         public string heading {get; set;}
         public Gtk.Grid chooser {get; set;}
