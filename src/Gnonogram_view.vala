@@ -95,6 +95,18 @@ public class View : Gtk.ApplicationWindow {
             update_tooltip ();
         }
     }
+    private bool _readonly;
+    public bool readonly {
+
+        get {
+            return _readonly;
+        }
+
+        set {
+            _readonly = value;
+            update_header_bar ();
+        }
+    }
 
     public uint rows {
         get {
@@ -450,8 +462,8 @@ public class View : Gtk.ApplicationWindow {
 
     private void update_header_bar () {
         if (game_state == GameState.SETTING) {
-            header_bar.title = _("Drawing");
-            header_bar.subtitle = _("Design new puzzle or edit %s").printf (game_name);
+            header_bar.title = _("Drawing %s").printf (game_name);
+            header_bar.subtitle = readonly ? _("Read Only - Save to a different file") : _("Save will Overwrite");
             restart_button.tooltip_text = _("Clear canvas");
         } else {
             header_bar.title = _("Solving %s").printf (game_name);

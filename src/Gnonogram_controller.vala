@@ -75,8 +75,14 @@ public class Controller : GLib.Object {
     private string load_game_dir;
     private string current_game_path;
     private string temporary_game_path;
-    private string? game_path = null;
-    private bool is_readonly = true;
+    private bool is_readonly {
+        get {
+            return view.readonly;
+        }
+        set {
+            view.readonly = value;
+        }
+    }
 
     private GameState game_state {
         get {
@@ -219,7 +225,6 @@ public class Controller : GLib.Object {
         model.clear ();
         view.update_labels_from_solution ();
         clear_history ();
-        game_path = "";
 
         game_state = GameState.SETTING;
         is_readonly = false;
@@ -285,7 +290,7 @@ public class Controller : GLib.Object {
         saved_state.set_int ("window-x", x);
         saved_state.set_int ("window-y", y);
         if (current_game_path != null) {
-            saved_state.set_string ("current-game-path", game_path);
+            saved_state.set_string ("current-game-path", current_game_path);
         }
 
         try {
@@ -328,7 +333,7 @@ public class Controller : GLib.Object {
             int x, y;
             x = saved_state.get_int ("window-x");
             y = saved_state.get_int ("window-y");
-            game_path = saved_state.get_string ("current-game-path");
+            current_game_path = saved_state.get_string ("current-game-path");
             window.move (x, y);
             view.fontheight = saved_state.get_double ("font-height");
 
@@ -412,7 +417,6 @@ public class Controller : GLib.Object {
             if (update_load_dir) {
                 /* At this point, we can assume game_file exists and has parent */
                 load_game_dir = reader.game_file.get_parent ().get_uri ();
-                game_path = reader.game_file.get_path ();
             }
         } else {
             /* There is something wrong with the file being loaded */
@@ -629,12 +633,7 @@ public class Controller : GLib.Object {
         if (is_readonly) {
             on_save_game_as_request ();
         } else {
-            /* Do not save working, but save any solution present */
-            var write_path = write_game (game_path, true, false);
-
-            if (game_path == null || game_path == "") {
-                game_path = write_path;
-            }
+            current_game_path = write_game (current_game_path, true, false);
         }
     }
 
@@ -643,7 +642,7 @@ public class Controller : GLib.Object {
         var write_path = write_game (null, false, false);
 
         if (write_path != null) {
-            game_path = write_path;
+            current_game_path = write_path;
         }
     }
 
