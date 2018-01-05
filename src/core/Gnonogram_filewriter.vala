@@ -30,6 +30,7 @@ public class Filewriter : Object {
     public string[] col_clues {get; construct;}
     public string? game_path {get; private set;}
 
+    public bool is_readonly {get; set; default = true;}
     public string author {get; set; default = "";}
     public string license {get; set; default = "";}
     public Difficulty difficulty {get; set; default = Difficulty.UNDEFINED;}
@@ -134,6 +135,10 @@ public class Filewriter : Object {
             stream.printf ("[Solution grid]\n");
             stream.printf (solution.to_string ());
         }
+
+        stream.printf ("[Locked]\n");
+        stream.printf (is_readonly.to_string ());
+warning ("DONE WRITING");
     }
 
     /*** Writes complete information to reload game state ***/
@@ -152,6 +157,9 @@ public class Filewriter : Object {
         stream.printf (working.to_string());
         stream.printf ("[State]\n");
         stream.printf (game_state.to_string() + "\n");
+        stream.printf ("[Original path]");
+        stream.printf (game_path.to_string ());
+
         stream.flush ();
     }
 

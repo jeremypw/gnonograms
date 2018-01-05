@@ -64,6 +64,7 @@ public class Controller : GLib.Object {
     }
 
 /** PRIVATE **/
+    private const string BLANK_NAME =  _("Blank sheet");
     private View view;
     private Model model;
     private GLib.Settings? settings;
@@ -73,7 +74,9 @@ public class Controller : GLib.Object {
     private string save_game_dir;
     private string load_game_dir;
     private string current_game_path;
+    private string temporary_game_path;
     private string? game_path = null;
+    private bool is_readonly = true;
 
     private GameState game_state {
         get {
@@ -183,7 +186,9 @@ public class Controller : GLib.Object {
             }
         }
 
-        current_game_path = Path.build_path (Path.DIR_SEPARATOR_S,
+        current_game_path = null;
+
+        temporary_game_path = Path.build_path (Path.DIR_SEPARATOR_S,
                                              data_home_folder_current,
                                              Gnonograms.UNSAVED_FILENAME);
 
@@ -217,11 +222,12 @@ public class Controller : GLib.Object {
         game_path = "";
 
         game_state = GameState.SETTING;
+        is_readonly = false;
     }
 
     private void new_game () {
         clear ();
-        title = _("Blank sheet");
+        title = BLANK_NAME;
     }
 
     private void on_new_random_request () {
@@ -278,9 +284,19 @@ public class Controller : GLib.Object {
         window.get_position (out x, out y);
         saved_state.set_int ("window-x", x);
         saved_state.set_int ("window-y", y);
-        saved_state.set_string ("current-game-path", game_path);
+        if (current_game_path != null) {
+            saved_state.set_string ("current-game-path", game_path);
+        }
 
-        save_current_game ();
+        try {
+            var current_game = File.new_for_path (temporary_game_path);
+            current_game.@delete ();
+        } catch (GLib.Error e) {
+            debug ("Error deleting temporary game file - %s", e.message);
+        } finally {
+            /* Save solution and current state */
+            write_game (temporary_game_path, true, true);
+        }
     }
 
     private void save_settings () {
@@ -290,22 +306,6 @@ public class Controller : GLib.Object {
 
         settings.set_string ("save-game-dir", save_game_dir);
         settings.set_string ("load-game-dir", load_game_dir);
-    }
-
-    private void save_current_game () {
-        if (current_game_path == null) {
-            return;
-        }
-
-        try {
-            var current_game = File.new_for_path (current_game_path);
-            current_game.@delete ();
-        } catch (GLib.Error e) {
-            debug ("Error deleting current game file - %s", e.message);
-        } finally {
-            /* Save solution and current state */
-            write_game (current_game_path, true, true);
-        }
     }
 
     private void restore_settings () {
@@ -344,7 +344,7 @@ public class Controller : GLib.Object {
     }
 
     private async bool restore_game () {
-        var current_game = File.new_for_path (current_game_path);
+        var current_game = File.new_for_path (temporary_game_path);
         return yield load_game (current_game, false);
     }
 
@@ -367,6 +367,7 @@ public class Controller : GLib.Object {
             file_writer.working.copy (model.working_data);
             file_writer.solution.copy (model.solution_data);
             file_writer.save_solution = save_solution;
+            file_writer.is_readonly = is_readonly;
 
             if (save_state) {
                 file_writer.write_position_file ();
@@ -375,7 +376,7 @@ public class Controller : GLib.Object {
             }
 
         } catch (IOError e) {
-            critical ("File writer error %s", e.message);
+            warning ("File writer error %s", e.message); // May have been cancelled
             return null;
         }
 
@@ -455,7 +456,7 @@ public class Controller : GLib.Object {
             yield start_solving (false, true); // Sets difficulty in header bar; copies any solution found to solution grid.
         }
 
-        if (reader.name.length > 1) {
+        if (reader.name.length > 1 && reader.name != BLANK_NAME) {
             title = reader.name;
         } else if (reader.game_file != null) {
             title = reader.game_file.get_basename ();
@@ -464,6 +465,14 @@ public class Controller : GLib.Object {
         if (reader.has_working) {
             model.game_state = GameState.SOLVING; /* Selects the working grid */
             model.set_row_data_from_string_array (reader.working[0 : rows]);
+        }
+
+        is_readonly = reader.is_readonly;
+
+        if (reader.original_path != null && reader.original_path != "") {
+            current_game_path = reader.original_path;
+        } else {
+            current_game_path = reader.game_file.get_uri ();
         }
 
 #if 0 //To be implemented (maybe)
@@ -617,11 +626,15 @@ public class Controller : GLib.Object {
     }
 
     private void on_save_game_request () {
-        /* Do not save working, but save any solution present */
-        var write_path = write_game (game_path, true, false);
+        if (is_readonly) {
+            on_save_game_as_request ();
+        } else {
+            /* Do not save working, but save any solution present */
+            var write_path = write_game (game_path, true, false);
 
-        if (game_path == null || game_path == "") {
-            game_path = write_path;
+            if (game_path == null || game_path == "") {
+                game_path = write_path;
+            }
         }
     }
 

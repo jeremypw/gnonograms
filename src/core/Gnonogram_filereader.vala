@@ -40,6 +40,7 @@ public class Filereader : Object {
     public string date {get; private set; default = "";}
     public string score {get; private set; default = "";}
     public string license {get; private set; default = "";}
+    public string original_path {get; private set; default = "";}
 
     public bool has_dimensions {get; private set; default = false;}
     public bool has_row_clues {get; private set; default = false;}
@@ -47,6 +48,7 @@ public class Filereader : Object {
     public bool has_solution {get; private set; default = false;}
     public bool has_working {get; private set; default = false;}
     public bool has_state {get; private set; default = false;}
+    public bool is_readonly {get; private set; default = true;}
 
     public bool valid {
         get {
@@ -172,15 +174,23 @@ public class Filereader : Object {
                     break;
 
                 case "STA":
-                    in_error = !get_gnonogram_state(body);
+                    in_error = !get_gnonogram_state (body);
                     break;
 
                 case "DES":
-                    in_error = !get_game_description(body);
+                    in_error = !get_game_description (body);
                     break;
 
                 case "LIC":
-                    in_error = !get_game_license(body);
+                    in_error = !get_game_license (body);
+                    break;
+
+                case "LOC":
+                    in_error = !get_readonly (body);
+                    break;
+
+                case "ORI":
+                    in_error = !get_original_game_path (body);
                     break;
 
                 default:
@@ -351,6 +361,39 @@ public class Filereader : Object {
                 license = s[0];
             }
         }
+
+        return true;
+    }
+
+    private bool get_readonly (string? body) {
+        if (body == null) {
+            return true; /* Not mandatory */
+        }
+
+        string[] s = Utils.remove_blank_lines (body.split("\n"));
+
+        bool result = true;
+        if (s.length >= 1) {
+            bool.try_parse (s[0].down (), out result);
+        }
+
+        is_readonly = result;
+
+        return true;
+    }
+
+    private bool get_original_game_path (string? body) {
+        string result = "";
+
+        if (body != null) {
+            string[] s = Utils.remove_blank_lines (body.split("\n"));
+
+            if (s.length >= 1) {
+                result = s[0];
+            }
+        }
+
+        original_path = result;
 
         return true;
     }
