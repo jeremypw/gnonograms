@@ -65,7 +65,15 @@ class AppMenu : Gtk.MenuButton {
         }
     }
 
-    public string title {get; set; default = "";}
+    public string title {
+        get {
+            return title_setting.get_text ();
+        }
+
+        set {
+            title_setting.set_text (value);
+        }
+    }
 
     public signal void apply ();
 
@@ -166,7 +174,6 @@ class AppMenu : Gtk.MenuButton {
     }
 
     /** Setting Widget using a Scale limited to integral values separated by step (interface uses uint) **/
-//~     protected class ScaleGrid :Object, AppSetting {
     protected class ScaleGrid : AppSetting {
         public string heading {get; set;}
         public Gtk.Grid chooser {get; set;}
@@ -190,7 +197,7 @@ class AppMenu : Gtk.MenuButton {
             scale.value_changed.connect (() => {
                 var val = (uint)(scale.get_value ());
                 val_label.label = val.to_string ();
-                value_changed ();
+                changed ();
             });
 
             heading_label = new Gtk.Label (heading);
@@ -247,7 +254,6 @@ class AppMenu : Gtk.MenuButton {
         }
     }
 
-//~     protected class GradeChooser : Object, AppSetting {
     protected class GradeChooser : AppSetting {
         Gtk.ComboBoxText cb;
         Gtk.Label heading;
@@ -260,8 +266,7 @@ class AppMenu : Gtk.MenuButton {
             }
 
             cb.changed.connect (() => {
-//~                 value_changed ((uint)(cb.active));
-                value_changed ();
+                changed ();
             });
 
             cb.expand = false;
@@ -286,7 +291,6 @@ class AppMenu : Gtk.MenuButton {
 
     }
 
-//~     protected class TitleEntry : Object, AppSetting {
     protected class TitleEntry : AppSetting {
         Gtk.Entry entry;
         Gtk.Label heading;
@@ -301,28 +305,21 @@ class AppMenu : Gtk.MenuButton {
 
         public override Gtk.Widget get_chooser () {return entry;}
 
-        public override string get_text () {return entry.text;}
-        public override void set_text (string text) {entry.text = text;}
+        public override unowned string get_text () {return entry.text;}
+        public override void set_text (string text) {
+            entry.text = text;
+            changed ();
+        }
     }
 
     protected abstract class AppSetting : Object {
-        public signal void value_changed ();
+        public signal void changed ();
         public virtual void set_value (uint val) {return;}
         public virtual uint get_value () {return 0;}
         public virtual void set_text (string text) {}
-        public virtual string get_text () {return "";}
+        public virtual unowned string get_text () {return "";}
         public abstract Gtk.Label get_heading ();
         public abstract Gtk.Widget get_chooser ();
     }
 }
-
-//~ public interface AppSetting : Object {
-//~     public signal void value_changed ();
-//~     public void set_value (uint val) {return;}
-//~     public uint get_value () {return 0;}
-//~     public void set_text (string text) {}
-//~     public string get_text () {return "";}
-//~     public abstract Gtk.Label get_heading ();
-//~     public abstract Gtk.Widget get_chooser ();
-//~ }
 }

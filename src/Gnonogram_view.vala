@@ -43,11 +43,18 @@ public class View : Gtk.ApplicationWindow {
     private string? _game_name = null;
     public string game_name {
         get {
-            return _game_name;
+            if (_game_name == null || _game_name == "") {
+                return Gnonograms.UNTITLED_NAME;
+            } else {
+                return _game_name;
+            }
         }
 
         set {
             _game_name = value;
+            if (value != Gnonograms.UNTITLED_NAME) {
+                app_menu.title = value;
+            }
             update_header_bar ();
         }
     }
