@@ -270,17 +270,18 @@ public class View : Gtk.ApplicationWindow {
         header_bar.pack_start (load_game_button);
         header_bar.pack_start (save_game_button);
         header_bar.pack_start (save_game_as_button);
-        header_bar.pack_start (new Gtk.VSeparator ());
-        header_bar.pack_start (mode_switch);
+        header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
+        header_bar.pack_start (random_game_button);
+        header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
+        header_bar.pack_start (restart_button);
+        header_bar.pack_start (undo_button);
+        header_bar.pack_start (check_correct_button);
+        header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
+        header_bar.pack_start (auto_solve_button);
+
 
         header_bar.pack_end (app_menu);
-        header_bar.pack_end (new Gtk.VSeparator ());
-        header_bar.pack_end (undo_button);
-        header_bar.pack_end (check_correct_button);
-        header_bar.pack_end (auto_solve_button);
-        header_bar.pack_end (restart_button);
-        header_bar.pack_end (new Gtk.VSeparator ());
-        header_bar.pack_end (random_game_button);
+        header_bar.pack_end (mode_switch);
 
         set_titlebar (header_bar);
 
