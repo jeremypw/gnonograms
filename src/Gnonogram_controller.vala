@@ -390,12 +390,12 @@ public class Controller : GLib.Object {
             reader = new Filereader (window, load_game_dir, game);
         } catch (GLib.IOError e) {
             if (!(e is IOError.CANCELLED)) {
-                if (reader != null) {
-                    view.send_notification (reader.err_msg);
-                } else {
-                    /* Maybe there is no game to restore */
-                    debug ("Failed to create game file reader for dir %s and game %s - %s", load_game_dir, game != null ? game.get_uri () : "null", e.message);
+                var basename = _("game");
+                if (reader != null && reader.game_file != null) {
+                    basename = reader.game_file.get_basename ();
                 }
+
+                Utils.show_error_dialog (_("Unable to load %s").printf (basename), e.message, window);
             }
 
             return false;
@@ -414,7 +414,7 @@ public class Controller : GLib.Object {
             }
         } else {
             /* There is something wrong with the file being loaded */
-            view.send_notification (reader.err_msg);
+            Utils.show_error_dialog (_("Invalid game file"), reader.err_msg, window);
             return false;
         }
 
