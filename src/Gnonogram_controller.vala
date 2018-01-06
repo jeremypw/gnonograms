@@ -349,19 +349,16 @@ public class Controller : GLib.Object {
     }
 
     private string? write_game (string? path, bool save_solution = false, bool save_state = false) {
-        Filewriter file_writer;
+        var file_writer = new Filewriter (window,
+                                          save_game_dir,
+                                          path,
+                                          game_name,
+                                          dimensions,
+                                          view.get_row_clues (),
+                                          view.get_col_clues ()
+                                        );
 
         try {
-            file_writer = new Filewriter (
-                                window,
-                                save_game_dir,
-                                path,
-                                game_name,
-                                dimensions,
-                                view.get_row_clues (),
-                                view.get_col_clues ()
-                            );
-
             file_writer.difficulty = view.game_grade;
             file_writer.game_state = game_state;
             file_writer.working.copy (model.working_data);
@@ -376,7 +373,9 @@ public class Controller : GLib.Object {
             }
 
         } catch (IOError e) {
-            warning ("File writer error %s", e.message); // May have been cancelled
+            var basename = Path.get_basename (file_writer.game_path);
+            Utils.show_error_dialog (_("Unable to save %s").printf (basename), e.message);
+
             return null;
         }
 
@@ -630,18 +629,23 @@ public class Controller : GLib.Object {
             var path = write_game (current_game_path, true, false);
             if (path != null && path != "") {
                 current_game_path = path;
-                view.send_notification (_("Saved to %s").printf (path));
+                notify_saved (path);
             }
         }
     }
 
     private void on_save_game_as_request () {
         /* Filewriter will request save location, no solution saved as default */
-        var write_path = write_game (null, false, false);
+        var path = write_game (null, false, false);
 
-        if (write_path != null) {
-            current_game_path = write_path;
+        if (path != null) {
+            current_game_path = path;
+            notify_saved (path);
         }
+    }
+
+    private void notify_saved (string path) {
+        view.send_notification (_("Saved to %s").printf (path));
     }
 
     private void on_open_game_request () {
