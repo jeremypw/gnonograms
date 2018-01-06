@@ -221,7 +221,7 @@ public class View : Gtk.ApplicationWindow {
         title = _("Gnonograms for Elementary");
 
         load_game_button = new Gtk.Button ();
-        var img = new Gtk.Image.from_icon_name ("document-open-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
+        var img = new Gtk.Image.from_icon_name ("document-open", Gtk.IconSize.LARGE_TOOLBAR);
         load_game_button.image = img;
         load_game_button.tooltip_text = _("Load a Game from File");
 
@@ -236,17 +236,17 @@ public class View : Gtk.ApplicationWindow {
         save_game_as_button.tooltip_text = _("Save Game to Different File");
 
         random_game_button = new Gtk.Button ();
-        img = new Gtk.Image.from_icon_name ("list-add-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
+        img = new Gtk.Image.from_icon_name ("list-add", Gtk.IconSize.LARGE_TOOLBAR);
         random_game_button.image = img;
 
         undo_button = new Gtk.Button ();
-        img = new Gtk.Image.from_icon_name ("edit-undo-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
+        img = new Gtk.Image.from_icon_name ("edit-undo", Gtk.IconSize.LARGE_TOOLBAR);
         undo_button.image = img;
         undo_button.tooltip_text = _("Undo Last Move");
         undo_button.sensitive = false;
 
         check_correct_button = new Gtk.Button ();
-        img = new Gtk.Image.from_icon_name ("media-seek-backward-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
+        img = new Gtk.Image.from_icon_name ("media-seek-backward", Gtk.IconSize.LARGE_TOOLBAR);
         check_correct_button.image = img;
         check_correct_button.tooltip_text = _("Go Back to Last Correct Position");
         check_correct_button.sensitive = false;
