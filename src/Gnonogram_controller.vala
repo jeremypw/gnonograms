@@ -373,8 +373,10 @@ public class Controller : GLib.Object {
             }
 
         } catch (IOError e) {
-            var basename = Path.get_basename (file_writer.game_path);
-            Utils.show_error_dialog (_("Unable to save %s").printf (basename), e.message);
+            if (!(e is IOError.CANCELLED)) {
+                var basename = Path.get_basename (file_writer.game_path);
+                Utils.show_error_dialog (_("Unable to save %s").printf (basename), e.message);
+            }
 
             return null;
         }
