@@ -164,12 +164,40 @@ namespace Utils {
         return sb.str;
     }
 
-    public static int show_dlg (string msg, Gtk.MessageType type, Gtk.ButtonsType buttons, Gtk.Window? parent = null) {
-        var dialog = new Gtk.MessageDialog (parent,
-                                            Gtk.DialogFlags.MODAL,
-                                            type,
-                                            buttons,
-                                            "%s", msg);
+    public static int show_dlg (string primary_text, Gtk.MessageType type, string? secondary_text, Gtk.Window? parent) {
+        string icon_name = "";
+        var buttons = Gtk.ButtonsType.CLOSE;
+        switch (type) {
+            case Gtk.MessageType.INFO:
+                icon_name = "dialog-information";
+                break;
+
+            case Gtk.MessageType.WARNING:
+                icon_name = "dialog-warning";
+                break;
+
+            case Gtk.MessageType.ERROR:
+                icon_name = "dialog-error";
+                break;
+
+            case Gtk.MessageType.QUESTION:
+                icon_name = "dialog-question";
+                buttons = Gtk.ButtonsType.NONE;
+                break;
+
+            default:
+                assert_not_reached ();
+        }
+
+        var dialog = new Granite.MessageDialog.with_image_from_icon_name (primary_text,
+                                                                          secondary_text ?? "",
+                                                                          icon_name, buttons);
+
+        if (type == Gtk.MessageType.QUESTION) {
+            dialog.add_button ("YES", Gtk.ResponseType.YES);
+            dialog.add_button ("NO", Gtk.ResponseType.NO);
+            dialog.set_default_response (Gtk.ResponseType.NO);
+        }
 
         dialog.set_position (Gtk.WindowPosition.MOUSE);
         int response = dialog.run ();
@@ -177,20 +205,29 @@ namespace Utils {
         return response;
     }
 
-    public static void show_info_dialog (string msg, Gtk.Window? parent = null) {
-        show_dlg (msg, Gtk.MessageType.INFO, Gtk.ButtonsType.CLOSE, parent);
+    public static void show_info_dialog (string primary_text, string? secondary_text = null,
+                                 Gtk.Window? parent = null) {
+
+        show_dlg (primary_text, Gtk.MessageType.INFO, secondary_text, parent);
     }
 
-    public static void show_warning_dialog (string msg, Gtk.Window? parent = null) {
-        show_dlg (msg, Gtk.MessageType.WARNING, Gtk.ButtonsType.CLOSE, parent);
+    public static void show_warning_dialog (string primary_text, string? secondary_text = null,
+                                            Gtk.Window? parent = null) {
+
+        show_dlg (primary_text, Gtk.MessageType.WARNING, secondary_text, parent);
     }
 
-    public static void show_error_dialog (string msg, Gtk.Window? parent = null) {
-        show_dlg (msg, Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE, parent);
+    public static void show_error_dialog (string primary_text, string? secondary_text = null,
+                                          Gtk.Window? parent = null) {
+
+        show_dlg (primary_text, Gtk.MessageType.ERROR, secondary_text, parent);
     }
 
-    public static bool show_confirm_dialog(string msg, Gtk.Window? parent = null) {
-        return show_dlg (msg, Gtk.MessageType.WARNING, Gtk.ButtonsType.YES_NO, parent) == Gtk.ResponseType.YES;
+    public static bool show_confirm_dialog (string primary_text, string? secondary_text = null,
+                                            Gtk.Window? parent = null) {
+
+        var response = show_dlg (primary_text, Gtk.MessageType.QUESTION, secondary_text, parent);
+        return response == Gtk.ResponseType.YES;
     }
 
     /** The @action parameter also indicates the default setting for saving the solution.
@@ -289,7 +326,7 @@ namespace Utils {
         if (gtk_action == Gtk.FileChooserAction.SAVE && file_path != null) {
             var file = File.new_for_commandline_arg (file_path);
             if (file.query_exists () &&
-                !show_confirm_dialog (_("Confirm overwrite file name %s").printf (file_path))) {
+                !show_confirm_dialog (_("Overwrite %s").printf (file_path), _("This action will destroy contents of that file"))) {
 
                 file_path = null;
             }
