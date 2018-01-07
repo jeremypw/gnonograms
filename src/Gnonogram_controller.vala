@@ -352,7 +352,10 @@ public class Controller : GLib.Object {
     }
 
     private string? write_game (string? path, bool save_state = false) {
-        var file_writer = new Filewriter (window,
+        Filewriter? file_writer = null;
+
+        try {
+            file_writer = new Filewriter (window,
                                           save_game_dir,
                                           path,
                                           game_name,
@@ -361,7 +364,6 @@ public class Controller : GLib.Object {
                                           view.get_col_clues ()
                                         );
 
-        try {
             file_writer.difficulty = view.game_grade;
             file_writer.game_state = game_state;
             file_writer.working.copy (model.working_data);
