@@ -158,7 +158,6 @@ public class View : Gtk.ApplicationWindow {
 
         set {
             if (_game_state != value) {
-warning ("SET VIEW STATE");
                 _game_state = value;
                 mode_switch.mode = value;
                 cell_grid.game_state = value;
@@ -492,7 +491,14 @@ warning ("SET VIEW STATE");
     }
 
     private void set_buttons_sensitive (bool sensitive) {
-
+        mode_switch.sensitive = sensitive;
+        load_game_button.sensitive = sensitive;
+        save_game_button.sensitive = sensitive;
+        save_game_as_button.sensitive = sensitive;
+        undo_button.sensitive = sensitive;
+        check_correct_button.sensitive = sensitive;
+        auto_solve_button.sensitive = sensitive;
+        restart_button.sensitive = sensitive;
     }
 
     private void update_solution_labels_for_cell (Cell cell) {
@@ -792,9 +798,7 @@ warning ("SET VIEW STATE");
     }
 
     private void on_mode_switch_changed (Gtk.Widget widget) {
-
         game_state = widget.get_data ("mode");
-warning ("mode switch change %s", game_state.to_string ());
         game_state_changed (game_state);
     }
 

@@ -91,12 +91,13 @@ public class Controller : GLib.Object {
         set {
             if (view.game_state != value) {
                 view.game_state = value;
-                model.game_state = value;
-                clear_history ();
+            }
 
-                if (value == GameState.GENERATING) {
-                    on_new_random_request ();
-                }
+            model.game_state = value;
+            clear_history ();
+
+            if (value == GameState.GENERATING) {
+                on_new_random_request ();
             }
         }
     }
@@ -229,8 +230,6 @@ public class Controller : GLib.Object {
         model.clear ();
         view.update_labels_from_solution ();
         clear_history ();
-
-        game_state = GameState.SETTING;
         is_readonly = true; // Force Save As when saving new design
     }
 
@@ -240,7 +239,6 @@ public class Controller : GLib.Object {
     }
 
     private void on_new_random_request () {
-warning ("new random request");
         clear ();
 
         AbstractGameGenerator gen;
@@ -259,19 +257,18 @@ warning ("new random request");
             var success = gen.generate ();
             /* Gtk is not thread-safe so must invoke in the main loop */
             MainContext.@default ().invoke (() => {
-            /* Show last generated game regardless */
-                model.set_solution_from_array (gen.get_solution ());
-                view.update_labels_from_solution ();
-
-                if (cancellable.is_cancelled ()) {
-                   view.send_notification (_("Game generation was cancelled"));
+                if (success) {
+                    model.set_solution_from_array (gen.get_solution ());
+                    view.update_labels_from_solution ();
+                    view.game_grade = gen.solution_grade;
+                    game_state = GameState.SOLVING;
                 } else {
-                    if (success) {
-                        view.game_grade = gen.solution_grade;
-                        game_state = GameState.SOLVING;
+                    clear ();
+                    game_state = GameState.SETTING;
+                    if (cancellable.is_cancelled ()) {
+                       view.send_notification (_("Game generation was cancelled"));
                     } else {
                         view.send_notification (_("Failed to generate game of required grade"));
-                        game_state = GameState.SETTING;
                     }
                 }
 
@@ -692,8 +689,14 @@ warning ("new random request");
 
                 view.game_grade = diff;
 
-                if (solver.state.solved () && copy_to_solution) {
-                    model.solution_data.copy (solver.grid);
+                if (solver.state.solved ()) {
+                    game_state = GameState.SOLVING;
+                    if (copy_to_solution) {
+                        model.solution_data.copy (solver.grid);
+                    }
+                } else {
+                    clear ();
+                    game_state = GameState.SETTING;
                 }
 
                 if (copy_to_working) {
