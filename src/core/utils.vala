@@ -285,6 +285,7 @@ namespace Utils {
             }
 
         dialog.local_only = false;
+        Gtk.Switch? save_solution_switch = null;
 
         //only need access to built-in puzzle directory if loading a .gno puzzle
         if (action != Gnonograms.FileChooserAction.OPEN) {
@@ -292,7 +293,7 @@ namespace Utils {
             grid.orientation = Gtk.Orientation.HORIZONTAL;
             grid.column_spacing = 6;
 
-            var save_solution_switch = new Gtk.Switch ();
+            save_solution_switch = new Gtk.Switch ();
             save_solution_switch.state = save_solution;
 
             var save_solution_label = new Gtk.Label (_("Save solution too"));
@@ -318,6 +319,10 @@ namespace Utils {
                             );
             } else {
                 file_path = dialog.get_filename ();
+            }
+
+            if (save_solution_switch != null) {
+                save_solution = save_solution_switch.state;
             }
         }
 

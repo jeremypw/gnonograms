@@ -299,7 +299,7 @@ public class Controller : GLib.Object {
             debug ("Error deleting temporary game file - %s", e.message);
         } finally {
             /* Save solution and current state */
-            write_game (temporary_game_path, true, true);
+            write_game (temporary_game_path, true);
         }
     }
 
@@ -348,7 +348,7 @@ public class Controller : GLib.Object {
         return yield load_game (current_game, false);
     }
 
-    private string? write_game (string? path, bool save_solution = false, bool save_state = false) {
+    private string? write_game (string? path, bool save_state = false) {
         var file_writer = new Filewriter (window,
                                           save_game_dir,
                                           path,
@@ -363,7 +363,6 @@ public class Controller : GLib.Object {
             file_writer.game_state = game_state;
             file_writer.working.copy (model.working_data);
             file_writer.solution.copy (model.solution_data);
-            file_writer.save_solution = save_solution;
             file_writer.is_readonly = is_readonly;
 
             if (save_state) {
@@ -628,7 +627,7 @@ public class Controller : GLib.Object {
         if (is_readonly) {
             on_save_game_as_request ();
         } else {
-            var path = write_game (current_game_path, true, false);
+            var path = write_game (current_game_path, false);
             if (path != null && path != "") {
                 current_game_path = path;
                 notify_saved (path);
@@ -638,7 +637,7 @@ public class Controller : GLib.Object {
 
     private void on_save_game_as_request () {
         /* Filewriter will request save location, no solution saved as default */
-        var path = write_game (null, false, false);
+        var path = write_game (null, false);
 
         if (path != null) {
             current_game_path = path;
