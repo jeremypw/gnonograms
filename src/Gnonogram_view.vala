@@ -850,6 +850,12 @@ public class View : Gtk.ApplicationWindow {
         var rows = app_menu.row_val;
         var cols = app_menu.column_val;
         generator_grade = (Difficulty)(app_menu.grade_val);
+
+        if (generator_grade >= Difficulty.CHALLENGING) {
+            rows = rows.clamp (15, rows);
+            cols = cols.clamp (15, cols);
+        }
+
         game_name = app_menu.title;
         dimensions = {cols, rows};
     }
