@@ -89,9 +89,15 @@ public class Controller : GLib.Object {
         }
 
         set {
-            view.game_state = value;
-            model.game_state = value;
-            clear_history ();
+            if (view.game_state != value) {
+                view.game_state = value;
+                model.game_state = value;
+                clear_history ();
+
+                if (value == GameState.GENERATING) {
+                    on_new_random_request ();
+                }
+            }
         }
     }
 
@@ -170,8 +176,7 @@ public class Controller : GLib.Object {
         view.moved.connect (on_moved);
         view.next_move_request.connect (on_next_move_request);
         view.previous_move_request.connect (on_previous_move_request);
-        view.game_state_changed.connect (on_state_changed);
-        view.random_game_request.connect (on_new_random_request);
+        view.game_state_changed.connect (on_game_state_changed);
         view.check_errors_request.connect (on_count_errors_request);
         view.rewind_request.connect (on_rewind_request);
         view.delete_event.connect (on_view_deleted);
@@ -235,6 +240,7 @@ public class Controller : GLib.Object {
     }
 
     private void on_new_random_request () {
+warning ("new random request");
         clear ();
 
         AbstractGameGenerator gen;
@@ -614,7 +620,7 @@ public class Controller : GLib.Object {
         view.queue_draw ();
     }
 
-    private void on_state_changed (GameState gs) {
+    private void on_game_state_changed (GameState gs) {
         game_state = gs;
     }
 

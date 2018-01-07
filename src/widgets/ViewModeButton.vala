@@ -57,7 +57,7 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
         /* Cannot do this in construct */
         setting_index = append (setting_icon);
         solving_index = append (solving_icon);
-        solving_index = append (generating_icon);
+        generating_index = append (generating_icon);
     }
 
     construct {

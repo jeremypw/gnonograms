@@ -69,7 +69,7 @@ public enum GameState {
     SETTING,
     SOLVING,
     GENERATING,
-    UNDEFINED;
+    UNDEFINED = 99;
 }
 
 public enum CellState {

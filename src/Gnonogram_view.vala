@@ -150,18 +150,21 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private GameState _game_state;
+    private GameState _game_state = GameState.UNDEFINED;
     public GameState game_state {
         get {
             return _game_state;
         }
 
         set {
-            _game_state = value;
-            mode_switch.mode = value;
-            cell_grid.game_state = value;
+            if (_game_state != value) {
+warning ("SET VIEW STATE");
+                _game_state = value;
+                mode_switch.mode = value;
+                cell_grid.game_state = value;
 
-            update_header_bar ();
+                update_header_bar ();
+            }
         }
     }
 
@@ -475,17 +478,21 @@ public class View : Gtk.ApplicationWindow {
             header_bar.title = _("Drawing %s").printf (game_name);
             header_bar.subtitle = readonly ? _("Read Only - Save to a different file") : _("Save will Overwrite");
             restart_button.tooltip_text = _("Clear canvas");
-            set_sensitive (true);
-        } else if (game_state == GameState.SETTING) {
+            set_buttons_sensitive (true);
+        } else if (game_state == GameState.SOLVING) {
             header_bar.title = _("Solving %s").printf (game_name);
             header_bar.subtitle = game_grade.to_string ();
             restart_button.tooltip_text = _("Restart solving");
-            set_sensitive (true);
+            set_buttons_sensitive (true);
         } else {
-            set_sensitive (false);
+            set_buttons_sensitive (false);
         }
 
         mode_switch.grade = generator_grade;
+    }
+
+    private void set_buttons_sensitive (bool sensitive) {
+
     }
 
     private void update_solution_labels_for_cell (Cell cell) {
@@ -785,7 +792,9 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private void on_mode_switch_changed (Gtk.Widget widget) {
+
         game_state = widget.get_data ("mode");
+warning ("mode switch change %s", game_state.to_string ());
         game_state_changed (game_state);
     }
 

@@ -14,6 +14,8 @@
     <enum id="com.github.jeremypw.gnonograms.game-state">
         <value value="0" nick="setting"/>
         <value value="1" nick="solving"/>
+        <value value="2" nick="generating"/>
+        <value value="99" nick="undefined"/>
     </enum>
 
     <schema path="/com/github/jeremypw/gnonograms/settings/" id="com.github.jeremypw.gnonograms.settings">
