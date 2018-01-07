@@ -71,9 +71,9 @@ public class View : Gtk.ApplicationWindow {
                 row_clue_box.dimensions = dimensions;
                 column_clue_box.dimensions = dimensions;
                 fontheight = get_default_fontheight_from_dimensions ();
-                app_menu.row_val = dimensions.height;
-                app_menu.column_val = dimensions.width;
-                resized (dimensions); /* Controller will queue draw after resizing model */
+                app_menu.row_val = value.height;
+                app_menu.column_val = value.width;
+                resized (value); /* Controller will queue draw after resizing model */
             }
         }
     }
@@ -851,9 +851,13 @@ public class View : Gtk.ApplicationWindow {
         var cols = app_menu.column_val;
         generator_grade = (Difficulty)(app_menu.grade_val);
 
-        if (generator_grade >= Difficulty.CHALLENGING) {
+        if (generator_grade >= Difficulty.CHALLENGING && (rows < 15 || cols < 15)) {
             rows = rows.clamp (15, rows);
             cols = cols.clamp (15, cols);
+            app_menu.row_val = rows;
+            app_menu.column_val = cols;
+
+            send_notification (_("Minimum size 15 for this difficulty"));
         }
 
         game_name = app_menu.title;
