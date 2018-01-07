@@ -49,7 +49,11 @@ namespace Utils {
         }
     }
 
-    public int blockextent_from_clue (string s) {
+    public int blockextent_from_clue (string? s) {
+        if (s == null) {
+            return 0;
+        }
+
         int[] blocks = block_array_from_clue (s);
         int extent = 0;
 
@@ -61,9 +65,9 @@ namespace Utils {
         return extent;
     }
 
-    public int freedom_from_array (CellState[] arr, out int filled, out int blocks) {
-        filled = 0; // count of filled cells
-        blocks = 0; // count of filled blocks
+    public int freedom_from_array (CellState[] arr) {
+        var filled = 0; // count of filled cells
+        var blocks = 0; // count of filled blocks
         int length = arr.length;
 
         for (int i = 0; i < length; i++) {
@@ -76,7 +80,7 @@ namespace Utils {
             }
         }
 
-        return (length - filled - blocks + 1);
+        return (length - filled - (blocks - 1));
     }
 
     public string[] row_clues_from_2D_array (My2DCellArray array) {

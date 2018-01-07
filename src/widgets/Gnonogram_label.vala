@@ -60,9 +60,6 @@ class Label : Gtk.Label {
             _clue = value;
             displayed_text = vertical_text ? vertical_string (_clue) : _clue;
 
-
-            blockextent = Utils.blockextent_from_clue (_clue);
-
             if (!vertical_text) {
                 displayed_text += " ";
             }
@@ -103,7 +100,6 @@ class Label : Gtk.Label {
     private string attrib_start;
     private string displayed_text; /* text of clue in final form */
     private string _clue; /* text of clue in horizontal form */
-    private int blockextent;
     private uint _size;
 
     private void update_markup () {
@@ -113,13 +109,8 @@ class Label : Gtk.Label {
     }
 
     private void update_tooltip () {
-        var freedom = size - blockextent;
-        if (freedom >= 0) {
-            has_tooltip = true;
-            set_tooltip_markup (attrib_start + _("Freedom = %u").printf (freedom) + "</span>");
-        } else {
-            has_tooltip = false;
-        }
+        var freedom = size - Utils.blockextent_from_clue (_clue);
+        set_tooltip_markup (attrib_start + _("Freedom = %u").printf (freedom) + "</span>");
     }
 
     private string vertical_string (string s) {

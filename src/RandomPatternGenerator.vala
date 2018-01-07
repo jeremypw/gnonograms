@@ -98,6 +98,9 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
             adjust_region (false, grid);
             adjust_region (true, grid);
         }
+
+        avoid_empty_regions (false, grid);
+        avoid_empty_regions (true, grid);
     }
 
     private void insert_random (CellState[] sa, bool column_wise, My2DCellArray grid) {
@@ -145,12 +148,18 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
         uint lim = is_column ? cols : rows;
         uint size = is_column ? rows : cols;
         CellState[] sa = new CellState[size];
-        int df, filled, blocks, min;
+        int df, min;
 
         for (uint i = 0; i < lim; i++) {
             grid.get_array (i, is_column, ref sa);
 
-            df = Utils.freedom_from_array (sa, out filled, out blocks);
+            df = Utils.freedom_from_array (sa);
+            if (df == size) {
+                /* Do not want completely empty region */
+                insert_filled (sa);
+                continue;
+            }
+
             /* Do not want to produce totally empty regions */
             min = int.min ((int)size - 1, min_freedom + (i < 2 || i > lim - 3 ? edge_bias : 0));
 
@@ -159,8 +168,25 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
             }
 
             insert_empty (min - df, sa);
-
             grid.set_array (i, is_column, sa);
+        }
+    }
+
+    private void avoid_empty_regions (bool is_column, My2DCellArray grid) {
+        uint lim = is_column ? cols : rows;
+        uint size = is_column ? rows : cols;
+        CellState[] sa = new CellState[size];
+        int df;
+
+        for (uint i = 0; i < lim; i++) {
+            grid.get_array (i, is_column, ref sa);
+
+            df = Utils.freedom_from_array (sa);
+            if (df >= size) {
+                insert_filled (sa);
+                grid.set_array (i, is_column, sa);
+                continue;
+            }
         }
     }
 
@@ -169,9 +195,9 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
      **/
     private void insert_empty (uint replace, CellState[] sa) {
         uint count = 0;
-        uint lim = sa.length - 1;
+        uint lim = sa.length - 2;
 
-        for (uint i = 0; i <= lim / 2 + 1; i++) {
+        for (uint i = 1; i <= lim / 2 + 1; i++) {
             var ptr = i;
             if (sa[ptr] == CellState.FILLED) {
                 sa[ptr] = CellState.EMPTY;
@@ -188,6 +214,14 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
                 }
             }
         }
+    }
+
+    /** Only call for empty row/col **/
+    private void insert_filled (CellState[] sa) {
+        int lim = sa.length - 2;
+
+        var ptr = rand_gen.int_range (1, lim);
+        sa[ptr] = CellState.FILLED;
     }
 }
 }
