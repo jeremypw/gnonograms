@@ -294,7 +294,7 @@ namespace Gnonograms {
 
         var cells_per_pass = (double)(dimensions.length ()) / ((double)passes - 2);
 
-        if (cells_per_pass < 1.5 ) {
+        if (cells_per_pass < 1.7 ) {
             return Difficulty.CHALLENGING;
         } else if (cells_per_pass < 3 ) {
             return Difficulty.HARD;

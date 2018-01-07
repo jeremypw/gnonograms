@@ -70,8 +70,8 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
                     break;
             case Difficulty.ADVANCED:
                     threshold = 65;
-                    min_freedom = 2;
-                    edge_bias = -2;
+                    min_freedom = 4;
+                    edge_bias = 0;
                     break;
             case Difficulty.MAXIMUM:
                     threshold = 70;
