@@ -68,6 +68,7 @@ public enum Difficulty {
 public enum GameState {
     SETTING,
     SOLVING,
+    GENERATING,
     UNDEFINED;
 }
 

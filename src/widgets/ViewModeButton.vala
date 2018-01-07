@@ -24,38 +24,55 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
     /** PUBLIC **/
     public GameState mode {
         set {
-            if (value == GameState.SETTING) {
-                set_active (setting_index);
-            } else {
-                set_active (solving_index);
+            switch (value) {
+                case GameState.SETTING:
+                    set_active (setting_index);
+                    break;
+                case GameState.SOLVING:
+                    set_active (solving_index);
+                    break;
+                case GameState.GENERATING:
+                    set_active (generating_index);
+                    break;
+                default:
+                    assert_not_reached ();
             }
         }
     }
+
+    public Difficulty grade {
+        set {
+            generating_icon.tooltip_text = _("Generate %s puzzle").printf (value.to_string ());
+        }
+    }
+
+    private int setting_index;
+    private int solving_index;
+    private int generating_index;
+    private Gtk.Image setting_icon;
+    private Gtk.Image solving_icon;
+    private Gtk.Image generating_icon;
 
     public ViewModeButton () {
         /* Cannot do this in construct */
         setting_index = append (setting_icon);
         solving_index = append (solving_icon);
+        solving_index = append (generating_icon);
     }
 
     construct {
         /* Icons used are provisional */
         setting_icon = new Gtk.Image.from_icon_name ("edit-symbolic", Gtk.IconSize.MENU);
         solving_icon = new Gtk.Image.from_icon_name ("process-working-symbolic", Gtk.IconSize.MENU);
+        generating_icon = new Gtk.Image.from_icon_name ("list-add-symbolic", Gtk.IconSize.MENU);
 
         setting_icon.set_data ("mode", GameState.SETTING);
         solving_icon.set_data ("mode", GameState.SOLVING);
+        generating_icon.set_data ("mode", GameState.GENERATING);
 
-        setting_icon.tooltip_text = _("Draw a pattern");
-        solving_icon.tooltip_text = _("Solve a puzzle");
+        setting_icon.tooltip_text = _("Draw pattern");
+        solving_icon.tooltip_text = _("Solve puzzle");
+        generating_icon.tooltip_text = _("Generate new random puzzle");
     }
-
-    /** PRIVATE **/
-    private int setting_index;
-    private int solving_index;
-    private Gtk.Image setting_icon;
-    private Gtk.Image solving_icon;
-
-
 }
 }

@@ -99,7 +99,6 @@ public class View : Gtk.ApplicationWindow {
         set {
             _generator_grade = value;
             app_menu.grade_val = (uint)_generator_grade;
-            update_tooltip ();
         }
     }
     private bool _readonly;
@@ -235,10 +234,6 @@ public class View : Gtk.ApplicationWindow {
         save_game_as_button.image = img;
         save_game_as_button.tooltip_text = _("Save Game to Different File");
 
-        random_game_button = new Gtk.Button ();
-        img = new Gtk.Image.from_icon_name ("list-add", Gtk.IconSize.LARGE_TOOLBAR);
-        random_game_button.image = img;
-
         undo_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("edit-undo", Gtk.IconSize.LARGE_TOOLBAR);
         undo_button.image = img;
@@ -270,8 +265,6 @@ public class View : Gtk.ApplicationWindow {
         header_bar.pack_start (load_game_button);
         header_bar.pack_start (save_game_button);
         header_bar.pack_start (save_game_as_button);
-        header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
-        header_bar.pack_start (random_game_button);
         header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_start (restart_button);
         header_bar.pack_start (undo_button);
@@ -323,7 +316,6 @@ public class View : Gtk.ApplicationWindow {
         load_game_button.clicked.connect (on_load_game_button_clicked);
         save_game_button.clicked.connect (on_save_game_button_clicked);
         save_game_as_button.clicked.connect (on_save_game_as_button_clicked);
-        random_game_button.clicked.connect (on_random_game_button_clicked);
         check_correct_button.clicked.connect (on_check_button_pressed);
         undo_button.clicked.connect (on_undo_button_pressed);
         restart_button.clicked.connect (on_restart_button_pressed);
@@ -417,7 +409,6 @@ public class View : Gtk.ApplicationWindow {
     private Gtk.Button load_game_button;
     private Gtk.Button save_game_button;
     private Gtk.Button save_game_as_button;
-    private Gtk.Button random_game_button;
     private Gtk.Button undo_button;
     private Gtk.Button check_correct_button;
     private Gtk.Button auto_solve_button;
@@ -484,11 +475,17 @@ public class View : Gtk.ApplicationWindow {
             header_bar.title = _("Drawing %s").printf (game_name);
             header_bar.subtitle = readonly ? _("Read Only - Save to a different file") : _("Save will Overwrite");
             restart_button.tooltip_text = _("Clear canvas");
-        } else {
+            set_sensitive (true);
+        } else if (game_state == GameState.SETTING) {
             header_bar.title = _("Solving %s").printf (game_name);
             header_bar.subtitle = game_grade.to_string ();
             restart_button.tooltip_text = _("Restart solving");
+            set_sensitive (true);
+        } else {
+            set_sensitive (false);
         }
+
+        mode_switch.grade = generator_grade;
     }
 
     private void update_solution_labels_for_cell (Cell cell) {
@@ -808,10 +805,6 @@ public class View : Gtk.ApplicationWindow {
         open_game_request ();
     }
 
-    private void on_random_game_button_clicked () {
-        random_game_request ();
-    }
-
     private void on_check_button_pressed () {
         var errors = check_errors_request ();
 
@@ -846,11 +839,6 @@ public class View : Gtk.ApplicationWindow {
         generator_grade = (Difficulty)(app_menu.grade_val);
         game_name = app_menu.title;
         dimensions = {cols, rows};
-        update_tooltip ();
-    }
-
-    private void update_tooltip () {
-        random_game_button.tooltip_text = _("New Random Game - %s").printf (generator_grade.to_string ()); ///TRANSLATORS %s is a description of difficulty
     }
 }
 }
