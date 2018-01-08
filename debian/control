@@ -14,5 +14,5 @@ Standards-Version: 4.1.1
 Package: com.github.jeremypw.gnonograms
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}
-Description: Japanese Logic Puzzle
- Generate, draw and solve nonogram type puzzles.
+Description: Generate, draw and solve nonogram logic puzzles
+

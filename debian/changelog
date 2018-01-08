@@ -1,5 +1,11 @@
-com.github.jeremypw.gnonograms (0.1) UNRELEASED; urgency=medium
+com.github.jeremypw.gnonograms (0.1) xenial; urgency=low
 
   * Initial release.
+  * Draw puzzles
+  * Generate random puzzles
+  * Check for errors while solving
+  * Adjust size of grid
+  * Adjust difficulty of generated puzzles
+  * Save and restore program state and settings
 
- -- Jeremy Wootten <jeremywootten@gmail.com>  Fri, 27 Oct 2017 15:33:55 +0100
+ -- Jeremy Wootten <jeremywootten@gmail.com> Mon, 08 Jan 2018 15:33:55 +0100
