@@ -34,6 +34,17 @@
     <provides>
         <binary>com.github.jeremypw.gnonograms</binary>
     </provides>
+    <screenshots>
+        <screenshot type="default">
+            https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/Screenshot - Solving Random.png
+        </screenshot>
+        <screenshot>
+            https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/Screenshot - Designing.png
+        </screenshot>
+        <screenshot>
+            https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/Screenshot  - Settings.png
+        </screenshot>
+    </screenshots>
 
     <developer_name>Jeremy P Wootten</developer_name>
     <url type="homepage">https://github.com/jeremypw/gnonograms</url>
