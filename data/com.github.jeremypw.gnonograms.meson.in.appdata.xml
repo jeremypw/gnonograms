@@ -49,7 +49,7 @@
     <update_contact>jeremywootten@gmail.com</update_contact>
 
     <custom>
-        <value key="x-appcenter-color-primary">#ddd9f0</value>
+        <value key="x-appcenter-color-primary">#d4d4d4</value>
         <value key="x-appcenter-color-primary-text">#210c9b</value>
     </custom>
 </component>
