@@ -17,7 +17,7 @@
         <category>Games</category>
     </categories>
     <releases>
-        <release version="0.1" date="2017-xx-xx" urgency="medium">
+        <release version="1.0.0" date="2018-01-09" urgency="low">
             <description>
                 <p>Initial release.</p>
                 <ul>
