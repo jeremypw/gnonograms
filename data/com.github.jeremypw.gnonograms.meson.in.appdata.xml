@@ -7,11 +7,7 @@
     <name>Gnonograms</name>
     <summary>Create and solve gnonogram puzzles</summary>
     <description>
-        <p>
-        Gnonograms is an implementation of the Japanese logic puzzle "Nonograms", also known as "Tsunami", "Griddlers", and other names.
-        The object of the game is to discover the pattern in the grid which is encoded in the clues which are given for each row and column.
-        Random soluble pattern puzzles can be generated. New puzzles can be designed and saved.
-        </p>
+        <p>An implementation of the Japanese logic puzzle "Nonograms"</p>
     </description>
     <categories>
         <category>Games</category>
