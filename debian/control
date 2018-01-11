@@ -4,6 +4,7 @@ Priority: extra
 Maintainer: Jeremy Wootten <jeremywootten@gmail.com>
 Build-Depends: meson,
                desktop-file-utils,
+               appstream,
                debhelper (>= 9),
                valac (>= 0.30),
                libglib2.0-dev (>= 2.48),
