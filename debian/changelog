@@ -9,3 +9,9 @@ com.github.jeremypw.gnonograms (0.1) xenial; urgency=low
   * Save and restore program state and settings
 
  -- Jeremy Wootten <jeremywootten@gmail.com> Mon, 08 Jan 2018 15:33:55 +0100
+
+com.github.jeremypw.gnonograms (0.1) xenial; urgency=low
+
+  * Fix build dependencies for xenial
+
+ -- Jeremy Wootten <jeremywootten@gmail.com> Mon, 11 Jan 2018 13:02:55 +0100
