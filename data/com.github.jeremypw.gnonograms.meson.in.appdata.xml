@@ -26,6 +26,13 @@
                 </ul>
             </description>
         </release>
+        <release version="1.0.1" date="2018-01-11" urgency="low">
+            <description>
+                <ul>
+                    <li>Correct dependencies for xenial build</li>
+                </ul>
+            </description>
+        </release>
     </releases>
     <provides>
         <binary>com.github.jeremypw.gnonograms</binary>
