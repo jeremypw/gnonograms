@@ -1,4 +1,4 @@
-com.github.jeremypw.gnonograms (0.1) xenial; urgency=low
+com.github.jeremypw.gnonograms (1.0.0) xenial; urgency=low
 
   * Initial release.
   * Draw puzzles
@@ -8,10 +8,10 @@ com.github.jeremypw.gnonograms (0.1) xenial; urgency=low
   * Adjust difficulty of generated puzzles
   * Save and restore program state and settings
 
- -- Jeremy Wootten <jeremywootten@gmail.com> Mon, 08 Jan 2018 15:33:55 +0100
+ -- Jeremy Wootten <jeremywootten@gmail.com>  Mon, 08 Jan 2018 15:33:55 +0100
 
-com.github.jeremypw.gnonograms (0.1) xenial; urgency=low
+com.github.jeremypw.gnonograms (1.0.1) xenial; urgency=low
 
   * Fix build dependencies for xenial
 
- -- Jeremy Wootten <jeremywootten@gmail.com> Mon, 11 Jan 2018 13:02:55 +0100
+ -- Jeremy Wootten <jeremywootten@gmail.com>  Mon, 11 Jan 2018 13:02:55 +0100

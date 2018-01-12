@@ -1,7 +1,7 @@
 Source: com.github.jeremypw.gnonograms
+Maintainer: Jeremy Wootten <jeremywootten@gmail.com>
 Section: x11
 Priority: extra
-Maintainer: Jeremy Wootten <jeremywootten@gmail.com>
 Build-Depends: meson,
                desktop-file-utils,
                appstream,
@@ -11,10 +11,11 @@ Build-Depends: meson,
                libgtk-3-dev (>= 3.18),
                libgee-0.8-dev (>= 0.18),
                libgranite-dev (>= 0.3)
-
 Standards-Version: 4.1.1
+
 Package: com.github.jeremypw.gnonograms
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}
 Description: Generate, draw and solve nonogram logic puzzles
+Depends: ${misc:Depends}, ${shlibs:Depends}
+
 
