@@ -1,6 +1,9 @@
 com.github.jeremypw.gnonograms (1.0.2) xenial; urgency=low
 
   * Fix debian files
+  * Fix .desktop file
+  * Fix .appdata file
+  * Builds with dpkg-buildpackage and Travis CI
 
  -- Jeremy Wootten <jeremywootten@gmail.com>  Mon, 12 Jan 2018 12:40:55 +0100
 
