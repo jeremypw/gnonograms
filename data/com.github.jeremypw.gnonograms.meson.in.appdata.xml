@@ -8,9 +8,16 @@
     <summary>Create and solve gnonogram puzzles</summary>
     <description>
         <p>An implementation of the Japanese logic puzzle "Nonograms"</p>
+        <p>
+            <ul>
+                <li>Draw puzzles</li>
+                <li>Generate random puzzles of chosen difficulty</li>
+            </ul>
+        </p>
     </description>
     <categories>
-        <category>Games</category>
+        <category>Game</category>
+        <category>LogicGame</category>
     </categories>
     <releases>
         <release version="1.0.0" date="2018-01-09" urgency="low">
@@ -39,13 +46,13 @@
     </provides>
     <screenshots>
         <screenshot type="default">
-            https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/Solving.png
+            <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/Solving.png</image>
         </screenshot>
         <screenshot>
-            https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/Designing.png
+            <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/Designing.png</image>
         </screenshot>
         <screenshot>
-            https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/Settings.png
+            <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/Settings.png</image>
         </screenshot>
     </screenshots>
 
