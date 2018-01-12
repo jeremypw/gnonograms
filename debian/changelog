@@ -1,3 +1,15 @@
+com.github.jeremypw.gnonograms (1.0.2) xenial; urgency=low
+
+  * Fix debian files
+
+ -- Jeremy Wootten <jeremywootten@gmail.com>  Mon, 12 Jan 2018 12:40:55 +0100
+
+com.github.jeremypw.gnonograms (1.0.1) xenial; urgency=low
+
+  * Fix build dependencies for xenial
+
+ -- Jeremy Wootten <jeremywootten@gmail.com>  Mon, 11 Jan 2018 13:02:55 +0100
+
 com.github.jeremypw.gnonograms (1.0.0) xenial; urgency=low
 
   * Initial release.
@@ -9,9 +21,3 @@ com.github.jeremypw.gnonograms (1.0.0) xenial; urgency=low
   * Save and restore program state and settings
 
  -- Jeremy Wootten <jeremywootten@gmail.com>  Mon, 08 Jan 2018 15:33:55 +0100
-
-com.github.jeremypw.gnonograms (1.0.1) xenial; urgency=low
-
-  * Fix build dependencies for xenial
-
- -- Jeremy Wootten <jeremywootten@gmail.com>  Mon, 11 Jan 2018 13:02:55 +0100
