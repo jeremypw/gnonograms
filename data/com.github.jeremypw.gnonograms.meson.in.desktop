@@ -9,7 +9,6 @@ Exec=com.github.jeremypw.gnonograms %f
 Icon=com.github.jeremypw.gnonograms
 Terminal=false
 StartupNotify=true
-Type=Application
 MimeType=application/x-gnonogram-puzzle;
 Categories=GNOME;GTK;Game;
 Actions=AboutDialog;
