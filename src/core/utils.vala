@@ -241,7 +241,7 @@ namespace Utils {
                                           Gnonograms.FileChooserAction action,
                                           string dialogname,
                                           FilterInfo [] filters,
-                                          string start_path,
+                                          string? start_path,
                                           out bool save_solution) {
 
         string? file_path = null;
@@ -308,6 +308,10 @@ namespace Utils {
             ((Gtk.Container)(dialog.get_action_area ())).add (grid);
 
             grid.show_all ();
+        }
+
+        if (start_path == null) {
+            start_path = Environment.get_home_dir ();
         }
 
         var start = File.new_for_commandline_arg (start_path);

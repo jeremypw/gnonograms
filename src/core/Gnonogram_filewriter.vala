@@ -183,12 +183,14 @@ public class Filewriter : Object {
             out with_solution  // cannot use save_solution directly (will not compile)
         );
 
-        save_solution = with_solution;
+        if (path != null) {
+            save_solution = with_solution;
 
-        if (!save_solution) {
-            save_solution = !Utils.show_confirm_dialog (_("Confirm save without solution"),
-                                                        _("Do not save computer insoluble clues without solution"),
-                                                        parent);
+            if (!save_solution) {
+                save_solution = !Utils.show_confirm_dialog (_("Confirm save without solution"),
+                                                            _("Do not save computer insoluble clues without solution"),
+                                                            parent);
+            }
         }
 
         return path;

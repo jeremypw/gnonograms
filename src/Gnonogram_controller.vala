@@ -70,10 +70,10 @@ public class Controller : GLib.Object {
     private GLib.Settings? saved_state;
     private Gee.Deque<Move> back_stack;
     private Gee.Deque<Move> forward_stack;
-    private string save_game_dir;
-    private string load_game_dir;
+    private string? save_game_dir = null;
+    private string? load_game_dir = null;
     private string current_game_path;
-    private string? temporary_game_path;
+    private string? temporary_game_path = null;
     private bool is_readonly {
         get {
             return view.readonly;
@@ -153,23 +153,6 @@ public class Controller : GLib.Object {
         back_stack = new Gee.LinkedList<Move> ();
         forward_stack = new Gee.LinkedList<Move> ();
 
-        var schema_source = GLib.SettingsSchemaSource.get_default ();
-        if (schema_source.lookup ("com.github.jeremypw.gnonograms.settings", true) != null &&
-            schema_source.lookup ("com.github.jeremypw.gnonograms.saved-state", true) != null) {
-
-            settings = new Settings ("com.github.jeremypw.gnonograms.settings");
-            saved_state = new Settings ("com.github.jeremypw.gnonograms.saved-state");
-        }
-
-        save_game_dir = Environment.get_home_dir () + "/gnonograms";
-
-        string data_home_folder_current = Path.build_path (
-                                                Path.DIR_SEPARATOR_S,
-                                                Environment.get_user_data_dir (),
-                                                "gnonograms",
-                                                "unsaved"
-                                            );
-
         /* Connect signals. Must be done before restoring settings so that e.g.
          * dimensions of model are set. */
         view.resized.connect (on_view_resized);
@@ -186,6 +169,20 @@ public class Controller : GLib.Object {
         view.solve_this_request.connect (on_solve_this_request);
         view.restart_request.connect (on_restart_request);
 
+        var schema_source = GLib.SettingsSchemaSource.get_default ();
+        if (schema_source.lookup ("com.github.jeremypw.gnonograms.settings", true) != null &&
+            schema_source.lookup ("com.github.jeremypw.gnonograms.saved-state", true) != null) {
+
+            settings = new Settings ("com.github.jeremypw.gnonograms.settings");
+            saved_state = new Settings ("com.github.jeremypw.gnonograms.saved-state");
+        }
+
+
+        string data_home_folder_current = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                           Environment.get_user_data_dir (),
+                                                           Build.PROGRAM_NAME,
+                                                           "unsaved"
+                                                           );
         File file;
         try {
             file = File.new_for_path (data_home_folder_current);
@@ -197,45 +194,10 @@ public class Controller : GLib.Object {
         }
 
         current_game_path = null;
-
-        var temporary_game_dir = Path.build_path (Path.DIR_SEPARATOR_S,
-                                                  data_home_folder_current);
-
-        temporary_game_path = Path.build_path (temporary_game_dir,
+        temporary_game_path = Path.build_path (Path.DIR_SEPARATOR_S, data_home_folder_current,
                                                Gnonograms.UNSAVED_FILENAME);
 
-
-        try {
-            file = File.new_for_path (temporary_game_dir);
-            file.make_directory_with_parents (null);
-        } catch (GLib.Error e) {
-            if (!(e is IOError.EXISTS)) {
-                warning ("Could not make %s - %s",file.get_uri (), e.message);
-                temporary_game_path = null;
-            }
-        }
-
         restore_settings (); /* May change load_game_dir and save_game_dir */
-
-        /* Ensure load save and data directories exist */
-
-        try {
-            file = File.new_for_path (save_game_dir);
-            file.make_directory_with_parents (null);
-        } catch (GLib.Error e) {
-            if (!(e is IOError.EXISTS)) {
-                warning ("Could not make %s - %s",file.get_uri (), e.message);
-            }
-        }
-
-        try {
-            file = File.new_for_path (load_game_dir);
-            file.make_directory_with_parents (null);
-        } catch (GLib.Error e) {
-            if (!(e is IOError.EXISTS)) {
-                warning ("Could not make %s - %s",file.get_uri (), e.message);
-            }
-        }
     }
 
     private void clear () {
@@ -304,6 +266,7 @@ public class Controller : GLib.Object {
         window.get_position (out x, out y);
         saved_state.set_int ("window-x", x);
         saved_state.set_int ("window-y", y);
+
         if (current_game_path != null) {
             saved_state.set_string ("current-game-path", current_game_path);
         }
@@ -313,7 +276,7 @@ public class Controller : GLib.Object {
                 var current_game = File.new_for_path (temporary_game_path);
                 current_game.@delete ();
             } catch (GLib.Error e) {
-                debug ("Error deleting temporary game file - %s", e.message);
+                warning ("Error deleting temporary game file - %s", e.message);
             } finally {
                 /* Save solution and current state */
                 write_game (temporary_game_path, true);
@@ -372,7 +335,6 @@ public class Controller : GLib.Object {
 
     private string? write_game (string? path, bool save_state = false) {
         Filewriter? file_writer = null;
-
         try {
             file_writer = new Filewriter (window,
                                           save_game_dir,
@@ -415,12 +377,16 @@ public class Controller : GLib.Object {
             reader = new Filereader (window, load_game_dir, game);
         } catch (GLib.IOError e) {
             if (!(e is IOError.CANCELLED)) {
-                var basename = _("game");
+                var basename = game != null ? game.get_basename () : _("game");
+
                 if (reader != null && reader.game_file != null) {
                     basename = reader.game_file.get_basename ();
                 }
 
-                Utils.show_error_dialog (_("Unable to load %s").printf (basename), e.message, window);
+                /* Avoid error dialog on first run */
+                if (basename != Gnonograms.UNSAVED_FILENAME) {
+                   Utils.show_error_dialog (_("Unable to load %s").printf (basename), e.message, window);
+                }
             }
 
             return false;
@@ -630,11 +596,6 @@ public class Controller : GLib.Object {
 
         clear ();
         game_state = GameState.SETTING;
-
-        if (view.get_realized ()) { /* No need to save if just constructing */
-            save_game_state (); /* Forget previous game settings */
-        }
-
         view.queue_draw ();
     }
 
