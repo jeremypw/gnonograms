@@ -14,7 +14,7 @@ ninja
 
 ### Installing & executing
 ```
-ninja install
+sudo ninja install
 com.github.jeremy.gnonograms
 ```
 
@@ -22,6 +22,6 @@ com.github.jeremy.gnonograms
 ```
 In original build directory:
 
-ninja uninstall
+sudo ninja uninstall
 sudo ./post_uninstall.py
 ```
