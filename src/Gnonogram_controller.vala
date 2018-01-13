@@ -276,7 +276,7 @@ public class Controller : GLib.Object {
                 var current_game = File.new_for_path (temporary_game_path);
                 current_game.@delete ();
             } catch (GLib.Error e) {
-                warning ("Error deleting temporary game file % - %s", temporary_game_path, e.message);
+                warning ("Error deleting temporary game file %s - %s", temporary_game_path, e.message);
             } finally {
                 /* Save solution and current state */
                 write_game (temporary_game_path, true);
