@@ -276,7 +276,7 @@ public class Controller : GLib.Object {
                 var current_game = File.new_for_path (temporary_game_path);
                 current_game.@delete ();
             } catch (GLib.Error e) {
-                warning ("Error deleting temporary game file - %s", e.message);
+                warning ("Error deleting temporary game file % - %s", temporary_game_path, e.message);
             } finally {
                 /* Save solution and current state */
                 write_game (temporary_game_path, true);
@@ -289,8 +289,8 @@ public class Controller : GLib.Object {
             return;
         }
 
-        settings.set_string ("save-game-dir", save_game_dir);
-        settings.set_string ("load-game-dir", load_game_dir);
+        settings.set_string ("save-game-dir", save_game_dir ?? "");
+        settings.set_string ("load-game-dir", load_game_dir ?? "");
     }
 
     private void restore_settings () {
