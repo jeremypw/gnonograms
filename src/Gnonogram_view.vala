@@ -462,12 +462,12 @@ public class View : Gtk.ApplicationWindow {
         var monitor = screen.get_monitor_at_window (get_window ());
         screen.get_monitor_geometry (monitor, out rect);
 #endif
-        /* Window height excluding header is approx 1.33 * grid height
+        /* Window height excluding header is approx 1.4 * grid height
          * Window width approx 1.25 * grid width.
          * Cell dimensions approx 2.0 * font height
-         * Make allowance for unusable monitor height -approx 64px;
+         * Make allowance for unusable monitor height - approx 10%;
          */
-        max_h = (double)(rect.height - 64) / 1.33 / (double)rows / 2.0;
+        max_h = (double)(rect.height * 0.90) / 1.4 / (double)rows / 2.0;
         max_w = (double)(rect.width) / 1.25 / (double)cols / 2.0;
 
         return double.min (max_h, max_w);

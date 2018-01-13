@@ -371,7 +371,6 @@ public class Controller : GLib.Object {
 
     private async bool load_game (File? game, bool update_load_dir) {
         Filereader? reader = null;
-        clear ();
 
         try {
             reader = new Filereader (window, load_game_dir, game);
