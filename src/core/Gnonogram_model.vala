@@ -23,15 +23,19 @@ public class Model : GLib.Object {
     public GameState game_state { get; set; }
     public My2DCellArray solution_data { get; private set; }
     public My2DCellArray working_data { get; private set; }
-    public uint rows { get; private set; }
-    public uint cols  { get; private set; }
+    public uint rows { get {return dimensions.height;} }
+    public uint cols  { get {return dimensions.width;} }
 
+    private Dimensions _dimensions;
     public Dimensions dimensions {
         set {
+            _dimensions = value;
             solution_data.dimensions = value;
             working_data.dimensions = value;
-            rows = value.height;
-            cols = value.width;
+        }
+
+        get {
+            return _dimensions;
         }
     }
 
@@ -54,6 +58,7 @@ public class Model : GLib.Object {
     construct {
         solution_data = new My2DCellArray ({ MAXSIZE, MAXSIZE }, CellState.EMPTY);
         working_data = new My2DCellArray ({ MAXSIZE, MAXSIZE }, CellState.UNKNOWN);
+        dimensions = {15, 10}; /* This will also set default size of view. */
     }
 
     public int count_errors () {

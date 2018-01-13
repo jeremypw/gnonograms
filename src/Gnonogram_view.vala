@@ -323,9 +323,10 @@ public class View : Gtk.ApplicationWindow {
         restart_button.clicked.connect (on_restart_button_pressed);
         auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
 
-        dimensions = {15, 10};
-        fontheight = 24;
+        dimensions = model.dimensions;
         generator_grade = Difficulty.MODERATE;
+
+        show_all ();
     }
 
     public void blank_labels () {
@@ -450,7 +451,7 @@ public class View : Gtk.ApplicationWindow {
         Gdk.Rectangle rect;
 
         if (get_window () == null) {
-            return 0;
+            return DEFAULT_FONT_HEIGHT;
         }
 
 #if HAVE_GDK_3_22

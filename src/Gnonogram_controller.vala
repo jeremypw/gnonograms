@@ -41,7 +41,7 @@ public class Controller : GLib.Object {
         } else {
             restore_game.begin ((obj, res) => {
                 if (!restore_game.end (res)) {
-                    new_or_random_game ();
+                    new_game ();
                 }
             });
         }
@@ -73,7 +73,7 @@ public class Controller : GLib.Object {
     private string save_game_dir;
     private string load_game_dir;
     private string current_game_path;
-    private string temporary_game_path;
+    private string? temporary_game_path;
     private bool is_readonly {
         get {
             return view.readonly;
@@ -162,7 +162,6 @@ public class Controller : GLib.Object {
         }
 
         save_game_dir = Environment.get_home_dir () + "/gnonograms";
-        load_game_dir = save_game_dir;
 
         string data_home_folder_current = Path.build_path (
                                                 Path.DIR_SEPARATOR_S,
@@ -199,9 +198,22 @@ public class Controller : GLib.Object {
 
         current_game_path = null;
 
-        temporary_game_path = Path.build_path (Path.DIR_SEPARATOR_S,
-                                             data_home_folder_current,
-                                             Gnonograms.UNSAVED_FILENAME);
+        var temporary_game_dir = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                  data_home_folder_current);
+
+        temporary_game_path = Path.build_path (temporary_game_dir,
+                                               Gnonograms.UNSAVED_FILENAME);
+
+
+        try {
+            file = File.new_for_path (temporary_game_dir);
+            file.make_directory_with_parents (null);
+        } catch (GLib.Error e) {
+            if (!(e is IOError.EXISTS)) {
+                warning ("Could not make %s - %s",file.get_uri (), e.message);
+                temporary_game_path = null;
+            }
+        }
 
         restore_settings (); /* May change load_game_dir and save_game_dir */
 
@@ -235,6 +247,7 @@ public class Controller : GLib.Object {
 
     private void new_game () {
         clear ();
+        game_state = GameState.SETTING;
         game_name = Gnonograms.UNTITLED_NAME;
     }
 
@@ -295,14 +308,16 @@ public class Controller : GLib.Object {
             saved_state.set_string ("current-game-path", current_game_path);
         }
 
-        try {
-            var current_game = File.new_for_path (temporary_game_path);
-            current_game.@delete ();
-        } catch (GLib.Error e) {
-            debug ("Error deleting temporary game file - %s", e.message);
-        } finally {
-            /* Save solution and current state */
-            write_game (temporary_game_path, true);
+        if (temporary_game_path != null) {
+            try {
+                var current_game = File.new_for_path (temporary_game_path);
+                current_game.@delete ();
+            } catch (GLib.Error e) {
+                debug ("Error deleting temporary game file - %s", e.message);
+            } finally {
+                /* Save solution and current state */
+                write_game (temporary_game_path, true);
+            }
         }
     }
 
@@ -347,8 +362,12 @@ public class Controller : GLib.Object {
     }
 
     private async bool restore_game () {
-        var current_game = File.new_for_path (temporary_game_path);
-        return yield load_game (current_game, false);
+        if (temporary_game_path != null) {
+            var current_game = File.new_for_path (temporary_game_path);
+            return yield load_game (current_game, false);
+        } else {
+            return false;
+        }
     }
 
     private string? write_game (string? path, bool save_state = false) {
