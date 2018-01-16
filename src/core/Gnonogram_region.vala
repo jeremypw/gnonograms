@@ -459,7 +459,17 @@ public class Region { /* Not a GObject, to reduce weight */
         // Tries each ploy in turn, returns as soon as a change is made
         // or an error detected.
 
-        if (free_cell_audit () || in_error) {
+
+        if (fix_blocks_in_ranges () || in_error) {
+            return true;
+        }
+
+
+        if (do_edge ( -1) || in_error) {
+            return true;
+        }
+
+        if (available_filled_subregion_audit () || in_error) {
             return true;
         }
 
@@ -467,9 +477,6 @@ public class Region { /* Not a GObject, to reduce weight */
             return true;
         }
 
-        if (capped_range_audit () || in_error) {
-            return true;
-        }
 
         if (possibilities_audit () || in_error) {
             return true;
@@ -487,15 +494,11 @@ public class Region { /* Not a GObject, to reduce weight */
             return true;
         }
 
-        if (do_edge ( -1) || in_error) {
+        if (free_cell_audit () || in_error) {
             return true;
         }
 
-        if (available_filled_subregion_audit () || in_error) {
-            return true;
-        }
-
-        if (fix_blocks_in_ranges () || in_error) {
+        if (capped_range_audit () || in_error) {
             return true;
         }
 
