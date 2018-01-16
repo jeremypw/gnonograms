@@ -675,9 +675,6 @@ public class Controller : GLib.Object {
                     if (copy_to_solution) {
                         model.solution_data.copy (solver.grid);
                     }
-                } else {
-                    clear ();
-                    game_state = GameState.SETTING;
                 }
 
                 if (copy_to_working) {
