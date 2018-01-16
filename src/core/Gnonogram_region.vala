@@ -1089,10 +1089,10 @@ public class Region { /* Not a GObject, to reduce weight */
             if (tags[i, is_finished_pointer]) {  //skip to end of finished block
                 i += (dir ? blocks[current_block_number] - 1 : 1 - blocks[current_block_number]);
                 //now pointing at last cell of filled block
-                current_block_number += loop_step;  //Increment or decrement current block as appropriate
-
-                if (current_block_number < 0 || current_block_number == n_blocks) {
-                    record_error ("FindEdge", "Invalid BlockNum %u n_blocks %u clue %s".printf (current_block_number, n_blocks, clue));
+                var next_block = current_block_number + loop_step;  //Increment or decrement current block as appropriate
+                if (next_block >= 0 || next_block < n_blocks - 1) {
+                    current_block_number = next_block;
+                } else {
                     return false;
                 }
             } else {
