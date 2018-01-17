@@ -55,3 +55,8 @@ install_data (
     install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', 'scalable', 'apps')
 )
 
+install_data (
+    meson.project_name () + '.mimeinfo' + '.xml',
+    install_dir: join_paths(get_option('datadir'), 'mime', 'packages')
+)
+
