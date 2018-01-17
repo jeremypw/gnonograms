@@ -60,3 +60,8 @@ install_data (
     install_dir: join_paths(get_option('datadir'), 'mime', 'packages')
 )
 
+install_data (
+    join_paths('icons', application-x-gnonogram-puzzle.png'),
+    install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '48x48', 'mimetypes')
+)
+
