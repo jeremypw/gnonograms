@@ -4,28 +4,12 @@ domain = 'com.github.jeremypw.'
 schema_path = '/com/github/jeremypw/' + shortname + '/'
 tmp_dir_path = '/.local/share/' + shortname + '/'
 
-add_project_arguments (
-    ['--vapidir', join_paths (meson.current_source_dir (), 'vapi')],
-    language: 'vala'
-)
-
 i18n = import ('i18n')
 
 add_global_arguments (
     '-DGETTEXT_PACKAGE="' + meson.project_name () + '"',
     language:'c'
 )
-
-conf_data = configuration_data ()
-conf_data.set ('VERSION', '1.0.1')
-conf_data.set ('DATADIR', join_paths (get_option ('prefix'), get_option ('datadir')))
-conf_data.set ('PKGDATADIR', join_paths (get_option ('prefix'), get_option ('datadir'), meson.project_name ()))
-conf_data.set ('PROJECT_NAME', meson.project_name ())
-conf_data.set ('PROGRAM_NAME', shortname)
-
-configure_file (input : 'config.h.meson',
-                output : 'config.h',
-                configuration : conf_data )
 
 executable (
     meson.project_name (),
@@ -56,7 +40,6 @@ executable (
     'src/core/Enums.vala',
     'src/core/Structs.vala',
     'src/core/Constants.vala',
-    'vapi/config.vapi',
     dependencies : [
         dependency ('glib-2.0'),
         dependency ('gtk+-3.0'),

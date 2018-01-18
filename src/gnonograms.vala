@@ -27,19 +27,7 @@ public class App : Granite.Application {
         flags = ApplicationFlags.HANDLES_OPEN;
 
         program_name = _("Gnonograms");
-        app_years = "2017";
-        app_icon = "gnonograms";
-        build_version = Build.VERSION;
-
         app_launcher = "com.github.jeremypw.gnonograms.desktop";
-        main_url = "https://github.com/jeremypw/gnonograms";
-        bug_url = "https://github.com/jeremypw/gnonograms/issues";
-        help_url = "";
-        translate_url = "";
-        about_authors = { "Jeremy Wootten <jeremywootten@gmail.com" };
-        about_comments = "";
-        about_translators = _("translator-credits");
-        about_license_type = Gtk.License.GPL_3_0;
 
         SimpleAction quit_action = new SimpleAction ("quit", null);
         quit_action.activate.connect (() => {

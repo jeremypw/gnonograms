@@ -248,24 +248,24 @@ namespace Utils {
 
         save_solution = (action == Gnonograms.FileChooserAction.SAVE_WITH_SOLUTION);
 
-        string button = "Error";
+        string button_label = "Error";
         var gtk_action = Gtk.FileChooserAction.SAVE;
 
         switch (action) {
             case Gnonograms.FileChooserAction.OPEN:
                 gtk_action = Gtk.FileChooserAction.OPEN;
-                button = Gtk.Stock.OPEN;
+                button_label = _("Open");
                 break;
 
             case Gnonograms.FileChooserAction.SAVE_WITH_SOLUTION:
             case Gnonograms.FileChooserAction.SAVE_NO_SOLUTION:
                 gtk_action = Gtk.FileChooserAction.SAVE;
-                button = Gtk.Stock.SAVE;
+                button_label = _("Save");
                 break;
 
             case Gnonograms.FileChooserAction.SELECT_FOLDER:
                 gtk_action = Gtk.FileChooserAction.SELECT_FOLDER;
-                button = Gtk.Stock.APPLY;
+                button_label = _("Apply");
                 break;
 
             default :
@@ -276,8 +276,8 @@ namespace Utils {
                         dialogname,
                         parent,
                         gtk_action,
-                        Gtk.Stock.CANCEL, Gtk.ResponseType.CANCEL,
-                        button, Gtk.ResponseType.ACCEPT,
+                        _("Cancel"), Gtk.ResponseType.CANCEL,
+                        button_label, Gtk.ResponseType.ACCEPT,
                         null
                     );
 

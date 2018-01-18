@@ -23,6 +23,15 @@
         <category>LogicGame</category>
     </categories>
     <releases>
+        <release version="1.0.4" date="2018-01-18" urgency="low">
+            <description>
+                <ul>
+                    <li>Fix post_install.py script</li>
+                    <li>Remove unused or deprecated config variables</li>
+                    <li>Replace deprecated Gtk.Stock items</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.0.3" date="2018-01-18" urgency="low">
             <description>
                 <ul>
