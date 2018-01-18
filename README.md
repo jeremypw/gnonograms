@@ -5,6 +5,17 @@ Nonogram puzzle game written in Vala/Gtk and intended primarily for elementaryos
 
 ![Screenshot](data/screenshots/Solving.png)
 
+### Dependencies
+These dependencies must be present before building
+ - `valac`
+ - `meson`
+ - `gtk+-3.0`
+ - `granite`
+
+ You can install these on a Ubuntu-based system by executing this command:
+
+ `sudo apt install valac meson libgranite-dev`
+
 ### Building
 ```
 meson build --prefix=/usr  --buildtype=release
