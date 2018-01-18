@@ -23,6 +23,33 @@
         <category>LogicGame</category>
     </categories>
     <releases>
+        <release version="1.0.3" date="2018-01-18" urgency="low">
+            <description>
+                <ul>
+                    <li>Fix first run after clean install problems</li>
+                    <li>More complete uninstall</li>
+                    <li>Provide mimeinfo and icon</li>
+                    <li>Various small bug fixes</li>
+                </ul>
+            </description>
+        </release>
+        <release version="1.0.2" date="2018-01-12" urgency="low">
+            <description>
+                <ul>
+                    <li>Fix debian files</li>
+                    <li>Fix .desktop file</li>
+                    <li>Fix .appdata file</li>
+                    <li>Builds with dpkg-buildpackage and Travis CI</li>
+                </ul>
+            </description>
+        </release>
+        <release version="1.0.1" date="2018-01-11" urgency="low">
+            <description>
+                <ul>
+                    <li>Correct dependencies for xenial build</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.0.0" date="2018-01-09" urgency="low">
             <description>
                 <p>Initial release.</p>
@@ -33,13 +60,6 @@
                     <li>Adjust size of grid</li>
                     <li>Adjust difficulty of generated puzzles</li>
                     <li>Save and restore program state and settings</li>
-                </ul>
-            </description>
-        </release>
-        <release version="1.0.1" date="2018-01-11" urgency="low">
-            <description>
-                <ul>
-                    <li>Correct dependencies for xenial build</li>
                 </ul>
             </description>
         </release>
