@@ -72,6 +72,9 @@ uninstall_data = configuration_data()
 uninstall_data.set('schema_install_dir', join_paths(get_option('prefix'), get_option('datadir'), 'glib-2.0', 'schemas'))
 uninstall_data.set('schema_path', schema_path)
 uninstall_data.set('tmp_dir_path', tmp_dir_path)
+uninstall_data.set('icon_dir_path', join_paths(get_option('prefix'), get_option('datadir'), 'icons', 'hicolor'))
+uninstall_data.set('mime_dir_path', join_paths(get_option('prefix'), get_option('datadir'), 'mime', 'packages'))
+uninstall_data.set('desktop_dir_path', join_paths(get_option('prefix'), get_option('datadir'), 'applications'))
 
 configure_file (
     input: join_paths (meson.source_root (), 'data', 'post_uninstall.py.in'),

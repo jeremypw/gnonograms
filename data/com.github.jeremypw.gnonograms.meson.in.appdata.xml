@@ -5,6 +5,9 @@
     <project_group>jeremypw</project_group>
     <project_license>GPL-3.0+</project_license>
     <name>Gnonograms</name>
+    ​<mimetypes>
+    ​    <mimetype>application/x-gno</mimetype>
+    ​</mimetypes>
     <summary>Create and solve gnonogram puzzles</summary>
     <description>
         <p>An implementation of the Japanese logic puzzle "Nonograms"</p>

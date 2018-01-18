@@ -6,11 +6,21 @@ import subprocess
 schemadir = "@schema_install_dir@"
 schemapath = "@schema_path@"
 tmpdirpath = "@tmp_dir_path@"
+icondir = "@icon_dir_path@"
+mimedir = "@mime_dir_path@"
+desktopdir = "@desktop_dir_path@"
 
 print('Compiling gsettings schemas...' + schemadir)
 subprocess.call(['glib-compile-schemas', schemadir])
 print('Resetting dconf path ...' + schemapath)
 subprocess.call(['dconf', 'reset', '-f', schemapath])
+
+print('Updating icon cache...')
+subprocess.call(['gtk-update-icon-cache', '-t', '-f', icondir])
+print('Updating mimetype database...')
+subprocess.call(['update-mime-database', mimedir])
+print('Updating desktop database...')
+subprocess.call(['update-desktop-database', desktopdir])
 
 print('Removing temporary game directory')
 homedir = os.environ['HOME']
