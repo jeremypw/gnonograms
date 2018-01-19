@@ -90,7 +90,7 @@ public enum SolverState {
     UNDEFINED = 1 << 5;
 
     public bool solved () {
-        return this in SIMPLE | ADVANCED | AMBIGUOUS;
+        return this == SIMPLE || this == ADVANCED || this == AMBIGUOUS;
     }
 }
 
