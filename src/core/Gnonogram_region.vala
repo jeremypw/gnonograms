@@ -1016,7 +1016,7 @@ public class Region { /* Not a GObject, to reduce weight */
             int block_length = blocks[current_block_number];
             int blocklimit = (dir? current_index + block_length : current_index - block_length);
 
-            if (blocklimit < -1 || blocklimit > n_cells) {
+            if (blocklimit < -1 && blocklimit > n_cells) {
                 in_error = true;
                 message = "Invalid blocklimit";
                 return false;

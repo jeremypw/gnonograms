@@ -55,6 +55,7 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
             }
         }
 
+        assert (solver.state != SolverState.ERROR);
         return !cancelled;
     }
 
