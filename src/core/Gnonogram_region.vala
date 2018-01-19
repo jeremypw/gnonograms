@@ -464,6 +464,9 @@ public class Region { /* Not a GObject, to reduce weight */
             return true;
         }
 
+        if (do_edge (1) || in_error) {
+            return true;
+        }
 
         if (do_edge ( -1) || in_error) {
             return true;
@@ -487,10 +490,6 @@ public class Region { /* Not a GObject, to reduce weight */
         }
 
         if (only_possibility () || in_error) {
-            return true;
-        }
-
-        if (do_edge (1) || in_error) {
             return true;
         }
 
