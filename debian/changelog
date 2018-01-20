@@ -1,3 +1,10 @@
+com.github.jeremypw.gnonograms (1.0.5) xenial; urgency=low
+
+  * Fix regression in game generator
+  * Fix error in solver
+
+ -- Jeremy Wootten <jeremywootten@gmail.com>  Thu, 20 Jan 2018 15:16:00 +0000
+
 com.github.jeremypw.gnonograms (1.0.4) xenial; urgency=low
 
   * Fix post_install.py script

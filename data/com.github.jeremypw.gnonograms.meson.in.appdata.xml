@@ -23,6 +23,14 @@
         <category>LogicGame</category>
     </categories>
     <releases>
+        <release version="1.0.5" date="2018-01-20" urgency="low">
+            <description>
+                <ul>
+                    <li>Fix regression in game generator</li>
+                    <li>Fix error in solver</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.0.4" date="2018-01-18" urgency="low">
             <description>
                 <ul>
