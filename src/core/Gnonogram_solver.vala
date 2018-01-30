@@ -182,7 +182,8 @@ namespace Gnonograms {
 
             if (initial_state == SolverState.ERROR && inverse_state == SolverState.ERROR) {
                 state = SolverState.NO_SOLUTION;
-                assert_not_reached ();
+                /* This can happen when generating advanced logic puzzles */
+                break;
             }
 
             switch (inverse_state) {
