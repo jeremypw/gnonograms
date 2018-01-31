@@ -180,7 +180,7 @@ public class Controller : GLib.Object {
 
         string data_home_folder_current = Path.build_path (Path.DIR_SEPARATOR_S,
                                                            Environment.get_user_data_dir (),
-                                                           "Gnonograms",
+                                                           Gnonograms.APP_NAME,
                                                            "unsaved"
                                                            );
         File file;
