@@ -141,12 +141,6 @@ public class View : Gtk.ApplicationWindow {
             _fontheight = value;
             row_clue_box.fontheight = _fontheight;
             column_clue_box.fontheight = _fontheight;
-
-            /* Avoid window resizing as clues change */
-            /* Typical longest row clue width approx cols * 0.45 char) */
-            row_clue_box.set_size_request((int)(cols * 0.45 * fontheight), -1);
-            /* Typical longest col clue width approx rows * 0.55) */
-            column_clue_box.set_size_request(-1, (int)(rows * 0.55 * fontheight));
         }
     }
 

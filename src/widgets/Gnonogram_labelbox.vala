@@ -44,6 +44,14 @@ public class LabelBox : Gtk.Grid {
 
                 _fontheight = fh;
             }
+
+            if (vertical_labels) {
+                min_width = (int)(_dimensions.cols () * 2 * fh);
+                min_height = (int)(_dimensions.rows () * 0.8 * fh);
+            } else {
+                min_width = (int)(_dimensions.cols () * 0.6 * fh);
+                min_height = (int)(_dimensions.rows () * 2 * fh);
+            }
         }
     }
 
@@ -53,9 +61,7 @@ public class LabelBox : Gtk.Grid {
                 column_spacing: 0,
                 row_spacing: 0,
                 vertical_labels: (orientation == Gtk.Orientation.HORIZONTAL),
-                attach_position: (orientation == Gtk.Orientation.HORIZONTAL) ? Gtk.PositionType.RIGHT : Gtk.PositionType.BOTTOM,
-                vexpand: (orientation == Gtk.Orientation.HORIZONTAL),
-                hexpand: !(orientation == Gtk.Orientation.HORIZONTAL)
+                attach_position: (orientation == Gtk.Orientation.HORIZONTAL) ? Gtk.PositionType.RIGHT : Gtk.PositionType.BOTTOM
                 );
     }
 
@@ -106,6 +112,8 @@ public class LabelBox : Gtk.Grid {
     /* Backing variables - do not assign directly */
     private Dimensions _dimensions;
     private double _fontheight;
+    private int min_width = -1;
+    private int min_height = -1;
     /* ----------------------------------------- */
 
     private Label[] labels;
@@ -161,5 +169,19 @@ public class LabelBox : Gtk.Grid {
         other_size = new_other_size;
         blank_labels ();
     }
+
+    public override void get_preferred_width (out int _min_width, out int _nat_width) {
+        _min_width = min_width;
+        _nat_width = min_width;
+    }
+
+    public override void get_preferred_height (out int _min_height, out int _nat_height) {
+        _min_height = min_height;
+        _nat_height = min_height;
+    }
+
+
+
+
 }
 }

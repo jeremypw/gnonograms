@@ -40,13 +40,6 @@ class Label : Gtk.Label {
             var fontsize = (int)(1024 * (value));
             attrib_start = "<span size='%i' weight='bold'>".printf (fontsize);
 
-            /* Ensure grid remains square */
-            if (vertical_text) {
-                set_size_request (int.max((int)(value * 2), 8), -1);
-            } else {
-                set_size_request (-1, int.max((int)(value * 2), 8));
-            }
-
             update_markup ();
         }
     }
