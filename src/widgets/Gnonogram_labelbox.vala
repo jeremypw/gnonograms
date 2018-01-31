@@ -89,7 +89,10 @@ public class LabelBox : Gtk.Grid {
             txt = BLANKLABELTEXT;
         }
 
-        labels[index].clue = txt;
+        Label? label = labels[index];
+        if (label != null) {
+            label.clue = txt;
+        }
     }
 
     public string[] get_clues () {
@@ -100,12 +103,6 @@ public class LabelBox : Gtk.Grid {
         }
 
         return texts;
-    }
-
-    public void blank_labels () {
-        for (uint index = 0; index < size; index++) {
-            labels[index].clue = ("---");
-        }
     }
 
 /** PRIVATE **/
@@ -167,7 +164,10 @@ public class LabelBox : Gtk.Grid {
 
         size = new_size;
         other_size = new_other_size;
-        blank_labels ();
+
+        for (uint index = 0; index < size; index++) {
+            labels[index].clue = ("0");
+        }
     }
 
     public override void get_preferred_width (out int _min_width, out int _nat_width) {
@@ -179,9 +179,5 @@ public class LabelBox : Gtk.Grid {
         _min_height = min_height;
         _nat_height = min_height;
     }
-
-
-
-
 }
 }

@@ -31,6 +31,59 @@ public class Controller : GLib.Object {
         }
     }
 
+    construct {
+        model = new Model ();
+        view = new View (model);
+
+        back_stack = new Gee.LinkedList<Move> ();
+        forward_stack = new Gee.LinkedList<Move> ();
+
+        /* Connect signals. Must be done before restoring settings so that e.g.
+         * dimensions of model are set. */
+        view.resized.connect (on_view_resized);
+        view.moved.connect (on_moved);
+        view.next_move_request.connect (on_next_move_request);
+        view.previous_move_request.connect (on_previous_move_request);
+        view.game_state_changed.connect (on_game_state_changed);
+        view.check_errors_request.connect (on_count_errors_request);
+        view.rewind_request.connect (on_rewind_request);
+        view.delete_event.connect (on_view_deleted);
+        view.save_game_request.connect (on_save_game_request);
+        view.save_game_as_request.connect (on_save_game_as_request);
+        view.open_game_request.connect (on_open_game_request);
+        view.solve_this_request.connect (on_solve_this_request);
+        view.restart_request.connect (on_restart_request);
+
+        var schema_source = GLib.SettingsSchemaSource.get_default ();
+        if (schema_source.lookup ("com.github.jeremypw.gnonograms.settings", true) != null &&
+            schema_source.lookup ("com.github.jeremypw.gnonograms.saved-state", true) != null) {
+
+            settings = new Settings ("com.github.jeremypw.gnonograms.settings");
+            saved_state = new Settings ("com.github.jeremypw.gnonograms.saved-state");
+        }
+
+        string data_home_folder_current = Path.build_path (Path.DIR_SEPARATOR_S,
+                                                           Environment.get_user_data_dir (),
+                                                           Gnonograms.APP_NAME,
+                                                           "unsaved"
+                                                           );
+        File file;
+        try {
+            file = File.new_for_path (data_home_folder_current);
+            file.make_directory_with_parents (null);
+        } catch (GLib.Error e) {
+            if (!(e is IOError.EXISTS)) {
+                warning ("Could not make %s - %s",file.get_uri (), e.message);
+            }
+        }
+
+        current_game_path = null;
+        temporary_game_path = Path.build_path (Path.DIR_SEPARATOR_S, data_home_folder_current,
+                                               Gnonograms.UNSAVED_FILENAME);
+
+        restore_settings (); /* May change load_game_dir and save_game_dir */
+    }
+
     public Controller (File? game = null) {
         if (game != null) {
             load_game.begin (game, true, (obj, res) => {
@@ -147,58 +200,6 @@ public class Controller : GLib.Object {
         }
     }
 
-    construct {
-        model = new Model ();
-        view = new View (model);
-        back_stack = new Gee.LinkedList<Move> ();
-        forward_stack = new Gee.LinkedList<Move> ();
-
-        /* Connect signals. Must be done before restoring settings so that e.g.
-         * dimensions of model are set. */
-        view.resized.connect (on_view_resized);
-        view.moved.connect (on_moved);
-        view.next_move_request.connect (on_next_move_request);
-        view.previous_move_request.connect (on_previous_move_request);
-        view.game_state_changed.connect (on_game_state_changed);
-        view.check_errors_request.connect (on_count_errors_request);
-        view.rewind_request.connect (on_rewind_request);
-        view.delete_event.connect (on_view_deleted);
-        view.save_game_request.connect (on_save_game_request);
-        view.save_game_as_request.connect (on_save_game_as_request);
-        view.open_game_request.connect (on_open_game_request);
-        view.solve_this_request.connect (on_solve_this_request);
-        view.restart_request.connect (on_restart_request);
-
-        var schema_source = GLib.SettingsSchemaSource.get_default ();
-        if (schema_source.lookup ("com.github.jeremypw.gnonograms.settings", true) != null &&
-            schema_source.lookup ("com.github.jeremypw.gnonograms.saved-state", true) != null) {
-
-            settings = new Settings ("com.github.jeremypw.gnonograms.settings");
-            saved_state = new Settings ("com.github.jeremypw.gnonograms.saved-state");
-        }
-
-
-        string data_home_folder_current = Path.build_path (Path.DIR_SEPARATOR_S,
-                                                           Environment.get_user_data_dir (),
-                                                           Gnonograms.APP_NAME,
-                                                           "unsaved"
-                                                           );
-        File file;
-        try {
-            file = File.new_for_path (data_home_folder_current);
-            file.make_directory_with_parents (null);
-        } catch (GLib.Error e) {
-            if (!(e is IOError.EXISTS)) {
-                warning ("Could not make %s - %s",file.get_uri (), e.message);
-            }
-        }
-
-        current_game_path = null;
-        temporary_game_path = Path.build_path (Path.DIR_SEPARATOR_S, data_home_folder_current,
-                                               Gnonograms.UNSAVED_FILENAME);
-
-        restore_settings (); /* May change load_game_dir and save_game_dir */
-    }
 
     private void clear () {
         model.clear ();
@@ -316,7 +317,6 @@ public class Controller : GLib.Object {
             current_game_path = saved_state.get_string ("current-game-path");
             window.move (x, y);
             view.fontheight = saved_state.get_double ("font-height");
-
 
             saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
             saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);

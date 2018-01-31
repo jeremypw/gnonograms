@@ -163,10 +163,17 @@ public class CellGrid : Gtk.DrawingArea {
     private const double MINOR_GRID_LINE_WIDTH = 1.0;
     private Gdk.RGBA[, ] colors;
 
-    private uint rows {get {
-        assert (model != null);
-        return model != null ? model.rows : 0; }}
-    private uint cols {get { return model != null ? model.cols : 0; }}
+    private uint rows {
+        get {
+            assert (model != null);
+            return model != null ? model.rows : 0;
+        }
+    }
+    private uint cols {
+        get {
+            return model != null ? model.cols : 0;
+        }
+    }
 
     /* Backing variable; do not assign directly */
     private Cell _current_cell;
@@ -211,7 +218,6 @@ public class CellGrid : Gtk.DrawingArea {
         /* Cause refresh of existing pattern */
         highlight_pattern = new CellPattern.highlight (cell_width, cell_height);
     }
-
 
     private bool on_draw_event (Cairo.Context cr) {
         if (array != null) {

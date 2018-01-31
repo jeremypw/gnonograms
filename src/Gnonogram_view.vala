@@ -68,12 +68,14 @@ public class View : Gtk.ApplicationWindow {
         set {
             if (value != _dimensions) {
                 _dimensions = value;
+
+                resized (value); /* Controller will queue draw after resizing model */
+
                 row_clue_box.dimensions = dimensions;
                 column_clue_box.dimensions = dimensions;
                 fontheight = get_default_fontheight_from_dimensions ();
                 app_menu.row_val = value.height;
                 app_menu.column_val = value.width;
-                resized (value); /* Controller will queue draw after resizing model */
             }
         }
     }
@@ -321,11 +323,6 @@ public class View : Gtk.ApplicationWindow {
         generator_grade = Difficulty.MODERATE;
 
         show_all ();
-    }
-
-    public void blank_labels () {
-        row_clue_box.blank_labels ();
-        column_clue_box.blank_labels ();
     }
 
     public string[] get_row_clues () {
