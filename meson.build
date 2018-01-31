@@ -41,7 +41,6 @@ executable (
     'src/core/Structs.vala',
     'src/core/Constants.vala',
     dependencies : [
-        dependency ('glib-2.0'),
         dependency ('gtk+-3.0'),
         dependency ('gee-0.8'),
         dependency ('granite')
