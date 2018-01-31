@@ -59,7 +59,6 @@ public enum Difficulty {
         }
     }
 
-
     public static Difficulty[] all_human () {
         return { EASY, MODERATE, HARD, CHALLENGING, ADVANCED, MAXIMUM };
     }

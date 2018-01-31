@@ -96,7 +96,7 @@ public class Filewriter : Object {
         stream.printf ("%s\n", name);
         stream.printf ("%s\n", author);
         stream.printf ("%s\n", date.to_string ());
-        stream.printf ("%s\n", difficulty.to_string ());
+        stream.printf ("%u\n", difficulty);
 
         if (license == null || license.length > 0) {
             stream.printf("[License]\n");
@@ -133,11 +133,11 @@ public class Filewriter : Object {
 
         if (save_solution) {
             stream.printf ("[Solution grid]\n");
-            stream.printf (solution.to_string ());
+            stream.printf ("%s", solution.to_string ());
         }
 
         stream.printf ("[Locked]\n");
-        stream.printf (is_readonly.to_string ());
+        stream.printf (is_readonly.to_string () + "\n");
     }
 
     /*** Writes complete information to reload game state ***/
@@ -158,8 +158,8 @@ public class Filewriter : Object {
         stream.printf (game_state.to_string() + "\n");
 
         if (name != Gnonograms.UNTITLED_NAME) {
-            stream.printf ("[Original path]");
-            stream.printf (game_path.to_string ());
+            stream.printf ("[Original path]\n");
+            stream.printf (game_path.to_string () + "\n");
         }
 
         stream.flush ();

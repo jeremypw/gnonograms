@@ -36,9 +36,8 @@ public class Filereader : Object {
     public string[] working {get; private set;}
 
     public string name {get; private set; default = "";}
-    public string author {get; private set; default = "";}
     public string date {get; private set; default = "";}
-    public string score {get; private set; default = "";}
+    public Difficulty difficulty {get; private set; default = Difficulty.UNDEFINED;}
     public string license {get; private set; default = "";}
     public string original_path {get; private set; default = "";}
 
@@ -181,10 +180,6 @@ public class Filereader : Object {
                     in_error = !get_game_description (body);
                     break;
 
-                case "LIC":
-                    in_error = !get_game_license (body);
-                    break;
-
                 case "LOC":
                     in_error = !get_readonly (body);
                     break;
@@ -321,6 +316,9 @@ public class Filereader : Object {
         return true;
     }
 
+    /** First four lines of description must be in order @name, @date, @score (difficulty or grade).
+      * Missing data must be represented by blank lines.
+    **/
     private bool get_game_description (string? body) {
         if (body == null) {
             return true;
@@ -333,32 +331,15 @@ public class Filereader : Object {
         }
 
         if (s.length >= 2) {
-            author = Uri.unescape_string (s[1]);
+            date = s[1];
         }
 
         if (s.length >= 3) {
-            date = s[2];
-        }
-
-        if (s.length >= 4) {
-            score = s[3];
-        }
-
-        return true;
-    }
-
-    private bool get_game_license (string? body) {
-        if (body == null) {
-            return true; /* Not mandatory */
-        }
-
-        string[] s = Utils.remove_blank_lines (body.split("\n"));
-
-        if (s.length >= 1) {
-            if (s[0].length > 50) {
-                license = s[0].slice (0, 50);
+            var grade = s[2].strip ();
+            if (grade.length == 1 && grade[0].isdigit ()) {
+                difficulty = (Difficulty)(int.parse (grade));
             } else {
-                license = s[0];
+                difficulty = Difficulty.UNDEFINED;
             }
         }
 

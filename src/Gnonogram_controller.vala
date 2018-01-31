@@ -439,6 +439,7 @@ public class Controller : GLib.Object {
         model.blank_working (); // Do not reveal solution on load
 
         if (reader.has_solution) {
+            view.game_grade = reader.difficulty;
             model.game_state = GameState.SETTING; /* Selects the working grid */
             model.set_row_data_from_string_array (reader.solution[0 : rows]);
         } else {
