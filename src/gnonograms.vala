@@ -23,11 +23,12 @@ public class App : Granite.Application {
     public Controller controller;
 
     construct {
-        application_id = "com.github.jeremypw.gnonograms";
-        flags = ApplicationFlags.HANDLES_OPEN;
+        application_id = Gnonograms.APP_ID;
+        program_name = Gnonograms.APP_NAME;
+        app_launcher = Gnonograms.LAUNCHER;
+        build_version = Gnonograms.VERSION;
 
-        program_name = _("Gnonograms");
-        app_launcher = "com.github.jeremypw.gnonograms.desktop";
+        flags = ApplicationFlags.HANDLES_OPEN;
 
         SimpleAction quit_action = new SimpleAction ("quit", null);
         quit_action.activate.connect (() => {

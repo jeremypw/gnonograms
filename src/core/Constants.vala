@@ -34,4 +34,9 @@ namespace Gnonograms {
     public const int MAX_TRIES_PER_GRADE = 1000;
     public const string UNTITLED_NAME = _("Untitled");
 
+    public const string APP_ID = "com.github.jeremypw.gnonograms";
+    public const string APP_NAME = _("Gnonograms");
+    public const string LAUNCHER = "com.github.jeremypw.gnonograms.desktop";
+    public const string VERSION = "1.0.6"; // For benefit of Granite.Application terminal output.
+
 }
