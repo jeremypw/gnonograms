@@ -212,6 +212,7 @@ public class View : Gtk.ApplicationWindow {
         default_theme.add_resource_path ("/com/gnonograms/icons");
 
         header_bar = new Gtk.HeaderBar ();
+        header_bar.get_style_context ().add_class ("default-decoration");
         header_bar.set_has_subtitle (true);
         header_bar.set_show_close_button (true);
 
@@ -237,17 +238,21 @@ public class View : Gtk.ApplicationWindow {
         undo_button.image = img;
         undo_button.tooltip_text = _("Undo Last Move");
         undo_button.sensitive = false;
+        undo_button.get_style_context ().add_class (Granite.STYLE_CLASS_BACK_BUTTON);
+
 
         check_correct_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("media-seek-backward", Gtk.IconSize.LARGE_TOOLBAR);
         check_correct_button.image = img;
         check_correct_button.tooltip_text = _("Go Back to Last Correct Position");
         check_correct_button.sensitive = false;
+        check_correct_button.get_style_context ().add_class (Granite.STYLE_CLASS_BACK_BUTTON);
 
         restart_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("view-refresh", Gtk.IconSize.LARGE_TOOLBAR);
         restart_button.image = img;
         restart_button.sensitive = true;
+        restart_button.get_style_context ().add_class (Gtk.STYLE_CLASS_DESTRUCTIVE_ACTION);
 
         auto_solve_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("system-run", Gtk.IconSize.LARGE_TOOLBAR);
@@ -265,6 +270,7 @@ public class View : Gtk.ApplicationWindow {
         header_bar.pack_start (save_game_as_button);
         header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_start (restart_button);
+        header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_start (undo_button);
         header_bar.pack_start (check_correct_button);
         header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
