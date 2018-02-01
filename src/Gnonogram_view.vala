@@ -645,14 +645,13 @@ public class View : Gtk.ApplicationWindow {
         set_mods (event.state);
 
         if (control_pressed) {
-
             switch (event.direction) {
                 case Gdk.ScrollDirection.UP:
-                    fontheight -= 1.0;
+                    zoom_out ();
                     break;
 
                 case Gdk.ScrollDirection.DOWN:
-                    fontheight += 1.0;
+                    zoom_in ();
                     break;
 
                 default:
@@ -662,7 +661,6 @@ public class View : Gtk.ApplicationWindow {
             return true;
 
         } else if (drawing_with_state != CellState.UNDEFINED) {
-
             switch (event.direction) {
                 case Gdk.ScrollDirection.UP:
                     handle_arrow_keys ("UP");
@@ -736,9 +734,9 @@ public class View : Gtk.ApplicationWindow {
             case "KP_ADD":
                 if (only_control_pressed) {
                     if (name == "MINUS" || name == "KP_SUBTRACT") {
-                        fontheight -= 1.0;
+                        zoom_out ();
                     } else {
-                        fontheight += 1.0;
+                        zoom_in ();
                     }
                 }
 
@@ -865,6 +863,19 @@ public class View : Gtk.ApplicationWindow {
 
         game_name = app_menu.title;
         dimensions = {cols, rows};
+    }
+
+    private void zoom_out () {
+        int min, nat;
+        header_bar.get_preferred_width (out min, out nat);
+        /* Do not shrink below min header size plus allowance for progress widget */
+        if (main_grid.get_allocated_width () > min + 150) {
+            fontheight -= 1.0;
+        }
+    }
+
+    private void zoom_in () {
+        fontheight += 1.0;
     }
 }
 }
