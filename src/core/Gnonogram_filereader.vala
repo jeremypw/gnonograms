@@ -189,7 +189,8 @@ public class Filereader : Object {
                     break;
 
                 default:
-                    /* Just ignore unhandled headings e.g. from other versions */
+                    err_msg = "Unrecognized heading";
+                    in_error = true;
                     break;
             }
         }
