@@ -300,14 +300,19 @@ public class View : Gtk.ApplicationWindow {
         cell_grid.leave_notify_event.connect (on_grid_leave);
         cell_grid.button_press_event.connect (on_grid_button_press);
         cell_grid.button_release_event.connect (on_grid_button_release);
-        cell_grid.scroll_event.connect (on_scroll_event);
 
         main_grid.row_spacing = 6;
         main_grid.column_spacing = 6;
         main_grid.border_width = 6;
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for rows */
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
-        overlay.add (main_grid);
+
+        var ev = new Gtk.EventBox ();
+        ev.add_events (Gdk.EventMask.SCROLL_MASK);
+        ev.scroll_event.connect (on_grid_scroll_event);
+
+        ev.add (main_grid);
+        overlay.add (ev);
         add (overlay);
 
         /* Connect signal handlers */
@@ -636,7 +641,7 @@ public class View : Gtk.ApplicationWindow {
     /** With Control pressed, zoom using the fontsize.  Else, if button is down (drawing)
       * draw a straight line in the scroll direction.
     **/
-    private bool on_scroll_event (Gdk.EventScroll event) {
+    private bool on_grid_scroll_event (Gdk.EventScroll event) {
         set_mods (event.state);
 
         if (control_pressed) {
