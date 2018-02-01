@@ -1,5 +1,5 @@
 project ('com.github.jeremypw.gnonograms', 'vala', 'c')
-shortname = 'Gnonograms'
+shortname = 'gnonograms'
 domain = 'com.github.jeremypw.'
 schema_path = '/com/github/jeremypw/' + shortname + '/'
 tmp_dir_path = '/.local/share/' + shortname + '/'

@@ -52,7 +52,7 @@ endforeach
 
 foreach i : icon_sizes
     install_data (
-        join_paths('icons', i, 'gnonogram-puzzle.svg'),
+        join_paths('icons', i, 'application-x-gnonogram-puzzle' + '.svg'),
         install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', i + 'x' + i, 'mimetypes')
     )
 endforeach
@@ -64,7 +64,7 @@ install_data (
 )
 
 install_data (
-    join_paths('icons', 'gnonogram-puzzle.svg'),
+    join_paths('icons', 'application-x-gnonogram-puzzle.svg'),
     install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', 'scalable', 'mimetypes')
 )
 
