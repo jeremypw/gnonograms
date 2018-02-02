@@ -289,27 +289,19 @@ public class Filereader : Object {
     }
 
     private bool get_gnonogram_state (string? body) {
-        if (body == null) {
-            err_msg = _("Missing game state");
-            return false;
-        }
+        /* Default to SOLVING state to avoid inadvertently showing solution */
+        state = GameState.SOLVING;
 
-        string[] s = Utils.remove_blank_lines (body.split("\n"));
+        if (body != null) {
+            string[] s = Utils.remove_blank_lines (body.split("\n"));
 
-        if (s == null || s.length != 1) {
-            err_msg = _("Could not determine game state in loaded game file");
-            return false;
-        }
+            if (s != null && s.length == 1) {
+                var state_string = s[0];
 
-        var state_string = s[0];
-
-        if (state_string.up ().contains ("SETTING")) {
-            state = GameState.SETTING;
-        } else if (state_string.up ().contains ("SOLVING")) {
-            state = GameState.SOLVING;
-        } else {
-            err_msg = _("Invalid game state '%s' in loaded game file").printf (state_string);
-            return false;
+                if (state_string.up ().contains ("SETTING")) {
+                    state = GameState.SETTING;
+                }
+            }
         }
 
         return true;
