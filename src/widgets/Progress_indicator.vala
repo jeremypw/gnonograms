@@ -45,6 +45,7 @@ public class Progress_indicator : Gtk.Grid {
     construct {
         spinner = new Gtk.Spinner ();
         label = new Gtk.Label (null);
+        label.get_style_context ().add_class (Granite.STYLE_CLASS_H3_LABEL);
 
         add (label);
         add (spinner);
@@ -54,6 +55,8 @@ public class Progress_indicator : Gtk.Grid {
         img.set_tooltip_text (_("Cancel solving"));
         cancel_button.image = img;
         cancel_button.no_show_all = true;
+        cancel_button.get_style_context ().add_class (Gtk.STYLE_CLASS_DESTRUCTIVE_ACTION);
+
         add (cancel_button);
 
         show_all ();

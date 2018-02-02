@@ -208,6 +208,14 @@ public class View : Gtk.ApplicationWindow {
         resizable = false;
         drawing_with_state = CellState.UNDEFINED;
 
+        var provider = new Gtk.CssProvider ();
+        try {
+            provider.load_from_data (BRAND_STYLESHEET, -1);
+            Gtk.StyleContext.add_provider_for_screen (get_screen (), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+        } catch (Error e) {
+            warning ("Could not create CSS Provider: %s", e.message);
+        }
+
         weak Gtk.IconTheme default_theme = Gtk.IconTheme.get_default ();
         default_theme.add_resource_path ("/com/gnonograms/icons");
 
@@ -275,7 +283,7 @@ public class View : Gtk.ApplicationWindow {
         header_bar.pack_start (check_correct_button);
         header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_start (auto_solve_button);
-
+        header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
 
         header_bar.pack_end (app_menu);
         header_bar.pack_end (mode_switch);
@@ -292,6 +300,7 @@ public class View : Gtk.ApplicationWindow {
 
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL);
+
         cell_grid = new CellGrid (model);
         main_grid = new Gtk.Grid ();
 
@@ -400,6 +409,19 @@ public class View : Gtk.ApplicationWindow {
     /**PRIVATE**/
     private const uint NOTIFICATION_TIMEOUT_SEC = 10;
     private const uint PROGRESS_DELAY_MSEC = 500;
+
+    private const string BRAND_STYLESHEET = """
+        @define-color textColorPrimary #210c9b;
+
+        *.label:selected {
+            background-color: #ddd9f0;
+        }
+
+        .tooltip {
+            background-color: @textColorPrimary;
+            border-radius: 4px 4px 4px 4px;
+        }
+    """;
 
     private Gnonograms.LabelBox row_clue_box;
     private Gnonograms.LabelBox column_clue_box;
