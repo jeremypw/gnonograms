@@ -300,14 +300,19 @@ public class View : Gtk.ApplicationWindow {
         cell_grid.leave_notify_event.connect (on_grid_leave);
         cell_grid.button_press_event.connect (on_grid_button_press);
         cell_grid.button_release_event.connect (on_grid_button_release);
-        cell_grid.scroll_event.connect (on_scroll_event);
 
         main_grid.row_spacing = 6;
         main_grid.column_spacing = 6;
         main_grid.border_width = 6;
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for rows */
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
-        overlay.add (main_grid);
+
+        var ev = new Gtk.EventBox ();
+        ev.add_events (Gdk.EventMask.SCROLL_MASK);
+        ev.scroll_event.connect (on_grid_scroll_event);
+
+        ev.add (main_grid);
+        overlay.add (ev);
         add (overlay);
 
         /* Connect signal handlers */
@@ -636,18 +641,17 @@ public class View : Gtk.ApplicationWindow {
     /** With Control pressed, zoom using the fontsize.  Else, if button is down (drawing)
       * draw a straight line in the scroll direction.
     **/
-    private bool on_scroll_event (Gdk.EventScroll event) {
+    private bool on_grid_scroll_event (Gdk.EventScroll event) {
         set_mods (event.state);
 
         if (control_pressed) {
-
             switch (event.direction) {
                 case Gdk.ScrollDirection.UP:
-                    fontheight -= 1.0;
+                    zoom_out ();
                     break;
 
                 case Gdk.ScrollDirection.DOWN:
-                    fontheight += 1.0;
+                    zoom_in ();
                     break;
 
                 default:
@@ -657,7 +661,6 @@ public class View : Gtk.ApplicationWindow {
             return true;
 
         } else if (drawing_with_state != CellState.UNDEFINED) {
-
             switch (event.direction) {
                 case Gdk.ScrollDirection.UP:
                     handle_arrow_keys ("UP");
@@ -731,9 +734,9 @@ public class View : Gtk.ApplicationWindow {
             case "KP_ADD":
                 if (only_control_pressed) {
                     if (name == "MINUS" || name == "KP_SUBTRACT") {
-                        fontheight -= 1.0;
+                        zoom_out ();
                     } else {
-                        fontheight += 1.0;
+                        zoom_in ();
                     }
                 }
 
@@ -860,6 +863,19 @@ public class View : Gtk.ApplicationWindow {
 
         game_name = app_menu.title;
         dimensions = {cols, rows};
+    }
+
+    private void zoom_out () {
+        int min, nat;
+        header_bar.get_preferred_width (out min, out nat);
+        /* Do not shrink below min header size plus allowance for progress widget */
+        if (main_grid.get_allocated_width () > min + 150) {
+            fontheight -= 1.0;
+        }
+    }
+
+    private void zoom_in () {
+        fontheight += 1.0;
     }
 }
 }
