@@ -410,18 +410,19 @@ public class View : Gtk.ApplicationWindow {
     private const uint NOTIFICATION_TIMEOUT_SEC = 10;
     private const uint PROGRESS_DELAY_MSEC = 500;
 
-    private const string BRAND_STYLESHEET = """
-        @define-color textColorPrimary #210c9b;
+    private string BRAND_STYLESHEET = """
+        @define-color textColorPrimary %s;
+        @define-color textColorPrimaryShadow %s;
 
         *.label:selected {
-            background-color: #ddd9f0;
+            background-color: @textColorPrimaryShadow;
         }
 
         .tooltip {
             background-color: @textColorPrimary;
             border-radius: 4px 4px 4px 4px;
         }
-    """;
+    """.printf (Gnonograms.SOLVING_FILLED_COLOR, Gnonograms.SHADOW_COLOR);
 
     private Gnonograms.LabelBox row_clue_box;
     private Gnonograms.LabelBox column_clue_box;

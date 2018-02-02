@@ -104,6 +104,6 @@
 
     <custom>
         <value key="x-appcenter-color-primary">#d4d4d4</value>
-        <value key="x-appcenter-color-primary-text">#210c9b</value>
+        <value key="x-appcenter-color-primary-text">#180297</value>
     </custom>
 </component>

@@ -196,14 +196,14 @@ public class CellGrid : Gtk.DrawingArea {
 
     private void set_colors () {  /* TODO simplify by having same colors for setting and solving, derived from theme */
         int setting = (int)GameState.SETTING;
-        colors[setting, (int)CellState.UNKNOWN].parse ("LIGHT GREY");
-        colors[setting, (int)CellState.EMPTY].parse ("WHITE");
-        colors[setting, (int)CellState.FILLED].parse ("DARK GREY");
+        colors[setting, (int)CellState.UNKNOWN].parse (Gnonograms.UNKNOWN_COLOR);
+        colors[setting, (int)CellState.EMPTY].parse (Gnonograms.SETTING_EMPTY_COLOR);
+        colors[setting, (int)CellState.FILLED].parse (Gnonograms.SETTING_FILLED_COLOR);
 
         int solving = (int)GameState.SOLVING;
-        colors[solving, (int)CellState.UNKNOWN].parse ("LIGHT GREY");
-        colors[solving, (int)CellState.EMPTY].parse ("YELLOW");
-        colors[solving, (int)CellState.FILLED].parse ("BLUE");
+        colors[solving, (int)CellState.UNKNOWN].parse (Gnonograms.UNKNOWN_COLOR);
+        colors[solving, (int)CellState.EMPTY].parse (Gnonograms.SOLVING_EMPTY_COLOR);
+        colors[solving, (int)CellState.FILLED].parse (Gnonograms.SOLVING_FILLED_COLOR);
     }
 
 /*** Signal Handlers ***/
