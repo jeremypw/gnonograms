@@ -47,7 +47,7 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
                     set_active (generating_index);
                     break;
                 default:
-                    assert_not_reached ();
+                    break;
             }
         }
     }

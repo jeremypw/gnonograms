@@ -349,6 +349,9 @@ public class Controller : GLib.Object {
 
     private string? write_game (string? path, bool save_state = false) {
         Filewriter? file_writer = null;
+        var gs = game_state;
+        game_state = GameState.UNDEFINED;
+
         try {
             file_writer = new Filewriter (window,
                                           save_game_dir,
@@ -360,7 +363,7 @@ public class Controller : GLib.Object {
                                         );
 
             file_writer.difficulty = view.game_grade;
-            file_writer.game_state = game_state;
+            file_writer.game_state = gs;
             file_writer.working.copy (model.working_data);
             file_writer.solution.copy (model.solution_data);
             file_writer.is_readonly = is_readonly;
@@ -380,11 +383,14 @@ public class Controller : GLib.Object {
             return null;
         }
 
+        game_state = gs;
+
         return file_writer.game_path;
     }
 
     private async bool load_game (File? game, bool update_load_dir) {
         Filereader? reader = null;
+        game_state = GameState.UNDEFINED;
 
         try {
             reader = new Filereader (window, load_game_dir, game);
