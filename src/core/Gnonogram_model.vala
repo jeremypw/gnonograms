@@ -20,7 +20,16 @@
 namespace Gnonograms {
 public class Model : GLib.Object {
     /** PUBLIC **/
-    public GameState game_state { get; set; }
+    public GameState game_state {
+        set {
+            if (value == GameState.SETTING) {
+                display_data = solution_data;
+            } else {
+                display_data = working_data;
+            }
+        }
+    }
+
     public My2DCellArray solution_data { get; private set; }
     public My2DCellArray working_data { get; private set; }
     public uint rows { get {return dimensions.height;} }
@@ -39,13 +48,14 @@ public class Model : GLib.Object {
         }
     }
 
+    private My2DCellArray _display_data;
     public My2DCellArray display_data  {
         get {
-            if (game_state == GameState.SETTING) {
-                return solution_data;
-            } else {
-                return working_data;
-            }
+            return _display_data;
+        }
+
+        private set {
+            _display_data = value;
         }
     }
 

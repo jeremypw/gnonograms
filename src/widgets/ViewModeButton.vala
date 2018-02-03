@@ -23,6 +23,18 @@ namespace Gnonograms {
 public class ViewModeButton : Granite.Widgets.ModeButton {
     /** PUBLIC **/
     public GameState mode {
+        get {
+            if (selected == setting_index) {
+                return GameState.SETTING;
+            } else if (selected == solving_index) {
+                return GameState.SOLVING;
+            } else if (selected == generating_index) {
+                    return GameState.GENERATING;
+            } else {
+                return GameState.UNDEFINED;
+            }
+        }
+
         set {
             switch (value) {
                 case GameState.SETTING:

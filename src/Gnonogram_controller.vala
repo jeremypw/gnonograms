@@ -44,7 +44,7 @@ public class Controller : GLib.Object {
         view.moved.connect (on_moved);
         view.next_move_request.connect (on_next_move_request);
         view.previous_move_request.connect (on_previous_move_request);
-        view.game_state_changed.connect (on_game_state_changed);
+        view.mode_change_request.connect (on_view_mode_change_request);
         view.check_errors_request.connect (on_count_errors_request);
         view.rewind_request.connect (on_rewind_request);
         view.delete_event.connect (on_view_deleted);
@@ -53,6 +53,9 @@ public class Controller : GLib.Object {
         view.open_game_request.connect (on_open_game_request);
         view.solve_this_request.connect (on_solve_this_request);
         view.restart_request.connect (on_restart_request);
+
+        view.show_all ();
+        view.present ();
 
         var schema_source = GLib.SettingsSchemaSource.get_default ();
         if (schema_source.lookup ("com.github.jeremypw.gnonograms.settings", true) != null &&
@@ -98,10 +101,6 @@ public class Controller : GLib.Object {
                 }
             });
         }
-
-        view.show_all ();
-        view.present ();
-
     }
 
     private void new_or_random_game () {
@@ -150,21 +149,22 @@ public class Controller : GLib.Object {
         }
     }
 
-    private GameState game_state {
+    private GameState _game_state;
+    public GameState game_state {
         get {
-            return view.game_state;
+            return _game_state;
         }
 
         set {
-            if (view.game_state != value) {
+            if (_game_state != value) {
+                _game_state = value;
+                model.game_state = value;
                 view.game_state = value;
-            }
 
-            model.game_state = value;
-            clear_history ();
-
-            if (value == GameState.GENERATING) {
-                on_new_random_request ();
+                clear_history ();
+                if (value == GameState.GENERATING) {
+                    on_new_random_request ();
+                }
             }
         }
     }
@@ -333,7 +333,7 @@ public class Controller : GLib.Object {
             view.fontheight = saved_state.get_double ("font-height");
 
             saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
-            saved_state.bind ("mode", view, "game_state", SettingsBindFlags.DEFAULT);
+            saved_state.bind ("mode", this, "game_state", SettingsBindFlags.DEFAULT);
             settings.bind ("grade", view, "generator_grade", SettingsBindFlags.DEFAULT);
         }
     }
@@ -613,7 +613,7 @@ public class Controller : GLib.Object {
         view.queue_draw ();
     }
 
-    private void on_game_state_changed (GameState gs) {
+    private void on_view_mode_change_request (GameState gs) {
         game_state = gs;
     }
 

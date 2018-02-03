@@ -36,7 +36,7 @@ public class View : Gtk.ApplicationWindow {
     public signal void restart_request ();
     public signal void resized (Dimensions dim);
     public signal void moved (Cell cell);
-    public signal void game_state_changed (GameState gs);
+    public signal void mode_change_request (GameState gs);
 
     public Model model { get; construct; }
 
@@ -55,6 +55,7 @@ public class View : Gtk.ApplicationWindow {
             if (value != Gnonograms.UNTITLED_NAME) {
                 app_menu.title = value;
             }
+
             update_header_bar ();
         }
     }
@@ -146,20 +147,16 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private GameState _game_state = GameState.UNDEFINED;
     public GameState game_state {
-        get {
-            return _game_state;
+        private get {
+            return mode_switch.mode;
         }
 
         set {
-            if (_game_state != value) {
-                _game_state = value;
-                mode_switch.mode = value;
-                cell_grid.game_state = value;
+            mode_switch.mode = value;
+            cell_grid.game_state = value;
 
-                update_header_bar ();
-            }
+            update_header_bar ();
         }
     }
 
@@ -499,17 +496,19 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private void update_header_bar () {
-        if (game_state == GameState.SETTING) {
+        var gs = game_state;
+
+        if (gs == GameState.SETTING) {
             header_bar.title = _("Drawing %s").printf (game_name);
             header_bar.subtitle = readonly ? _("Read Only - Save to a different file") : _("Save will Overwrite");
             restart_button.tooltip_text = _("Clear canvas");
             set_buttons_sensitive (true);
-        } else if (game_state == GameState.SOLVING) {
+        } else if (gs == GameState.SOLVING) {
             header_bar.title = _("Solving %s").printf (game_name);
             header_bar.subtitle = game_grade.to_string ();
             restart_button.tooltip_text = _("Restart solving");
             set_buttons_sensitive (true);
-        } else {
+        } else if (gs == GameState.GENERATING) {
             set_buttons_sensitive (false);
         }
 
@@ -822,8 +821,7 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private void on_mode_switch_changed (Gtk.Widget widget) {
-        game_state = widget.get_data ("mode");
-        game_state_changed (game_state);
+        mode_change_request (mode_switch.mode);
     }
 
     private void on_save_game_button_clicked () {
