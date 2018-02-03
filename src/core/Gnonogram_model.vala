@@ -88,7 +88,7 @@ public class Model : GLib.Object {
         return count;
     }
 
-    public int count_unsolved () {
+    private int count_state (CellState state) {
         int count=0;
         CellState cs;
 
@@ -96,13 +96,25 @@ public class Model : GLib.Object {
             for (int c = 0; c < cols; c++) {
                 cs = working_data.get_data_from_rc (r,c);
 
-                if (cs == CellState.UNKNOWN) {
+                if (cs == state) {
                     count++;
                 }
             }
         }
 
         return count;
+    }
+
+    public int count_unsolved () {
+        return count_state (CellState.UNKNOWN);
+    }
+
+    public int count_filled () {
+        return count_state (CellState.FILLED);
+    }
+
+    public int count_empty () {
+        return count_state (CellState.EMPTY);
     }
 
     public void clear () {

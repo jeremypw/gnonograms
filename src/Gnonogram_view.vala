@@ -164,6 +164,7 @@ public class View : Gtk.ApplicationWindow {
         set {
             check_correct_button.sensitive = value && is_solving;
             undo_button.sensitive = value;
+            restart_button.sensitive = value;
         }
     }
 
@@ -255,8 +256,9 @@ public class View : Gtk.ApplicationWindow {
 
         restart_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("view-refresh-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
+        img.get_style_context ().add_class ("warn");
         restart_button.image = img;
-        restart_button.sensitive = true;
+        restart_button.sensitive = false;
 
         auto_solve_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("system-run", Gtk.IconSize.LARGE_TOOLBAR);
@@ -268,7 +270,7 @@ public class View : Gtk.ApplicationWindow {
         mode_switch = new ViewModeButton ();
 
         progress_indicator = new Gnonograms.Progress_indicator ();
-
+        progress_indicator.get_style_context ().add_class ("progress");
         header_bar.pack_start (load_game_button);
         header_bar.pack_start (save_game_button);
         header_bar.pack_start (save_game_as_button);
@@ -412,7 +414,6 @@ public class View : Gtk.ApplicationWindow {
         @define-color colorPrimary %s;
         @define-color colorDarkBackground %s;
         @define-color colorPaleBackground %s;
-        @define-color colorDarkImage %s;
 
         .linked {
             border-radius: 4px 4px 4px 4px;
@@ -428,12 +429,33 @@ public class View : Gtk.ApplicationWindow {
             background-color: @colorPrimary;
             border-radius: 4px 4px 4px 4px;
         }
+
+        .progress .label {
+            color: @textColorPrimary;
+        }
+
+        .progress .spinner {
+            opacity: 1.0;
+            color: @textColorPrimary;
+        }
+
+        .button .warn {
+            color: #c6262e;
+        }
+
+        .button:insensitive .warn {
+            color: @colorPaleBackground;
+        }
+
+        .progress .warn {
+            color: #c6262e;
+        }
+
     """.printf (Gnonograms.PALE_TEXT,
                 Gnonograms.PALE_SHADOW,
                 Gnonograms.DARK_BACKGROUND,
                 Gnonograms.DARK_BACKGROUND,
-                Gnonograms.PALE_BACKGROUND,
-                Gnonograms.DARK_SHADOW);
+                Gnonograms.PALE_BACKGROUND);
 
     private Gnonograms.LabelBox row_clue_box;
     private Gnonograms.LabelBox column_clue_box;
@@ -516,11 +538,13 @@ public class View : Gtk.ApplicationWindow {
             header_bar.title = _("Drawing %s").printf (game_name);
             header_bar.subtitle = readonly ? _("Read Only - Save to a different file") : _("Save will Overwrite");
             restart_button.tooltip_text = _("Clear canvas");
+            restart_button.sensitive = model.count_filled () > 0;
             set_buttons_sensitive (true);
         } else if (gs == GameState.SOLVING) {
             header_bar.title = _("Solving %s").printf (game_name);
             header_bar.subtitle = game_grade.to_string ();
             restart_button.tooltip_text = _("Restart solving");
+            restart_button.sensitive = model.count_filled () + model.count_empty () > 0;
             set_buttons_sensitive (true);
         } else if (gs == GameState.GENERATING) {
             set_buttons_sensitive (false);
@@ -537,7 +561,6 @@ public class View : Gtk.ApplicationWindow {
         undo_button.sensitive = sensitive;
         check_correct_button.sensitive = sensitive;
         auto_solve_button.sensitive = sensitive;
-        restart_button.sensitive = sensitive;
     }
 
     private void update_solution_labels_for_cell (Cell cell) {
@@ -880,6 +903,7 @@ public class View : Gtk.ApplicationWindow {
 
     private void on_restart_button_pressed () {
         restart_request ();
+        restart_button.sensitive = false;
     }
 
     private void on_app_menu_apply () {
