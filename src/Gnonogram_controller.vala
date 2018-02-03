@@ -54,9 +54,6 @@ public class Controller : GLib.Object {
         view.solve_this_request.connect (on_solve_this_request);
         view.restart_request.connect (on_restart_request);
 
-        view.show_all ();
-        view.present ();
-
         var schema_source = GLib.SettingsSchemaSource.get_default ();
         if (schema_source.lookup ("com.github.jeremypw.gnonograms.settings", true) != null &&
             schema_source.lookup ("com.github.jeremypw.gnonograms.saved-state", true) != null) {
@@ -85,6 +82,9 @@ public class Controller : GLib.Object {
                                                Gnonograms.UNSAVED_FILENAME);
 
         restore_settings (); /* May change load_game_dir and save_game_dir */
+
+        view.show_all ();
+        view.present ();
     }
 
     public Controller (File? game = null) {
