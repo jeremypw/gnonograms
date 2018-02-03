@@ -39,13 +39,17 @@ namespace Gnonograms {
     public const string LAUNCHER = "com.github.jeremypw.gnonograms.desktop";
     public const string VERSION = "1.0.6"; // For benefit of Granite.Application terminal output.
 
-    public const string SETTING_FILLED_COLOR = "#000000"; /* Elementary Silver 900 */
+    public const string SETTING_FILLED_COLOR = "#000000"; /* Elementary Black 900 */
     public const string SETTING_EMPTY_COLOR = "#fafafa"; /* Elementary Silver 100 */
-
     public const string SOLVING_FILLED_COLOR = "#180297"; /* Gnonograms Dark Purple */
     public const string SOLVING_EMPTY_COLOR = "#ffff00";  /* Pure Yellow */
-
     public const string UNKNOWN_COLOR = "#d4d4d4"; /* Elementary Silver 300 */
-    public const string SHADOW_COLOR = "#ddd9f0";
+
+    public const string DARK_TEXT       = "#000000"; /* Elementary Black 900 */
+    public const string PALE_TEXT       = "#fafafa"; /* Elementary Silver 100 */
+    public const string DARK_BACKGROUND = "#180297"; /* Gnonograms Dark Purple */
+    public const string PALE_BACKGROUND = "#ddd9f0"; /* Gnonograms Pale Purple */
+    public const string DARK_SHADOW     = "#1a1a1a"; /* Elementary Black 700 */
+    public const string PALE_SHADOW     = "#fafafa"; /* Elementary Silver 100 */
 
 }

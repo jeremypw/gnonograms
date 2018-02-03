@@ -82,6 +82,10 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
         solving_icon.set_data ("mode", GameState.SOLVING);
         generating_icon.set_data ("mode", GameState.GENERATING);
 
+        setting_icon.get_style_context ().add_class ("linked");
+        solving_icon.get_style_context ().add_class ("linked");
+        generating_icon.get_style_context ().add_class ("linked");
+
         setting_icon.tooltip_text = _("Draw pattern");
         solving_icon.tooltip_text = _("Solve puzzle");
         generating_icon.tooltip_text = _("Generate new random puzzle");

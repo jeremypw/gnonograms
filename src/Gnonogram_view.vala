@@ -254,10 +254,9 @@ public class View : Gtk.ApplicationWindow {
         check_correct_button.get_style_context ().add_class (Granite.STYLE_CLASS_BACK_BUTTON);
 
         restart_button = new Gtk.Button ();
-        img = new Gtk.Image.from_icon_name ("view-refresh", Gtk.IconSize.LARGE_TOOLBAR);
+        img = new Gtk.Image.from_icon_name ("view-refresh-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         restart_button.image = img;
         restart_button.sensitive = true;
-        restart_button.get_style_context ().add_class (Gtk.STYLE_CLASS_DESTRUCTIVE_ACTION);
 
         auto_solve_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("system-run", Gtk.IconSize.LARGE_TOOLBAR);
@@ -410,16 +409,31 @@ public class View : Gtk.ApplicationWindow {
     private string BRAND_STYLESHEET = """
         @define-color textColorPrimary %s;
         @define-color textColorPrimaryShadow %s;
+        @define-color colorPrimary %s;
+        @define-color colorDarkBackground %s;
+        @define-color colorPaleBackground %s;
+        @define-color colorDarkImage %s;
+
+        .linked {
+            border-radius: 4px 4px 4px 4px;
+            background-color: @colorPaleBackground;
+            color: @colorDarkBackground;
+        }
 
         *.label:selected {
-            background-color: @textColorPrimaryShadow;
+            background-color: @colorPaleBackground;
         }
 
         .tooltip {
-            background-color: @textColorPrimary;
+            background-color: @colorPrimary;
             border-radius: 4px 4px 4px 4px;
         }
-    """.printf (Gnonograms.SOLVING_FILLED_COLOR, Gnonograms.SHADOW_COLOR);
+    """.printf (Gnonograms.PALE_TEXT,
+                Gnonograms.PALE_SHADOW,
+                Gnonograms.DARK_BACKGROUND,
+                Gnonograms.DARK_BACKGROUND,
+                Gnonograms.PALE_BACKGROUND,
+                Gnonograms.DARK_SHADOW);
 
     private Gnonograms.LabelBox row_clue_box;
     private Gnonograms.LabelBox column_clue_box;
