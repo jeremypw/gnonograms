@@ -100,6 +100,8 @@ public class Controller : GLib.Object {
         }
 
         view.show_all ();
+        view.present ();
+
     }
 
     private void new_or_random_game () {
