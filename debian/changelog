@@ -1,3 +1,13 @@
+com.github.jeremypw.gnonograms (1.0.6) xenial; urgency=low
+
+  * Add brand styling and update screenshots
+  * Fix possible failed assertion in advanced solver</li>
+  * Fix some resizing isses
+  * Fix some loading and saving issues
+  * Some code refactoring and cleanup
+
+ -- Jeremy Wootten <jeremywootten@gmail.com>  Thu, 03 Feb 2018 17:48:00 +0000
+
 com.github.jeremypw.gnonograms (1.0.5) xenial; urgency=low
 
   * Fix regression in game generator

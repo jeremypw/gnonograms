@@ -23,6 +23,17 @@
         <category>LogicGame</category>
     </categories>
     <releases>
+        <release version="1.0.6" date="2018-02-03" urgency="low">
+            <description>
+                <ul>
+                    <li>Add brand styling and update screenshots</li>
+                    <li>Fix possible failed assertion in advanced solver</li>
+                    <li>Fix some resizing isses</li>
+                    <li>Fix some loading and saving issues</li>
+                    <li>Some code refactoring and cleanup</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.0.5" date="2018-01-20" urgency="low">
             <description>
                 <ul>
