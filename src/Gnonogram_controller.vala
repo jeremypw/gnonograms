@@ -111,7 +111,17 @@ public class Controller : GLib.Object {
     }
 
     public void quit () {
-        save_game_state ();
+        if (solver != null) {
+            solver.cancel ();
+        }
+
+        /* If in middle of generating no defined game to save */
+        if (generator == null) {
+            save_game_state ();
+        } else {
+            generator.cancel ();
+        }
+
         save_settings ();
         quit_app ();
     }
@@ -119,6 +129,8 @@ public class Controller : GLib.Object {
 /** PRIVATE **/
     private View view;
     private Model model;
+    private AbstractSolver? solver;
+    private AbstractGameGenerator? generator;
     private GLib.Settings? settings;
     private GLib.Settings? saved_state;
     private Gee.Deque<Move> back_stack;
@@ -217,15 +229,14 @@ public class Controller : GLib.Object {
     private void on_new_random_request () {
         clear ();
 
-        AbstractGameGenerator gen;
         var cancellable = new Cancellable ();
-        gen = new SimpleRandomGameGenerator (dimensions, cancellable);
-        gen.grade = generator_grade;
+        generator = new SimpleRandomGameGenerator (dimensions, cancellable);
+        generator.grade = generator_grade;
 
         game_name = _("Random pattern");
         view.game_grade = Difficulty.UNDEFINED;
         view.show_working (cancellable, "Generating");
-        start_generating (cancellable, gen);
+        start_generating (cancellable, generator);
     }
 
     private void start_generating (Cancellable cancellable, AbstractGameGenerator gen) {
@@ -250,6 +261,7 @@ public class Controller : GLib.Object {
 
                 view.hide_progress ();
                 view.queue_draw ();
+                generator = null;
 
                 return false;
             });
@@ -651,9 +663,9 @@ public class Controller : GLib.Object {
         string msg = "";
         var cancellable = new Cancellable ();
         view.show_working (cancellable, "Solving");
+        solver = new Solver (dimensions, cancellable);
 
         new Thread<void*> (null, () => {
-            AbstractSolver solver = new Solver (dimensions, cancellable);
             diff = computer_solve_clues (solver);
 
             if (cancellable != null && cancellable.is_cancelled ()) {
@@ -692,6 +704,8 @@ public class Controller : GLib.Object {
         });
 
         yield;
+
+        solver = null;
         return state;
     }
 

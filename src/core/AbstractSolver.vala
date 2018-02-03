@@ -181,14 +181,16 @@ namespace Gnonograms {
                                    My2DCellArray? start_grid = null,
                                    My2DCellArray? solution_grid = null) {
 
-        cancellable = _cancellable;
-
         if (initialize (row_clues, col_clues, start_grid, solution_grid)) {
             return solve_it ();
         } else {
             state = SolverState.ERROR;
             return Difficulty.UNDEFINED;
         }
+    }
+
+    public void cancel () {
+        cancellable.cancel ();
     }
 
     protected abstract Difficulty solve_it ();
