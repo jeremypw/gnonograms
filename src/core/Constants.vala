@@ -44,6 +44,7 @@ namespace Gnonograms {
     public const string SOLVING_FILLED_COLOR = "#180297"; /* Gnonograms Dark Purple */
     public const string SOLVING_EMPTY_COLOR = "#ffff00";  /* Pure Yellow */
     public const string UNKNOWN_COLOR = "#d4d4d4"; /* Elementary Silver 300 */
+    public const string GRID_COLOR = "#000000"; /* Elementary Black 900 */
 
     public const string DARK_TEXT       = "#000000"; /* Elementary Black 900 */
     public const string PALE_TEXT       = "#fafafa"; /* Elementary Silver 100 */

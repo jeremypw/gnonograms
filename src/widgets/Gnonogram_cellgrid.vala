@@ -94,7 +94,7 @@ public class CellGrid : Gtk.DrawingArea {
     construct {
         _current_cell = NULL_CELL;
         colors = new Gdk.RGBA[2, 3];
-        grid_color.parse ("GREY");
+        grid_color.parse (Gnonograms.GRID_COLOR);
         game_state = GameState.SETTING;
         cell_pattern_type = CellPatternType.CELL;
         set_colors ();
@@ -156,9 +156,7 @@ public class CellGrid : Gtk.DrawingArea {
 /*************/
 /** PRIVATE **/
 /*************/
-    private const double CELL_FRAME_WIDTH = 0.0;
-    private const double HIGHLIGHT_WIDTH = 2.0;
-    private const double MAJOR_GRID_LINE_WIDTH = 2.0;
+    private const double MAJOR_GRID_LINE_WIDTH = 3.0;
     private const double MINOR_GRID_LINE_WIDTH = 1.0;
     private Gdk.RGBA[, ] colors;
 
@@ -263,66 +261,86 @@ public class CellGrid : Gtk.DrawingArea {
     private void draw_grid (Cairo.Context cr) {
         double x1, x2, y1, y2;
 
-        double inc = (alloc_height - MINOR_GRID_LINE_WIDTH) / (double)rows;
-
-
         Gdk.cairo_set_source_rgba (cr, grid_color);
         cr.set_antialias (Cairo.Antialias.NONE);
 
+        //Draw minor grid
+        cr.set_line_width (MINOR_GRID_LINE_WIDTH);
 
-        //Draw minor grid (dashed lines)
-        cr.set_line_width (1.0);
-        x1 = 0; x2 = alloc_width - 1;
+        // Horizontal lines
+        y1 = 0;
+        x1 = 0; x2 = alloc_width;
 
-        for (int r = 0; r <= rows; r++) {
-            y1 = 1.0 + r * cell_height;
+        while (y1 < alloc_height) {
+            cr.move_to (x1, y1);
+            cr.line_to (x2, y1);
+            cr.stroke ();
+            y1 += cell_height;
+        }
+
+        // Vertical lines
+        x1 = 0;
+        y1 = 0; y2 = alloc_height;
+
+        while (x1 < alloc_width) {
+            cr.move_to (x1, y1);
+            cr.line_to (x1, y2);
+            cr.stroke ();
+            x1 += cell_width;
+
+        }
+
+        // Draw major grid
+        cr.set_line_width (MAJOR_GRID_LINE_WIDTH);
+
+
+        // Horizontal lines
+        y1 = 0;
+        x1 = 0; x2 = alloc_width;
+
+        while (y1 < alloc_height) {
+            y1 += 5.0 * cell_height;
             cr.move_to (x1, y1);
             cr.line_to (x2, y1);
             cr.stroke ();
         }
 
-        y1 = 0; y2 = alloc_height - 1;
+        // Vertical lines
+        x1 = 0;
+        y1 = 0; y2 = alloc_height;
 
-        for (int c = 0; c <= cols; c++) {
-            x1 = 1.0 + c * cell_width;
+        while (x1 < alloc_width) {
+            x1 += 5.0 * cell_width;
             cr.move_to (x1, y1);
             cr.line_to (x1, y2);
             cr.stroke ();
         }
 
-        //Draw major grid (solid lines)
-        cr.set_dash (null, 0.0);
+        // Draw frame
         cr.set_line_width (MAJOR_GRID_LINE_WIDTH);
-        uint r = 0;
-        uint c = 0;
-
-        /* Draw horizontal lines */
+        // Horizontal lines
         y1 = MAJOR_GRID_LINE_WIDTH / 2;
         x1 = 0; x2 = alloc_width;
-        r = 0;
-        inc = 5.0 * ((alloc_height - MAJOR_GRID_LINE_WIDTH) / (double)rows);
+        cr.move_to (x1, y1);
+        cr.line_to (x2, y1);
+        cr.stroke ();
 
-        while (r <= rows) {
-            cr.move_to (x1, y1);
-            cr.line_to (x2, y1);
-            cr.stroke ();
-            y1 += inc;
-            r += 5;
-        }
+        y1 = alloc_height - MAJOR_GRID_LINE_WIDTH / 2;
+        cr.move_to (x1, y1);
+        cr.line_to (x2, y1);
+        cr.stroke ();
 
-        /* Draw vertical lines */
         x1 = MAJOR_GRID_LINE_WIDTH / 2;
         y1 = 0; y2 = alloc_height;
-        c = 0;
-        inc = 5.0 * ((alloc_width - MAJOR_GRID_LINE_WIDTH) / (double)cols);
+        cr.move_to (x1, y1);
+        cr.line_to (x1, y2);
+        cr.stroke ();
 
-        while (c <= cols) {
-            cr.move_to (x1, y1);
-            cr.line_to (x1, y2);
-            cr.stroke ();
-            x1 += inc;
-            c += 5;
-        }
+        x1 = alloc_width - MAJOR_GRID_LINE_WIDTH / 2;
+        cr.move_to (x1, y1);
+        cr.line_to (x1, y2);
+        cr.stroke ();
+
     }
 
     private void draw_cell (Cairo.Context cr, Cell cell, bool highlight = false, bool mark = false) {
@@ -353,16 +371,18 @@ public class CellGrid : Gtk.DrawingArea {
                 break;
         }
 
-        /* Draw cell body */
+        /* Draw cell body (draws over any previous highlight) */
         cell_pattern.move_to (x, y); /* Not needed for plain fill, but may use a pattern later */
-        cr.set_line_width (0.5);
+        cr.set_line_width (0.0);
         cr.rectangle (x, y, cell_body_width, cell_body_height);
         cr.set_source (cell_pattern.pattern);
         cr.fill ();
 
         if (highlight) {
-            highlight_pattern.move_to (x, y);
-            cr.rectangle (x, y, cell_body_width, cell_body_height);
+            /* Ensure highlight centred and slightly overlapping grid */
+            var offset = (cell_body_width - highlight_pattern.size) / 4;
+            highlight_pattern.move_to (x + offset, y + offset);
+            cr.rectangle (x, y, cell_body_width - offset, cell_body_width - offset);
             cr.set_source (highlight_pattern.pattern);
             cr.set_operator (Cairo.Operator.OVER);
             cr.fill ();
@@ -379,6 +399,7 @@ public class CellGrid : Gtk.DrawingArea {
 
     private class CellPattern: GLib.Object {
         public Cairo.Pattern pattern;
+        public double size { get; private set; }
 
         public CellPattern.cell (Gdk.RGBA color) {
             double red = color.red;
@@ -388,11 +409,12 @@ public class CellGrid : Gtk.DrawingArea {
         }
 
         public CellPattern.highlight (double wd, double ht) {
-            var r = (wd + ht) / 4.0;
+            var r = (wd + ht) / 4.0 - 2.0;
+            size = 2 * r;
 
             pattern = new Cairo.Pattern.radial (r, r, 0.0, r, r, r * 1.1);
-            pattern.add_color_stop_rgba (0.0, 1.0, 1.0, 1.0, 0.1);
-            pattern.add_color_stop_rgba (0.95, 1.0, 1.0, 1.0, 0.2);
+            pattern.add_color_stop_rgba (0.0, 1.0, 1.0, 1.0, 0.4);
+            pattern.add_color_stop_rgba (0.95, 1.0, 1.0, 1.0, 0.4);
             pattern.add_color_stop_rgba (1.0, 0.0, 0.0, 0.0, 1.0);
 
             pattern.set_matrix (matrix);
