@@ -33,7 +33,6 @@ executable (
     'src/core/Range.vala',
     'src/core/Gnonogram_region.vala',
     'src/core/Gnonogram_solver.vala',
-    'src/core/Gnonogram_permutor.vala',
     'src/core/Gnonogram_filereader.vala',
     'src/core/Gnonogram_filewriter.vala',
     'src/core/Move.vala',

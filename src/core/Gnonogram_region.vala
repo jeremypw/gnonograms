@@ -375,25 +375,6 @@ public class Region { /* Not a GObject, to reduce weight */
         return pvalue;
     }
 
-    public Permutor? get_permutor (out int start) {
-        string clue = "";
-        start = 0;
-
-        //Find available range (must be only one)
-        if (count_available_ranges (false) != 1) {
-            return null;
-        }
-
-        int[] ablocks = get_blocks_available ();
-
-        foreach (var ablock in ablocks) {
-            clue = clue + blocks[ablock].to_string () + ", ";
-        }
-
-        start = ranges[0, 0];
-        return new Permutor (ranges[0, 1], clue);
-    }
-
     /** PRIVATE **/
     private My2DCellArray grid;
 
