@@ -35,8 +35,7 @@ public class Controller : GLib.Object {
         model = new Model ();
         view = new View (model);
 
-        back_stack = new Gee.LinkedList<Move> ();
-        forward_stack = new Gee.LinkedList<Move> ();
+        history = new Gnonograms.History ();
 
         /* Connect signals. Must be done before restoring settings so that e.g.
          * dimensions of model are set. */
@@ -134,8 +133,7 @@ public class Controller : GLib.Object {
     private AbstractGameGenerator? generator;
     private GLib.Settings? settings;
     private GLib.Settings? saved_state;
-    private Gee.Deque<Move> back_stack;
-    private Gee.Deque<Move> forward_stack;
+    private Gnonograms.History history;
     private string? save_game_dir = null;
     private string? load_game_dir = null;
     private string current_game_path;
@@ -494,19 +492,8 @@ public class Controller : GLib.Object {
     }
 
     private void record_move (Cell cell, CellState previous_state) {
-        var new_move = new Move (cell, previous_state);
-
-        if (new_move.cell.state != CellState.UNDEFINED) {
-            Move? current_move = back_stack.peek_head ();
-            if (current_move != null && current_move.equal (new_move)) {
-                return;
-            }
-
-            forward_stack.clear ();
-        }
-
-        back_stack.offer_head (new_move);
-        update_history_view ();
+        history.record_move (cell, previous_state);
+        view.can_go_back = history.can_go_back;
 
         /* Check if puzzle finished */
         if (is_solving && model.is_finished) {
@@ -535,17 +522,12 @@ public class Controller : GLib.Object {
         model.set_data_from_cell (mv.cell);
 
         view.make_move (mv);
-        update_history_view ();
-    }
-
-    private void update_history_view () {
-        view.can_go_back = back_stack.size > 0;
+        view.can_go_back = history.can_go_back;
     }
 
     private void clear_history () {
-        forward_stack.clear ();
-        back_stack.clear ();
-        update_history_view ();
+        history.clear_all ();
+        view.can_go_back = false;
     }
 
     /*** Solver related functions ***/
@@ -580,12 +562,8 @@ public class Controller : GLib.Object {
     }
 
     private bool on_next_move_request () {
-        if (forward_stack.size > 0) {
-            Move mv = forward_stack.poll_head ();
-            back_stack.offer_head (mv);
-
-            make_move (mv);
-
+        if (history.can_go_forward) {
+            make_move (history.pop_next_move ());
             return true;
         } else {
             return false;
@@ -593,13 +571,10 @@ public class Controller : GLib.Object {
     }
 
     private bool on_previous_move_request () {
-        if (back_stack.size > 0) {
-            Move mv = back_stack.poll_head ();
-            /* Record copy otherwise it will be altered by next line*/
-            forward_stack.offer_head (mv.clone ());
+        if (history.can_go_back) {
+            make_move (history.pop_previous_move ());
 
-            mv.cell.state = mv.previous_state;
-            make_move (mv);
+
 
             return true;
         } else {

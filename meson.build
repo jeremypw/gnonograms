@@ -36,6 +36,7 @@ executable (
     'src/core/Gnonogram_filereader.vala',
     'src/core/Gnonogram_filewriter.vala',
     'src/core/Move.vala',
+    'src/core/History.vala',
     'src/core/Enums.vala',
     'src/core/Structs.vala',
     'src/core/Constants.vala',
