@@ -140,6 +140,19 @@ public class Model : GLib.Object {
         return working_data.data2text (idx, length, is_column);
     }
 
+    public bool get_complete (uint idx, bool is_column) {
+        var csa = new CellState[is_column ? rows : cols];
+        working_data.get_array (idx, is_column, ref csa);
+
+        foreach (CellState cs in csa) {
+            if (cs == CellState.UNKNOWN) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public void set_data_from_cell (Cell cell) {
         display_data.set_data_from_cell (cell);
     }
