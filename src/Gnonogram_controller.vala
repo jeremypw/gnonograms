@@ -156,14 +156,8 @@ public class Controller : GLib.Object {
         set {
             if (_game_state != value) {
                 _game_state = value;
-
                 view.game_state = value;
-
-                /* Do not clear history while saving */
-                if (value != GameState.UNDEFINED) {
-                    model.game_state = value;
-                    clear_history ();
-                }
+                model.game_state = value;
 
                 if (value == GameState.GENERATING) {
                     on_new_random_request ();
@@ -417,16 +411,20 @@ public class Controller : GLib.Object {
         }
 
         if (reader.valid && (yield load_common (reader))) {
+            if (update_load_dir) {
+                /* At this point, we can assume game_file exists and has parent */
+                load_game_dir = reader.game_file.get_parent ().get_uri ();
+            }
+
+            history.from_string (reader.moves);
+
             if (reader.state != GameState.UNDEFINED) {
                 game_state = reader.state;
             } else {
                 game_state = GameState.SOLVING;
             }
 
-            if (update_load_dir) {
-                /* At this point, we can assume game_file exists and has parent */
-                load_game_dir = reader.game_file.get_parent ().get_uri ();
-            }
+            make_move (history.get_current_move ());
         } else {
             /* There is something wrong with the file being loaded */
             Utils.show_error_dialog (_("Invalid game file"), reader.err_msg, window);
@@ -525,7 +523,11 @@ public class Controller : GLib.Object {
         }
     }
 
-    private void make_move (Move mv) {
+    private void make_move (Move? mv) {
+        if (mv == null) {
+            return;
+        }
+
         model.set_data_from_cell (mv.cell);
 
         view.make_move (mv);
@@ -580,9 +582,6 @@ public class Controller : GLib.Object {
     private bool on_previous_move_request () {
         if (history.can_go_back) {
             make_move (history.pop_previous_move ());
-
-
-
             return true;
         } else {
             return false;

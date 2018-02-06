@@ -40,6 +40,7 @@ public class Filereader : Object {
     public Difficulty difficulty {get; private set; default = Difficulty.UNDEFINED;}
     public string license {get; private set; default = "";}
     public string original_path {get; private set; default = "";}
+    public string moves {get; private set; default = "";}
 
     public bool has_dimensions {get; private set; default = false;}
     public bool has_row_clues {get; private set; default = false;}
@@ -186,6 +187,10 @@ public class Filereader : Object {
 
                 case "ORI":
                     in_error = !get_original_game_path (body);
+                    break;
+
+                case "HIS":
+                    moves = body;
                     break;
 
                 default:

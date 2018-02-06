@@ -164,7 +164,12 @@ public class View : Gtk.ApplicationWindow {
         set {
             check_correct_button.sensitive = value && is_solving;
             undo_button.sensitive = value;
-            restart_button.sensitive = value;
+        }
+    }
+
+    public bool can_go_forward {
+        set {
+            redo_button.sensitive = value;
         }
     }
 
@@ -244,7 +249,12 @@ public class View : Gtk.ApplicationWindow {
         undo_button.image = img;
         undo_button.tooltip_text = _("Undo Last Move");
         undo_button.sensitive = false;
-        undo_button.get_style_context ().add_class (Granite.STYLE_CLASS_BACK_BUTTON);
+
+        redo_button = new Gtk.Button ();
+        img = new Gtk.Image.from_icon_name ("edit-redo", Gtk.IconSize.LARGE_TOOLBAR);
+        redo_button.image = img;
+        redo_button.tooltip_text = _("Undo Last Move");
+        redo_button.sensitive = false;
 
 
         check_correct_button = new Gtk.Button ();
@@ -258,7 +268,7 @@ public class View : Gtk.ApplicationWindow {
         img = new Gtk.Image.from_icon_name ("view-refresh-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         img.get_style_context ().add_class ("warn");
         restart_button.image = img;
-        restart_button.sensitive = false;
+        restart_button.sensitive = true;
 
         auto_solve_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("system-run", Gtk.IconSize.LARGE_TOOLBAR);
@@ -278,6 +288,7 @@ public class View : Gtk.ApplicationWindow {
         header_bar.pack_start (restart_button);
         header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_start (undo_button);
+        header_bar.pack_start (redo_button);
         header_bar.pack_start (check_correct_button);
         header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_start (auto_solve_button);
@@ -334,6 +345,7 @@ public class View : Gtk.ApplicationWindow {
         save_game_as_button.clicked.connect (on_save_game_as_button_clicked);
         check_correct_button.clicked.connect (on_check_button_pressed);
         undo_button.clicked.connect (on_undo_button_pressed);
+        redo_button.clicked.connect (on_redo_button_pressed);
         restart_button.clicked.connect (on_restart_button_pressed);
         auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
 
@@ -471,6 +483,7 @@ public class View : Gtk.ApplicationWindow {
     private Gtk.Button save_game_button;
     private Gtk.Button save_game_as_button;
     private Gtk.Button undo_button;
+    private Gtk.Button redo_button;
     private Gtk.Button check_correct_button;
     private Gtk.Button auto_solve_button;
     private Gtk.Button restart_button;
@@ -538,13 +551,11 @@ public class View : Gtk.ApplicationWindow {
             header_bar.title = _("Drawing %s").printf (game_name);
             header_bar.subtitle = readonly ? _("Read Only - Save to a different file") : _("Save will Overwrite");
             restart_button.tooltip_text = _("Clear canvas");
-            restart_button.sensitive = model.count_filled () > 0;
             set_buttons_sensitive (true);
         } else if (gs == GameState.SOLVING) {
             header_bar.title = _("Solving %s").printf (game_name);
             header_bar.subtitle = game_grade.to_string ();
             restart_button.tooltip_text = _("Restart solving");
-            restart_button.sensitive = model.count_filled () + model.count_empty () > 0;
             set_buttons_sensitive (true);
         } else if (gs == GameState.GENERATING) {
             set_buttons_sensitive (false);
@@ -559,6 +570,8 @@ public class View : Gtk.ApplicationWindow {
         save_game_button.sensitive = sensitive;
         save_game_as_button.sensitive = sensitive;
         undo_button.sensitive = sensitive;
+        redo_button.sensitive = sensitive;
+        restart_button.sensitive = sensitive;
         check_correct_button.sensitive = sensitive;
         auto_solve_button.sensitive = sensitive;
     }
@@ -897,13 +910,16 @@ public class View : Gtk.ApplicationWindow {
         previous_move_request ();
     }
 
+    private void on_redo_button_pressed () {
+        next_move_request ();
+    }
+
     private void on_auto_solve_button_pressed () {
         solve_this_request ();
     }
 
     private void on_restart_button_pressed () {
         restart_request ();
-        restart_button.sensitive = false;
     }
 
     private void on_app_menu_apply () {

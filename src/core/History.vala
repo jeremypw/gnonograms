@@ -80,37 +80,52 @@ public class History : GLib.Object {
         return mv;
     }
 
-    public string to_string () {
-
-        var sb = new StringBuilder ("");
-        foreach (Move mv in back_stack) {
-            sb.append (mv.to_string () + ";");
-        }
-
-        sb.append ("\n");
-
-        foreach (Move mv in forward_stack) {
-            sb.append (mv.to_string () + ";");
-        }
-
-        return sb.str;
+    public Move? get_current_move () {
+        return back_stack.peek_head ();
     }
 
-    public void from_string (string s) {
-        clear_all();
+    public string to_string () {
 
-        var stacks = s.split ("\n");
+        var sb_back = new StringBuilder ("");
+        foreach (Move mv in back_stack) { /* iterates from head backwards */
+            sb_back.prepend (mv.to_string () + ";");
+        }
+
+        sb_back.append ("\n");
+
+        var sb_forward = new StringBuilder ("");
+
+        foreach (Move mv in forward_stack) {
+            sb_forward.prepend (mv.to_string () + ";");
+        }
+
+        sb_forward.append ("\n");
+
+        return sb_back.str + sb_forward.str;
+    }
+
+    public void from_string (string? s) {
+        clear_all();
+        if (s == null) {
+            return;
+        }
+
+        var stacks = Utils.remove_blank_lines (s.split ("\n"));
 
         if (stacks != null) {
-            add_to_stack_from_string (back_stack, stacks[0]);
+            add_to_stack_from_string (stacks[0], true);
         }
 
         if (stacks.length > 1) {
-            add_to_stack_from_string (forward_stack, stacks[1]);
+            add_to_stack_from_string (stacks[1], false);
         }
     }
 
-    private void add_to_stack_from_string (Gee.Deque<Move> stack, string s) {
+    private void add_to_stack_from_string (string? s, bool back) {
+        if (s == null) {
+            return;
+        }
+
         var moves_s = s.split (";");
         if (moves_s == null) {
             return;
@@ -118,8 +133,13 @@ public class History : GLib.Object {
 
         foreach (string move_s in moves_s) {
             var move = Move.from_string (move_s);
+
             if (move != null) {
-                stack.offer_head (move);
+                if (back) {
+                    back_stack.offer_head (move);
+                } else {
+                    forward_stack.offer_head (move);
+                }
             }
         }
     }

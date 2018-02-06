@@ -50,7 +50,11 @@ public class Move {
         return "%u,%u,%u,%u".printf (cell.row, cell.col, cell.state, previous_state);
     }
 
-    public static Move? from_string (string s) {
+    public static Move? from_string (string? s) {
+        if (s == null) {
+            return null;
+        }
+
         var parts = s.split (",");
 
         if (parts == null || parts.length != 4) {
