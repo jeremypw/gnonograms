@@ -452,7 +452,7 @@ public class View : Gtk.ApplicationWindow {
         }
 
     """.printf (Gnonograms.PALE_TEXT,
-                Gnonograms.PALE_SHADOW,
+                Gnonograms.DARK_SHADOW,
                 Gnonograms.DARK_BACKGROUND,
                 Gnonograms.DARK_BACKGROUND,
                 Gnonograms.PALE_BACKGROUND);
