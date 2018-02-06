@@ -156,10 +156,15 @@ public class Controller : GLib.Object {
         set {
             if (_game_state != value) {
                 _game_state = value;
-                model.game_state = value;
+
                 view.game_state = value;
 
-                clear_history ();
+                /* Do not clear history while saving */
+                if (value != GameState.UNDEFINED) {
+                    model.game_state = value;
+                    clear_history ();
+                }
+
                 if (value == GameState.GENERATING) {
                     on_new_random_request ();
                 }
@@ -292,6 +297,7 @@ public class Controller : GLib.Object {
                 warning ("Error deleting temporary game file %s - %s", temporary_game_path, e.message);
             } finally {
                 /* Save solution and current state */
+                history.to_string ();
                 write_game (temporary_game_path, true);
             }
         }
@@ -357,7 +363,8 @@ public class Controller : GLib.Object {
                                           game_name,
                                           dimensions,
                                           view.get_row_clues (),
-                                          view.get_col_clues ()
+                                          view.get_col_clues (),
+                                          history
                                         );
 
             file_writer.difficulty = view.game_grade;

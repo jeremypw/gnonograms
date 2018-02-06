@@ -47,7 +47,31 @@ public class Move {
     }
 
     public string to_string () {
-        return cell.to_string () + " Previous state %s".printf (previous_state.to_string ());
+        return "%u,%u,%u,%u".printf (cell.row, cell.col, cell.state, previous_state);
+    }
+
+    public static Move? from_string (string s) {
+        var parts = s.split (",");
+
+        if (parts == null || parts.length != 4) {
+            return null;
+        }
+
+        var row = (uint)(int.parse (parts[0]));
+        var col = (uint)(int.parse (parts[1]));
+        var state = (Gnonograms.CellState)(int.parse (parts[2]));
+        var previous_state = (Gnonograms.CellState)(int.parse (parts[3]));
+
+        if (row > Gnonograms.MAXSIZE ||
+            col > Gnonograms.MAXSIZE ||
+            state == Gnonograms.CellState.UNDEFINED ||
+            previous_state == Gnonograms.CellState.UNDEFINED) {
+
+            return null;
+        }
+
+        Cell c = {row, col, state};
+        return new Move (c, previous_state);
     }
 }
 }

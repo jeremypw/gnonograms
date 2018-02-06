@@ -28,6 +28,7 @@ public class Filewriter : Object {
     public string name {get; construct;}
     public string[] row_clues {get; construct;}
     public string[] col_clues {get; construct;}
+    public History history {get; construct;}
     public string? game_path {get; private set;}
 
     public bool is_readonly {get; set; default = true;}
@@ -45,14 +46,16 @@ public class Filewriter : Object {
                        string? name,
                        Dimensions dimensions,
                        string[] row_clues,
-                       string[] col_clues) throws IOError {
+                       string[] col_clues,
+                       History history) throws IOError {
 
         Object (
             name: name ?? Gnonograms.UNTITLED_NAME,
             rows: dimensions.rows (),
             cols: dimensions.cols (),
             row_clues: row_clues,
-            col_clues: col_clues
+            col_clues: col_clues,
+            history: history
         );
 
         if (path == null || path.length <= 4) {
@@ -161,6 +164,9 @@ public class Filewriter : Object {
             stream.printf ("[Original path]\n");
             stream.printf (game_path.to_string () + "\n");
         }
+
+        stream.printf ("[History]\n");
+        stream.printf (history.to_string () + "\n");
 
         stream.flush ();
     }

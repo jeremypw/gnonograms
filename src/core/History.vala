@@ -79,5 +79,49 @@ public class History : GLib.Object {
 
         return mv;
     }
+
+    public string to_string () {
+
+        var sb = new StringBuilder ("");
+        foreach (Move mv in back_stack) {
+            sb.append (mv.to_string () + ";");
+        }
+
+        sb.append ("\n");
+
+        foreach (Move mv in forward_stack) {
+            sb.append (mv.to_string () + ";");
+        }
+
+        return sb.str;
+    }
+
+    public void from_string (string s) {
+        clear_all();
+
+        var stacks = s.split ("\n");
+
+        if (stacks != null) {
+            add_to_stack_from_string (back_stack, stacks[0]);
+        }
+
+        if (stacks.length > 1) {
+            add_to_stack_from_string (forward_stack, stacks[1]);
+        }
+    }
+
+    private void add_to_stack_from_string (Gee.Deque<Move> stack, string s) {
+        var moves_s = s.split (";");
+        if (moves_s == null) {
+            return;
+        }
+
+        foreach (string move_s in moves_s) {
+            var move = Move.from_string (move_s);
+            if (move != null) {
+                stack.offer_head (move);
+            }
+        }
+    }
 }
 }
