@@ -390,6 +390,7 @@ public class Controller : GLib.Object {
     private async bool load_game (File? game, bool update_load_dir) {
         Filereader? reader = null;
         game_state = GameState.UNDEFINED;
+        clear_history ();
 
         try {
             reader = new Filereader (window, load_game_dir, game);
@@ -523,6 +524,8 @@ public class Controller : GLib.Object {
             continue;
         }
 
+        view.can_go_forward = false;
+
         if (model.count_errors () > 0) { // Only happens for completed erroneous solution without history.
             model.blank_working (); // have to restart solving
             clear_history (); // just in case - should not be necessary.
@@ -538,11 +541,13 @@ public class Controller : GLib.Object {
 
         view.make_move (mv);
         view.can_go_back = history.can_go_back;
+        view.can_go_forward = history.can_go_forward;
     }
 
     private void clear_history () {
         history.clear_all ();
         view.can_go_back = false;
+        view.can_go_forward = false;
     }
 
     /*** Solver related functions ***/

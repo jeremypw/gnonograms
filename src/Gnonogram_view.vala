@@ -160,14 +160,25 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
+    private bool _can_go_back;
     public bool can_go_back {
+        get {
+            return _can_go_back;
+        }
+
         set {
             check_correct_button.sensitive = value && is_solving;
             undo_button.sensitive = value;
+            restart_button.sensitive = value;
+            _can_go_back = value;
         }
     }
-
+    private bool _can_go_forward;
     public bool can_go_forward {
+        get {
+            return _can_go_forward;
+        }
+
         set {
             redo_button.sensitive = value;
         }
@@ -266,13 +277,13 @@ public class View : Gtk.ApplicationWindow {
         img = new Gtk.Image.from_icon_name ("view-refresh-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         img.get_style_context ().add_class ("warn");
         restart_button.image = img;
-        restart_button.sensitive = true;
+        restart_button.sensitive = false;
 
         auto_solve_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("system-run", Gtk.IconSize.LARGE_TOOLBAR);
         auto_solve_button.image = img;
         auto_solve_button.tooltip_text = _("Solve by Computer");
-        auto_solve_button.sensitive = true;
+        auto_solve_button.sensitive = false;
 
         app_menu = new AppMenu ();
         mode_switch = new ViewModeButton ();
@@ -580,10 +591,10 @@ public class View : Gtk.ApplicationWindow {
         load_game_button.sensitive = sensitive;
         save_game_button.sensitive = sensitive;
         save_game_as_button.sensitive = sensitive;
-        undo_button.sensitive = sensitive;
-        redo_button.sensitive = sensitive;
-        restart_button.sensitive = sensitive;
-        check_correct_button.sensitive = sensitive;
+        undo_button.sensitive = sensitive && can_go_back;
+        redo_button.sensitive = sensitive && can_go_forward;
+        restart_button.sensitive = sensitive && can_go_back;
+        check_correct_button.sensitive = sensitive && can_go_back;
         auto_solve_button.sensitive = sensitive;
     }
 
