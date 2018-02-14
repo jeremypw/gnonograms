@@ -116,6 +116,7 @@ class Label : Gtk.Label {
               sb.append ("\n");
             }
         }
+
         sb.truncate (sb.len - 1);
 
         return sb.str;

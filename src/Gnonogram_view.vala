@@ -369,6 +369,22 @@ public class View : Gtk.ApplicationWindow {
         for (int c = 0; c < cols; c++) {
             column_clue_box.update_label_text (c, model.get_label_text_from_solution (c, true));
         }
+
+        update_labels_complete_from_working ();
+    }
+
+    public void update_labels_complete_from_working () {
+        if (!is_solving) {
+            return;
+        }
+
+        for (int r = 0; r < rows; r++) {
+            row_clue_box.update_label_complete (r, model.get_complete (r, false));
+        }
+
+        for (int c = 0; c < cols; c++) {
+            column_clue_box.update_label_complete (c, model.get_complete (c, true));
+        }
     }
 
     public void make_move (Move m) {
@@ -423,6 +439,10 @@ public class View : Gtk.ApplicationWindow {
 
         *.label:selected {
             background-color: @colorPaleBackground;
+        }
+
+        *.dim-label {
+            opacity: 0.5;
         }
 
         .tooltip {
@@ -564,12 +584,21 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private void update_solution_labels_for_cell (Cell cell) {
-        if (cell == NULL_CELL) {
+        if (cell == NULL_CELL || cell.state == CellState.UNDEFINED) {
             return;
         }
 
         row_clue_box.update_label_text (cell.row, model.get_label_text_from_solution (cell.row, false));
         column_clue_box.update_label_text (cell.col, model.get_label_text_from_solution (cell.col, true));
+    }
+
+    private void update_labels_complete_for_cell (Cell cell) {
+        if (cell == NULL_CELL || cell.state == CellState.UNDEFINED) {
+            return;
+        }
+
+        row_clue_box.update_label_complete (cell.row, model.get_complete (cell.row, false));
+        column_clue_box.update_label_complete (cell.col, model.get_complete (cell.col, true));
     }
 
     private void highlight_labels (Cell c, bool is_highlight) {
@@ -599,8 +628,10 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private void mark_cell (Cell cell) {
-        if (!is_solving && cell.state != CellState.UNDEFINED) {
+        if (!is_solving ) {
             update_solution_labels_for_cell (cell);
+        } else {
+            update_labels_complete_for_cell (cell);
         }
     }
 
