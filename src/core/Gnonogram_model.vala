@@ -176,13 +176,21 @@ public class Model : GLib.Object {
         return display_data.get_data_from_rc (r, c);
     }
 
-    public void set_row_data_from_string_array (string[] row_clues) {
+    private void set_row_data_from_string_array (string[] row_clues, My2DCellArray array) {
         assert (row_clues.length == rows);
         int row = 0;
         foreach (var clue in row_clues) {
-            display_data.set_row (row, Utils.cellstate_array_from_string (clue));
+            array.set_row (row, Utils.cellstate_array_from_string (clue));
             row++;
         }
+    }
+
+    public void set_working_data_from_string_array (string[] row_clues) {
+        set_row_data_from_string_array (row_clues, working_data);
+    }
+
+    public void set_solution_data_from_string_array (string[] row_clues) {
+        set_row_data_from_string_array (row_clues, solution_data);
     }
 }
 }

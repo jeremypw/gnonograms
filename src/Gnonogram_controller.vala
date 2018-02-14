@@ -470,8 +470,7 @@ public class Controller : GLib.Object {
 
         if (reader.has_solution) {
             view.game_grade = reader.difficulty;
-            model.game_state = GameState.SETTING; /* Selects the working grid */
-            model.set_row_data_from_string_array (reader.solution[0 : rows]);
+            model.set_solution_data_from_string_array (reader.solution[0 : rows]);
         } else {
             yield start_solving (false, true); // Sets difficulty in header bar; copies any solution found to solution grid.
         }
@@ -481,8 +480,7 @@ public class Controller : GLib.Object {
         }
 
         if (reader.has_working) {
-            model.game_state = GameState.SOLVING; /* Selects the working grid */
-            model.set_row_data_from_string_array (reader.working[0 : rows]);
+            model.set_working_data_from_string_array (reader.working[0 : rows]);
         }
 
         is_readonly = reader.is_readonly;

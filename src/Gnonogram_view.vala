@@ -410,7 +410,6 @@ public class View : Gtk.ApplicationWindow {
     public void make_move (Move m) {
         move_cursor_to (m.cell);
         mark_cell (m.cell);
-
         queue_draw ();
     }
 
