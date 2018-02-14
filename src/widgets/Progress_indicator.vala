@@ -44,8 +44,10 @@ public class Progress_indicator : Gtk.Grid {
 
     construct {
         spinner = new Gtk.Spinner ();
+        spinner.get_style_context ().add_class ("progress");
 
         label = new Gtk.Label (null);
+        label.get_style_context ().add_class ("progress");
         label.get_style_context ().add_class (Granite.STYLE_CLASS_H3_LABEL);
 
         add (label);

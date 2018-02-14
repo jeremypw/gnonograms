@@ -450,26 +450,25 @@ public class View : Gtk.ApplicationWindow {
             border-radius: 4px 4px 4px 4px;
         }
 
-        .progress .label {
-            color: @textColorPrimary;
-        }
-
-        .progress .spinner {
+        .progress  {
             opacity: 1.0;
             color: @textColorPrimary;
-        }
-
-        .button .warn {
-            color: #c6262e;
-        }
-
-        .button:insensitive .warn {
-            color: @colorPaleBackground;
+            font-weight: bold
         }
 
         .progress .warn {
-            color: #c6262e;
+            color: @error_color;
         }
+
+        .button .warn {
+          color:  @error_color;
+        }
+
+        .button:disabled .warn {
+            color: @colorPaleBackground;
+        }
+
+
 
     """.printf (Gnonograms.PALE_TEXT,
                 Gnonograms.DARK_SHADOW,
