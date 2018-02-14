@@ -245,9 +245,9 @@ public class Controller : GLib.Object {
             MainContext.@default ().invoke (() => {
                 if (success) {
                     model.set_solution_from_array (gen.get_solution ());
+                    game_state = GameState.SOLVING;
                     view.update_labels_from_solution ();
                     view.game_grade = gen.solution_grade;
-                    game_state = GameState.SOLVING;
                 } else {
                     clear ();
                     game_state = GameState.SETTING;
