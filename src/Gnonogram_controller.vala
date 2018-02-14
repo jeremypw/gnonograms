@@ -425,6 +425,12 @@ public class Controller : GLib.Object {
             }
 
             make_move (history.get_current_move ());
+            view.update_labels_complete_from_working ();
+
+            if (update_load_dir) {
+                /* At this point, we can assume game_file exists and has parent */
+                load_game_dir = reader.game_file.get_parent ().get_uri ();
+            }
         } else {
             /* There is something wrong with the file being loaded */
             Utils.show_error_dialog (_("Invalid game file"), reader.err_msg, window);
@@ -684,6 +690,7 @@ public class Controller : GLib.Object {
                 }
 
                 view.hide_progress ();
+                view.update_labels_complete_from_working ();
                 view.queue_draw ();
                 start_solving.callback (); // Needed to continue after yield;
                 return false;
@@ -706,6 +713,7 @@ public class Controller : GLib.Object {
             clear_history ();
         }
 
+        view.update_labels_complete_from_working ();
         view.queue_draw ();
     }
 }
