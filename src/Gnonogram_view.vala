@@ -244,15 +244,12 @@ public class View : Gtk.ApplicationWindow {
         undo_button.image = img;
         undo_button.tooltip_text = _("Undo Last Move");
         undo_button.sensitive = false;
-        undo_button.get_style_context ().add_class (Granite.STYLE_CLASS_BACK_BUTTON);
-
 
         check_correct_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("media-seek-backward", Gtk.IconSize.LARGE_TOOLBAR);
         check_correct_button.image = img;
         check_correct_button.tooltip_text = _("Go Back to Last Correct Position");
         check_correct_button.sensitive = false;
-        check_correct_button.get_style_context ().add_class (Granite.STYLE_CLASS_BACK_BUTTON);
 
         restart_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("view-refresh-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
