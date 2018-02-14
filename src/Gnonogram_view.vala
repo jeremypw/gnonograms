@@ -295,16 +295,15 @@ public class View : Gtk.ApplicationWindow {
         header_bar.pack_start (save_game_as_button);
         header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_start (restart_button);
-        header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_start (undo_button);
         header_bar.pack_start (redo_button);
         header_bar.pack_start (check_correct_button);
-        header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
-        header_bar.pack_start (auto_solve_button);
-        header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
 
         header_bar.pack_end (app_menu);
+        header_bar.pack_end (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_end (mode_switch);
+        header_bar.pack_end (new Gtk.Separator (Gtk.Orientation.VERTICAL));
+        header_bar.pack_end (auto_solve_button);
 
         set_titlebar (header_bar);
 
@@ -483,6 +482,10 @@ public class View : Gtk.ApplicationWindow {
 
         .warn:disabled {
           opacity: 0.5;
+        }
+
+        separator.vertical {
+            margin: 2px;
         }
 
     """.printf (Gnonograms.PALE_TEXT,
