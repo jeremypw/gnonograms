@@ -456,19 +456,13 @@ public class View : Gtk.ApplicationWindow {
             font-weight: bold
         }
 
-        .progress .warn {
-            color: @error_color;
-        }
-
-        .button .warn {
+        .warn {
           color:  @error_color;
         }
 
-        .button:disabled .warn {
-            color: @colorPaleBackground;
+        .warn:disabled {
+          opacity: 0.5;
         }
-
-
 
     """.printf (Gnonograms.PALE_TEXT,
                 Gnonograms.DARK_SHADOW,
