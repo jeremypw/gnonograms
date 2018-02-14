@@ -577,6 +577,7 @@ public class View : Gtk.ApplicationWindow {
             header_bar.subtitle = readonly ? _("Read Only - Save to a different file") : _("Save will Overwrite");
             restart_button.tooltip_text = _("Clear canvas");
             set_buttons_sensitive (true);
+            restart_button.sensitive = true;
         } else if (gs == GameState.SOLVING) {
             header_bar.title = _("Solving %s").printf (game_name);
             header_bar.subtitle = game_grade.to_string ();
