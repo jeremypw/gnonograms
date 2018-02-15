@@ -26,10 +26,28 @@ namespace Gnonograms {
       * at a time (used for hinting if implemented).
     **/
 
+    /* Cells solved per pass factors for different grades. The lower the factor, the more time consuming
+     * it is to generate or solve a puzzle of that grade.
+     */
+    private const double MODERATE_CPP = 5.0f;
+    private const double HARD_CPP = 3.0f;
+    private const double CHALLENGING_CPP = 2.0f;
+
+    /* Corresponding pass numbers for different grade (depends on dimensions) */
+    private uint moderate_threshold;
+    private uint hard_threshold;
+    private uint challenging_threshold;
+
     public Solver (Dimensions _dimensions, Cancellable? _cancellable) {
         Object (dimensions: _dimensions,
                 cancellable: _cancellable
         );
+
+        double length = (double)(dimensions.length ());
+
+        moderate_threshold = (uint)((length / MODERATE_CPP + 0.5));  /* Round up */
+        hard_threshold = (uint)((length / HARD_CPP + 0.5));  /* Round up */
+        challenging_threshold = (uint)((length / CHALLENGING_CPP - 0.5));  /* Round down */
     }
 
     public override void configure_from_grade (Difficulty grade) {
@@ -285,25 +303,26 @@ namespace Gnonograms {
 
     /** Only call if simple solver used **/
     private Difficulty passes_to_grade (uint passes) {
+        Difficulty result;
+
         if (passes == 0) {
-            return Difficulty.UNDEFINED;
+            result = Difficulty.UNDEFINED;
         } else if (state == SolverState.ADVANCED) {
-            return Difficulty.ADVANCED;
+            result = Difficulty.ADVANCED;
         } else if (state == SolverState.AMBIGUOUS) {
-            return Difficulty.MAXIMUM;
-        }
-
-        var cells_per_pass = (double)(dimensions.length ()) / ((double)passes - 2);
-
-        if (cells_per_pass < 1.7 ) {
-            return Difficulty.CHALLENGING;
-        } else if (cells_per_pass < 3 ) {
-            return Difficulty.HARD;
-        } else if (cells_per_pass < 5 ) {
-            return Difficulty.MODERATE;
+            result = Difficulty.MAXIMUM;
+        } else if (passes >= challenging_threshold ) {
+            result = Difficulty.CHALLENGING;
+        } else if (passes >= hard_threshold) {
+            result = Difficulty.HARD;
+        } else if (passes >= moderate_threshold ) {
+            result = Difficulty.MODERATE;
         } else {
-            return Difficulty.EASY;
+            result = Difficulty.EASY;
         }
+
+warning ("passes %u - result %s", passes, result.to_string ());
+        return result;
     }
 
     private class Guesser {

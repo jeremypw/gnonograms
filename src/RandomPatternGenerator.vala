@@ -20,9 +20,9 @@
 namespace Gnonograms {
 public class RandomPatternGenerator : AbstractPatternGenerator {
 
-    int threshold = 40;
-    int min_freedom = 0;
-    int edge_bias = 0; /* Extra freedom for edge ranges */
+    public int threshold = 40;
+    public int min_freedom = 0;
+    public int edge_bias = 0; /* Extra freedom for edge ranges */
 
     public RandomPatternGenerator (Dimensions dim) {
         Object (dimensions: dim);
@@ -37,15 +37,20 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
     }
 
     public override void easier () {
-        threshold--;
-    }
-
-    public override void harder () {
-        if (threshold < 80) {
-            threshold++;
+        if (min_freedom > 1) {
+            min_freedom--;
+        } else if (edge_bias > 1) {
+            edge_bias--;
+        } else if (threshold > 50) {
+            threshold -= 2;
         }
     }
 
+
+    /* Approximately suitable parameters to generate puzzles of the required grade.
+     * These factors do not affect the difficulty of the puzzles but may impact on the
+     * length of time to generate a pattern with the correct grade.
+     */
     protected override void set_parameters () {
         edge_bias = 0;
 
@@ -60,12 +65,12 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
                     break;
             case Difficulty.HARD:
                     threshold = 70;
-                    min_freedom = 3;
+                    min_freedom = 2;
                     edge_bias = 1;
                     break;
             case Difficulty.CHALLENGING:
-                    threshold = 60;
-                    min_freedom = 4;
+                    threshold = 75;
+                    min_freedom = 2;
                     edge_bias = 3;
                     break;
             case Difficulty.ADVANCED:
