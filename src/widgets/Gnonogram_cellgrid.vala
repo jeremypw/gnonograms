@@ -89,6 +89,8 @@ public class CellGrid : Gtk.DrawingArea {
 
     public CellGrid (Model model) {
         Object (model: model);
+
+        model.notify["dimensions"].connect (dimensions_updated);
     }
 
     construct {
@@ -208,6 +210,10 @@ public class CellGrid : Gtk.DrawingArea {
     private void on_size_allocate (Gtk.Allocation rect) {
         alloc_width = (double)(rect.width);
         alloc_height = (double)(rect.height);
+        dimensions_updated ();
+    }
+
+    private void dimensions_updated () {
         cell_width = (alloc_width) / (double)cols;
         cell_height = (alloc_height) / (double)rows;
         cell_body_width = cell_width;

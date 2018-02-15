@@ -34,7 +34,7 @@ public class View : Gtk.ApplicationWindow {
     public signal void open_game_request ();
     public signal void solve_this_request ();
     public signal void restart_request ();
-    public signal void resized (Dimensions dim);
+    public signal void resize_request (Dimensions dim);
     public signal void moved (Cell cell);
     public signal void mode_change_request (GameState gs);
 
@@ -62,7 +62,7 @@ public class View : Gtk.ApplicationWindow {
 
     private Dimensions _dimensions;
     public Dimensions dimensions {
-        get {
+        private get {
             return _dimensions;
         }
 
@@ -70,14 +70,13 @@ public class View : Gtk.ApplicationWindow {
             if (value != _dimensions) {
                 _dimensions = value;
 
-                resized (value); /* Controller will queue draw after resizing model */
-
                 row_clue_box.dimensions = dimensions;
                 column_clue_box.dimensions = dimensions;
                 fontheight = get_default_fontheight_from_dimensions ();
-                app_menu.row_val = value.height;
-                app_menu.column_val = value.width;
+
             }
+
+            queue_draw ();
         }
     }
 
@@ -286,6 +285,14 @@ public class View : Gtk.ApplicationWindow {
         auto_solve_button.sensitive = false;
 
         app_menu = new AppMenu ();
+        /* Ensure values match view before showing */
+        app_menu.clicked.connect (() => {
+            app_menu.row_val = dimensions.rows ();
+            app_menu.column_val = dimensions.cols ();
+            app_menu.grade_val = (uint)_generator_grade;
+            app_menu.title = game_name;
+        });
+
         mode_switch = new ViewModeButton ();
 
         progress_indicator = new Gnonograms.Progress_indicator ();
@@ -356,11 +363,6 @@ public class View : Gtk.ApplicationWindow {
         redo_button.clicked.connect (on_redo_button_pressed);
         restart_button.clicked.connect (on_restart_button_pressed);
         auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
-
-        dimensions = model.dimensions;
-        generator_grade = Difficulty.MODERATE;
-
-        show_all ();
     }
 
     public string[] get_row_clues () {
@@ -959,21 +961,22 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private void on_app_menu_apply () {
-        var rows = app_menu.row_val;
-        var cols = app_menu.column_val;
-        generator_grade = (Difficulty)(app_menu.grade_val);
+        game_name = app_menu.title;
 
-        if (generator_grade >= Difficulty.CHALLENGING && (rows < 15 || cols < 15)) {
-            rows = rows.clamp (15, rows);
-            cols = cols.clamp (15, cols);
-            app_menu.row_val = rows;
-            app_menu.column_val = cols;
+        var grade = (Difficulty)(app_menu.grade_val);
+        var rows = (uint)app_menu.row_val;
+        var cols = (uint)app_menu.column_val;
+
+        if (grade >= Difficulty.CHALLENGING &&
+            (rows < 15 || cols < 15)) {
 
             send_notification (_("Minimum size 15 for this difficulty"));
+            return;
+        } else {
+            generator_grade = grade;
+            Dimensions dim = {cols, rows};
+            resize_request (dim);
         }
-
-        game_name = app_menu.title;
-        dimensions = {cols, rows};
     }
 
     private void zoom_out () {

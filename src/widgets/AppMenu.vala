@@ -99,7 +99,7 @@ class AppMenu : Gtk.MenuButton {
         grid.row_spacing = 6;
         grid.column_spacing = 6;
 
-        clicked.connect (() => {
+        clicked.connect_after (() => { /* Allow parent to set values first */
             store_values ();
             popover.show_all ();
         });

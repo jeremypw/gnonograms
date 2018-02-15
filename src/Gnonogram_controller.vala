@@ -33,13 +33,14 @@ public class Controller : GLib.Object {
 
     construct {
         model = new Model ();
+        bind_property ("dimensions", model, "dimensions");
         view = new View (model);
-
+        bind_property ("dimensions", view, "dimensions");
         history = new Gnonograms.History ();
 
         /* Connect signals. Must be done before restoring settings so that e.g.
          * dimensions of model are set. */
-        view.resized.connect (on_view_resized);
+        view.resize_request.connect (on_view_resize_request);
         view.moved.connect (on_moved);
         view.next_move_request.connect (on_next_move_request);
         view.previous_move_request.connect (on_previous_move_request);
@@ -177,11 +178,7 @@ public class Controller : GLib.Object {
     }
 
 
-    private Dimensions dimensions {
-        get {
-            return view.dimensions;
-        }
-    }
+    public Dimensions dimensions {get; set;}
 
     private bool is_solving {
         get {
@@ -450,7 +447,7 @@ public class Controller : GLib.Object {
                 reader.err_msg = (_("Dimensions too small"));
                 return false;
             } else {
-                view.dimensions = {reader.cols, reader.rows};
+                dimensions = {reader.cols, reader.rows};
             }
         } else {
             reader.err_msg = (_("Dimensions missing"));
@@ -601,12 +598,10 @@ public class Controller : GLib.Object {
         rewind_until_correct ();
     }
 
-    private void on_view_resized () {
-        model.dimensions = dimensions;
-
+    private void on_view_resize_request (Dimensions dim) {
         clear ();
+        dimensions = dim;
         game_state = GameState.SETTING;
-        view.queue_draw ();
     }
 
     private void on_view_mode_change_request (GameState gs) {

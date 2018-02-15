@@ -329,12 +329,12 @@ namespace Gnonograms {
 
             private set {
                 _grid = value;
-                 gs = new CellState[_grid.dimensions.area ()];
+                 gs = new CellState[_grid.area];
             }
         }
 
-        public uint rows { get {return _grid.dimensions.rows (); }}
-        public uint cols { get {return _grid.dimensions.cols (); }}
+        public uint rows { get {return _grid.rows; }}
+        public uint cols { get {return _grid.cols; }}
 
         public Guesser (My2DCellArray _grid, bool _human_only) {
             grid = _grid;

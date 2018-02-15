@@ -23,7 +23,7 @@ namespace Gnonograms {
    *        of the calling function.
 ***/
 public class My2DCellArray  : GLib.Object {
-    public Dimensions dimensions;
+    public Dimensions dimensions {set; private get;}
 
     public uint rows {
         get {
@@ -37,14 +37,23 @@ public class My2DCellArray  : GLib.Object {
         }
     }
 
+    public uint area {
+        get {
+            return dimensions.area ();
+        }
+    }
+
     private CellState[,] data;
 
     construct {
         data = new CellState[MAXSIZE, MAXSIZE];
     }
 
-    public My2DCellArray (Dimensions dimensions, CellState init = CellState.EMPTY) {
-        this.dimensions = dimensions;
+    public My2DCellArray (Dimensions _dimensions, CellState init = CellState.EMPTY) {
+        Object (
+            dimensions: _dimensions
+        );
+
         set_all (init);
     }
 

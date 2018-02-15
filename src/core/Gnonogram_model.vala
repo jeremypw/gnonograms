@@ -68,7 +68,6 @@ public class Model : GLib.Object {
     construct {
         solution_data = new My2DCellArray ({ MAXSIZE, MAXSIZE }, CellState.EMPTY);
         working_data = new My2DCellArray ({ MAXSIZE, MAXSIZE }, CellState.UNKNOWN);
-        dimensions = {15, 10}; /* This will also set default size of view. */
     }
 
     public int count_errors () {
