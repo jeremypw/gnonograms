@@ -28,8 +28,13 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
     public override bool generate () {
         /* returns true if a game of correct grade was generated otherwise false  */
         uint count = 0;
+        uint unsolved = 0;
+        uint total_tries = 0;
+        uint too_hard = 0;
+        uint too_easy = 0;
 
         while (!cancelled) {
+            total_tries++;
             var pattern = pattern_gen.generate ();
             var row_clues = Utils.row_clues_from_2D_array (pattern);
             var col_clues = Utils.col_clues_from_2D_array (pattern);
@@ -39,23 +44,37 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
             if (solver.state.solved ()) {
                 if (solution_grade == grade) {
                     break;
-                } else {
-                    count++;
-                    if (count < 20) {
-                        continue;
-                    } else {
-                        count = 0;
-                        if (solution_grade > grade) {
-                            pattern_gen.easier ();
-                        } else {
-                            pattern_gen.harder ();
-                        }
-                    }
                 }
+
+                if (solution_grade > grade) {
+                    too_hard++;
+                } else {
+                    too_easy++;
+                }
+            } else {
+                unsolved++;
+            }
+
+            count++;
+
+            if (count < 100) {
+                continue;
+            } else {
+                if (too_hard >= too_easy) {
+                    pattern_gen.easier ();
+                } else if (too_easy > too_hard) {
+                    pattern_gen.harder ();
+                }
+                count = 0;
+                too_hard = 0;
+                too_easy = 0;
             }
         }
 
         assert (solver.state != SolverState.ERROR);
+        debug ("total tries %u, unsolved %u, too_hard %u, too_easy %u", total_tries, unsolved, too_hard, too_easy);
+        RandomPatternGenerator pg = pattern_gen as RandomPatternGenerator;
+        debug ("threshold %u, min free %u, edge %u", pg.threshold, pg.min_freedom, pg.edge_bias);
         return !cancelled;
     }
 
