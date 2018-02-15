@@ -31,7 +31,7 @@ namespace Gnonograms {
      */
     private const double MODERATE_CPP = 5.0f;
     private const double HARD_CPP = 3.0f;
-    private const double CHALLENGING_CPP = 2.0f;
+    private const double CHALLENGING_CPP = 1.8f;
 
     /* Corresponding pass numbers for different grade (depends on dimensions) */
     private uint moderate_threshold;
@@ -321,7 +321,6 @@ namespace Gnonograms {
             result = Difficulty.EASY;
         }
 
-warning ("passes %u - result %s", passes, result.to_string ());
         return result;
     }
 

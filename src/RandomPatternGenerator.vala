@@ -39,8 +39,6 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
     public override void easier () {
         if (min_freedom > 1) {
             min_freedom--;
-        } else if (edge_bias > 1) {
-            edge_bias--;
         } else if (threshold > 50) {
             threshold -= 2;
         }

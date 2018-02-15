@@ -60,7 +60,7 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
             if (count < 100) {
                 continue;
             } else {
-                if (too_hard > too_easy) {
+                if (too_hard >= too_easy) {
                     pattern_gen.easier ();
                 } else if (too_easy > too_hard) {
                     pattern_gen.harder ();
