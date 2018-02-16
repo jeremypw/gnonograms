@@ -168,7 +168,7 @@ public class View : Gtk.ApplicationWindow {
         set {
             check_correct_button.sensitive = value && is_solving;
             undo_button.sensitive = value;
-            restart_button.sensitive = value;
+            restart_destructive |= value; /* May be destructive even if no history (e.g. after automatic solve) */
             _can_go_back = value;
         }
     }
@@ -180,6 +180,25 @@ public class View : Gtk.ApplicationWindow {
 
         set {
             redo_button.sensitive = value;
+        }
+    }
+    private bool _restart_destructive;
+    public bool restart_destructive {
+        private get {
+            return _restart_destructive;
+        }
+
+        set {
+            if (value) {
+                restart_button.image.get_style_context ().add_class ("warn");
+                restart_button.image.get_style_context ().remove_class ("dim");
+            } else {
+                restart_button.image.get_style_context ().remove_class ("warn");
+                restart_button.image.get_style_context ().add_class ("dim");
+
+            }
+
+            restart_button.sensitive = value;
         }
     }
 
@@ -274,9 +293,7 @@ public class View : Gtk.ApplicationWindow {
 
         restart_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("view-refresh-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
-        img.get_style_context ().add_class ("warn");
         restart_button.image = img;
-        restart_button.sensitive = false;
 
         auto_solve_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("system-run", Gtk.IconSize.LARGE_TOOLBAR);
@@ -407,6 +424,8 @@ public class View : Gtk.ApplicationWindow {
         for (int c = 0; c < cols; c++) {
             column_clue_box.update_label_complete (c, model.get_complete (c, true));
         }
+
+        restart_destructive = model.count_unsolved () < dimensions.area ();
     }
 
     public void make_move (Move m) {
@@ -462,7 +481,7 @@ public class View : Gtk.ApplicationWindow {
             background-color: @colorPaleBackground;
         }
 
-        *.dim-label {
+        *.dim {
             opacity: 0.5;
         }
 
@@ -479,10 +498,6 @@ public class View : Gtk.ApplicationWindow {
 
         .warn {
           color:  @error_color;
-        }
-
-        .warn:disabled {
-          opacity: 0.5;
         }
 
         separator.vertical {
@@ -578,7 +593,6 @@ public class View : Gtk.ApplicationWindow {
             header_bar.subtitle = readonly ? _("Read Only - Save to a different file") : _("Save will Overwrite");
             restart_button.tooltip_text = _("Clear canvas");
             set_buttons_sensitive (true);
-            restart_button.sensitive = true;
         } else if (gs == GameState.SOLVING) {
             header_bar.title = _("Solving %s").printf (game_name);
             header_bar.subtitle = game_grade.to_string ();
@@ -598,7 +612,6 @@ public class View : Gtk.ApplicationWindow {
         save_game_as_button.sensitive = sensitive;
         undo_button.sensitive = sensitive && can_go_back;
         redo_button.sensitive = sensitive && can_go_forward;
-        restart_button.sensitive = sensitive && can_go_back;
         check_correct_button.sensitive = sensitive && can_go_back;
         auto_solve_button.sensitive = sensitive;
     }
