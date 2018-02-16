@@ -31,11 +31,14 @@ public class Controller : GLib.Object {
         }
     }
 
+    public Difficulty generator_grade {get; set;}
+
     construct {
         model = new Model ();
         bind_property ("dimensions", model, "dimensions");
         view = new View (model);
         bind_property ("dimensions", view, "dimensions");
+        bind_property ("generator_grade", view, "generator_grade");
         history = new Gnonograms.History ();
 
         /* Connect signals. Must be done before restoring settings so that e.g.
@@ -91,12 +94,14 @@ public class Controller : GLib.Object {
         if (game != null) {
             load_game.begin (game, true, (obj, res) => {
                 if (!load_game.end (res)) {
+                    critical ("Unable to load specified game");
                     new_or_random_game ();
                 }
             });
         } else {
             restore_game.begin ((obj, res) => {
                 if (!restore_game.end (res)) {
+                    critical ("Unable to restore game");
                     new_game ();
                 }
             });
@@ -166,17 +171,6 @@ public class Controller : GLib.Object {
             }
         }
     }
-
-    private Difficulty generator_grade {
-        get {
-            return view.generator_grade;
-        }
-
-        set {
-            view.generator_grade = value;
-        }
-    }
-
 
     public Dimensions dimensions {get; set;}
 
@@ -307,7 +301,7 @@ public class Controller : GLib.Object {
         if (settings != null) {
             var rows = settings.get_uint ("rows");
             var cols = settings.get_uint ("columns");
-            view.dimensions = {cols, rows};
+            dimensions = {cols, rows};
 
             var dir = settings.get_string ("load-game-dir");
             if (dir.length > 0) {
@@ -329,7 +323,13 @@ public class Controller : GLib.Object {
 
             saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
             saved_state.bind ("mode", this, "game_state", SettingsBindFlags.DEFAULT);
-            settings.bind ("grade", view, "generator_grade", SettingsBindFlags.DEFAULT);
+            settings.bind ("grade", this, "generator_grade", SettingsBindFlags.DEFAULT);
+        } else {
+            critical ("Unable to restore settings - using defaults");
+            /* Default puzzle parameters */
+            dimensions = {15, 10};
+            game_state = GameState.SETTING;
+            generator_grade = Difficulty.MODERATE;
         }
     }
 
