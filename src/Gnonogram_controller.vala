@@ -377,9 +377,9 @@ public class Controller : GLib.Object {
             }
 
             return null;
+        } finally {
+            game_state = gs;
         }
-
-        game_state = gs;
 
         return file_writer.game_path;
     }
