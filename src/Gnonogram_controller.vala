@@ -30,24 +30,30 @@ public class Controller : GLib.Object {
             return (Gtk.Window)view;
         }
     }
-
+    public GameState game_state {get; set;}
+    public Dimensions dimensions {get; set;}
     public Difficulty generator_grade {get; set;}
 
     construct {
         model = new Model ();
-        bind_property ("dimensions", model, "dimensions");
         view = new View (model);
-        bind_property ("dimensions", view, "dimensions");
-        bind_property ("generator_grade", view, "generator_grade");
+
+        bind_property ("dimensions", model, "dimensions");
+        bind_property ("game-state", model, "game-state");
+
+        /* Need bidirectional bindings so AppMenu can update controller without request*/
+        var binding_flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
+        bind_property ("dimensions", view, "dimensions", binding_flags);
+        bind_property ("generator-grade", view, "generator-grade", binding_flags);
+        bind_property ("game-state", view, "game-state", binding_flags);
+
         history = new Gnonograms.History ();
 
         /* Connect signals. Must be done before restoring settings so that e.g.
          * dimensions of model are set. */
-        view.resize_request.connect (on_view_resize_request);
         view.moved.connect (on_moved);
         view.next_move_request.connect (on_next_move_request);
         view.previous_move_request.connect (on_previous_move_request);
-        view.mode_change_request.connect (on_view_mode_change_request);
         view.check_errors_request.connect (on_count_errors_request);
         view.rewind_request.connect (on_rewind_request);
         view.delete_event.connect (on_view_deleted);
@@ -56,6 +62,17 @@ public class Controller : GLib.Object {
         view.open_game_request.connect (on_open_game_request);
         view.solve_this_request.connect (on_solve_this_request);
         view.restart_request.connect (on_restart_request);
+
+        notify["game-state"].connect (() => {
+            if (game_state == GameState.GENERATING) {
+                on_new_random_request ();
+            }
+        });
+
+        notify["dimensions"].connect (() => {
+            clear ();
+            game_state = GameState.SETTING;
+        });
 
         var schema_source = GLib.SettingsSchemaSource.get_default ();
         if (schema_source.lookup ("com.github.jeremypw.gnonograms.settings", true) != null &&
@@ -152,27 +169,6 @@ public class Controller : GLib.Object {
             view.readonly = value;
         }
     }
-
-    private GameState _game_state;
-    public GameState game_state {
-        get {
-            return _game_state;
-        }
-
-        set {
-            if (_game_state != value) {
-                _game_state = value;
-                view.game_state = value;
-                model.game_state = value;
-
-                if (value == GameState.GENERATING) {
-                    on_new_random_request ();
-                }
-            }
-        }
-    }
-
-    public Dimensions dimensions {get; set;}
 
     private bool is_solving {
         get {
@@ -599,16 +595,6 @@ public class Controller : GLib.Object {
 
     private void on_rewind_request () {
         rewind_until_correct ();
-    }
-
-    private void on_view_resize_request (Dimensions dim) {
-        clear ();
-        dimensions = dim;
-        game_state = GameState.SETTING;
-    }
-
-    private void on_view_mode_change_request (GameState gs) {
-        game_state = gs;
     }
 
     private bool on_view_deleted () {

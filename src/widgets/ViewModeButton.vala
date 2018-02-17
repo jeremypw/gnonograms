@@ -22,35 +22,7 @@ namespace Gnonograms {
 /** ModeButton used by View in headbar to switch between SETTING and SOLVING modes **/
 public class ViewModeButton : Granite.Widgets.ModeButton {
     /** PUBLIC **/
-    public GameState mode {
-        get {
-            if (selected == setting_index) {
-                return GameState.SETTING;
-            } else if (selected == solving_index) {
-                return GameState.SOLVING;
-            } else if (selected == generating_index) {
-                    return GameState.GENERATING;
-            } else {
-                return GameState.UNDEFINED;
-            }
-        }
-
-        set {
-            switch (value) {
-                case GameState.SETTING:
-                    set_active (setting_index);
-                    break;
-                case GameState.SOLVING:
-                    set_active (solving_index);
-                    break;
-                case GameState.GENERATING:
-                    set_active (generating_index);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
+    public GameState mode {get; set;}
 
     public Difficulty grade {
         set {
@@ -89,6 +61,34 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
         setting_icon.tooltip_text = _("Draw pattern");
         solving_icon.tooltip_text = _("Solve puzzle");
         generating_icon.tooltip_text = _("Generate new random puzzle");
+
+        mode_changed.connect (() => {
+            if (selected == setting_index) {
+                mode = GameState.SETTING;
+            } else if (selected == solving_index) {
+                mode = GameState.SOLVING;
+            } else if (selected == generating_index) {
+                mode = GameState.GENERATING;
+            } else {
+                mode = GameState.UNDEFINED;
+            }
+        });
+
+        notify["mode"].connect (() => {
+            switch (mode) {
+                case GameState.SETTING:
+                    set_active (setting_index);
+                    break;
+                case GameState.SOLVING:
+                    set_active (solving_index);
+                    break;
+                case GameState.GENERATING:
+                    set_active (generating_index);
+                    break;
+                default:
+                    break;
+            }
+        });
     }
 }
 }

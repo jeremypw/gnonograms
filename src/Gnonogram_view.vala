@@ -34,51 +34,13 @@ public class View : Gtk.ApplicationWindow {
     public signal void open_game_request ();
     public signal void solve_this_request ();
     public signal void restart_request ();
-    public signal void resize_request (Dimensions dim);
     public signal void moved (Cell cell);
-    public signal void mode_change_request (GameState gs);
 
-    public Model model { get; construct; }
-
-    private string? _game_name = null;
-    public string game_name {
-        get {
-            if (_game_name == null || _game_name == "") {
-                return Gnonograms.UNTITLED_NAME;
-            } else {
-                return _game_name;
-            }
-        }
-
-        set {
-            _game_name = value;
-            if (value != Gnonograms.UNTITLED_NAME) {
-                app_menu.title = value;
-            }
-
-            update_header_bar ();
-        }
-    }
-
-    private Dimensions _dimensions;
-    public Dimensions dimensions {
-        private get {
-            return _dimensions;
-        }
-
-        set {
-            if (value != _dimensions) {
-                _dimensions = value;
-
-                row_clue_box.dimensions = dimensions;
-                column_clue_box.dimensions = dimensions;
-                fontheight = get_default_fontheight_from_dimensions ();
-
-            }
-
-            queue_draw ();
-        }
-    }
+    public Model model {private get; construct; }
+    public Dimensions dimensions {get; set;}
+    public Difficulty generator_grade {get; set;}
+    public GameState game_state {get; set;}
+    public string game_name {get; set; default = "";}
 
     private Difficulty _game_grade = Difficulty.UNDEFINED;
     public Difficulty game_grade { // Difficulty of game actually loaded
@@ -88,21 +50,10 @@ public class View : Gtk.ApplicationWindow {
 
         set {
             _game_grade = value;
-            update_header_bar ();
+            header_bar.subtitle = game_grade.to_string ();;
         }
     }
-    private Difficulty _generator_grade;
-    public Difficulty generator_grade { // Grade setting
 
-        get {
-            return _generator_grade;
-        }
-
-        set {
-            _generator_grade = value;
-            app_menu.grade_val = (uint)_generator_grade;
-        }
-    }
     private bool _readonly;
     public bool readonly {
 
@@ -143,19 +94,6 @@ public class View : Gtk.ApplicationWindow {
             _fontheight = value;
             row_clue_box.fontheight = _fontheight;
             column_clue_box.fontheight = _fontheight;
-        }
-    }
-
-    public GameState game_state {
-        private get {
-            return mode_switch.mode;
-        }
-
-        set {
-            mode_switch.mode = value;
-            cell_grid.game_state = value;
-
-            update_header_bar ();
         }
     }
 
@@ -302,15 +240,12 @@ public class View : Gtk.ApplicationWindow {
         auto_solve_button.sensitive = false;
 
         app_menu = new AppMenu ();
-        /* Ensure values match view before showing */
-        app_menu.clicked.connect (() => {
-            app_menu.row_val = dimensions.rows ();
-            app_menu.column_val = dimensions.cols ();
-            app_menu.grade_val = (uint)_generator_grade;
-            app_menu.title = game_name;
-        });
+        bind_property ("dimensions", app_menu, "dimensions", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
+        bind_property ("generator-grade", app_menu, "grade", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
+        bind_property ("game-name", app_menu, "title", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
 
         mode_switch = new ViewModeButton ();
+        bind_property ("game-state", mode_switch, "mode", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
 
         progress_indicator = new Gnonograms.Progress_indicator ();
         progress_indicator.get_style_context ().add_class ("progress");
@@ -342,6 +277,9 @@ public class View : Gtk.ApplicationWindow {
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL);
 
+        bind_property ("dimensions", row_clue_box, "dimensions");
+        bind_property ("dimensions", column_clue_box, "dimensions");
+
         cell_grid = new CellGrid (model);
         main_grid = new Gtk.Grid ();
 
@@ -366,11 +304,8 @@ public class View : Gtk.ApplicationWindow {
         add (overlay);
 
         /* Connect signal handlers */
-        mode_switch.mode_changed.connect (on_mode_switch_changed);
         key_press_event.connect (on_key_press_event);
         key_release_event.connect (on_key_release_event);
-
-        app_menu.apply.connect (on_app_menu_apply);
 
         load_game_button.clicked.connect (on_load_game_button_clicked);
         save_game_button.clicked.connect (on_save_game_button_clicked);
@@ -380,6 +315,26 @@ public class View : Gtk.ApplicationWindow {
         redo_button.clicked.connect (on_redo_button_pressed);
         restart_button.clicked.connect (on_restart_button_pressed);
         auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
+
+        notify["game-state"].connect (() => {
+            cell_grid.game_state = game_state;
+            update_header_bar ();
+            queue_draw ();
+        });
+
+        notify["dimensions"].connect (() => {
+            row_clue_box.dimensions = dimensions;
+            column_clue_box.dimensions = dimensions;
+            fontheight = get_default_fontheight_from_dimensions ();
+        });
+
+        notify["generator-grade"].connect (() => {
+            mode_switch.grade = generator_grade;
+        });
+
+        notify["game-name"].connect (() => {
+            update_header_bar ();
+        });
     }
 
     public string[] get_row_clues () {
@@ -595,14 +550,11 @@ public class View : Gtk.ApplicationWindow {
             set_buttons_sensitive (true);
         } else if (gs == GameState.SOLVING) {
             header_bar.title = _("Solving %s").printf (game_name);
-            header_bar.subtitle = game_grade.to_string ();
             restart_button.tooltip_text = _("Restart solving");
             set_buttons_sensitive (true);
         } else if (gs == GameState.GENERATING) {
             set_buttons_sensitive (false);
         }
-
-        mode_switch.grade = generator_grade;
     }
 
     private void set_buttons_sensitive (bool sensitive) {
@@ -921,10 +873,6 @@ public class View : Gtk.ApplicationWindow {
         only_control_pressed = control_pressed && !other_mod_pressed; /* Shift can be pressed */
     }
 
-    private void on_mode_switch_changed (Gtk.Widget widget) {
-        mode_change_request (mode_switch.mode);
-    }
-
     private void on_save_game_button_clicked () {
         if (shift_pressed) {
             save_game_as_request ();
@@ -971,25 +919,6 @@ public class View : Gtk.ApplicationWindow {
 
     private void on_restart_button_pressed () {
         restart_request ();
-    }
-
-    private void on_app_menu_apply () {
-        game_name = app_menu.title;
-
-        var grade = (Difficulty)(app_menu.grade_val);
-        var rows = (uint)app_menu.row_val;
-        var cols = (uint)app_menu.column_val;
-
-        if (grade >= Difficulty.CHALLENGING &&
-            (rows < 15 || cols < 15)) {
-
-            send_notification (_("Minimum size 15 for this difficulty"));
-            return;
-        } else {
-            generator_grade = grade;
-            Dimensions dim = {cols, rows};
-            resize_request (dim);
-        }
     }
 
     private void zoom_out () {

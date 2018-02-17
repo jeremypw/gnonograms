@@ -29,53 +29,11 @@ class AppMenu : Gtk.MenuButton {
     private AppSetting title_setting;
     private Gtk.Grid grid;
 
-    private uint _grade_val;
-    public uint grade_val {
-        get {
-            return _grade_val;
-        }
+    public Dimensions dimensions {get; set;}
+    public Difficulty grade {get; set;}
+    public string title {get; set;}
 
-        set {
-            _grade_val = value;
-            grade_setting.set_value (value);
-        }
-    }
-
-    private uint _row_val;
-    public uint row_val {
-        get {
-            return _row_val;
-        }
-
-        set {
-            _row_val = value;
-            row_setting.set_value (value);
-        }
-    }
-
-    private uint _column_val;
-    public uint column_val {
-        get {
-            return _column_val;
-        }
-
-        set {
-            _column_val = value;
-            column_setting.set_value (value);
-        }
-    }
-
-    public string title {
-        get {
-            return title_setting.get_text ();
-        }
-
-        set {
-            title_setting.set_text (value);
-        }
-    }
-
-    public signal void apply ();
+//    public signal void apply ();
 
     construct {
         popover = new AppPopover (this);
@@ -99,19 +57,32 @@ class AppMenu : Gtk.MenuButton {
         grid.row_spacing = 6;
         grid.column_spacing = 6;
 
-        clicked.connect_after (() => { /* Allow parent to set values first */
-            store_values ();
-            popover.show_all ();
+        toggled.connect (() => { /* Allow parent to set values first */
+            if (active) {
+                update_dimension_settings ();
+                update_grade_setting ();
+                update_title_setting ();
+                popover.show_all ();
+            }
         });
 
         app_popover.apply_settings.connect (() => {
-            store_values ();
-            apply ();
+            update_properties ();
         });
 
-        app_popover.cancel.connect (() => {
-            restore_values ();
+        notify["dimensions"].connect (() => {
+            update_dimension_settings ();
         });
+
+        notify["grade"].connect (() => {
+            update_grade_setting ();
+        });
+
+        notify["title"].connect (() => {
+            update_title_setting ();
+        });
+
+
     }
 
     public AppMenu () {
@@ -119,18 +90,25 @@ class AppMenu : Gtk.MenuButton {
         tooltip_text = _("Options");
     }
 
-    private void store_values () {
-        grade_val = (uint)(grade_setting.get_value ());
-        row_val = (uint)(row_setting.get_value ());
-        column_val = (uint)(column_setting.get_value ());
-        title = title_setting.get_text ();
+    private void update_dimension_settings () {
+        row_setting.set_value (dimensions.rows ());
+        column_setting.set_value (dimensions.cols ());
     }
 
-    private void restore_values () {
-        grade_setting.set_value (grade_val);
-        row_setting.set_value (row_val);
-        column_setting.set_value (column_val);
+    private void update_grade_setting () {
+        grade_setting.set_value ((uint)grade);
+    }
+
+    private void update_title_setting () {
         title_setting.set_text (title);
+    }
+
+    private void update_properties () {
+        var rows = (uint)(row_setting.get_value ());
+        var cols = (uint)(column_setting.get_value ());
+        dimensions = {cols, rows};
+        grade = (Difficulty)(grade_setting.get_value ());
+        title = title_setting.get_text ();
     }
 
     private void add_setting (ref int pos, AppSetting setting) {
