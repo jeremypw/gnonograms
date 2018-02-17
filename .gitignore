@@ -36,5 +36,8 @@
 *build/*
 debian/build/*
 debian/com.github*
-debian/debhelper*
+debian/*debhelper*
 debian/files
+
+#Misc untracked
+untracked/*

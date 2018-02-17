@@ -23,6 +23,20 @@
         <category>LogicGame</category>
     </categories>
     <releases>
+        <release version="1.1.0" date="2018-02-16" urgency="low">
+            <description>
+                <ul>
+                    <li>Save and restore move history</li>
+                    <li>Fade completed clues when solving</li>
+                    <li>Generate difficult puzzles faster</li>
+                    <li>Add redo button</li>
+                    <li>Reorder header bar</li>
+                    <li>Various bug fixes</li>
+                    <li>Some restyling</li>
+                    <li>Some code refactoring and cleanup</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.0.6" date="2018-02-03" urgency="low">
             <description>
                 <ul>
