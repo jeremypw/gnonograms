@@ -47,9 +47,9 @@ public class LabelBox : Gtk.Grid {
 
             if (vertical_labels) {
                 min_width = (int)(_dimensions.cols () * 2 * fh);
-                min_height = (int)(_dimensions.rows () * 0.8 * fh);
+                min_height = (int)((_dimensions.rows () * 0.5 + 2) * fh);
             } else {
-                min_width = (int)(_dimensions.cols () * 0.6 * fh);
+                min_width = (int)((_dimensions.cols () * 0.5 + 1) * fh);
                 min_height = (int)(_dimensions.rows () * 2 * fh);
             }
         }
