@@ -177,12 +177,22 @@ public class View : Gtk.ApplicationWindow {
     }
 
     construct {
+        directions = new Gee.HashMap<string, Gdk.Point?> ();
+        directions["UP"] = {0, -1};
+        directions["DOWN"] = {0, 1};
+        directions["LEFT"] = {-1, 0};
+        directions["RIGHT"] = {1, 0};
+
         view_actions = new GLib.SimpleActionGroup ();
         view_actions.add_action_entries (view_action_entries, this);
         insert_action_group ("view", view_actions);
         var application = Gnonograms.get_app ();
         application.set_accels_for_action ("view.undo", {"<Ctrl>Z"});
         application.set_accels_for_action ("view.redo", {"<Ctrl><Shift>Z"});
+        application.set_accels_for_action ("view.move_cursor::UP", {"Up"});
+        application.set_accels_for_action ("view.move_cursor::DOWN", {"Down"});
+        application.set_accels_for_action ("view.move_cursor::LEFT", {"Left"});
+        application.set_accels_for_action ("view.move_cursor::RIGHT", {"Right"});
 
         resizable = false;
         drawing_with_state = CellState.UNDEFINED;
@@ -441,6 +451,12 @@ public class View : Gtk.ApplicationWindow {
     /**PRIVATE**/
     private const uint NOTIFICATION_TIMEOUT_SEC = 10;
     private const uint PROGRESS_DELAY_MSEC = 500;
+    private const string UP = "U";
+    private const string DOWN = "D";
+    private const string LEFT = "L";
+    private const string RIGHT = "R";
+
+    private Gee.HashMap<string, Gdk.Point?> directions;
 
     private string BRAND_STYLESHEET = """
         @define-color textColorPrimary %s;
@@ -491,7 +507,9 @@ public class View : Gtk.ApplicationWindow {
     private const GLib.ActionEntry [] view_action_entries = {
         {"undo", action_undo},
         {"redo", action_redo},
+        {"move_cursor", action_move_cursor, "s"}
     };
+
 
     private GLib.SimpleActionGroup view_actions;
 
@@ -659,29 +677,6 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private void handle_arrow_keys (string keyname) {
-        int r = 0; int c = 0;
-        switch (keyname) {
-            case "UP":
-                    r = -1;
-                    break;
-            case "DOWN":
-                    r = 1;
-                    break;
-            case "LEFT":
-                    c = -1;
-                    break;
-            case "RIGHT":
-                    c = 1;
-                    break;
-
-            default:
-                    return;
-        }
-
-        cell_grid.move_cursor_relative (r, c);
-    }
-
     private void handle_pen_keys (string keyname) {
         if (mods) {
             return;
@@ -773,38 +768,6 @@ public class View : Gtk.ApplicationWindow {
             }
 
             return true;
-
-        } else if (drawing_with_state != CellState.UNDEFINED) {
-            switch (event.direction) {
-                case Gdk.ScrollDirection.UP:
-                    handle_arrow_keys ("UP");
-                    break;
-
-                case Gdk.ScrollDirection.DOWN:
-                    handle_arrow_keys ("DOWN");
-                    break;
-
-                case Gdk.ScrollDirection.LEFT:
-                    handle_arrow_keys ("LEFT");
-                    break;
-
-                case Gdk.ScrollDirection.RIGHT:
-                    handle_arrow_keys ("RIGHT");
-                    break;
-
-                default:
-                    return false;
-            }
-
-            /* Cause mouse pointer to follow current cell */
-            int window_x, window_y;
-            double x = (current_cell.col + 0.5) * cell_grid.cell_width;
-            double y = (current_cell.row + 0.5) * cell_grid.cell_height;
-
-            cell_grid.get_window ().get_root_coords ((int)x, (int)y, out window_x, out window_y);
-            event.device.warp (screen, window_x, window_y);
-
-            return true;
         }
 
         return false;
@@ -820,13 +783,6 @@ public class View : Gtk.ApplicationWindow {
         var name = (Gdk.keyval_name (event.keyval)).up();
 
         switch (name) {
-            case "UP":
-            case "DOWN":
-            case "LEFT":
-            case "RIGHT":
-                handle_arrow_keys (name);
-                break;
-
             case "F":
             case "E":
             case "X":
@@ -950,6 +906,10 @@ public class View : Gtk.ApplicationWindow {
 
     private void action_redo () {
         next_move_request ();
+    }
+
+    private void action_move_cursor (SimpleAction action, Variant? param) {
+        cell_grid.move_cursor_relative (directions.get (param.get_string ()));
     }
 
     private void on_auto_solve_button_pressed () {
