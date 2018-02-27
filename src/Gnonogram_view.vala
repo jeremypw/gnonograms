@@ -379,8 +379,6 @@ public class View : Gtk.ApplicationWindow {
         for (int c = 0; c < cols; c++) {
             column_clue_box.update_label_complete (c, model.get_complete (c, true));
         }
-
-        restart_destructive = model.count_unsolved () < dimensions.area ();
     }
 
     public void make_move (Move m) {
@@ -402,6 +400,13 @@ public class View : Gtk.ApplicationWindow {
         cell_grid.frozen = true; // Do not show model updates
         progress_indicator.text = text;
         schedule_show_progress (cancellable);
+    }
+
+    public void end_working () {
+        hide_progress ();
+        update_labels_complete_from_working ();
+        update_header_bar ();
+        queue_draw ();
     }
 
     public void hide_progress () {
@@ -541,19 +546,26 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private void update_header_bar () {
-        var gs = game_state;
+        switch (game_state) {
+            case GameState.SETTING:
+                header_bar.title = _("Drawing %s").printf (game_name);
+                header_bar.subtitle = readonly ? _("Read Only - Save to a different file") : _("Save will Overwrite");
+                restart_button.tooltip_text = _("Clear canvas");
+                set_buttons_sensitive (true);
 
-        if (gs == GameState.SETTING) {
-            header_bar.title = _("Drawing %s").printf (game_name);
-            header_bar.subtitle = readonly ? _("Read Only - Save to a different file") : _("Save will Overwrite");
-            restart_button.tooltip_text = _("Clear canvas");
-            set_buttons_sensitive (true);
-        } else if (gs == GameState.SOLVING) {
-            header_bar.title = _("Solving %s").printf (game_name);
-            restart_button.tooltip_text = _("Restart solving");
-            set_buttons_sensitive (true);
-        } else if (gs == GameState.GENERATING) {
-            set_buttons_sensitive (false);
+                break;
+            case GameState.SOLVING:
+                header_bar.title = _("Solving %s").printf (game_name);
+                restart_button.tooltip_text = _("Restart solving");
+                set_buttons_sensitive (true);
+
+                break;
+            case GameState.GENERATING:
+                set_buttons_sensitive (false);
+
+                break;
+            default:
+                break;
         }
     }
 
@@ -562,6 +574,7 @@ public class View : Gtk.ApplicationWindow {
         load_game_button.sensitive = sensitive;
         save_game_button.sensitive = sensitive;
         save_game_as_button.sensitive = sensitive;
+        restart_destructive = sensitive && !model.is_blank (game_state);
         undo_button.sensitive = sensitive && can_go_back;
         redo_button.sensitive = sensitive && can_go_forward;
         check_correct_button.sensitive = sensitive && can_go_back;

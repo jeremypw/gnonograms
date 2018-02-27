@@ -61,7 +61,7 @@ public class Model : GLib.Object {
 
     public bool is_finished {
         get {
-            return count_unsolved () == 0;
+            return count_state (GameState.SOLVING, CellState.UNKNOWN) == 0;
         }
     }
 
@@ -87,33 +87,22 @@ public class Model : GLib.Object {
         return count;
     }
 
-    private int count_state (CellState state) {
+    private int count_state (GameState game_state, CellState cell_state) {
         int count=0;
         CellState cs;
+        My2DCellArray arr = game_state == GameState.SOLVING ? working_data : solution_data;
 
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
-                cs = working_data.get_data_from_rc (r,c);
+                cs = arr.get_data_from_rc (r,c);
 
-                if (cs == state) {
+                if (cs == cell_state) {
                     count++;
                 }
             }
         }
 
         return count;
-    }
-
-    public int count_unsolved () {
-        return count_state (CellState.UNKNOWN);
-    }
-
-    public int count_filled () {
-        return count_state (CellState.FILLED);
-    }
-
-    public int count_empty () {
-        return count_state (CellState.EMPTY);
     }
 
     public void clear () {
@@ -127,6 +116,14 @@ public class Model : GLib.Object {
 
     public void blank_working () {
         working_data.set_all (CellState.UNKNOWN);
+    }
+
+    public bool is_blank (GameState state) {
+        if (state == GameState.SOLVING) {
+            return count_state (state, CellState.EMPTY) + count_state (state, CellState.FILLED) == 0;
+        } else {
+            return count_state (state, CellState.FILLED) == 0;
+        }
     }
 
     public string get_label_text_from_solution (uint idx, bool is_column) {
