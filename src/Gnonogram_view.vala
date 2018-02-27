@@ -699,7 +699,7 @@ public class View : Gtk.ApplicationWindow {
         progress_timeout_id = Timeout.add_full (Priority.HIGH_IDLE, PROGRESS_DELAY_MSEC, () => {
             progress_indicator.cancellable = cancellable;
             header_bar.set_custom_title (progress_indicator);
-            this.queue_draw ();
+            queue_draw ();
             progress_timeout_id = 0;
             return false;
         });

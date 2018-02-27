@@ -37,9 +37,7 @@ class Label : Gtk.Label {
 
     public double fontheight {
         set {
-            var fontsize = (int)(1024 * (value));
-            attrib_start = "<span size='%i' weight='bold'>".printf (fontsize);
-
+            fontsize = (int)(1024 * (value));
             update_markup ();
         }
     }
@@ -66,7 +64,8 @@ class Label : Gtk.Label {
                 use_markup: true,
                 vertical_text: _vertical_text,
                 xalign: _vertical_text ? (float)0.5 : (float)1.0,
-                yalign: _vertical_text ? (float)1.0 : (float)0.5
+                yalign: _vertical_text ? (float)1.0 : (float)0.5,
+                size: 0
                 );
 
         if (label_text != "") {
@@ -74,11 +73,10 @@ class Label : Gtk.Label {
         } else {
             clue = "?,?,?";
         }
-    }
 
-    construct {
-        attrib_start = "<span>";
-        size = 0;
+        size_allocate.connect (() => {
+            update_markup ();
+        });
     }
 
     public void highlight (bool is_highlight) {
@@ -90,20 +88,31 @@ class Label : Gtk.Label {
     }
 
 /** PRIVATE **/
-    private string attrib_start;
+    private const string attr_template = "<span size='%i' weight='bold'>";
+    private double fontsize;
     private string displayed_text; /* text of clue in final form */
     private string _clue; /* text of clue in horizontal form */
     private uint _size;
 
-    private void update_markup () {
-        var markup = attrib_start + displayed_text + "</span>";
-        set_markup (markup);
-        update_tooltip ();
+    private void update_markup (double fs = fontsize) {
+        set_markup (attr_template.printf ((int)fs) + displayed_text + "</span>");
+        var layout = get_layout ();
+        int w, h;
+        layout.get_size (out w, out h);
+        var size = vertical_text ? h : w;
+        var alloc = vertical_text ? get_allocated_height () : get_allocated_width ();
+
+        if (size / 1024 > alloc) {
+            update_markup (fs * 0.95);
+        } else {
+            update_tooltip ();
+        }
     }
 
     private void update_tooltip () {
-        var freedom = size - Utils.blockextent_from_clue (_clue);
-        set_tooltip_markup (attrib_start + _("Freedom = %u").printf (freedom) + "</span>");
+        set_tooltip_markup (attr_template.printf ((int)fontsize) +
+                            _("Freedom = %u").printf (size - Utils.blockextent_from_clue (_clue)) +
+                            "</span>");
     }
 
     private string vertical_string (string s) {
