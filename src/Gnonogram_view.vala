@@ -327,7 +327,6 @@ public class View : Gtk.ApplicationWindow {
         notify["dimensions"].connect (() => {
             row_clue_box.dimensions = dimensions;
             column_clue_box.dimensions = dimensions;
-//~             fontheight = double.min (fontheight, get_default_fontheight_from_dimensions ());
             fontheight = get_default_fontheight_from_dimensions ();
             queue_draw ();
         });
@@ -586,7 +585,7 @@ public class View : Gtk.ApplicationWindow {
         restart_destructive = sensitive && !model.is_blank (game_state);
         undo_button.sensitive = sensitive && can_go_back;
         redo_button.sensitive = sensitive && can_go_forward;
-        check_correct_button.sensitive = sensitive && can_go_back;
+        check_correct_button.sensitive = sensitive && is_solving && can_go_back;
         auto_solve_button.sensitive = sensitive;
     }
 
