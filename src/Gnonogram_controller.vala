@@ -40,12 +40,7 @@ public class Controller : GLib.Object {
 
         bind_property ("dimensions", model, "dimensions");
         bind_property ("game-state", model, "game-state");
-
-        /* Need bidirectional bindings so AppMenu can update controller without request*/
-        var binding_flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
-        bind_property ("dimensions", view, "dimensions", binding_flags);
-        bind_property ("generator-grade", view, "generator-grade", binding_flags);
-        bind_property ("game-state", view, "game-state", binding_flags);
+        /* Do not bind view properties until game restored */
 
         history = new Gnonograms.History ();
 
@@ -102,14 +97,18 @@ public class Controller : GLib.Object {
                                                Gnonograms.UNSAVED_FILENAME);
 
         restore_settings (); /* May change load_game_dir and save_game_dir */
-
-        view.show_all ();
-        view.present ();
     }
 
     public Controller (File? game = null) {
+        var fh = saved_state.get_double ("font-height");
+        var binding_flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
+        bind_property ("dimensions", view, "dimensions",  binding_flags);
+        bind_property ("generator-grade", view, "generator-grade", binding_flags);
+        bind_property ("game-state", view, "game-state", binding_flags);
+
         if (game != null) {
             load_game.begin (game, true, (obj, res) => {
+                view.fontheight = fh; /* Ensure restored fontheight applied */
                 if (!load_game.end (res)) {
                     critical ("Unable to load specified game");
                     new_or_random_game ();
@@ -117,12 +116,16 @@ public class Controller : GLib.Object {
             });
         } else {
             restore_game.begin ((obj, res) => {
+                view.fontheight = fh; /* Ensure restored fontheight applied */
                 if (!restore_game.end (res)) {
                     critical ("Unable to restore game");
                     new_game ();
                 }
             });
         }
+
+        view.show_all ();
+        view.present ();
     }
 
     private void new_or_random_game () {
@@ -315,7 +318,6 @@ public class Controller : GLib.Object {
             y = saved_state.get_int ("window-y");
             current_game_path = saved_state.get_string ("current-game-path");
             window.move (x, y);
-            view.fontheight = saved_state.get_double ("font-height");
 
             saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
             saved_state.bind ("mode", this, "game_state", SettingsBindFlags.DEFAULT);

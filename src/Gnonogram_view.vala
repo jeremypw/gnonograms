@@ -94,6 +94,7 @@ public class View : Gtk.ApplicationWindow {
             _fontheight = value;
             row_clue_box.fontheight = _fontheight;
             column_clue_box.fontheight = _fontheight;
+            queue_draw ();
         }
     }
 
@@ -326,7 +327,9 @@ public class View : Gtk.ApplicationWindow {
         notify["dimensions"].connect (() => {
             row_clue_box.dimensions = dimensions;
             column_clue_box.dimensions = dimensions;
+//~             fontheight = double.min (fontheight, get_default_fontheight_from_dimensions ());
             fontheight = get_default_fontheight_from_dimensions ();
+            queue_draw ();
         });
 
         notify["generator-grade"].connect (() => {
