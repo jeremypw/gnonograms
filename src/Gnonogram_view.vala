@@ -23,6 +23,7 @@ namespace Gnonograms {
    * from the controller. It signals user interaction to the controller.
 ***/
 public class View : Gtk.ApplicationWindow {
+
 /**PUBLIC**/
     public signal void random_game_request ();
     public signal uint check_errors_request ();
@@ -176,6 +177,13 @@ public class View : Gtk.ApplicationWindow {
     }
 
     construct {
+        view_actions = new GLib.SimpleActionGroup ();
+        view_actions.add_action_entries (view_action_entries, this);
+        insert_action_group ("view", view_actions);
+        var application = Gnonograms.get_app ();
+        application.set_accels_for_action ("view.undo", {"<Ctrl>Z"});
+        application.set_accels_for_action ("view.redo", {"<Ctrl><Shift>Z"});
+
         resizable = false;
         drawing_with_state = CellState.UNDEFINED;
 
@@ -312,8 +320,10 @@ public class View : Gtk.ApplicationWindow {
         save_game_button.clicked.connect (on_save_game_button_clicked);
         save_game_as_button.clicked.connect (on_save_game_as_button_clicked);
         check_correct_button.clicked.connect (on_check_button_pressed);
-        undo_button.clicked.connect (on_undo_button_pressed);
-        redo_button.clicked.connect (on_redo_button_pressed);
+
+        undo_button.set_action_name ("view.undo");
+        redo_button.set_action_name ("view.redo");
+
         restart_button.clicked.connect (on_restart_button_pressed);
         auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
 
@@ -477,6 +487,14 @@ public class View : Gtk.ApplicationWindow {
                 Gnonograms.DARK_BACKGROUND,
                 Gnonograms.DARK_BACKGROUND,
                 Gnonograms.PALE_BACKGROUND);
+
+    private const GLib.ActionEntry [] view_action_entries = {
+        {"undo", action_undo},
+        {"redo", action_redo},
+    };
+
+    private GLib.SimpleActionGroup view_actions;
+
 
     private Gnonograms.LabelBox row_clue_box;
     private Gnonograms.LabelBox column_clue_box;
@@ -926,11 +944,11 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private void on_undo_button_pressed () {
+    private void action_undo () {
         previous_move_request ();
     }
 
-    private void on_redo_button_pressed () {
+    private void action_redo () {
         next_move_request ();
     }
 
