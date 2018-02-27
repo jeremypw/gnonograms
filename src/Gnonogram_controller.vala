@@ -675,9 +675,7 @@ public class Controller : GLib.Object {
                     model.working_data.copy (solver.grid);
                 }
 
-                view.hide_progress ();
-                view.update_labels_complete ();
-                view.queue_draw ();
+                view.end_working ();
                 start_solving.callback (); // Needed to continue after yield;
                 return false;
             });
