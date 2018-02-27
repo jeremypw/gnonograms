@@ -1,7 +1,7 @@
 com.github.jeremypw.gnonograms (1.1.0) xenial; urgency=low
 
   * Save and restore move history
-  * Fade completed clues when solving</li>
+  * Fade completed clues when solving
   * Generate difficult puzzles faste
   * Add redo button
   * Reorder header bar
@@ -14,7 +14,7 @@ com.github.jeremypw.gnonograms (1.1.0) xenial; urgency=low
 com.github.jeremypw.gnonograms (1.0.6) xenial; urgency=low
 
   * Add brand styling and update screenshots
-  * Fix possible failed assertion in advanced solver</li>
+  * Fix possible failed assertion in advanced solver
   * Fix some resizing isses
   * Fix some loading and saving issues
   * Some code refactoring and cleanup
