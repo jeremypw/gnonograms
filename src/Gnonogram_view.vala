@@ -193,6 +193,8 @@ public class View : Gtk.ApplicationWindow {
         application.set_accels_for_action ("view.move_cursor::DOWN", {"Down"});
         application.set_accels_for_action ("view.move_cursor::LEFT", {"Left"});
         application.set_accels_for_action ("view.move_cursor::RIGHT", {"Right"});
+        application.set_accels_for_action ("view.zoom_in", {"<Ctrl>plus", "<Ctrl>equal", "<Ctrl>KP_Add"});
+        application.set_accels_for_action ("view.zoom_out", {"<Ctrl>minus", "<Ctrl>KP_Subtract"});
 
         resizable = false;
         drawing_with_state = CellState.UNDEFINED;
@@ -507,6 +509,8 @@ public class View : Gtk.ApplicationWindow {
     private const GLib.ActionEntry [] view_action_entries = {
         {"undo", action_undo},
         {"redo", action_redo},
+        {"zoom_in", action_zoom_in},
+        {"zoom_out", action_zoom_out},
         {"move_cursor", action_move_cursor, "s"}
     };
 
@@ -756,11 +760,11 @@ public class View : Gtk.ApplicationWindow {
         if (control_pressed) {
             switch (event.direction) {
                 case Gdk.ScrollDirection.UP:
-                    zoom_out ();
+                    action_zoom_out ();
                     break;
 
                 case Gdk.ScrollDirection.DOWN:
-                    zoom_in ();
+                    action_zoom_in ();
                     break;
 
                 default:
@@ -793,21 +797,6 @@ public class View : Gtk.ApplicationWindow {
             case "2":
                 if (only_control_pressed) {
                     game_state = name == "1" ? GameState.SETTING : GameState.SOLVING;
-                }
-
-                break;
-
-            case "MINUS":
-            case "KP_SUBTRACT":
-            case "EQUAL":
-            case "PLUS":
-            case "KP_ADD":
-                if (only_control_pressed) {
-                    if (name == "MINUS" || name == "KP_SUBTRACT") {
-                        zoom_out ();
-                    } else {
-                        zoom_in ();
-                    }
                 }
 
                 break;
@@ -920,7 +909,7 @@ public class View : Gtk.ApplicationWindow {
         restart_request ();
     }
 
-    private void zoom_out () {
+    private void action_zoom_out () {
         int min, nat;
         header_bar.get_preferred_width (out min, out nat);
         /* Do not shrink below min header size plus allowance for progress widget */
@@ -929,7 +918,7 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private void zoom_in () {
+    private void action_zoom_in () {
         fontheight += 1.0;
     }
 }
