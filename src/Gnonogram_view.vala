@@ -319,6 +319,7 @@ public class View : Gtk.ApplicationWindow {
         notify["game-state"].connect (() => {
             cell_grid.game_state = game_state;
             update_header_bar ();
+            update_labels_complete ();
             queue_draw ();
         });
 
@@ -345,7 +346,6 @@ public class View : Gtk.ApplicationWindow {
         return column_clue_box.get_clues ();
     }
 
-
     public void update_labels_from_string_array (string[] clues, bool is_column) {
         var clue_box = is_column ? column_clue_box : row_clue_box;
         var lim = is_column ? cols : rows;
@@ -364,20 +364,26 @@ public class View : Gtk.ApplicationWindow {
             column_clue_box.update_label_text (c, model.get_label_text_from_solution (c, true));
         }
 
-        update_labels_complete_from_working ();
+        update_labels_complete ();
     }
 
-    public void update_labels_complete_from_working () {
+    public void update_labels_complete () {
         if (!is_solving) {
-            return;
-        }
+            for (int r = 0; r < rows; r++) {
+                row_clue_box.update_label_complete (r, false);
+            }
 
-        for (int r = 0; r < rows; r++) {
-            row_clue_box.update_label_complete (r, model.get_complete (r, false));
-        }
+            for (int c = 0; c < cols; c++) {
+                column_clue_box.update_label_complete (c, false);
+            }
+        } else {
+            for (int r = 0; r < rows; r++) {
+                row_clue_box.update_label_complete (r, model.get_complete (r, false));
+            }
 
-        for (int c = 0; c < cols; c++) {
-            column_clue_box.update_label_complete (c, model.get_complete (c, true));
+            for (int c = 0; c < cols; c++) {
+                column_clue_box.update_label_complete (c, model.get_complete (c, true));
+            }
         }
 
         restart_destructive = model.count_unsolved () < dimensions.area ();

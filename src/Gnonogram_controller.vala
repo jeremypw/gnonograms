@@ -422,7 +422,6 @@ public class Controller : GLib.Object {
             }
 
             make_move (history.get_current_move ());
-            view.update_labels_complete_from_working ();
 
             if (update_load_dir) {
                 /* At this point, we can assume game_file exists and has parent */
@@ -677,7 +676,7 @@ public class Controller : GLib.Object {
                 }
 
                 view.hide_progress ();
-                view.update_labels_complete_from_working ();
+                view.update_labels_complete ();
                 view.queue_draw ();
                 start_solving.callback (); // Needed to continue after yield;
                 return false;
@@ -700,7 +699,7 @@ public class Controller : GLib.Object {
             clear_history ();
         }
 
-        view.update_labels_complete_from_working ();
+        view.update_labels_complete ();
         view.queue_draw ();
     }
 }
