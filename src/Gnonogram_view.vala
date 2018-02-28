@@ -197,7 +197,7 @@ public class View : Gtk.ApplicationWindow {
         application.set_accels_for_action ("view.zoom_out", {"<Ctrl>minus", "<Ctrl>KP_Subtract"});
         application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.SETTING), {"<Ctrl>1"});
         application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.SOLVING), {"<Ctrl>2"});
-        application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.GENERATING), {"<Ctrl>3"});
+        application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.GENERATING), {"<Ctrl>3", "<Ctrl>R"});
         application.set_accels_for_action ("view.open", {"<Ctrl>O"});
         application.set_accels_for_action ("view.save", {"<Ctrl>S"});
         application.set_accels_for_action ("view.save-as", {"<Ctrl><Shift>S"});
@@ -801,24 +801,6 @@ public class View : Gtk.ApplicationWindow {
             case "E":
             case "X":
                 handle_pen_keys (name);
-                break;
-
-            case "R":
-                if (only_control_pressed) {
-                    random_game_request ();
-                }
-
-                break;
-
-            case "S":
-                if (only_control_pressed) {
-                    if (shift_pressed) {
-                        save_game_as_request ();
-                    } else {
-                        save_game_request ();
-                    }
-                }
-
                 break;
 
             default:
