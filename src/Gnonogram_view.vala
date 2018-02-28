@@ -199,6 +199,8 @@ public class View : Gtk.ApplicationWindow {
         application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.SOLVING), {"<Ctrl>2"});
         application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.GENERATING), {"<Ctrl>3"});
         application.set_accels_for_action ("view.open", {"<Ctrl>O"});
+        application.set_accels_for_action ("view.save", {"<Ctrl>S"});
+        application.set_accels_for_action ("view.save-as", {"<Ctrl><Shift>S"});
 
         resizable = false;
         drawing_with_state = CellState.UNDEFINED;
@@ -332,14 +334,13 @@ public class View : Gtk.ApplicationWindow {
         key_press_event.connect (on_key_press_event);
         key_release_event.connect (on_key_release_event);
 
-
-        save_game_button.clicked.connect (on_save_game_button_clicked);
-        save_game_as_button.clicked.connect (on_save_game_as_button_clicked);
         check_correct_button.clicked.connect (on_check_button_pressed);
 
         undo_button.set_action_name ("view.undo");
         redo_button.set_action_name ("view.redo");
         load_game_button.set_action_name ("view.open");
+        save_game_button.set_action_name ("view.save");
+        save_game_as_button.set_action_name ("view.save-as");
 
         restart_button.clicked.connect (on_restart_button_pressed);
         auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
@@ -518,7 +519,9 @@ public class View : Gtk.ApplicationWindow {
         {"zoom_out", action_zoom_out},
         {"move-cursor", action_move_cursor, "(ii)"},
         {"set-mode", action_set_mode, "u"},
-        {"open", action_open}
+        {"open", action_open},
+        {"save", action_save},
+        {"save-as", action_save_as}
     };
 
 
@@ -849,18 +852,6 @@ public class View : Gtk.ApplicationWindow {
         only_control_pressed = control_pressed && !other_mod_pressed; /* Shift can be pressed */
     }
 
-    private void on_save_game_button_clicked () {
-        if (shift_pressed) {
-            save_game_as_request ();
-        } else {
-            save_game_request ();
-        }
-    }
-
-    private void on_save_game_as_button_clicked () {
-        save_game_as_request ();
-    }
-
     private void on_check_button_pressed () {
         var errors = check_errors_request ();
 
@@ -902,6 +893,14 @@ public class View : Gtk.ApplicationWindow {
 
     private void action_open () {
         open_game_request ();
+    }
+
+    private void action_save () {
+        save_game_request ();
+    }
+
+    private void action_save_as () {
+        save_game_as_request ();
     }
 
     private void action_zoom_out () {

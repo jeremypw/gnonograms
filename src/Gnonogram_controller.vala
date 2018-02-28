@@ -608,6 +608,7 @@ public class Controller : GLib.Object {
             on_save_game_as_request ();
         } else {
             var path = write_game (current_game_path, false);
+
             if (path != null && path != "") {
                 current_game_path = path;
                 notify_saved (path);
@@ -622,6 +623,7 @@ public class Controller : GLib.Object {
         if (path != null) {
             current_game_path = path;
             notify_saved (path);
+            is_readonly = false;
         }
     }
 
