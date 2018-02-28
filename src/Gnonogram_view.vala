@@ -189,12 +189,15 @@ public class View : Gtk.ApplicationWindow {
         var application = Gnonograms.get_app ();
         application.set_accels_for_action ("view.undo", {"<Ctrl>Z"});
         application.set_accels_for_action ("view.redo", {"<Ctrl><Shift>Z"});
-        application.set_accels_for_action ("view.move_cursor::UP", {"Up"});
-        application.set_accels_for_action ("view.move_cursor::DOWN", {"Down"});
-        application.set_accels_for_action ("view.move_cursor::LEFT", {"Left"});
-        application.set_accels_for_action ("view.move_cursor::RIGHT", {"Right"});
+        application.set_accels_for_action ("view.move-cursor((-1, 0))", {"Up"});
+        application.set_accels_for_action ("view.move-cursor((1, 0))", {"Down"});
+        application.set_accels_for_action ("view.move-cursor((0, -1))", {"Left"});
+        application.set_accels_for_action ("view.move-cursor((0, 1))", {"Right"});
         application.set_accels_for_action ("view.zoom_in", {"<Ctrl>plus", "<Ctrl>equal", "<Ctrl>KP_Add"});
         application.set_accels_for_action ("view.zoom_out", {"<Ctrl>minus", "<Ctrl>KP_Subtract"});
+        application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.SETTING), {"<Ctrl>1"});
+        application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.SOLVING), {"<Ctrl>2"});
+        application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.GENERATING), {"<Ctrl>3"});
 
         resizable = false;
         drawing_with_state = CellState.UNDEFINED;
@@ -511,7 +514,8 @@ public class View : Gtk.ApplicationWindow {
         {"redo", action_redo},
         {"zoom_in", action_zoom_in},
         {"zoom_out", action_zoom_out},
-        {"move_cursor", action_move_cursor, "s"}
+        {"move-cursor", action_move_cursor, "(ii)"},
+        {"set-mode", action_set_mode, "u"}
     };
 
 
@@ -793,14 +797,6 @@ public class View : Gtk.ApplicationWindow {
                 handle_pen_keys (name);
                 break;
 
-            case "1":
-            case "2":
-                if (only_control_pressed) {
-                    game_state = name == "1" ? GameState.SETTING : GameState.SOLVING;
-                }
-
-                break;
-
             case "R":
                 if (only_control_pressed) {
                     random_game_request ();
@@ -889,24 +885,27 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private void action_undo () {
-        previous_move_request ();
-    }
-
-    private void action_redo () {
-        next_move_request ();
-    }
-
-    private void action_move_cursor (SimpleAction action, Variant? param) {
-        cell_grid.move_cursor_relative (directions.get (param.get_string ()));
-    }
-
     private void on_auto_solve_button_pressed () {
         solve_this_request ();
     }
 
     private void on_restart_button_pressed () {
         restart_request ();
+    }
+
+    private void action_move_cursor (SimpleAction action, Variant? param) {
+        int dr, dc;
+        param.get_child (0, "i", out dr);
+        param.get_child (1, "i", out dc);
+        cell_grid.move_cursor_relative (dr, dc);
+    }
+
+    private void action_undo () {
+        previous_move_request ();
+    }
+
+    private void action_redo () {
+        next_move_request ();
     }
 
     private void action_zoom_out () {
@@ -920,6 +919,10 @@ public class View : Gtk.ApplicationWindow {
 
     private void action_zoom_in () {
         fontheight += 1.0;
+    }
+
+    private void action_set_mode (SimpleAction action, Variant? param) {
+        game_state = (GameState)(param.get_uint32 ());
     }
 }
 }

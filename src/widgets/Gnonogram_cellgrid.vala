@@ -137,13 +137,13 @@ public class CellGrid : Gtk.DrawingArea {
     }
 
     /* The relative coords are given as a point */
-    public void move_cursor_relative (Gdk.Point? point) {
-        if (current_cell == NULL_CELL || point == null) {
+    public void move_cursor_relative (int delta_r, int delta_c) {
+        if (current_cell == NULL_CELL) {
             return;
         }
 
-        Cell target = {current_cell.row + point.y,
-                       current_cell.col + point.x,
+        Cell target = {current_cell.row + delta_r,
+                       current_cell.col + delta_c,
                        CellState.UNDEFINED
                       };
 
