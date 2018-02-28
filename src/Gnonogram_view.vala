@@ -204,6 +204,7 @@ public class View : Gtk.ApplicationWindow {
         application.set_accels_for_action ("view.paint-cell(uint32 %u)".printf (CellState.EMPTY), {"E"});
         application.set_accels_for_action ("view.paint-cell(uint32 %u)".printf (CellState.UNKNOWN), {"X"});
         application.set_accels_for_action ("view.check-errors", {"F7"});
+        application.set_accels_for_action ("view.restart", {"F5", "<Ctrl>R"});
 
         resizable = false;
         drawing_with_state = CellState.UNDEFINED;
@@ -338,7 +339,7 @@ public class View : Gtk.ApplicationWindow {
 
         key_release_event.connect (stop_painting);
 
-        restart_button.clicked.connect (on_restart_button_pressed);
+
         auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
 
         /* Set actions */
@@ -348,6 +349,7 @@ public class View : Gtk.ApplicationWindow {
         save_game_button.set_action_name ("view.save");
         save_game_as_button.set_action_name ("view.save-as");
         check_correct_button.set_action_name ("view.check-errors");
+        restart_button.set_action_name ("view.restart");
 
         /* Monitor certain bound properties */
         notify["game-state"].connect (() => {
@@ -528,7 +530,8 @@ public class View : Gtk.ApplicationWindow {
         {"save", action_save},
         {"save-as", action_save_as},
         {"paint-cell", action_paint_cell, "u"},
-        {"check-errors", action_check_errors}
+        {"check-errors", action_check_errors},
+        {"restart", action_restart}
     };
 
 
@@ -778,7 +781,7 @@ public class View : Gtk.ApplicationWindow {
         solve_this_request ();
     }
 
-    private void on_restart_button_pressed () {
+    private void action_restart () {
         restart_request ();
     }
 
