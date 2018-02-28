@@ -201,6 +201,9 @@ public class View : Gtk.ApplicationWindow {
         application.set_accels_for_action ("view.open", {"<Ctrl>O"});
         application.set_accels_for_action ("view.save", {"<Ctrl>S"});
         application.set_accels_for_action ("view.save-as", {"<Ctrl><Shift>S"});
+        application.set_accels_for_action ("view.paint-cell(uint32 %u)".printf (CellState.FILLED), {"F"});
+        application.set_accels_for_action ("view.paint-cell(uint32 %u)".printf (CellState.EMPTY), {"E"});
+        application.set_accels_for_action ("view.paint-cell(uint32 %u)".printf (CellState.UNKNOWN), {"X"});
 
         resizable = false;
         drawing_with_state = CellState.UNDEFINED;
@@ -331,7 +334,6 @@ public class View : Gtk.ApplicationWindow {
         add (overlay);
 
         /* Connect signal handlers */
-        key_press_event.connect (on_key_press_event);
         key_release_event.connect (on_key_release_event);
 
         check_correct_button.clicked.connect (on_check_button_pressed);
@@ -521,7 +523,8 @@ public class View : Gtk.ApplicationWindow {
         {"set-mode", action_set_mode, "u"},
         {"open", action_open},
         {"save", action_save},
-        {"save-as", action_save_as}
+        {"save-as", action_save_as},
+        {"paint-cell", action_paint_cell, "u"}
     };
 
 
@@ -691,34 +694,6 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private void handle_pen_keys (string keyname) {
-        if (mods) {
-            return;
-        }
-
-        switch (keyname) {
-            case "F":
-                drawing_with_state = CellState.FILLED;
-                break;
-
-            case "E":
-                drawing_with_state = CellState.EMPTY;
-                break;
-
-            case "X":
-                if (is_solving) {
-                    drawing_with_state = CellState.UNKNOWN;
-                    break;
-                } else {
-                    return;
-                }
-
-            default:
-                    return;
-        }
-
-        make_move_at_cell ();
-    }
 
     private uint progress_timeout_id = 0;
     private void schedule_show_progress (Cancellable cancellable) {
@@ -785,28 +760,6 @@ public class View : Gtk.ApplicationWindow {
         }
 
         return false;
-    }
-
-    private bool on_key_press_event (Gdk.EventKey event) {
-        /* TODO (if necessary) ignore key autorepeat */
-        if (event.is_modifier == 1) {
-            return true;
-        }
-
-        set_mods (event.state);
-        var name = (Gdk.keyval_name (event.keyval)).up();
-
-        switch (name) {
-            case "F":
-            case "E":
-            case "X":
-                handle_pen_keys (name);
-                break;
-
-            default:
-                return false;
-        }
-        return true;
     }
 
     private bool on_key_release_event (Gdk.EventKey event) {
@@ -900,6 +853,16 @@ public class View : Gtk.ApplicationWindow {
 
     private void action_set_mode (SimpleAction action, Variant? param) {
         game_state = (GameState)(param.get_uint32 ());
+    }
+
+    private void action_paint_cell (SimpleAction action, Variant? param) {
+        var cs = (CellState)(param.get_uint32 ());
+        if (cs == CellState.UNKNOWN && !is_solving) {
+            return;
+        }
+
+        drawing_with_state = cs;
+        make_move_at_cell ();
     }
 }
 }
