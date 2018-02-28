@@ -49,8 +49,7 @@ public class Controller : GLib.Object {
         view.moved.connect (on_moved);
         view.next_move_request.connect (on_next_move_request);
         view.previous_move_request.connect (on_previous_move_request);
-        view.check_errors_request.connect (on_count_errors_request);
-        view.rewind_request.connect (on_rewind_request);
+        view.rewind_request.connect (rewind_until_correct);
         view.delete_event.connect (on_view_deleted);
         view.save_game_request.connect (on_save_game_request);
         view.save_game_as_request.connect (on_save_game_as_request);
@@ -514,8 +513,10 @@ public class Controller : GLib.Object {
         }
     }
 
-    private void rewind_until_correct () {
-        while (on_previous_move_request () && model.count_errors () > 0) {
+    private uint rewind_until_correct () {
+        var errors = model.count_errors ();
+
+        while (model.count_errors () > 0 && on_previous_move_request ()) {
             continue;
         }
 
@@ -525,6 +526,8 @@ public class Controller : GLib.Object {
             model.blank_working (); // have to restart solving
             clear_history (); // just in case - should not be necessary.
         }
+
+        return errors;
     }
 
     private void make_move (Move? mv) {
@@ -562,11 +565,6 @@ public class Controller : GLib.Object {
     }
 
 /*** Signal Handlers ***/
-
-    private uint on_count_errors_request () {
-        return model.count_errors ();
-    }
-
     private void on_moved (Cell cell) {
         var prev_state = model.get_data_for_cell (cell);
         model.set_data_from_cell (cell);
@@ -592,10 +590,6 @@ public class Controller : GLib.Object {
         } else {
             return false;
         }
-    }
-
-    private void on_rewind_request () {
-        rewind_until_correct ();
     }
 
     private bool on_view_deleted () {

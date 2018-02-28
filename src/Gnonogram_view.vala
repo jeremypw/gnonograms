@@ -26,8 +26,7 @@ public class View : Gtk.ApplicationWindow {
 
 /**PUBLIC**/
     public signal void random_game_request ();
-    public signal uint check_errors_request ();
-    public signal void rewind_request ();
+    public signal uint rewind_request ();
     public signal bool next_move_request ();
     public signal bool previous_move_request ();
     public signal void save_game_request ();
@@ -204,6 +203,7 @@ public class View : Gtk.ApplicationWindow {
         application.set_accels_for_action ("view.paint-cell(uint32 %u)".printf (CellState.FILLED), {"F"});
         application.set_accels_for_action ("view.paint-cell(uint32 %u)".printf (CellState.EMPTY), {"E"});
         application.set_accels_for_action ("view.paint-cell(uint32 %u)".printf (CellState.UNKNOWN), {"X"});
+        application.set_accels_for_action ("view.check-errors", {"F7"});
 
         resizable = false;
         drawing_with_state = CellState.UNDEFINED;
@@ -314,10 +314,7 @@ public class View : Gtk.ApplicationWindow {
         main_grid = new Gtk.Grid ();
 
         main_grid.attach (cell_grid, 1, 1, 1, 1);
-        cell_grid.cursor_moved.connect (on_grid_cursor_moved);
-        cell_grid.leave_notify_event.connect (on_grid_leave);
-        cell_grid.button_press_event.connect (on_grid_button_press);
-        cell_grid.button_release_event.connect (on_grid_button_release);
+
 
         main_grid.row_spacing = 6;
         main_grid.column_spacing = 6;
@@ -334,19 +331,25 @@ public class View : Gtk.ApplicationWindow {
         add (overlay);
 
         /* Connect signal handlers */
-        key_release_event.connect (on_key_release_event);
+        cell_grid.cursor_moved.connect (on_grid_cursor_moved);
+        cell_grid.leave_notify_event.connect (on_grid_leave);
+        cell_grid.button_press_event.connect (on_grid_button_press);
+        cell_grid.button_release_event.connect (stop_painting);
 
-        check_correct_button.clicked.connect (on_check_button_pressed);
+        key_release_event.connect (stop_painting);
 
+        restart_button.clicked.connect (on_restart_button_pressed);
+        auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
+
+        /* Set actions */
         undo_button.set_action_name ("view.undo");
         redo_button.set_action_name ("view.redo");
         load_game_button.set_action_name ("view.open");
         save_game_button.set_action_name ("view.save");
         save_game_as_button.set_action_name ("view.save-as");
+        check_correct_button.set_action_name ("view.check-errors");
 
-        restart_button.clicked.connect (on_restart_button_pressed);
-        auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
-
+        /* Monitor certain bound properties */
         notify["game-state"].connect (() => {
             cell_grid.game_state = game_state;
             update_header_bar ();
@@ -524,7 +527,8 @@ public class View : Gtk.ApplicationWindow {
         {"open", action_open},
         {"save", action_save},
         {"save-as", action_save_as},
-        {"paint-cell", action_paint_cell, "u"}
+        {"paint-cell", action_paint_cell, "u"},
+        {"check-errors", action_check_errors}
     };
 
 
@@ -731,9 +735,9 @@ public class View : Gtk.ApplicationWindow {
         return true;
     }
 
-    private bool on_grid_button_release () {
+    private bool stop_painting () {
         drawing_with_state = CellState.UNDEFINED;
-        return true;
+        return false;
     }
 
     /** With Control pressed, zoom using the fontsize.  Else, if button is down (drawing)
@@ -762,45 +766,12 @@ public class View : Gtk.ApplicationWindow {
         return false;
     }
 
-    private bool on_key_release_event (Gdk.EventKey event) {
-        var name = (Gdk.keyval_name (event.keyval)).up();
-
-        switch (name) {
-            case "F":
-            case "E":
-            case "X":
-                drawing_with_state = CellState.UNDEFINED;
-                break;
-
-            default:
-                return false;
-        }
-
-        return true;
-    }
-
     private void set_mods (uint state) {
         var mods = (state & Gtk.accelerator_get_default_mod_mask ());
         control_pressed = ((mods & Gdk.ModifierType.CONTROL_MASK) != 0);
         other_mod_pressed = (((mods & ~Gdk.ModifierType.SHIFT_MASK) & ~Gdk.ModifierType.CONTROL_MASK) != 0);
         shift_pressed = ((mods & Gdk.ModifierType.SHIFT_MASK) != 0);
         only_control_pressed = control_pressed && !other_mod_pressed; /* Shift can be pressed */
-    }
-
-    private void on_check_button_pressed () {
-        var errors = check_errors_request ();
-
-        if (errors > 0) {
-            send_notification (
-                (ngettext (_("%u error found"), _("%u errors found"), errors)).printf (errors)
-            );
-        } else {
-            send_notification (_("No errors"));
-        }
-
-        if (errors > 0) {
-            rewind_request ();
-        }
     }
 
     private void on_auto_solve_button_pressed () {
@@ -849,6 +820,18 @@ public class View : Gtk.ApplicationWindow {
 
     private void action_zoom_in () {
         fontheight += 1.0;
+    }
+
+    private void action_check_errors () {
+        var errors = rewind_request ();
+
+        if (errors > 0) {
+            send_notification (
+                (ngettext (_("%u error found"), _("%u errors found"), errors)).printf (errors)
+            );
+        } else {
+            send_notification (_("No errors"));
+        }
     }
 
     private void action_set_mode (SimpleAction action, Variant? param) {
