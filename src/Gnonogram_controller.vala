@@ -247,8 +247,7 @@ public class Controller : GLib.Object {
                     }
                 }
 
-                view.hide_progress ();
-                view.queue_draw ();
+                view.end_working ();
                 generator = null;
 
                 return false;

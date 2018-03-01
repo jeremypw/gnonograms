@@ -176,13 +176,7 @@ public class View : Gtk.ApplicationWindow {
     }
 
     construct {
-        directions = new Gee.HashMap<string, Gdk.Point?> ();
-        directions["UP"] = {0, -1};
-        directions["DOWN"] = {0, 1};
-        directions["LEFT"] = {-1, 0};
-        directions["RIGHT"] = {1, 0};
-
-        view_actions = new GLib.SimpleActionGroup ();
+        var view_actions = new GLib.SimpleActionGroup ();
         view_actions.add_action_entries (view_action_entries, this);
         insert_action_group ("view", view_actions);
         var application = Gnonograms.get_app ();
@@ -196,15 +190,16 @@ public class View : Gtk.ApplicationWindow {
         application.set_accels_for_action ("view.zoom_out", {"<Ctrl>minus", "<Ctrl>KP_Subtract"});
         application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.SETTING), {"<Ctrl>1"});
         application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.SOLVING), {"<Ctrl>2"});
-        application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.GENERATING), {"<Ctrl>3", "<Ctrl>R"});
+        application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.GENERATING), {"<Ctrl>3", "<Ctrl>N"});
         application.set_accels_for_action ("view.open", {"<Ctrl>O"});
         application.set_accels_for_action ("view.save", {"<Ctrl>S"});
         application.set_accels_for_action ("view.save-as", {"<Ctrl><Shift>S"});
         application.set_accels_for_action ("view.paint-cell(uint32 %u)".printf (CellState.FILLED), {"F"});
         application.set_accels_for_action ("view.paint-cell(uint32 %u)".printf (CellState.EMPTY), {"E"});
         application.set_accels_for_action ("view.paint-cell(uint32 %u)".printf (CellState.UNKNOWN), {"X"});
-        application.set_accels_for_action ("view.check-errors", {"F7"});
+        application.set_accels_for_action ("view.check-errors", {"F7", "less", "comma"});
         application.set_accels_for_action ("view.restart", {"F5", "<Ctrl>R"});
+        application.set_accels_for_action ("view.solve", {"F9", "<Ctrl>H"});
 
         resizable = false;
         drawing_with_state = CellState.UNDEFINED;
@@ -340,7 +335,6 @@ public class View : Gtk.ApplicationWindow {
         key_release_event.connect (stop_painting);
 
 
-        auto_solve_button.clicked.connect (on_auto_solve_button_pressed);
 
         /* Set actions */
         undo_button.set_action_name ("view.undo");
@@ -350,6 +344,7 @@ public class View : Gtk.ApplicationWindow {
         save_game_as_button.set_action_name ("view.save-as");
         check_correct_button.set_action_name ("view.check-errors");
         restart_button.set_action_name ("view.restart");
+        auto_solve_button.set_action_name ("view.solve");
 
         /* Monitor certain bound properties */
         notify["game-state"].connect (() => {
@@ -446,13 +441,6 @@ public class View : Gtk.ApplicationWindow {
     }
 
     public void end_working () {
-        hide_progress ();
-        update_labels_complete ();
-        update_header_bar ();
-        queue_draw ();
-    }
-
-    public void hide_progress () {
         cell_grid.frozen = false; // Show model updates again
 
         if (progress_timeout_id > 0) {
@@ -461,6 +449,10 @@ public class View : Gtk.ApplicationWindow {
         } else {
             header_bar.set_custom_title (null);
         }
+
+        update_labels_complete ();
+        update_header_bar ();
+        queue_draw ();
     }
 
     /**PRIVATE**/
@@ -470,8 +462,6 @@ public class View : Gtk.ApplicationWindow {
     private const string DOWN = "D";
     private const string LEFT = "L";
     private const string RIGHT = "R";
-
-    private Gee.HashMap<string, Gdk.Point?> directions;
 
     private string BRAND_STYLESHEET = """
         @define-color textColorPrimary %s;
@@ -531,12 +521,9 @@ public class View : Gtk.ApplicationWindow {
         {"save-as", action_save_as},
         {"paint-cell", action_paint_cell, "u"},
         {"check-errors", action_check_errors},
-        {"restart", action_restart}
+        {"restart", action_restart},
+        {"solve", action_solve}
     };
-
-
-    private GLib.SimpleActionGroup view_actions;
-
 
     private Gnonograms.LabelBox row_clue_box;
     private Gnonograms.LabelBox column_clue_box;
@@ -556,11 +543,6 @@ public class View : Gtk.ApplicationWindow {
     private Gtk.Button check_correct_button;
     private Gtk.Button auto_solve_button;
     private Gtk.Button restart_button;
-
-    private bool control_pressed = false;
-    private bool other_mod_pressed = false;
-    private bool shift_pressed = false;
-    private bool only_control_pressed = false;
     /* ----------------------------------------- */
 
     private CellState drawing_with_state;
@@ -577,12 +559,6 @@ public class View : Gtk.ApplicationWindow {
         }
         set {
             cell_grid.current_cell = value;
-        }
-    }
-
-    private bool mods {
-        get {
-            return control_pressed || other_mod_pressed;
         }
     }
 
@@ -701,7 +677,6 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-
     private uint progress_timeout_id = 0;
     private void schedule_show_progress (Cancellable cancellable) {
         progress_timeout_id = Timeout.add_full (Priority.HIGH_IDLE, PROGRESS_DELAY_MSEC, () => {
@@ -743,13 +718,9 @@ public class View : Gtk.ApplicationWindow {
         return false;
     }
 
-    /** With Control pressed, zoom using the fontsize.  Else, if button is down (drawing)
-      * draw a straight line in the scroll direction.
-    **/
+    /** With Control pressed, zoom using the fontsize. **/
     private bool on_grid_scroll_event (Gdk.EventScroll event) {
-        set_mods (event.state);
-
-        if (control_pressed) {
+        if (Gdk.ModifierType.CONTROL_MASK in event.state) {
             switch (event.direction) {
                 case Gdk.ScrollDirection.UP:
                     action_zoom_out ();
@@ -769,27 +740,12 @@ public class View : Gtk.ApplicationWindow {
         return false;
     }
 
-    private void set_mods (uint state) {
-        var mods = (state & Gtk.accelerator_get_default_mod_mask ());
-        control_pressed = ((mods & Gdk.ModifierType.CONTROL_MASK) != 0);
-        other_mod_pressed = (((mods & ~Gdk.ModifierType.SHIFT_MASK) & ~Gdk.ModifierType.CONTROL_MASK) != 0);
-        shift_pressed = ((mods & Gdk.ModifierType.SHIFT_MASK) != 0);
-        only_control_pressed = control_pressed && !other_mod_pressed; /* Shift can be pressed */
-    }
-
-    private void on_auto_solve_button_pressed () {
-        solve_this_request ();
-    }
-
     private void action_restart () {
         restart_request ();
     }
 
-    private void action_move_cursor (SimpleAction action, Variant? param) {
-        int dr, dc;
-        param.get_child (0, "i", out dr);
-        param.get_child (1, "i", out dc);
-        cell_grid.move_cursor_relative (dr, dc);
+    private void action_solve () {
+        solve_this_request ();
     }
 
     private void action_undo () {
@@ -835,6 +791,14 @@ public class View : Gtk.ApplicationWindow {
         } else {
             send_notification (_("No errors"));
         }
+    }
+
+
+    private void action_move_cursor (SimpleAction action, Variant? param) {
+        int dr, dc;
+        param.get_child (0, "i", out dr);
+        param.get_child (1, "i", out dc);
+        cell_grid.move_cursor_relative (dr, dc);
     }
 
     private void action_set_mode (SimpleAction action, Variant? param) {
