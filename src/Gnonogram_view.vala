@@ -458,10 +458,6 @@ public class View : Gtk.ApplicationWindow {
     /**PRIVATE**/
     private const uint NOTIFICATION_TIMEOUT_SEC = 10;
     private const uint PROGRESS_DELAY_MSEC = 500;
-    private const string UP = "U";
-    private const string DOWN = "D";
-    private const string LEFT = "L";
-    private const string RIGHT = "R";
 
     private string BRAND_STYLESHEET = """
         @define-color textColorPrimary %s;
