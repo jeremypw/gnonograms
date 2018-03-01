@@ -98,29 +98,9 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private bool _can_go_back;
-    public bool can_go_back {
-        get {
-            return _can_go_back;
-        }
+    public bool can_go_back {get; set;}
+    public bool can_go_forward {get; set;}
 
-        set {
-            check_correct_button.sensitive = value && is_solving;
-            undo_button.sensitive = value;
-            restart_destructive |= value; /* May be destructive even if no history (e.g. after automatic solve) */
-            _can_go_back = value;
-        }
-    }
-    private bool _can_go_forward;
-    public bool can_go_forward {
-        get {
-            return _can_go_forward;
-        }
-
-        set {
-            redo_button.sensitive = value;
-        }
-    }
     private bool _restart_destructive;
     public bool restart_destructive {
         private get {
@@ -367,6 +347,16 @@ public class View : Gtk.ApplicationWindow {
 
         notify["game-name"].connect (() => {
             update_header_bar ();
+        });
+
+        notify["can-go-back"].connect (() => {
+            check_correct_button.sensitive = can_go_back && is_solving;
+            undo_button.sensitive = can_go_back;
+            restart_destructive |= can_go_back; /* May be destructive even if no history (e.g. after automatic solve) */
+        });
+
+        notify["can-go-forward"].connect (() => {
+            redo_button.sensitive = can_go_forward;
         });
     }
 

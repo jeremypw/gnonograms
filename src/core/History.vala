@@ -24,24 +24,23 @@ namespace Gnonograms {
 /* Move class records the current cell coordinates, its state and previous state */
 public class History : GLib.Object {
 
-    private Gee.Deque<Move> back_stack;
-    private Gee.Deque<Move> forward_stack;
+    private HistoryStack back_stack;
+    private HistoryStack forward_stack;
 
-    public bool can_go_back {
-        get {
-            return back_stack.size > 0;
-        }
-    }
-
-    public bool can_go_forward {
-        get {
-            return forward_stack.size > 0;
-        }
-    }
+    public bool can_go_back {get; private set;}
+    public bool can_go_forward {get; private set;}
 
     construct {
-        back_stack = new Gee.LinkedList<Move> ();
-        forward_stack = new Gee.LinkedList<Move> ();
+        back_stack = new HistoryStack ();
+        forward_stack = new HistoryStack ();
+
+        back_stack.notify["empty"].connect (() => {
+            can_go_back = !back_stack.empty;
+        });
+
+        forward_stack.notify["empty"].connect (() => {
+            can_go_forward = !forward_stack.empty;
+        });
     }
 
     public void clear_all () {
@@ -53,7 +52,7 @@ public class History : GLib.Object {
         var new_move = new Gnonograms.Move (cell, previous_state);
 
         if (new_move.cell.state != CellState.UNDEFINED) {
-            Move? current_move = back_stack.peek_head ();
+            Move? current_move = back_stack.peek_move ();
             if (current_move != null && current_move.equal (new_move)) {
                 return;
             }
@@ -61,33 +60,33 @@ public class History : GLib.Object {
             forward_stack.clear ();
         }
 
-        back_stack.offer_head (new_move);
+        back_stack.push_move (new_move);
     }
 
     public Move pop_next_move () {
-        Move mv = forward_stack.poll_head ();
-        back_stack.offer_head (mv);
+        Move mv = forward_stack.pop_move ();
+        back_stack.push_move (mv);
 
         return mv;
     }
 
     public Move pop_previous_move () {
-        Move mv = back_stack.poll_head ();
+        Move mv = back_stack.pop_move ();
         /* Record copy otherwise it will be altered by next line*/
-        forward_stack.offer_head (mv.clone ());
+        forward_stack.push_move (mv.clone ());
         mv.cell.state = mv.previous_state;
 
         return mv;
     }
 
     public Move? get_current_move () {
-        return back_stack.peek_head ();
+        return back_stack.peek_move ();
     }
 
     public string to_string () {
 
         var sb_back = new StringBuilder ("");
-        foreach (Move mv in back_stack) { /* iterates from head backwards */
+        foreach (Move mv in back_stack.get_moves ()) { /* iterates from head backwards */
             sb_back.prepend (mv.to_string () + ";");
         }
 
@@ -95,7 +94,7 @@ public class History : GLib.Object {
 
         var sb_forward = new StringBuilder ("");
 
-        foreach (Move mv in forward_stack) {
+        foreach (Move mv in forward_stack.get_moves ()) {
             sb_forward.prepend (mv.to_string () + ";");
         }
 
@@ -136,11 +135,44 @@ public class History : GLib.Object {
 
             if (move != null) {
                 if (back) {
-                    back_stack.offer_head (move);
+                    back_stack.push_move (move);
                 } else {
-                    forward_stack.offer_head (move);
+                    forward_stack.push_move (move);
                 }
             }
+        }
+    }
+
+    private class HistoryStack : Object {
+        private Gee.Deque<Move> stack;
+        public bool empty {get; private set;}
+
+        construct {
+            stack = new Gee.LinkedList<Move> ();
+        }
+
+        public void push_move (Move mv) {
+            stack.offer_head (mv);
+            empty = false;
+        }
+
+        public Move peek_move () {
+            return stack.peek_head ();
+        }
+
+        public Move pop_move () {
+            var mv = stack.poll_head ();
+            empty = stack.is_empty;
+            return mv;
+        }
+
+        public void clear () {
+            stack.clear ();
+            empty = true;
+        }
+
+        public Move[] get_moves () {
+            return stack.to_array ();
         }
     }
 }
