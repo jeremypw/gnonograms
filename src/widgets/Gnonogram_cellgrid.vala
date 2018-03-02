@@ -385,12 +385,10 @@ public class CellGrid : Gtk.DrawingArea {
 
         if (highlight) {
             /* Ensure highlight centred and slightly overlapping grid */
-            var offset = (cell_body_width - highlight_pattern.size) / 4;
-            highlight_pattern.move_to (x + offset, y + offset);
-            cr.rectangle (x, y, cell_body_width - offset, cell_body_width - offset);
+            highlight_pattern.move_to (x, y);
+            cr.rectangle (x, y, cell_body_width, cell_body_width);
             cr.set_source (highlight_pattern.pattern);
-            cr.set_operator (Cairo.Operator.OVER);
-            cr.fill ();
+            cr.paint ();
         }
     }
 
@@ -414,14 +412,20 @@ public class CellGrid : Gtk.DrawingArea {
         }
 
         public CellPattern.highlight (double wd, double ht) {
-            var r = (wd + ht) / 4.0 - 2.0;
+            var r = (wd + ht) / 4.0;
             size = 2 * r;
 
-            pattern = new Cairo.Pattern.radial (r, r, 0.0, r, r, r * 1.1);
-            pattern.add_color_stop_rgba (0.0, 1.0, 1.0, 1.0, 0.4);
-            pattern.add_color_stop_rgba (0.95, 1.0, 1.0, 1.0, 0.4);
-            pattern.add_color_stop_rgba (1.0, 0.0, 0.0, 0.0, 1.0);
+            Cairo.ImageSurface surface = new Cairo.ImageSurface (Cairo.Format.ARGB32, (int)size, (int)size);
+            Cairo.Context context = new Cairo.Context (surface);
+            context.set_source_rgb (0.0, 0.0, 0.0);
+            context.rectangle (0, 0, size, size);
+            context.fill ();
+            context.arc (r, r, r - 2.0, 0, 2 * Math.PI);
+            context.set_source_rgba (1.0, 1.0, 1.0, 0.5);
+            context.set_operator (Cairo.Operator.SOURCE);
+            context.fill ();
 
+            pattern = new Cairo.Pattern.for_surface (surface);
             pattern.set_matrix (matrix);
         }
 
