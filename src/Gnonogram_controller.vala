@@ -61,6 +61,8 @@ public class Controller : GLib.Object {
         view.restart_request.connect (on_restart_request);
 
         notify["game-state"].connect (() => {
+            history.clear_all ();
+
             if (game_state == GameState.GENERATING) {
                 on_new_random_request ();
             }
