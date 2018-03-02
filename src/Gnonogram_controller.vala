@@ -37,12 +37,15 @@ public class Controller : GLib.Object {
     construct {
         model = new Model ();
         view = new View (model);
+        history = new Gnonograms.History ();
 
         bind_property ("dimensions", model, "dimensions");
         bind_property ("game-state", model, "game-state");
+        history.bind_property ("can-go-back", view, "can-go-back", BindingFlags.SYNC_CREATE | BindingFlags.DEFAULT);
+        history.bind_property ("can-go-forward", view, "can-go-forward", BindingFlags.SYNC_CREATE | BindingFlags.DEFAULT);
         /* Do not bind view properties until game restored */
 
-        history = new Gnonograms.History ();
+
 
         /* Connect signals. Must be done before restoring settings so that e.g.
          * dimensions of model are set. */
@@ -58,6 +61,8 @@ public class Controller : GLib.Object {
         view.restart_request.connect (on_restart_request);
 
         notify["game-state"].connect (() => {
+            history.clear_all ();
+
             if (game_state == GameState.GENERATING) {
                 on_new_random_request ();
             }
@@ -498,7 +503,6 @@ public class Controller : GLib.Object {
 
     private void record_move (Cell cell, CellState previous_state) {
         history.record_move (cell, previous_state);
-        view.can_go_back = history.can_go_back;
 
         /* Check if puzzle finished */
         if (is_solving && model.is_finished) {
@@ -519,8 +523,6 @@ public class Controller : GLib.Object {
             continue;
         }
 
-        view.can_go_forward = false;
-
         if (model.count_errors () > 0) { // Only happens for completed erroneous solution without history.
             model.blank_working (); // have to restart solving
             clear_history (); // just in case - should not be necessary.
@@ -537,14 +539,10 @@ public class Controller : GLib.Object {
         model.set_data_from_cell (mv.cell);
 
         view.make_move (mv);
-        view.can_go_back = history.can_go_back;
-        view.can_go_forward = history.can_go_forward;
     }
 
     private void clear_history () {
         history.clear_all ();
-        view.can_go_back = false;
-        view.can_go_forward = false;
     }
 
     /*** Solver related functions ***/
