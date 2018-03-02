@@ -508,8 +508,7 @@ public class View : Gtk.ApplicationWindow {
     private const GLib.ActionEntry [] view_action_entries = {
         {"undo", action_undo},
         {"redo", action_redo},
-        {"zoom_in", action_zoom_in},
-        {"zoom_out", action_zoom_out},
+        {"zoom", action_zoom, "i"},
         {"move-cursor", action_move_cursor, "(ii)"},
         {"set-mode", action_set_mode, "u"},
         {"open", action_open},
@@ -559,28 +558,21 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private double get_default_fontheight_from_dimensions () {
-        double max_h, max_w;
-        Gdk.Rectangle rect;
-
-        if (get_window () == null) {
-            return DEFAULT_FONT_HEIGHT;
+        Gdk.Rectangle monitor_area;
+        Gdk.Window? window = get_window ();
+        if (window == null) {
+            monitor_area = {1024, 768};
+        } else {
+            monitor_area  = Utils.get_monitor_area (screen, window);
         }
-
-#if HAVE_GDK_3_22
-        var display = Gdk.Display.get_default();
-        var monitor = display.get_monitor_at_window (get_window ());
-        monitor.get_geometry (out rect);
-#else
-        var monitor = screen.get_monitor_at_window (get_window ());
-        screen.get_monitor_geometry (monitor, out rect);
-#endif
         /* Window height excluding header is approx 1.4 * grid height
          * Window width approx 1.25 * grid width.
          * Cell dimensions approx 2.0 * font height
          * Make allowance for unusable monitor height - approx 10%;
          */
-        max_h = (double)(rect.height * 0.90) / 1.4 / (double)rows / 2.0;
-        max_w = (double)(rect.width) / 1.25 / (double)cols / 2.0;
+
+        var max_h = (double)(monitor_area.height * 0.90) / 1.4 / (double)rows / 2.0;
+        var max_w = (double)(monitor_area.width) / 1.25 / (double)cols / 2.0;
 
         return double.min (max_h, max_w);
     }
@@ -719,11 +711,11 @@ public class View : Gtk.ApplicationWindow {
         if (Gdk.ModifierType.CONTROL_MASK in event.state) {
             switch (event.direction) {
                 case Gdk.ScrollDirection.UP:
-                    action_zoom_out ();
+                    fontheight -= 1.0;
                     break;
 
                 case Gdk.ScrollDirection.DOWN:
-                    action_zoom_in ();
+                    fontheight += 1.0;
                     break;
 
                 default:
@@ -764,17 +756,8 @@ public class View : Gtk.ApplicationWindow {
         save_game_as_request ();
     }
 
-    private void action_zoom_out () {
-        int min, nat;
-        header_bar.get_preferred_width (out min, out nat);
-        /* Do not shrink below min header size plus allowance for progress widget */
-        if (main_grid.get_allocated_width () > min + 150) {
-            fontheight -= 1.0;
-        }
-    }
-
-    private void action_zoom_in () {
-        fontheight += 1.0;
+    private void action_zoom (SimpleAction action, Variant? param) {
+        fontheight += param.get_int32 ();
     }
 
     private void action_check_errors () {

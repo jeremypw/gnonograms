@@ -347,5 +347,20 @@ namespace Utils {
 
         return file_path;
     }
+
+    public Gdk.Rectangle get_monitor_area (Gdk.Screen screen, Gdk.Window window) {
+        Gdk.Rectangle rect;
+
+#if HAVE_GDK_3_22
+        var display = Gdk.Display.get_default();
+        var monitor = display.get_monitor_at_window (window);
+        monitor.get_geometry (out rect);
+#else
+        var monitor = screen.get_monitor_at_window (window);
+        screen.get_monitor_geometry (monitor, out rect);
+#endif
+
+        return rect;
+    }
 }
 }
