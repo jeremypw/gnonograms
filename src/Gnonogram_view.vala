@@ -311,10 +311,10 @@ public class View : Gtk.ApplicationWindow {
         cell_grid.button_press_event.connect (on_grid_button_press);
         cell_grid.button_release_event.connect (stop_painting);
 
+        key_release_event.connect (on_key_release_event);
+
         bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
         bind_property ("previous-cell", cell_grid, "previous-cell", BindingFlags.BIDIRECTIONAL);
-
-        key_release_event.connect (stop_painting);
 
         /* Set actions */
         undo_button.set_action_name ("view.undo");
@@ -362,6 +362,10 @@ public class View : Gtk.ApplicationWindow {
         notify["current-cell"].connect (() => {
             highlight_labels (previous_cell, false);
             highlight_labels (current_cell, true);
+
+            if (drawing_with_state != CellState.UNDEFINED) {
+                make_move_at_cell ();
+            }
         });
     }
 
@@ -536,6 +540,7 @@ public class View : Gtk.ApplicationWindow {
     /* ----------------------------------------- */
 
     private CellState drawing_with_state;
+    private uint drawing_with_key;
 
     private bool is_solving {
         get {
@@ -676,8 +681,17 @@ public class View : Gtk.ApplicationWindow {
         return true;
     }
 
+    private bool on_key_release_event (Gdk.EventKey event) {
+        if (event.keyval == drawing_with_key) {
+            stop_painting ();
+        }
+
+        return false;
+    }
+
     private bool stop_painting () {
         drawing_with_state = CellState.UNDEFINED;
+        drawing_with_key = 0;
         return false;
     }
 
@@ -781,6 +795,11 @@ public class View : Gtk.ApplicationWindow {
         }
 
         drawing_with_state = cs;
+        var current_event = Gtk.get_current_event ();
+        if (current_event.type == Gdk.EventType.KEY_PRESS) {
+            drawing_with_key = ((Gdk.EventKey)current_event).keyval;
+        }
+
         make_move_at_cell ();
     }
 }
