@@ -51,7 +51,9 @@ public class Controller : GLib.Object {
         view.restart_request.connect (on_restart_request);
 
         notify["game-state"].connect (() => {
-            history.clear_all ();
+            if (game_state != GameState.UNDEFINED) { /* Do not clear on save */
+                clear_history ();
+            }
 
             if (game_state == GameState.GENERATING) {
                 on_new_random_request ();
@@ -418,14 +420,13 @@ public class Controller : GLib.Object {
                 load_game_dir = reader.game_file.get_parent ().get_uri ();
             }
 
-            history.from_string (reader.moves);
-
             if (reader.state != GameState.UNDEFINED) {
                 game_state = reader.state;
             } else {
                 game_state = GameState.SOLVING;
             }
 
+            history.from_string (reader.moves);
             make_move (history.get_current_move ());
 
             if (update_load_dir) {
