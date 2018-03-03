@@ -23,6 +23,7 @@ namespace Gnonograms {
 
 /* Move class records the current cell coordinates, its state and previous state */
 public class Move {
+    public static Move null_move = new Move (NULL_CELL, CellState.UNDEFINED);
     public Cell cell;
     public CellState previous_state;
 
@@ -46,19 +47,23 @@ public class Move {
         return new Move (this.cell.clone (), this.previous_state);
     }
 
+    public bool is_null () {
+        return equal (Move.null_move);
+    }
+
     public string to_string () {
         return "%u,%u,%u,%u".printf (cell.row, cell.col, cell.state, previous_state);
     }
 
-    public static Move? from_string (string? s) {
+    public static Move from_string (string? s) {
         if (s == null) {
-            return null;
+            return Move.null_move;
         }
 
         var parts = s.split (",");
 
         if (parts == null || parts.length != 4) {
-            return null;
+            return Move.null_move;
         }
 
         var row = (uint)(int.parse (parts[0]));
@@ -71,7 +76,7 @@ public class Move {
             state == Gnonograms.CellState.UNDEFINED ||
             previous_state == Gnonograms.CellState.UNDEFINED) {
 
-            return null;
+            return Move.null_move;
         }
 
         Cell c = {row, col, state};

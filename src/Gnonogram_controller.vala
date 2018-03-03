@@ -39,7 +39,7 @@ public class Controller : GLib.Object {
         view = new View (model);
         history = new Gnonograms.History ();
 
-        view.moved.connect (on_moved);
+        view.changed_cell.connect (on_changed_cell);
         view.next_move_request.connect (on_next_move_request);
         view.previous_move_request.connect (on_previous_move_request);
         view.rewind_request.connect (rewind_until_correct);
@@ -51,7 +51,9 @@ public class Controller : GLib.Object {
         view.restart_request.connect (on_restart_request);
 
         notify["game-state"].connect (() => {
-            history.clear_all ();
+            if (game_state != GameState.UNDEFINED) {
+                clear_history ();
+            }
 
             if (game_state == GameState.GENERATING) {
                 on_new_random_request ();
@@ -288,7 +290,6 @@ public class Controller : GLib.Object {
                 warning ("Error deleting temporary game file %s - %s", temporary_game_path, e.message);
             } finally {
                 /* Save solution and current state */
-                history.to_string ();
                 write_game (temporary_game_path, true);
             }
         }
@@ -426,7 +427,9 @@ public class Controller : GLib.Object {
                 game_state = GameState.SOLVING;
             }
 
-            make_move (history.get_current_move ());
+            if (history.can_go_back) {
+                make_move (history.get_current_move ());
+            }
 
             if (update_load_dir) {
                 /* At this point, we can assume game_file exists and has parent */
@@ -501,21 +504,6 @@ public class Controller : GLib.Object {
         return true;
     }
 
-    private void record_move (Cell cell, CellState previous_state) {
-        history.record_move (cell, previous_state);
-
-        /* Check if puzzle finished */
-        if (is_solving && model.is_finished) {
-            if (model.count_errors () == 0) {
-                view.send_notification (_("Correct solution"));
-            } else if (view.model_matches_labels) {
-                view.send_notification (_("Alternative solution found"));
-            } else {
-                view.send_notification (_("There are errors"));
-            }
-        }
-    }
-
     private uint rewind_until_correct () {
         var errors = model.count_errors ();
 
@@ -531,13 +519,7 @@ public class Controller : GLib.Object {
         return errors;
     }
 
-    private void make_move (Move? mv) {
-        if (mv == null) {
-            return;
-        }
-
-        model.set_data_from_cell (mv.cell);
-
+    private void make_move (Move mv) {
         view.make_move (mv);
     }
 
@@ -562,12 +544,18 @@ public class Controller : GLib.Object {
     }
 
 /*** Signal Handlers ***/
-    private void on_moved (Cell cell) {
-        var prev_state = model.get_data_for_cell (cell);
-        model.set_data_from_cell (cell);
+    private void on_changed_cell (Cell cell, CellState previous_state) {
+        history.record_move (cell, previous_state);
 
-        if (prev_state != cell.state) {
-            record_move (cell, prev_state);
+        /* Check if puzzle finished */
+        if (is_solving && model.is_finished) {
+            if (model.count_errors () == 0) {
+                view.send_notification (_("Correct solution"));
+            } else if (view.model_matches_labels) {
+                view.send_notification (_("Alternative solution found"));
+            } else {
+                view.send_notification (_("There are errors"));
+            }
         }
     }
 
