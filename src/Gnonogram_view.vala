@@ -34,7 +34,7 @@ public class View : Gtk.ApplicationWindow {
     public signal void open_game_request ();
     public signal void solve_this_request ();
     public signal void restart_request ();
-    public signal void moved (Cell cell);
+    public signal void changed_cell (Cell cell, CellState previous_state);
 
     public Model model {private get; construct; }
     public Dimensions dimensions {get; set;}
@@ -307,14 +307,14 @@ public class View : Gtk.ApplicationWindow {
         add (overlay);
 
         /* Connect signal handlers */
-        cell_grid.cursor_moved.connect (on_grid_cursor_moved);
         cell_grid.leave_notify_event.connect (on_grid_leave);
         cell_grid.button_press_event.connect (on_grid_button_press);
         cell_grid.button_release_event.connect (stop_painting);
 
-        key_release_event.connect (stop_painting);
+        key_release_event.connect (on_key_release_event);
 
-
+        bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
+        bind_property ("previous-cell", cell_grid, "previous-cell", BindingFlags.BIDIRECTIONAL);
 
         /* Set actions */
         undo_button.set_action_name ("view.undo");
@@ -357,6 +357,15 @@ public class View : Gtk.ApplicationWindow {
 
         notify["can-go-forward"].connect (() => {
             redo_button.sensitive = can_go_forward;
+        });
+
+        notify["current-cell"].connect (() => {
+            highlight_labels (previous_cell, false);
+            highlight_labels (current_cell, true);
+
+            if (drawing_with_state != CellState.UNDEFINED) {
+                make_move_at_cell ();
+            }
         });
     }
 
@@ -410,9 +419,9 @@ public class View : Gtk.ApplicationWindow {
     }
 
     public void make_move (Move m) {
-        move_cursor_to (m.cell);
-        mark_cell (m.cell);
-        queue_draw ();
+        if (!m.is_null ()) {
+            update_current_and_model (m.cell.state, m.cell);
+        }
     }
 
     public void send_notification (string text) {
@@ -531,6 +540,7 @@ public class View : Gtk.ApplicationWindow {
     /* ----------------------------------------- */
 
     private CellState drawing_with_state;
+    private uint drawing_with_key;
 
     private bool is_solving {
         get {
@@ -538,14 +548,8 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private unowned Cell current_cell {
-        get {
-            return cell_grid.current_cell;
-        }
-        set {
-            cell_grid.current_cell = value;
-        }
-    }
+    public Cell current_cell {get; set;}
+    public Cell previous_cell {get; set;}
 
     private double get_default_fontheight_from_dimensions () {
         var monitor_area = Gdk.Rectangle () {width = 1024, height = 768};
@@ -603,24 +607,6 @@ public class View : Gtk.ApplicationWindow {
         auto_solve_button.sensitive = sensitive;
     }
 
-    private void update_solution_labels_for_cell (Cell cell) {
-        if (cell == NULL_CELL || cell.state == CellState.UNDEFINED) {
-            return;
-        }
-
-        row_clue_box.update_label_text (cell.row, model.get_label_text_from_solution (cell.row, false));
-        column_clue_box.update_label_text (cell.col, model.get_label_text_from_solution (cell.col, true));
-    }
-
-    private void update_labels_complete_for_cell (Cell cell) {
-        if (cell == NULL_CELL || cell.state == CellState.UNDEFINED) {
-            return;
-        }
-
-        row_clue_box.update_label_complete (cell.row, model.get_complete (cell.row, false));
-        column_clue_box.update_label_complete (cell.col, model.get_complete (cell.col, true));
-    }
-
     private void highlight_labels (Cell c, bool is_highlight) {
         /* If c is NULL_CELL then will unhighlight all labels */
         row_clue_box.highlight (c.row, is_highlight);
@@ -632,27 +618,38 @@ public class View : Gtk.ApplicationWindow {
             return;
         }
 
-        if (state != CellState.UNDEFINED) {
-            Cell cell = target.clone ();
-            cell.state = state;
-            moved (cell);
-            mark_cell (cell);
-            cell_grid.highlight_cell (cell, true);
+        var prev_state = model.get_data_for_cell (target);
+        var cell = update_current_and_model (state, target);
+
+        if (prev_state != state) {
+            changed_cell (cell, prev_state);
         }
     }
 
-    private void move_cursor_to (Cell to, Cell from = current_cell) {
-        highlight_labels  (from, false);
-        highlight_labels (to, true);
-        current_cell = to;
-    }
+    private Cell update_current_and_model (CellState state, Cell target) {
+        Cell cell = target.clone ();
+        cell.state = state;
 
-    private void mark_cell (Cell cell) {
-        if (!is_solving ) {
-            update_solution_labels_for_cell (cell);
+        model.set_data_from_cell (cell);
+        update_current_cell (cell);
+
+        var row = current_cell.row;
+        var col = current_cell.col;
+
+        if (is_solving) {
+            row_clue_box.update_label_complete (row, model.get_complete (row, false));
+            column_clue_box.update_label_complete (col, model.get_complete (col, true));
         } else {
-            update_labels_complete_for_cell (cell);
+            row_clue_box.update_label_text (row, model.get_label_text_from_solution (row, false));
+            column_clue_box.update_label_text (col, model.get_label_text_from_solution (col, true));
         }
+
+        return cell;
+    }
+
+    private void update_current_cell (Cell target) {
+        previous_cell = current_cell;
+        current_cell = target;
     }
 
     private uint progress_timeout_id = 0;
@@ -667,13 +664,6 @@ public class View : Gtk.ApplicationWindow {
     }
 
     /*** Signal handlers ***/
-    private void on_grid_cursor_moved (Cell from, Cell to) {
-        highlight_labels (from, false);
-        highlight_labels (to, true);
-        current_cell = to;
-        make_move_at_cell ();
-    }
-
     private bool on_grid_leave () {
         row_clue_box.unhighlight_all ();
         column_clue_box.unhighlight_all ();
@@ -691,8 +681,17 @@ public class View : Gtk.ApplicationWindow {
         return true;
     }
 
+    private bool on_key_release_event (Gdk.EventKey event) {
+        if (event.keyval == drawing_with_key) {
+            stop_painting ();
+        }
+
+        return false;
+    }
+
     private bool stop_painting () {
         drawing_with_state = CellState.UNDEFINED;
+        drawing_with_key = 0;
         return false;
     }
 
@@ -767,7 +766,22 @@ public class View : Gtk.ApplicationWindow {
         int dr, dc;
         param.get_child (0, "i", out dr);
         param.get_child (1, "i", out dc);
-        cell_grid.move_cursor_relative (dr, dc);
+
+    /* The relative coords are given as a point */
+        if (current_cell == NULL_CELL) {
+            return;
+        }
+
+        Cell target = {current_cell.row + dr,
+                       current_cell.col + dc,
+                       CellState.UNDEFINED
+                      };
+
+        if (target.row >= rows || target.col >= cols) {
+            return;
+        }
+
+        update_current_cell (target);
     }
 
     private void action_set_mode (SimpleAction action, Variant? param) {
@@ -781,6 +795,11 @@ public class View : Gtk.ApplicationWindow {
         }
 
         drawing_with_state = cs;
+        var current_event = Gtk.get_current_event ();
+        if (current_event.type == Gdk.EventType.KEY_PRESS) {
+            drawing_with_key = ((Gdk.EventKey)current_event).keyval;
+        }
+
         make_move_at_cell ();
     }
 }

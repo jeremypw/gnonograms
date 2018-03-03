@@ -24,7 +24,7 @@ public class CellGrid : Gtk.DrawingArea {
 
     public Model? model { get; set; }
 
-    public My2DCellArray? array {
+    private My2DCellArray? array {
         get {
             if (model != null) {
                 return model.display_data;
@@ -34,18 +34,9 @@ public class CellGrid : Gtk.DrawingArea {
         }
     } /* model display data */
 
-    public unowned Cell current_cell {
-        get {
-            return _current_cell;
-        }
 
-        set {
-            _current_cell.copy (value);
-        }
-    }
-
-    public double cell_width { get; private set; } /* Width of cell including frame */
-    public double cell_height { get; private set; } /* Height of cell including frame */
+    public Cell current_cell {get; set;}
+    public Cell previous_cell {get; set;}
 
     /* Could have more options for cell pattern - only plain implemented for elementaryos*/
     public CellPatternType cell_pattern_type {
@@ -114,6 +105,11 @@ public class CellGrid : Gtk.DrawingArea {
         draw.connect (on_draw_event);
         size_allocate.connect (on_size_allocate);
         leave_notify_event.connect (on_leave_notify);
+
+        notify["current-cell"].connect (() => {
+            highlight_cell (previous_cell, false);
+            highlight_cell (current_cell, true);
+        });
     }
 
     public void highlight_cell (Cell cell, bool highlight) {
@@ -136,24 +132,6 @@ public class CellGrid : Gtk.DrawingArea {
 #endif
     }
 
-    /* The relative coords are given as a point */
-    public void move_cursor_relative (int delta_r, int delta_c) {
-        if (current_cell == NULL_CELL) {
-            return;
-        }
-
-        Cell target = {current_cell.row + delta_r,
-                       current_cell.col + delta_c,
-                       CellState.UNDEFINED
-                      };
-
-        if (target.row >= rows || target.col >= cols) {
-            return;
-        }
-
-        move_cursor_to (target);
-    }
-
 /*************/
 /** PRIVATE **/
 /*************/
@@ -174,7 +152,6 @@ public class CellGrid : Gtk.DrawingArea {
     }
 
     /* Backing variable; do not assign directly */
-    private Cell _current_cell;
     private CellPatternType _cell_pattern_type;
     /*------------------------------------------*/
 
@@ -182,6 +159,8 @@ public class CellGrid : Gtk.DrawingArea {
     private double alloc_height; /* Height of drawing area less frame */
     private double cell_body_width; /* Width of cell excluding frame */
     private double cell_body_height; /* height of cell excluding frame */
+    private double cell_width; /* Width of cell including frame */
+    private double cell_height; /* Height of cell including frame */
 
     private Gdk.RGBA grid_color;
     private Gdk.RGBA fill_color;
@@ -242,25 +221,15 @@ public class CellGrid : Gtk.DrawingArea {
         uint c =  ((uint)(e.x / cell_width));
         /* Construct cell beneath pointer */
         Cell cell = {r, c, array.get_data_from_rc (r, c)};
-
-        move_cursor_to (cell);
+        update_current_cell (cell);
 
         return true;
     }
 
 /*** --------------------------------------------------- ***/
-
-    private void move_cursor_to (Cell target) {
-        if (target.row >= rows || target.col >= cols) {
-            target = NULL_CELL;
-        }
-
-        if (!target.equal (current_cell)) { /* only signal when cursor changes cell */
-            highlight_cell (current_cell, false);
-            highlight_cell (target, true);
-            cursor_moved (current_cell, target);
-            current_cell = target.clone ();
-        }
+    private void update_current_cell (Cell target) {
+        previous_cell = current_cell;
+        current_cell = target;
     }
 
     private void draw_grid (Cairo.Context cr) {

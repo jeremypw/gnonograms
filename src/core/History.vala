@@ -52,8 +52,9 @@ public class History : GLib.Object {
         var new_move = new Gnonograms.Move (cell, previous_state);
 
         if (new_move.cell.state != CellState.UNDEFINED) {
-            Move? current_move = back_stack.peek_move ();
-            if (current_move != null && current_move.equal (new_move)) {
+            Move last_move = back_stack.peek_move ();
+
+            if (last_move.equal (new_move)) {
                 return;
             }
 
@@ -84,27 +85,12 @@ public class History : GLib.Object {
     }
 
     public string to_string () {
-
-        var sb_back = new StringBuilder ("");
-        foreach (Move mv in back_stack.get_moves ()) { /* iterates from head backwards */
-            sb_back.prepend (mv.to_string () + ";");
-        }
-
-        sb_back.append ("\n");
-
-        var sb_forward = new StringBuilder ("");
-
-        foreach (Move mv in forward_stack.get_moves ()) {
-            sb_forward.prepend (mv.to_string () + ";");
-        }
-
-        sb_forward.append ("\n");
-
-        return sb_back.str + sb_forward.str;
+        return back_stack.to_string () + forward_stack.to_string ();
     }
 
     public void from_string (string? s) {
         clear_all();
+
         if (s == null) {
             return;
         }
@@ -152,17 +138,29 @@ public class History : GLib.Object {
         }
 
         public void push_move (Move mv) {
-            stack.offer_head (mv);
-            empty = false;
+            if (!mv.is_null ()) {
+                stack.offer_head (mv);
+                empty = false;
+            }
         }
 
         public Move peek_move () {
-            return stack.peek_head ();
+            if (empty) {
+                return Move.null_move;
+            } else {
+                return stack.peek_head ();
+            }
         }
 
         public Move pop_move () {
-            var mv = stack.poll_head ();
+            Move mv = Move.null_move;
+
+            if (!empty) {
+                mv = stack.poll_head ();
+            }
+
             empty = stack.is_empty;
+
             return mv;
         }
 
@@ -171,8 +169,15 @@ public class History : GLib.Object {
             empty = true;
         }
 
-        public Move[] get_moves () {
-            return stack.to_array ();
+        public string to_string () {
+            var sb = new StringBuilder ("");
+
+            foreach (Move mv in stack) { /* iterates from head backwards */
+                sb.prepend (mv.to_string () + ";");
+            }
+
+            sb.append ("\n");
+            return sb.str;
         }
     }
 }
