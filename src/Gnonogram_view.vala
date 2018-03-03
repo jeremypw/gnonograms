@@ -548,13 +548,13 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private double get_default_fontheight_from_dimensions () {
-        Gdk.Rectangle monitor_area;
+        var monitor_area = Gdk.Rectangle () {width = 1024, height = 768};
+
         Gdk.Window? window = get_window ();
-        if (window == null) {
-            monitor_area = {1024, 768};
-        } else {
+        if (window != null) {
             monitor_area  = Utils.get_monitor_area (screen, window);
         }
+
         /* Window height excluding header is approx 1.4 * grid height
          * Window width approx 1.25 * grid width.
          * Cell dimensions approx 2.0 * font height

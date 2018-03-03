@@ -39,16 +39,6 @@ public class Controller : GLib.Object {
         view = new View (model);
         history = new Gnonograms.History ();
 
-        bind_property ("dimensions", model, "dimensions");
-        bind_property ("game-state", model, "game-state");
-        history.bind_property ("can-go-back", view, "can-go-back", BindingFlags.SYNC_CREATE | BindingFlags.DEFAULT);
-        history.bind_property ("can-go-forward", view, "can-go-forward", BindingFlags.SYNC_CREATE | BindingFlags.DEFAULT);
-        /* Do not bind view properties until game restored */
-
-
-
-        /* Connect signals. Must be done before restoring settings so that e.g.
-         * dimensions of model are set. */
         view.moved.connect (on_moved);
         view.next_move_request.connect (on_next_move_request);
         view.previous_move_request.connect (on_previous_move_request);
@@ -101,14 +91,28 @@ public class Controller : GLib.Object {
                                                Gnonograms.UNSAVED_FILENAME);
 
         restore_settings (); /* May change load_game_dir and save_game_dir */
+
+        bind_property ("dimensions", model, "dimensions");
+        bind_property ("dimensions", view, "dimensions",  BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
+
+        bind_property ("generator-grade", view, "generator-grade", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
+
+        bind_property ("game-state", model, "game-state");
+        bind_property ("game-state", view, "game-state", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
+
+
+        history.bind_property ("can-go-back", view, "can-go-back", BindingFlags.SYNC_CREATE | BindingFlags.DEFAULT);
+        history.bind_property ("can-go-forward", view, "can-go-forward", BindingFlags.SYNC_CREATE | BindingFlags.DEFAULT);
+
+        saved_state.bind ("mode", this, "game_state", SettingsBindFlags.DEFAULT);
+        /* Delay binding font-height so can be applied after loading game */
+        settings.bind ("grade", this, "generator_grade", SettingsBindFlags.DEFAULT);
+
     }
 
     public Controller (File? game = null) {
         var fh = saved_state.get_double ("font-height");
-        var binding_flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
-        bind_property ("dimensions", view, "dimensions",  binding_flags);
-        bind_property ("generator-grade", view, "generator-grade", binding_flags);
-        bind_property ("game-state", view, "game-state", binding_flags);
+        saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
 
         if (game != null) {
             load_game.begin (game, true, (obj, res) => {
@@ -321,10 +325,6 @@ public class Controller : GLib.Object {
             y = saved_state.get_int ("window-y");
             current_game_path = saved_state.get_string ("current-game-path");
             window.move (x, y);
-
-            saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
-            saved_state.bind ("mode", this, "game_state", SettingsBindFlags.DEFAULT);
-            settings.bind ("grade", this, "generator_grade", SettingsBindFlags.DEFAULT);
         } else {
             critical ("Unable to restore settings - using defaults");
             /* Default puzzle parameters */
