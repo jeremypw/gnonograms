@@ -330,7 +330,7 @@ public class View : Gtk.ApplicationWindow {
         notify["game-state"].connect (() => {
             cell_grid.game_state = game_state;
             update_header_bar ();
-            update_labels_complete ();
+            update_all_labels_completeness ();
             queue_draw ();
         });
 
@@ -395,26 +395,16 @@ public class View : Gtk.ApplicationWindow {
             column_clue_box.update_label_text (c, model.get_label_text_from_solution (c, true));
         }
 
-        update_labels_complete ();
+        update_all_labels_completeness ();
     }
 
-    public void update_labels_complete () {
-        if (!is_solving) {
-            for (int r = 0; r < rows; r++) {
-                row_clue_box.update_label_complete (r, false);
-            }
+    public void update_all_labels_completeness () {
+        for (int r = 0; r < rows; r++) {
+            update_label_complete (r, false);
+        }
 
-            for (int c = 0; c < cols; c++) {
-                column_clue_box.update_label_complete (c, false);
-            }
-        } else {
-            for (int r = 0; r < rows; r++) {
-                row_clue_box.update_label_complete (r, model.get_complete (r, false));
-            }
-
-            for (int c = 0; c < cols; c++) {
-                column_clue_box.update_label_complete (c, model.get_complete (c, true));
-            }
+        for (int c = 0; c < cols; c++) {
+            update_label_complete (c, true);
         }
     }
 
@@ -449,7 +439,7 @@ public class View : Gtk.ApplicationWindow {
             header_bar.set_custom_title (null);
         }
 
-        update_labels_complete ();
+        update_all_labels_completeness ();
         update_header_bar ();
         queue_draw ();
     }
@@ -476,7 +466,7 @@ public class View : Gtk.ApplicationWindow {
         }
 
         *.dim {
-            opacity: 0.5;
+            opacity: 0.4;
         }
 
         .tooltip {
@@ -613,6 +603,14 @@ public class View : Gtk.ApplicationWindow {
         column_clue_box.highlight (c.col, is_highlight);
     }
 
+    private void update_label_complete (uint idx, bool is_col) {
+        var lbox = is_col ? column_clue_box : row_clue_box;
+        bool complete = is_solving ? model.get_complete (idx, is_col) : false;
+        string blocks = complete ? model.get_label_text_from_working (idx, is_col) : "";
+
+        lbox.update_label_complete (idx, complete, blocks);
+    }
+
     private void make_move_at_cell (CellState state = drawing_with_state, Cell target = current_cell) {
         if (target == NULL_CELL) {
             return;
@@ -636,13 +634,8 @@ public class View : Gtk.ApplicationWindow {
         var row = current_cell.row;
         var col = current_cell.col;
 
-        if (is_solving) {
-            row_clue_box.update_label_complete (row, model.get_complete (row, false));
-            column_clue_box.update_label_complete (col, model.get_complete (col, true));
-        } else {
-            row_clue_box.update_label_text (row, model.get_label_text_from_solution (row, false));
-            column_clue_box.update_label_text (col, model.get_label_text_from_solution (col, true));
-        }
+        update_label_complete (row, false);
+        update_label_complete (col, true);
 
         return cell;
     }

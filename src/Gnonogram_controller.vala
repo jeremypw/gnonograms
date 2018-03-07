@@ -556,6 +556,8 @@ public class Controller : GLib.Object {
             } else {
                 view.send_notification (_("There are errors"));
             }
+
+            view.end_working ();
         }
     }
 
@@ -680,8 +682,7 @@ public class Controller : GLib.Object {
             clear_history ();
         }
 
-        view.update_labels_complete ();
-        view.queue_draw ();
+        view.end_working ();
     }
 }
 }

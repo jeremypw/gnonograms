@@ -95,13 +95,22 @@ public class LabelBox : Gtk.Grid {
         }
     }
 
-    public void update_label_complete (uint index, bool complete) {
+    public void update_label_complete (uint index, bool complete, string blocks = "") {
         Label? label = labels[index];
         if (label != null) {
+            var sc = label.get_style_context ();
+
             if (complete) {
-                label.get_style_context ().add_class ("dim-label");
+                if (blocks != label.clue) {
+                        sc.add_class ("warn");
+                        sc.remove_class ("dim");
+                } else {
+                    sc.remove_class ("warn");
+                    sc.add_class ("dim");
+                }
             } else {
-                label.get_style_context ().remove_class ("dim-label");
+                    sc.remove_class ("warn");
+                    sc.remove_class ("dim");
             }
         }
     }
