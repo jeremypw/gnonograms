@@ -21,6 +21,7 @@ namespace Gnonograms {
 public abstract class AbstractGameGenerator : GLib.Object {
     protected AbstractPatternGenerator pattern_gen;
     protected AbstractSolver solver;
+
     protected bool cancelled {
         get {
             return solver.cancelled;

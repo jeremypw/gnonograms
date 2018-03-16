@@ -61,6 +61,10 @@ public class Controller : GLib.Object {
             }
         });
 
+        notify["dimensions"].connect (() => {
+            solver = new Solver (dimensions);
+        });
+
         var schema_source = GLib.SettingsSchemaSource.get_default ();
         if (schema_source.lookup ("com.github.jeremypw.gnonograms.settings", true) != null &&
             schema_source.lookup ("com.github.jeremypw.gnonograms.saved-state", true) != null) {
@@ -227,7 +231,9 @@ public class Controller : GLib.Object {
         clear ();
 
         var cancellable = new Cancellable ();
-        generator = new SimpleRandomGameGenerator (dimensions, cancellable);
+        solver.cancel ();
+        solver.cancellable = cancellable;
+        generator = new SimpleRandomGameGenerator (dimensions, solver);
         generator.grade = generator_grade;
 
         game_name = _("Random pattern");
@@ -516,6 +522,13 @@ public class Controller : GLib.Object {
             clear_history (); // just in case - should not be necessary.
         }
 
+
+        if (errors > 0) {
+            view.send_notification (
+                (ngettext (_("%u error found"), _("%u errors found"), errors)).printf (errors)
+            );
+        }
+
         return errors;
     }
 
@@ -551,15 +564,14 @@ public class Controller : GLib.Object {
 
         solver.configure_from_grade (Difficulty.CHALLENGING);
 
-        var move = solver.hint (row_clues, col_clues, model.working_data);
+        var moves = solver.hint (row_clues, col_clues, model.working_data);
 
-        if (!move.equal (Move.null_move)) {
-            make_move (move);
-            history.record_move (move.cell, move.previous_state);
-            return true;
-        } else {
-            return false;
+        foreach (Move mv in moves) {
+            make_move (mv);
+            history.record_move (mv.cell, mv.previous_state);
         }
+
+        return moves.size > 0;
     }
 
 /*** Signal Handlers ***/
@@ -645,11 +657,14 @@ public class Controller : GLib.Object {
             return;
         }
 
-        solver = new Solver (dimensions, null);
-        if (computer_hint (solver)) {
-            view.queue_draw ();
+        if (model.count_errors () > 0) {
+            rewind_until_correct ();
         } else {
-            view.send_notification (_("Failed to find a hint"));
+            if (computer_hint (solver)) {
+                view.queue_draw ();
+            } else {
+                view.send_notification (_("Failed to find a hint"));
+            }
         }
     }
 
@@ -660,8 +675,10 @@ public class Controller : GLib.Object {
         Difficulty diff = Difficulty.UNDEFINED;
         string msg = "";
         var cancellable = new Cancellable ();
+        solver.cancel ();
+        solver.cancellable = cancellable;
+
         view.show_working (cancellable, "Solving");
-        solver = new Solver (dimensions, cancellable);
 
         new Thread<void*> (null, () => {
             diff = computer_solve_clues (solver);

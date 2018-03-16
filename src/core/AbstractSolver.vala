@@ -30,7 +30,7 @@ namespace Gnonograms {
 
     public My2DCellArray grid {get; protected set;} // Shared with Regions which can update the contents
     public My2DCellArray solution {get; protected set;}
-    public Cancellable? cancellable { get; protected set; }
+    public Cancellable? cancellable { get; set; }
     public bool cancelled {
         get {
             return cancellable != null ? cancellable.is_cancelled () : false;
@@ -194,7 +194,7 @@ namespace Gnonograms {
     }
 
     protected abstract Difficulty solve_it ();
-    public abstract Move hint (string[] row_clues, string[] col_clues, My2DCellArray working);
+    public abstract Gee.ArrayQueue<Move> hint (string[] row_clues, string[] col_clues, My2DCellArray working);
     public abstract void configure_from_grade (Difficulty grade);
 }
 }

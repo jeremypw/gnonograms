@@ -33,8 +33,6 @@ class AppMenu : Gtk.MenuButton {
     public Difficulty grade {get; set;}
     public string title {get; set;}
 
-//    public signal void apply ();
-
     construct {
         popover = new AppPopover (this);
         app_popover = (AppPopover)popover;

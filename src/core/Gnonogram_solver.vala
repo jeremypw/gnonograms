@@ -38,9 +38,9 @@ namespace Gnonograms {
     private uint hard_threshold;
     private uint challenging_threshold;
 
-    public Solver (Dimensions _dimensions, Cancellable? _cancellable) {
-        Object (dimensions: _dimensions,
-                cancellable: _cancellable
+    public Solver (Dimensions _dimensions) {
+        Object (
+            dimensions: _dimensions
         );
 
         double length = (double)(dimensions.length ());
@@ -105,7 +105,7 @@ namespace Gnonograms {
         return passes_to_grade (result);
     }
 
-    public override Move hint (string[] row_clues, string[] col_clues, My2DCellArray working) {
+    public override Gee.ArrayQueue<Move> hint (string[] row_clues, string[] col_clues, My2DCellArray working) {
         assert (working.dimensions.equal (grid.dimensions));
         assert (working.dimensions.rows () == row_clues.length);
         assert (working.dimensions.cols () == col_clues.length);
@@ -115,7 +115,7 @@ namespace Gnonograms {
         bool changed = false;
         uint count = 0;
 
-        var move = Move.null_move;
+        var moves = new Gee.ArrayQueue<Move>();
 
         /* Initialize may have changed state of some cells during initial fix */
         foreach (Region r in regions) {
@@ -133,14 +133,15 @@ namespace Gnonograms {
                     var row = r.is_column ? i : r.index;
                     var col = r.is_column ? r.index : i;
                     Cell c = {row, col, r_state};
-                    move = new Move (c, csa[i]);
+                    moves.add (new Move (c, csa[i]));
+                    warning ("add initial move");
                     changed = true;
-                    break;
                 }
             }
         }
 
-        while (!changed && count < 2) { /* May require two passes before a state changes */
+        while (!changed && count < 2 && state != SolverState.ERROR) { /* May require two passes before a state changes */
+            changed = false;
             count++;
 
             foreach (Region r in regions) {
@@ -166,15 +167,17 @@ namespace Gnonograms {
                             var row = r.is_column ? i : r.index;
                             var col = r.is_column ? r.index : i;
                             Cell c = {row, col, r_state};
-                            move = new Move (c, csa[i]);
+                            moves.add (new Move (c, csa[i]));
                             break;
                         }
                     }
+
+                    break;
                 }
             }
         }
 
-        return move;
+        return moves;
     }
 
     /** PRIVATE **/

@@ -761,13 +761,7 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private void action_check_errors () {
-        var errors = rewind_request ();
-
-        if (errors > 0) {
-            send_notification (
-                (ngettext (_("%u error found"), _("%u errors found"), errors)).printf (errors)
-            );
-        } else {
+        if (rewind_request () == 0) {
             send_notification (_("No errors"));
         }
     }

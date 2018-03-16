@@ -20,9 +20,9 @@
 namespace Gnonograms {
 public class SimpleRandomGameGenerator : AbstractGameGenerator {
 
-    public SimpleRandomGameGenerator (Dimensions _dimensions, Cancellable? _cancellable) {
+    public SimpleRandomGameGenerator (Dimensions _dimensions, AbstractSolver _solver) {
         pattern_gen = new RandomPatternGenerator (_dimensions);
-        solver = new Solver (_dimensions, _cancellable);
+        solver = _solver;
     }
 
     public override bool generate () {
