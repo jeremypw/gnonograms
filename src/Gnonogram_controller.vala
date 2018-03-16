@@ -49,6 +49,7 @@ public class Controller : GLib.Object {
         view.open_game_request.connect (on_open_game_request);
         view.solve_this_request.connect (on_solve_this_request);
         view.restart_request.connect (on_restart_request);
+        view.hint_request.connect (on_hint_request);
 
         notify["game-state"].connect (() => {
             if (game_state != GameState.UNDEFINED) { /* Do not clear on save */
@@ -58,11 +59,6 @@ public class Controller : GLib.Object {
             if (game_state == GameState.GENERATING) {
                 on_new_random_request ();
             }
-        });
-
-        notify["dimensions"].connect (() => {
-            clear ();
-            game_state = GameState.SETTING;
         });
 
         var schema_source = GLib.SettingsSchemaSource.get_default ();
@@ -94,8 +90,8 @@ public class Controller : GLib.Object {
 
         restore_settings (); /* May change load_game_dir and save_game_dir */
 
-        bind_property ("dimensions", model, "dimensions");
-        bind_property ("dimensions", view, "dimensions",  BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
+        bind_property ("dimensions", model, "dimensions", BindingFlags.DEFAULT);
+        bind_property ("dimensions", view, "dimensions",  BindingFlags.BIDIRECTIONAL);
 
         bind_property ("generator-grade", view, "generator-grade", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
 
@@ -121,6 +117,7 @@ public class Controller : GLib.Object {
                 view.fontheight = fh; /* Ensure restored fontheight applied */
                 if (!load_game.end (res)) {
                     critical ("Unable to load specified game");
+                    restore_dimensions ();
                     new_or_random_game ();
                 }
             });
@@ -128,6 +125,7 @@ public class Controller : GLib.Object {
             restore_game.begin ((obj, res) => {
                 view.fontheight = fh; /* Ensure restored fontheight applied */
                 if (!restore_game.end (res)) {
+                    restore_dimensions ();
                     critical ("Unable to restore game");
                     new_game ();
                 }
@@ -306,10 +304,6 @@ public class Controller : GLib.Object {
 
     private void restore_settings () {
         if (settings != null) {
-            var rows = settings.get_uint ("rows");
-            var cols = settings.get_uint ("columns");
-            dimensions = {cols, rows};
-
             var dir = settings.get_string ("load-game-dir");
             if (dir.length > 0) {
                 load_game_dir = dir;
@@ -329,10 +323,17 @@ public class Controller : GLib.Object {
         } else {
             critical ("Unable to restore settings - using defaults");
             /* Default puzzle parameters */
-            dimensions = {15, 10};
             game_state = GameState.SETTING;
             generator_grade = Difficulty.MODERATE;
         }
+    }
+
+    private void restore_dimensions () {
+        if (settings != null) {
+            dimensions = {settings.get_uint ("columns"), settings.get_uint ("rows")};
+        } else {
+            dimensions = {15, 10};
+        };
     }
 
     private async bool restore_game () {
@@ -468,7 +469,6 @@ public class Controller : GLib.Object {
             return false;
         }
 
-        model.game_state = GameState.SETTING; /* Selects the solution grid */
         model.blank_working (); // Do not reveal solution on load
 
         if (reader.has_solution) {
@@ -541,6 +541,25 @@ public class Controller : GLib.Object {
         solver.configure_from_grade (Difficulty.COMPUTER);
 
         return solver.solve_clues (row_clues, col_clues);
+    }
+
+    private bool computer_hint (AbstractSolver solver) {
+        string[] row_clues;
+        string[] col_clues;
+        row_clues = view.get_row_clues ();
+        col_clues = view.get_col_clues ();
+
+        solver.configure_from_grade (Difficulty.CHALLENGING);
+
+        var move = solver.hint (row_clues, col_clues, model.working_data);
+
+        if (!move.equal (Move.null_move)) {
+            make_move (move);
+            history.record_move (move.cell, move.previous_state);
+            return true;
+        } else {
+            return false;
+        }
     }
 
 /*** Signal Handlers ***/
@@ -619,6 +638,19 @@ public class Controller : GLib.Object {
     private void on_solve_this_request () {
         game_state = GameState.SOLVING;
         start_solving.begin (true);
+    }
+
+    private void on_hint_request () {
+        if (game_state != GameState.SOLVING) {
+            return;
+        }
+
+        solver = new Solver (dimensions, null);
+        if (computer_hint (solver)) {
+            view.queue_draw ();
+        } else {
+            view.send_notification (_("Failed to find a hint"));
+        }
     }
 
     private async SolverState start_solving (bool copy_to_working = false, bool copy_to_solution = false) {

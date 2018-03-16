@@ -34,6 +34,7 @@ public class View : Gtk.ApplicationWindow {
     public signal void open_game_request ();
     public signal void solve_this_request ();
     public signal void restart_request ();
+    public signal void hint_request ();
     public signal void changed_cell (Cell cell, CellState previous_state);
 
     public Model model {private get; construct; }
@@ -179,7 +180,7 @@ public class View : Gtk.ApplicationWindow {
         application.set_accels_for_action ("view.paint-cell(uint32 %u)".printf (CellState.UNKNOWN), {"X"});
         application.set_accels_for_action ("view.check-errors", {"F7", "less", "comma"});
         application.set_accels_for_action ("view.restart", {"F5", "<Ctrl>R"});
-        application.set_accels_for_action ("view.solve", {"F9", "<Ctrl>H"});
+        application.set_accels_for_action ("view.hint", {"F9", "<Ctrl>H"});
 
         resizable = false;
         drawing_with_state = CellState.UNDEFINED;
@@ -239,6 +240,12 @@ public class View : Gtk.ApplicationWindow {
         img = new Gtk.Image.from_icon_name ("view-refresh-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         restart_button.image = img;
 
+        hint_button = new Gtk.Button ();
+        img = new Gtk.Image.from_icon_name ("help-contents-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
+        hint_button.image = img;
+        hint_button.tooltip_text = _("Suggest next move");
+        hint_button.sensitive = false;
+
         auto_solve_button = new Gtk.Button ();
         img = new Gtk.Image.from_icon_name ("system-run", Gtk.IconSize.LARGE_TOOLBAR);
         auto_solve_button.image = img;
@@ -269,6 +276,7 @@ public class View : Gtk.ApplicationWindow {
         header_bar.pack_end (mode_switch);
         header_bar.pack_end (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_end (auto_solve_button);
+        header_bar.pack_end (hint_button);
 
         set_titlebar (header_bar);
 
@@ -324,14 +332,17 @@ public class View : Gtk.ApplicationWindow {
         save_game_as_button.set_action_name ("view.save-as");
         check_correct_button.set_action_name ("view.check-errors");
         restart_button.set_action_name ("view.restart");
+        hint_button.set_action_name ("view.hint");
         auto_solve_button.set_action_name ("view.solve");
 
         /* Monitor certain bound properties */
         notify["game-state"].connect (() => {
-            cell_grid.game_state = game_state;
-            update_header_bar ();
-            update_all_labels_completeness ();
-            queue_draw ();
+            if (game_state != GameState.UNDEFINED) {
+                cell_grid.game_state = game_state;
+                update_header_bar ();
+                update_all_labels_completeness ();
+                queue_draw ();
+            }
         });
 
         notify["dimensions"].connect (() => {
@@ -506,7 +517,8 @@ public class View : Gtk.ApplicationWindow {
         {"paint-cell", action_paint_cell, "u"},
         {"check-errors", action_check_errors},
         {"restart", action_restart},
-        {"solve", action_solve}
+        {"solve", action_solve},
+        {"hint", action_hint}
     };
 
     private Gnonograms.LabelBox row_clue_box;
@@ -525,6 +537,7 @@ public class View : Gtk.ApplicationWindow {
     private Gtk.Button undo_button;
     private Gtk.Button redo_button;
     private Gtk.Button check_correct_button;
+    private Gtk.Button hint_button;
     private Gtk.Button auto_solve_button;
     private Gtk.Button restart_button;
     /* ----------------------------------------- */
@@ -594,6 +607,7 @@ public class View : Gtk.ApplicationWindow {
         undo_button.sensitive = sensitive && can_go_back;
         redo_button.sensitive = sensitive && can_go_forward;
         check_correct_button.sensitive = sensitive && is_solving && can_go_back;
+        hint_button.sensitive = sensitive && game_state == GameState.SOLVING;
         auto_solve_button.sensitive = sensitive;
     }
 
@@ -716,6 +730,10 @@ public class View : Gtk.ApplicationWindow {
 
     private void action_solve () {
         solve_this_request ();
+    }
+
+    private void action_hint () {
+        hint_request ();
     }
 
     private void action_undo () {

@@ -105,6 +105,78 @@ namespace Gnonograms {
         return passes_to_grade (result);
     }
 
+    public override Move hint (string[] row_clues, string[] col_clues, My2DCellArray working) {
+        assert (working.dimensions.equal (grid.dimensions));
+        assert (working.dimensions.rows () == row_clues.length);
+        assert (working.dimensions.cols () == col_clues.length);
+
+        initialize (row_clues, col_clues, working, null);
+
+        bool changed = false;
+        uint count = 0;
+
+        var move = Move.null_move;
+
+        /* Initialize may have changed state of some cells during initial fix */
+        foreach (Region r in regions) {
+            if (r.is_completed) {
+                continue;
+            }
+
+            var size = r.is_column ? rows : cols;
+            var csa = new CellState[size];
+            working.get_array (r.index, r.is_column, ref csa);
+            for (int i = 0; i < size; i++) {
+                var r_state = r.get_cell_state (i);
+
+                if (r_state != CellState.UNKNOWN && csa[i] != r_state) {
+                    var row = r.is_column ? i : r.index;
+                    var col = r.is_column ? r.index : i;
+                    Cell c = {row, col, r_state};
+                    move = new Move (c, csa[i]);
+                    changed = true;
+                    break;
+                }
+            }
+        }
+
+        while (!changed && count < 2) { /* May require two passes before a state changes */
+            count++;
+
+            foreach (Region r in regions) {
+                if (r.is_completed) {
+                    continue;
+                }
+
+                changed = r.solve ();
+
+                if (r.in_error) {
+                    /* TODO Use conditional compilation to print out error if required */
+                    state = SolverState.ERROR;
+                    break;
+                }
+
+                if (changed) {
+                    var size = r.is_column ? rows : cols;
+                    var csa = new CellState[size];
+                    working.get_array (r.index, r.is_column, ref csa);
+                    for (int i = 0; i < size; i++) {
+                        var r_state = r.get_cell_state (i);
+                        if (r_state != CellState.UNKNOWN && csa[i] != r_state) {
+                            var row = r.is_column ? i : r.index;
+                            var col = r.is_column ? r.index : i;
+                            Cell c = {row, col, r_state};
+                            move = new Move (c, csa[i]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return move;
+    }
+
     /** PRIVATE **/
 
     /** Returns -1 to indicate an error - TODO use throw error instead **/

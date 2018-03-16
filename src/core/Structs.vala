@@ -84,6 +84,10 @@ public struct Dimensions {
     public uint length () {
         return width + height;
     }
+
+    public bool equal (Dimensions other) {
+        return width == other.width && height == other.height;
+    }
 }
 
 public struct FilterInfo {

@@ -20,42 +20,17 @@
 namespace Gnonograms {
 public class Model : GLib.Object {
     /** PUBLIC **/
-    public GameState game_state {
-        set {
-            if (value == GameState.SETTING) {
-                display_data = solution_data;
-            } else {
-                display_data = working_data;
-            }
-        }
-    }
-
+    public GameState game_state {get; set; default = GameState.UNDEFINED; }
     public My2DCellArray solution_data { get; private set; }
     public My2DCellArray working_data { get; private set; }
+    public Dimensions dimensions { get; set; }
+
     public uint rows { get {return dimensions.height;} }
     public uint cols  { get {return dimensions.width;} }
 
-    private Dimensions _dimensions;
-    public Dimensions dimensions {
-        set {
-            _dimensions = value;
-            solution_data.dimensions = value;
-            working_data.dimensions = value;
-        }
-
-        get {
-            return _dimensions;
-        }
-    }
-
-    private My2DCellArray _display_data;
     public My2DCellArray display_data  {
         get {
-            return _display_data;
-        }
-
-        private set {
-            _display_data = value;
+            return game_state == GameState.SETTING ? solution_data : working_data;
         }
     }
 
@@ -66,8 +41,10 @@ public class Model : GLib.Object {
     }
 
     construct {
-        solution_data = new My2DCellArray ({ MAXSIZE, MAXSIZE }, CellState.EMPTY);
-        working_data = new My2DCellArray ({ MAXSIZE, MAXSIZE }, CellState.UNKNOWN);
+        notify["dimensions"].connect (() => {
+            solution_data = new My2DCellArray (dimensions, CellState.EMPTY);
+            working_data = new My2DCellArray (dimensions, CellState.UNKNOWN);
+        });
     }
 
     public int count_errors () {

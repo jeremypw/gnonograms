@@ -299,7 +299,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
     public CellState get_cell_state (uint index) {
         assert (index < n_cells);
-        return status[index];
+        return status[index] == CellState.COMPLETED ? CellState.FILLED : status[index];
     }
 
     /* For debugging and testing */

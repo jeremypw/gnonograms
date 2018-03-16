@@ -194,8 +194,7 @@ namespace Gnonograms {
     }
 
     protected abstract Difficulty solve_it ();
+    public abstract Move hint (string[] row_clues, string[] col_clues, My2DCellArray working);
     public abstract void configure_from_grade (Difficulty grade);
-
-
 }
 }
