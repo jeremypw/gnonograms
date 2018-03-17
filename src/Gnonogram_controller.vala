@@ -467,21 +467,18 @@ public class Controller : GLib.Object {
             return false;
         }
 
-        if (reader.has_row_clues && reader.has_col_clues) {
-            view.update_labels_from_string_array (reader.row_clues, false);
-            view.update_labels_from_string_array (reader.col_clues, true);
-        } else {
-            reader.err_msg = (_("Clues missing"));
-            return false;
-        }
-
         model.blank_working (); // Do not reveal solution on load
 
         if (reader.has_solution) {
             view.game_grade = reader.difficulty;
             model.set_solution_data_from_string_array (reader.solution[0 : rows]);
-        } else {
+        } else if (reader.has_row_clues && reader.has_col_clues) {
+            view.update_labels_from_string_array (reader.row_clues, false);
+            view.update_labels_from_string_array (reader.col_clues, true);
             yield start_solving (false, true); // Sets difficulty in header bar; copies any solution found to solution grid.
+        } else {
+            reader.err_msg = (_("Clues missing"));
+            return false;
         }
 
         if (reader.name.length > 1 && reader.name != "") {
@@ -491,6 +488,8 @@ public class Controller : GLib.Object {
         if (reader.has_working) {
             model.set_working_data_from_string_array (reader.working[0 : rows]);
         }
+
+        view.update_labels_from_solution (); /* Ensure completeness correctly set */
 
         is_readonly = reader.is_readonly;
 

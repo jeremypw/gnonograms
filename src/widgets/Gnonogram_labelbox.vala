@@ -102,15 +102,15 @@ public class LabelBox : Gtk.Grid {
 
             if (complete) {
                 if (blocks != label.clue) {
-                        sc.add_class ("warn");
-                        sc.remove_class ("dim");
+                    sc.add_class ("warn");
+                    sc.remove_class ("dim");
                 } else {
                     sc.remove_class ("warn");
                     sc.add_class ("dim");
                 }
             } else {
-                    sc.remove_class ("warn");
-                    sc.remove_class ("dim");
+                sc.remove_class ("warn");
+                sc.remove_class ("dim");
             }
         }
     }

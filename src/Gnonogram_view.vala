@@ -409,16 +409,6 @@ public class View : Gtk.ApplicationWindow {
         update_all_labels_completeness ();
     }
 
-    public void update_all_labels_completeness () {
-        for (int r = 0; r < rows; r++) {
-            update_label_complete (r, false);
-        }
-
-        for (int c = 0; c < cols; c++) {
-            update_label_complete (c, true);
-        }
-    }
-
     public void make_move (Move m) {
         if (!m.is_null ()) {
             update_current_and_model (m.cell.state, m.cell);
@@ -615,6 +605,17 @@ public class View : Gtk.ApplicationWindow {
         /* If c is NULL_CELL then will unhighlight all labels */
         row_clue_box.highlight (c.row, is_highlight);
         column_clue_box.highlight (c.col, is_highlight);
+    }
+
+
+    private void update_all_labels_completeness () {
+        for (int r = 0; r < rows; r++) {
+            update_label_complete (r, false);
+        }
+
+        for (int c = 0; c < cols; c++) {
+            update_label_complete (c, true);
+        }
     }
 
     private void update_label_complete (uint idx, bool is_col) {
