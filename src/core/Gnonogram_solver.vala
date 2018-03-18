@@ -125,10 +125,6 @@ namespace Gnonograms {
 
         /* Initialize may have changed state of some cells during initial fix */
         foreach (Region r in regions) {
-            if (r.is_completed) {
-                continue;
-            }
-
             var size = r.is_column ? rows : cols;
             var csa = new CellState[size];
             working.get_array (r.index, r.is_column, ref csa);
