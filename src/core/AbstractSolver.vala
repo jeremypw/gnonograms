@@ -193,8 +193,16 @@ namespace Gnonograms {
         cancellable.cancel ();
     }
 
+
+    public virtual Gee.ArrayQueue<Move> hint (string[] row_clues, string[] col_clues, My2DCellArray working) {
+        return new Gee.ArrayQueue<Move> ();
+    }
+
+    public virtual void debug (uint idx, bool is_column, string[] row_clues, string[] col_clues, My2DCellArray working) {
+
+    }
+
     protected abstract Difficulty solve_it ();
-    public abstract Gee.ArrayQueue<Move> hint (string[] row_clues, string[] col_clues, My2DCellArray working);
     public abstract void configure_from_grade (Difficulty grade);
 }
 }

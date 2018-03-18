@@ -105,6 +105,12 @@ namespace Gnonograms {
         return passes_to_grade (result);
     }
 
+    public override void debug (uint idx, bool is_column, string[] row_clues, string[] col_clues, My2DCellArray working) {
+        initialize (row_clues, col_clues, working, null);
+        var reg = regions[idx + (is_column ? rows : 0)];
+        reg.debug ();
+    }
+
     public override Gee.ArrayQueue<Move> hint (string[] row_clues, string[] col_clues, My2DCellArray working) {
         assert (working.dimensions.equal (grid.dimensions));
         assert (working.dimensions.rows () == row_clues.length);

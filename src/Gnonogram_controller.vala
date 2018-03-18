@@ -50,6 +50,7 @@ public class Controller : GLib.Object {
         view.solve_this_request.connect (on_solve_this_request);
         view.restart_request.connect (on_restart_request);
         view.hint_request.connect (on_hint_request);
+        view.debug_request.connect (on_debug_request);
 
         notify["game-state"].connect (() => {
             if (game_state != GameState.UNDEFINED) { /* Do not clear on save */
@@ -544,25 +545,23 @@ public class Controller : GLib.Object {
 
     /** Solve clues by computer using all available techniques
     **/
-    private Difficulty computer_solve_clues (AbstractSolver solver) {
+    private Difficulty computer_solve_clues () {
         string[] row_clues;
         string[] col_clues;
         row_clues = view.get_row_clues ();
         col_clues = view.get_col_clues ();
 
         solver.configure_from_grade (Difficulty.COMPUTER);
-
         return solver.solve_clues (row_clues, col_clues);
     }
 
-    private bool computer_hint (AbstractSolver solver) {
+    private bool computer_hint () {
         string[] row_clues;
         string[] col_clues;
         row_clues = view.get_row_clues ();
         col_clues = view.get_col_clues ();
 
         solver.configure_from_grade (Difficulty.CHALLENGING);
-
         var moves = solver.hint (row_clues, col_clues, model.working_data);
 
         foreach (Move mv in moves) {
@@ -659,12 +658,26 @@ public class Controller : GLib.Object {
         if (model.count_errors () > 0) {
             rewind_until_correct ();
         } else {
-            if (computer_hint (solver)) {
+            if (computer_hint ()) {
                 view.queue_draw ();
             } else {
                 view.send_notification (_("Failed to find a hint"));
             }
         }
+    }
+
+    private void on_debug_request (uint idx, bool is_column) {
+        if (game_state != GameState.SOLVING) {
+            return;
+        }
+
+        string[] row_clues;
+        string[] col_clues;
+        row_clues = view.get_row_clues ();
+        col_clues = view.get_col_clues ();
+
+        solver.configure_from_grade (Difficulty.CHALLENGING);
+        solver.debug (idx, is_column, row_clues, col_clues, model.working_data);
     }
 
     private async SolverState start_solving (bool copy_to_working = false, bool copy_to_solution = false) {
@@ -680,7 +693,7 @@ public class Controller : GLib.Object {
         view.show_working (cancellable, "Solving");
 
         new Thread<void*> (null, () => {
-            diff = computer_solve_clues (solver);
+            diff = computer_solve_clues ();
 
             if (cancellable != null && cancellable.is_cancelled ()) {
                 msg = _("Solving was cancelled");

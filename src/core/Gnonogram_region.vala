@@ -171,6 +171,15 @@ public class Region { /* Not a GObject, to reduce weight */
         put_status ();
     }
 
+    public void debug () {
+        debugging = true;
+        set_to_initial_state ();
+        solve ();
+        debugging = false;
+        stdout.printf (this.to_string ());
+        stdout.printf (message);
+    }
+
     public bool solve () {
         /**if change has occurred since last visit (due to change in an intersecting
          * region), runs full -fix () to see whether any inferences possible.
@@ -322,16 +331,23 @@ public class Region { /* Not a GObject, to reduce weight */
 
         for (int i = 0; i < n_cells; i++) {
             sb.append ("Cell " + i.to_string () + " Status: ");
-            sb.append (status[i].to_string () + "\n\r");
+            sb.append (status[i].to_string () + "\n\rOWNERS ");
 
-            for (int j = 0; j < n_blocks;  j++) {
-                sb.append (tags[i, j] ? "t" :"f");
+            int j;
+            for (j = 0; j < n_blocks;  j++) {
+                if (tags[i, j]) {
+                    sb.append ("[%i]".printf (blocks[j]));
+                }
             }
 
             sb.append (" : ");
+            if (tags[i, j]) {
+                sb.append ("ALLOW EMPTY ");
+            }
+            j++;
 
-            for (int j = can_be_empty_pointer; j < can_be_empty_pointer + 2; j++ ) {
-                sb.append (tags[i, j] ? "t" :"f");
+            if (tags[i, j]) {
+                sb.append ("COMPLETE");
             }
 
             sb.append ("\n\r");
@@ -411,6 +427,7 @@ public class Region { /* Not a GObject, to reduce weight */
     private int[,] ranges_backup;
 
     private string clue;
+    private bool debugging = false;
 
     private void initial_fix () {
         //finds cells that can be identified as FILLED from the start.
@@ -440,45 +457,63 @@ public class Region { /* Not a GObject, to reduce weight */
         // Tries each ploy in turn, returns as soon as a change is made
         // or an error detected.
 
+    capped_range_audit ();
 
-        if (fix_blocks_in_ranges () || in_error) {
+        if (in_error) {
             return true;
         }
 
-        if (do_edge (1) || in_error) {
+filled_subregion_audit ();
+
+        if (in_error) {
             return true;
         }
 
-        if (do_edge ( -1) || in_error) {
+do_edge (1);
+
+        if (in_error) {
             return true;
         }
 
-        if (available_filled_subregion_audit () || in_error) {
+do_edge ( -1);
+
+        if (in_error) {
             return true;
         }
 
-        if (filled_subregion_audit () || in_error) {
+available_filled_subregion_audit ();
+
+        if (in_error) {
             return true;
         }
 
+possibilities_audit ();
 
-        if (possibilities_audit () || in_error) {
+        if (in_error) {
             return true;
         }
 
-        if (fill_gaps () || in_error) {
+fill_gaps ();
+
+        if (in_error) {
             return true;
         }
 
-        if (only_possibility () || in_error) {
+only_possibility ();
+
+        if (in_error) {
             return true;
         }
 
-        if (free_cell_audit () || in_error) {
+free_cell_audit ();
+
+        if (in_error) {
             return true;
         }
 
-        if (capped_range_audit () || in_error) {
+fix_blocks_in_ranges ();
+
+        if (in_error) {
             return true;
         }
 
@@ -1110,7 +1145,8 @@ public class Region { /* Not a GObject, to reduce weight */
         int rng = 0;
         int offset = 0;
         int length = 0;
-        int ptr;
+        int ptr = 0;
+        int start = 0;
 
         for (int b = 0; b < bl; b++) {//for each available block
             length = blocks[available_blocks[b]];  //get its length
@@ -1130,11 +1166,16 @@ public class Region { /* Not a GObject, to reduce weight */
 
             //look for collision with filled cell
             ptr = ranges[rng, 0] + offset + length;  //cell after end of block
+            start = ptr;
 
             while (ptr < n_cells && !tags[ptr, can_be_empty_pointer]) {
                 ptr++;
                 offset++;
             }
+
+//~             if (start > 0 && !tags[start - 1, can_be_empty_pointer] && !tags[start - 1, b]) {
+//~                 offset++;
+//~             }
 
             block_start[b, 0] = rng;  //set start range number
             block_start[b, 1] =  offset;  //and start point
@@ -1157,18 +1198,28 @@ public class Region { /* Not a GObject, to reduce weight */
                 }
 
                 if (rng < 0) {
+critical ("NO end range found");
                     return false;
                 }
             }
 
             //look for collision with filled cell
             ptr = ranges[rng, 0] + ranges[rng, 1] - (offset + length) - 1;  //cell before beginning of block
+            start = ptr;
 
             while (ptr >= 0 && !tags[ptr, can_be_empty_pointer]) {
                 ptr --;
                 offset++;
             }
 
+//~             if (start < n_cells - 1 && !tags[start + 1, can_be_empty_pointer] && !tags[start + 1, b]) {
+//~                 offset++;
+//~             }
+
+
+if (debugging) {
+warning ("ptr end for BL %i %i offset %i, range end %i", blocks[b], ptr, offset, ranges[rng, 1]);
+}
             block_end[b, 0] = rng;  //set end range number
             block_end[b, 1] =  ranges[rng, 1] - offset;   //and end point
             //NB end point is index of cell AFTER last possible cell so that
@@ -1176,12 +1227,16 @@ public class Region { /* Not a GObject, to reduce weight */
             offset += (length + 1);  //shift offset allowing for one cell gap
         }
 
-        int start;
+//~         int start;
 
         for (int b = 0; b < bl; b++) { //for each available block
             rng = block_start[b, 0];
             offset = block_start[b, 1];
             start = ranges[rng, 0];
+
+            if (debugging) {
+warning ("BL %i earlest rng %i, earliest %i, latest rng, %i latest %i", blocks[b], rng, offset, block_end[b, 0], block_end[b, 1]);
+            }
 
             if (rng == block_end[b, 0]) { //if starts and ends in same range
                 length = block_end[b, 1] - block_start[b, 1];
@@ -1718,7 +1773,9 @@ public class Region { /* Not a GObject, to reduce weight */
 
     private bool fix_block_in_range (int block, int start, int length) {
         // block must be limited to range
-
+if (debugging) {
+warning ("fix block in range BL %i, start %i, length %i", blocks[block], start, length);
+}
         bool changed = false;
 
         if (is_invalid_data (start, block, length)) {
@@ -1727,14 +1784,13 @@ public class Region { /* Not a GObject, to reduce weight */
         } else {
             int blocklength = blocks[block];
             int freedom = length - blocklength;
-
+warning ("freedom %i", freedom);
             if (freedom < 0) {
                 record_error ("Fix block in range", "block longer than range");
                 return false;
             }
 
             if (freedom < blocklength) {
-
                 if (freedom == 0) {
                     set_block_complete_and_cap (block, start, 1);
                     changed = true;
@@ -1830,7 +1886,9 @@ public class Region { /* Not a GObject, to reduce weight */
 
     private bool set_block_complete_and_cap (int block, int start, int direction) {
         //returns true  - always changes a cell status if not in error
-
+if (debugging) {
+warning ("set block complete and cap BL %i, start %i, direction %i", blocks[block], start, direction);
+}
         bool changed = false;
         int length = blocks[block];
 
@@ -1948,7 +2006,9 @@ public class Region { /* Not a GObject, to reduce weight */
     private bool set_cell_owner (int cell, int owner, bool exclusive, bool can_be_empty) {
         //exclusive  - cant be any other block here
         //can be empty  - self evident
-
+if (debugging) {
+warning ("set cell owner cell %i owner %i excl %s, allow empty %s", cell, owner, exclusive.to_string (), can_be_empty.to_string ());
+}
         bool changed = false;
 
         if (is_invalid_data (cell, owner)) {
