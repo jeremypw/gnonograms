@@ -649,8 +649,13 @@ public class View : Gtk.ApplicationWindow {
         var row = current_cell.row;
         var col = current_cell.col;
 
-        update_label_complete (row, false);
-        update_label_complete (col, true);
+        if (game_state == GameState.SETTING) {
+            row_clue_box.update_label_text (row, model.get_label_text_from_solution (row, false));
+            column_clue_box.update_label_text (col, model.get_label_text_from_solution (col, true));
+        } else {
+            update_label_complete (row, false);
+            update_label_complete (col, true);
+        }
 
         return cell;
     }
