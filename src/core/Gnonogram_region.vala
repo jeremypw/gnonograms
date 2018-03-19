@@ -457,63 +457,54 @@ public class Region { /* Not a GObject, to reduce weight */
         // Tries each ploy in turn, returns as soon as a change is made
         // or an error detected.
 
-    capped_range_audit ();
 
-        if (in_error) {
+
+        if (capped_range_audit ()|| in_error) {
             return true;
         }
 
-filled_subregion_audit ();
 
-        if (in_error) {
+        if (filled_subregion_audit () || in_error) {
             return true;
         }
 
-do_edge (1);
 
-        if (in_error) {
+        if (do_edge (1) || in_error) {
             return true;
         }
 
-do_edge ( -1);
 
-        if (in_error) {
+        if (do_edge ( -1) || in_error) {
             return true;
         }
 
-available_filled_subregion_audit ();
 
-        if (in_error) {
+        if (available_filled_subregion_audit () || in_error) {
             return true;
         }
 
-possibilities_audit ();
 
-        if (in_error) {
+        if (possibilities_audit () || in_error) {
             return true;
         }
 
-fill_gaps ();
-
-        if (in_error) {
+        if (fill_gaps () || in_error) {
             return true;
         }
 
-only_possibility ();
-
-        if (in_error) {
+        if (only_possibility () || in_error) {
             return true;
         }
 
-free_cell_audit ();
-
-        if (in_error) {
+        if (free_cell_audit () || in_error) {
             return true;
         }
 
-fix_blocks_in_ranges ();
+        if (fix_blocks_in_ranges () || in_error) {
+            return true;
+        }
 
-        if (in_error) {
+        if (check_collisions () || in_error) {
             return true;
         }
 
@@ -1173,10 +1164,6 @@ fix_blocks_in_ranges ();
                 offset++;
             }
 
-//~             if (start > 0 && !tags[start - 1, can_be_empty_pointer] && !tags[start - 1, b]) {
-//~                 offset++;
-//~             }
-
             block_start[b, 0] = rng;  //set start range number
             block_start[b, 1] =  offset;  //and start point
             offset += (length + 1);  //move offset allowing for one cell gap between blocks
@@ -1198,7 +1185,6 @@ fix_blocks_in_ranges ();
                 }
 
                 if (rng < 0) {
-critical ("NO end range found");
                     return false;
                 }
             }
@@ -1212,14 +1198,6 @@ critical ("NO end range found");
                 offset++;
             }
 
-//~             if (start < n_cells - 1 && !tags[start + 1, can_be_empty_pointer] && !tags[start + 1, b]) {
-//~                 offset++;
-//~             }
-
-
-if (debugging) {
-warning ("ptr end for BL %i %i offset %i, range end %i", blocks[b], ptr, offset, ranges[rng, 1]);
-}
             block_end[b, 0] = rng;  //set end range number
             block_end[b, 1] =  ranges[rng, 1] - offset;   //and end point
             //NB end point is index of cell AFTER last possible cell so that
@@ -1227,16 +1205,10 @@ warning ("ptr end for BL %i %i offset %i, range end %i", blocks[b], ptr, offset,
             offset += (length + 1);  //shift offset allowing for one cell gap
         }
 
-//~         int start;
-
         for (int b = 0; b < bl; b++) { //for each available block
             rng = block_start[b, 0];
             offset = block_start[b, 1];
             start = ranges[rng, 0];
-
-            if (debugging) {
-warning ("BL %i earlest rng %i, earliest %i, latest rng, %i latest %i", blocks[b], rng, offset, block_end[b, 0], block_end[b, 1]);
-            }
 
             if (rng == block_end[b, 0]) { //if starts and ends in same range
                 length = block_end[b, 1] - block_start[b, 1];
@@ -1456,6 +1428,10 @@ warning ("BL %i earlest rng %i, earliest %i, latest rng, %i latest %i", blocks[b
         }
 
         return false;   //only changes tags
+    }
+
+    private bool check_collisions () {
+        return false;
     }
 
     // == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==
