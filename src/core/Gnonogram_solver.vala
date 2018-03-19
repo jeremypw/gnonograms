@@ -105,10 +105,35 @@ namespace Gnonograms {
         return passes_to_grade (result);
     }
 
-    public override void debug (uint idx, bool is_column, string[] row_clues, string[] col_clues, My2DCellArray working) {
+    public override Gee.ArrayQueue<Move>  debug (uint idx, bool is_column, string[] row_clues, string[] col_clues, My2DCellArray working) {
+        var moves = new Gee.ArrayQueue<Move>();
         initialize (row_clues, col_clues, working, null);
-        var reg = regions[idx + (is_column ? rows : 0)];
-        reg.debug ();
+        var r= regions[idx + (is_column ? rows : 0)];
+        var changed = r.debug ();
+
+        if (r.in_error) {
+            /* TODO Use conditional compilation to print out error if required */
+            state = SolverState.ERROR;
+            critical ("Degugged Region in error");
+        }
+
+        if (changed) {
+            var size = r.is_column ? rows : cols;
+            var csa = new CellState[size];
+            working.get_array (r.index, r.is_column, ref csa);
+            for (int i = 0; i < size; i++) {
+                var r_state = r.get_cell_state (i);
+                if (r_state != CellState.UNKNOWN && csa[i] != r_state) {
+                    var row = r.is_column ? i : r.index;
+                    var col = r.is_column ? r.index : i;
+                    Cell c = {row, col, r_state};
+                    moves.add (new Move (c, csa[i]));
+                    break;
+                }
+            }
+        }
+
+        return moves;
     }
 
     public override Gee.ArrayQueue<Move> hint (string[] row_clues, string[] col_clues, My2DCellArray working) {

@@ -171,13 +171,14 @@ public class Region { /* Not a GObject, to reduce weight */
         put_status ();
     }
 
-    public void debug () {
+    public bool debug () {
         debugging = true;
         set_to_initial_state ();
-        solve ();
+        var changed = solve ();
         debugging = false;
         stdout.printf (this.to_string ());
         stdout.printf (message);
+        return changed;
     }
 
     public bool solve () {
@@ -235,7 +236,6 @@ public class Region { /* Not a GObject, to reduce weight */
         }
 
         put_status ();
-
         return made_changes;
     }
 
@@ -458,17 +458,6 @@ public class Region { /* Not a GObject, to reduce weight */
         // or an error detected.
 
 
-
-        if (capped_range_audit ()|| in_error) {
-            return true;
-        }
-
-
-        if (filled_subregion_audit () || in_error) {
-            return true;
-        }
-
-
         if (do_edge (1) || in_error) {
             return true;
         }
@@ -501,6 +490,15 @@ public class Region { /* Not a GObject, to reduce weight */
         }
 
         if (fix_blocks_in_ranges () || in_error) {
+            return true;
+        }
+
+        if (capped_range_audit ()|| in_error) {
+            return true;
+        }
+
+
+        if (filled_subregion_audit () || in_error) {
             return true;
         }
 
@@ -655,7 +653,7 @@ public class Region { /* Not a GObject, to reduce weight */
                     continue;  //is following cell empty?
             }
 
-            if (!has_one_owner (idx)) {  // if owner ambiguous, can only deal with single cell gap
+            if (get_sole_owner (idx) < 0) {  // if owner ambiguous, can only deal with single cell gap
                 // see if single cell gap which can be marked empty because
                 // to fill it would create a block larger than any permissible.
                 if (status[idx + 2] != CellState.FILLED) {
@@ -916,25 +914,21 @@ public class Region { /* Not a GObject, to reduce weight */
             }
 
             // unfinished cell found
-            if (status[i] == CellState.FILLED && has_one_owner (i)) { //cell is FILLED and has only one owner
-                //find the owner
-                for (owner = 0; owner < n_blocks; owner++) {
-                    if (tags[i, owner]) {
-                        break;
+            if (status[i] == CellState.FILLED) {
+                owner = get_sole_owner (i);
+                if (owner >= 0) { //cell is FILLED and has only one owner
+                    length = blocks[owner];
+                    //remove this block from earlier cells our of range
+                    start = i - length;
+                    if (start >= 0) {
+                        remove_block_from_cell_to_end (owner, start, BACKWARDS);
                     }
-                }
 
-                length = blocks[owner];
-                //remove this block from earlier cells our of range
-                start = i - length;
-                if (start >= 0) {
-                    remove_block_from_cell_to_end (owner, start, BACKWARDS);
-                }
-
-                //remove this block from later cells our of range
-                start = i + length;
-                if (start < n_cells) {
-                    remove_block_from_cell_to_end (owner, start, FORWARDS);
+                    //remove this block from later cells our of range
+                    start = i + length;
+                    if (start < n_cells) {
+                        remove_block_from_cell_to_end (owner, start, FORWARDS);
+                    }
                 }
             }
         }
@@ -1431,7 +1425,79 @@ public class Region { /* Not a GObject, to reduce weight */
     }
 
     private bool check_collisions () {
-        return false;
+        bool changed = false;
+        for (int i = 0; i < n_cells - 2; i++) {
+            if (tags[i, can_be_empty_pointer] || tags[i, is_finished_pointer]) {
+                continue;
+            }
+
+            int owner = get_sole_owner (i);
+            if (owner >= 0) { //Filled cell with one owner
+                int next_owner = get_sole_owner (i + 1);
+                if (next_owner >= 0 && !tags[i + 1, can_be_empty_pointer]) { // Adjacent owner sole and filled
+                    if (owner != next_owner) { // Must be same owner
+                        record_error ("check_collisions", "Adjacent different sole owners idxs %i, %i".printf ( i, i + 1));
+                        return false;
+                    } else {
+                        continue; // No collision
+                    }
+                } else if (next_owner < 0) {  // Adjacent cell must be same owner or empty
+                    set_cell_owner (i + 1, owner, true, true);
+                    if (owner < n_blocks - 2) {
+                        // search for filled cell assumed belonging to next block
+                        // Extend beyond if appropriate
+                        int start = i + 1;
+                        int length = blocks[owner + 1];
+                        int  limit = start + length;
+                        int filled_idx = seek_next_required_status (CellState.FILLED, start, limit, 1);
+                        if (filled_idx < limit) {
+                            for (int j = filled_idx; j < limit; j++) {
+                                set_cell_owner (j, owner + 1, true, false);
+                            }
+                        }
+                        changed = true;
+                    }
+                }
+            }
+        }
+
+        for (int i = n_cells - 1; i > 1; i--) {
+            if (tags[i, can_be_empty_pointer] || tags[i, is_finished_pointer]) {
+                continue;
+            }
+
+            int owner = get_sole_owner (i);
+            if (owner >= 0) {
+                int next_owner = get_sole_owner (i - 1);
+                if (next_owner >= 0 && !tags[i - 1, can_be_empty_pointer]) {
+                    if (owner != next_owner) {
+                        record_error ("check_collisions", "Adjacent different sole owners idxs %i, %i".printf ( i - 1, FORWARDS));
+                        return false;
+                    } else {
+                        continue;
+                    }
+                } else  if (next_owner < 0) {
+                    set_cell_owner (i - 1, owner, true, true);
+                    if (owner > 0) {
+                        // search for filled cell assumed belonging to next block
+                        // Extend beyond if appropriate
+                        int start = i - 1;
+                        int length = blocks[owner - 1];
+                        int  limit = start + length;
+                        int filled_idx = seek_next_required_status (CellState.FILLED, start, limit, BACKWARDS);
+                        if (filled_idx < limit) {
+                            for (int j = filled_idx; j < limit; j++) {
+                                set_cell_owner (j, owner - 1, true, false);
+                            }
+                        }
+
+                        changed = true;
+                    }
+                }
+            }
+        }
+
+        return changed;
     }
 
     // == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==
@@ -1728,14 +1794,17 @@ public class Region { /* Not a GObject, to reduce weight */
         return owner;
     }
 
-    private bool has_one_owner (int cell) {
-        // if only one possible owner (if not empty) then return true
+    private int get_sole_owner (int cell) {
+        // if only one possible owner (if not empty) then return owner index
+        // else return -1.
 
         int count = 0;
+        int owner = -1;
 
         for (int i = 0; i < n_blocks; i++) {
 
             if (tags[cell, i]) {
+                owner = i;
                 count++;
             }
 
@@ -1744,15 +1813,12 @@ public class Region { /* Not a GObject, to reduce weight */
             }
         }
 
-        return count == 1;
+        return count == 1 ? owner : -1;
     }
 
     private bool fix_block_in_range (int block, int start, int length) {
         // block must be limited to range
-if (debugging) {
-warning ("fix block in range BL %i, start %i, length %i", blocks[block], start, length);
-}
-        bool changed = false;
+        var changed = false;
 
         if (is_invalid_data (start, block, length)) {
             in_error = true;
@@ -1760,7 +1826,6 @@ warning ("fix block in range BL %i, start %i, length %i", blocks[block], start, 
         } else {
             int blocklength = blocks[block];
             int freedom = length - blocklength;
-warning ("freedom %i", freedom);
             if (freedom < 0) {
                 record_error ("Fix block in range", "block longer than range");
                 return false;
@@ -1862,9 +1927,6 @@ warning ("freedom %i", freedom);
 
     private bool set_block_complete_and_cap (int block, int start, int direction) {
         //returns true  - always changes a cell status if not in error
-if (debugging) {
-warning ("set block complete and cap BL %i, start %i, direction %i", blocks[block], start, direction);
-}
         bool changed = false;
         int length = blocks[block];
 
@@ -1982,9 +2044,6 @@ warning ("set block complete and cap BL %i, start %i, direction %i", blocks[bloc
     private bool set_cell_owner (int cell, int owner, bool exclusive, bool can_be_empty) {
         //exclusive  - cant be any other block here
         //can be empty  - self evident
-if (debugging) {
-warning ("set cell owner cell %i owner %i excl %s, allow empty %s", cell, owner, exclusive.to_string (), can_be_empty.to_string ());
-}
         bool changed = false;
 
         if (is_invalid_data (cell, owner)) {

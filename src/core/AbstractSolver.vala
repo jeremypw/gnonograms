@@ -198,8 +198,8 @@ namespace Gnonograms {
         return new Gee.ArrayQueue<Move> ();
     }
 
-    public virtual void debug (uint idx, bool is_column, string[] row_clues, string[] col_clues, My2DCellArray working) {
-
+    public virtual  Gee.ArrayQueue<Move>  debug (uint idx, bool is_column, string[] row_clues, string[] col_clues, My2DCellArray working) {
+        return new Gee.ArrayQueue<Move> ();
     }
 
     protected abstract Difficulty solve_it ();

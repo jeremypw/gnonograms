@@ -677,7 +677,12 @@ public class Controller : GLib.Object {
         col_clues = view.get_col_clues ();
 
         solver.configure_from_grade (Difficulty.CHALLENGING);
-        solver.debug (idx, is_column, row_clues, col_clues, model.working_data);
+        var moves = solver.debug (idx, is_column, row_clues, col_clues, model.working_data);
+
+        foreach (Move mv in moves) {
+            make_move (mv);
+            history.record_move (mv.cell, mv.previous_state);
+        }
     }
 
     private async SolverState start_solving (bool copy_to_working = false, bool copy_to_solution = false) {
