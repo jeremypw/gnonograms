@@ -731,7 +731,6 @@ public class Controller : GLib.Object {
 
         yield;
 
-        solver = null;
         return state;
     }
 
