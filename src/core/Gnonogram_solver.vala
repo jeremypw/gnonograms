@@ -161,7 +161,6 @@ namespace Gnonograms {
                     var col = r.is_column ? r.index : i;
                     Cell c = {row, col, r_state};
                     moves.add (new Move (c, csa[i]));
-                    warning ("add initial move");
                     changed = true;
                 }
             }

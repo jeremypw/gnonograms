@@ -1477,7 +1477,7 @@ public class Region { /* Not a GObject, to reduce weight */
                         // Extend beyond if appropriate
                         int start = i - 1;
                         int length = blocks[owner - 1];
-                        int  limit = start + length;
+                        int  limit = start - length;
                         int filled_idx = seek_next_required_status (CellState.FILLED, start, limit, BACKWARDS);
                         if (filled_idx < limit) {
                             for (int j = filled_idx; j < limit; j++) {
@@ -2040,8 +2040,7 @@ public class Region { /* Not a GObject, to reduce weight */
         bool changed = false;
 
         if (is_invalid_data (cell, owner)) {
-            in_error = true;
-            message = "set_cell_owner";
+            record_error ("set_cell_owner", "invalid data %i, %i, %s, %s". printf (cell, owner, exclusive.to_string (), can_be_empty.to_string ()));
         } else if (status[cell] == CellState.EMPTY) {// do nothing  - not necessarily an error
         } else if (status[cell] == CellState.COMPLETED && tags[cell, owner] == false) {
             record_error ("set_cell_owner", "contradiction cell " + cell.to_string () + " filled but cannot be owner");
