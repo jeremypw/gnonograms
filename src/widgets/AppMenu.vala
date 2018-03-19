@@ -79,8 +79,6 @@ class AppMenu : Gtk.MenuButton {
         notify["title"].connect (() => {
             update_title_setting ();
         });
-
-
     }
 
     public AppMenu () {
@@ -122,7 +120,6 @@ class AppMenu : Gtk.MenuButton {
         private bool cancelled = false;
         public signal void apply_settings ();
         public signal void cancel ();
-
 
         construct {
             closed.connect (() => {

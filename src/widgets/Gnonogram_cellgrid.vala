@@ -34,7 +34,6 @@ public class CellGrid : Gtk.DrawingArea {
         }
     } /* model display data */
 
-
     public Cell current_cell {get; set;}
     public Cell previous_cell {get; set;}
 
@@ -266,7 +265,6 @@ public class CellGrid : Gtk.DrawingArea {
 
         // Draw major grid
         cr.set_line_width (MAJOR_GRID_LINE_WIDTH);
-
 
         // Horizontal lines
         y1 = 0;

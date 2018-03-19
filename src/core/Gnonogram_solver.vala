@@ -114,7 +114,7 @@ namespace Gnonograms {
         if (r.in_error) {
             /* TODO Use conditional compilation to print out error if required */
             state = SolverState.ERROR;
-            critical ("Degugged Region in error");
+            critical ("Debugged Region in error");
         }
 
         if (changed) {

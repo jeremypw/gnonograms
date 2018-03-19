@@ -193,7 +193,6 @@ namespace Gnonograms {
         cancellable.cancel ();
     }
 
-
     public virtual Gee.ArrayQueue<Move> hint (string[] row_clues, string[] col_clues, My2DCellArray working) {
         return new Gee.ArrayQueue<Move> ();
     }

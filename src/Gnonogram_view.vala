@@ -87,7 +87,6 @@ public class View : Gtk.ApplicationWindow {
             return _fontheight;
         }
 
-
         set {
             if (value < MINFONTSIZE || value > MAXFONTSIZE) {
                 return;
@@ -301,7 +300,6 @@ public class View : Gtk.ApplicationWindow {
         main_grid = new Gtk.Grid ();
 
         main_grid.attach (cell_grid, 1, 1, 1, 1);
-
 
         main_grid.row_spacing = 6;
         main_grid.column_spacing = 6;
@@ -612,7 +610,6 @@ public class View : Gtk.ApplicationWindow {
         column_clue_box.highlight (c.col, is_highlight);
     }
 
-
     private void update_all_labels_completeness () {
         for (int r = 0; r < rows; r++) {
             update_label_complete (r, false);
@@ -748,12 +745,10 @@ public class View : Gtk.ApplicationWindow {
     }
 
     private void action_debug_row () {
-warning ("debug row");
         debug_request (current_cell.row, false);
     }
 
     private void action_debug_col () {
-warning ("debug col");
         debug_request (current_cell.col, true);
     }
 
@@ -786,7 +781,6 @@ warning ("debug col");
             send_notification (_("No errors"));
         }
     }
-
 
     private void action_move_cursor (SimpleAction action, Variant? param) {
         int dr, dc;

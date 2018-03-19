@@ -457,21 +457,17 @@ public class Region { /* Not a GObject, to reduce weight */
         // Tries each ploy in turn, returns as soon as a change is made
         // or an error detected.
 
-
         if (do_edge (1) || in_error) {
             return true;
         }
-
 
         if (do_edge ( -1) || in_error) {
             return true;
         }
 
-
         if (available_filled_subregion_audit () || in_error) {
             return true;
         }
-
 
         if (possibilities_audit () || in_error) {
             return true;
@@ -496,7 +492,6 @@ public class Region { /* Not a GObject, to reduce weight */
         if (capped_range_audit ()|| in_error) {
             return true;
         }
-
 
         if (filled_subregion_audit () || in_error) {
             return true;
@@ -1124,7 +1119,6 @@ public class Region { /* Not a GObject, to reduce weight */
 
         int[,] block_start = new int[bl, 2];  //range number and offset of earliest start point
         int[,] block_end = new int[bl, 2];  //range number and offset of latest end point
-
 
         //find earliest start point of each block (treating ranges as all unknown cells)
         int rng = 0;
@@ -1988,7 +1982,6 @@ public class Region { /* Not a GObject, to reduce weight */
 
         return changed;   //if block was not already capped
     }
-
 
     private bool set_range_owner (int owner, int start, int length, bool exclusive, bool can_be_empty) {
         bool changed = false;
