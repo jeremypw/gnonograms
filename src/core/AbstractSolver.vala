@@ -129,7 +129,7 @@ namespace Gnonograms {
         return row_total == col_total;
     }
 
-    protected virtual bool solved () {
+    public virtual bool solved () {
         foreach (Region r in regions) {
             if (!r.is_completed) {
                 return false;
