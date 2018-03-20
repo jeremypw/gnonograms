@@ -106,6 +106,52 @@ namespace Utils {
         return clues;
     }
 
+    /* Incomplete regions denoted by -1 in returned array */
+    public Gee.ArrayList<int> complete_block_array_from_cellstate_array (CellState[] cellstates) {
+        var blocks = new  Gee.ArrayList<int>();
+        int count = 0;
+        bool counting = false, valid = true;
+
+        foreach (CellState state in cellstates) {
+            switch (state) {
+                case CellState.EMPTY:
+                    if (counting) {
+                        blocks.add (count);
+                        count = 0;
+                        counting = false;
+                    } else {
+                        valid = true;
+                    }
+
+                    break;
+
+                case CellState.FILLED:
+                    if (valid) {
+                        counting = true;
+                        count++;
+                    }
+
+                    break;
+
+                case CellState.UNKNOWN:
+                    if (valid) {
+                        valid = false;
+                        counting = false;
+                        count = 0;
+                        blocks.add (-1);
+                    }
+
+                    break;
+
+
+                default:
+                    assert_not_reached ();
+            }
+        }
+
+        return blocks;
+    }
+
     public string block_string_from_cellstate_array (CellState[] cellstates) {
         StringBuilder sb = new StringBuilder ("");
         int count = 0, blocks = 0;

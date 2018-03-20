@@ -122,34 +122,6 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    public bool model_matches_labels {
-        get {
-            if (model == null || row_clue_box == null || column_clue_box == null) {
-                return false;
-            }
-
-            int index = 0;
-            foreach (string clue in get_row_clues ()) {
-                if (clue != model.get_label_text_from_working (index, false)) {
-                    return false;
-                }
-
-                index++;
-            }
-
-            index = 0;
-            foreach (string clue in get_col_clues ()) {
-                if (clue != model.get_label_text_from_working (index, true)) {
-                    return false;
-                }
-
-                index++;
-            }
-
-            return true;
-        }
-    }
-
     public View (Model _model) {
         Object (
             model: _model
@@ -381,13 +353,13 @@ public class View : Gtk.ApplicationWindow {
         });
     }
 
-    public string[] get_row_clues () {
-        return row_clue_box.get_clues ();
-    }
+//~     public string[] get_row_clues () {
+//~         return row_clue_box.get_clues ();
+//~     }
 
-    public string[] get_col_clues () {
-        return column_clue_box.get_clues ();
-    }
+//~     public string[] get_col_clues () {
+//~         return column_clue_box.get_clues ();
+//~     }
 
     public void update_labels_from_string_array (string[] clues, bool is_column) {
         var clue_box = is_column ? column_clue_box : row_clue_box;
@@ -622,10 +594,9 @@ public class View : Gtk.ApplicationWindow {
 
     private void update_label_complete (uint idx, bool is_col) {
         var lbox = is_col ? column_clue_box : row_clue_box;
-        bool complete = is_solving ? model.get_complete (idx, is_col) : false;
-        string blocks = complete ? model.get_label_text_from_working (idx, is_col) : "";
+        Gee.ArrayList<int> blocks = model.get_complete_blocks_from_working (idx, is_col);
 
-        lbox.update_label_complete (idx, complete, blocks);
+        lbox.update_label_complete (idx, blocks);
     }
 
     private void make_move_at_cell (CellState state = drawing_with_state, Cell target = current_cell) {

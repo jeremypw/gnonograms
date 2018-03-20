@@ -363,8 +363,8 @@ public class Controller : GLib.Object {
                                           path,
                                           game_name,
                                           dimensions,
-                                          view.get_row_clues (),
-                                          view.get_col_clues (),
+                                          model.get_row_clues (),
+                                          model.get_col_clues (),
                                           history
                                         );
 
@@ -548,8 +548,8 @@ public class Controller : GLib.Object {
     private Difficulty computer_solve_clues () {
         string[] row_clues;
         string[] col_clues;
-        row_clues = view.get_row_clues ();
-        col_clues = view.get_col_clues ();
+        row_clues = model.get_row_clues ();
+        col_clues = model.get_col_clues ();
 
         solver.configure_from_grade (Difficulty.COMPUTER);
         return solver.solve_clues (row_clues, col_clues);
@@ -558,8 +558,8 @@ public class Controller : GLib.Object {
     private bool computer_hint () {
         string[] row_clues;
         string[] col_clues;
-        row_clues = view.get_row_clues ();
-        col_clues = view.get_col_clues ();
+        row_clues = model.get_row_clues ();
+        col_clues = model.get_col_clues ();
 
         solver.configure_from_grade (Difficulty.CHALLENGING);
         var moves = solver.hint (row_clues, col_clues, model.working_data);
@@ -580,7 +580,7 @@ public class Controller : GLib.Object {
         if (is_solving && model.is_finished) {
             if (model.count_errors () == 0) {
                 view.send_notification (_("Correct solution"));
-            } else if (view.model_matches_labels) {
+            } else if (model.working_matches_clues ()) {
                 view.send_notification (_("Alternative solution found"));
             } else {
                 view.send_notification (_("There are errors"));
@@ -673,8 +673,8 @@ public class Controller : GLib.Object {
 
         string[] row_clues;
         string[] col_clues;
-        row_clues = view.get_row_clues ();
-        col_clues = view.get_col_clues ();
+        row_clues = model.get_row_clues ();
+        col_clues = model.get_col_clues ();
 
         solver.configure_from_grade (Difficulty.CHALLENGING);
         var moves = solver.debug (idx, is_column, row_clues, col_clues, model.working_data);

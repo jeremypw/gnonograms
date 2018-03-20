@@ -103,6 +103,47 @@ public class Model : GLib.Object {
         }
     }
 
+    public bool working_matches_clues () {
+        int index = 0;
+        foreach (string clue in get_row_clues ()) {
+            if (clue != get_label_text_from_working (index, false)) {
+                return false;
+            }
+
+            index++;
+        }
+
+        index = 0;
+        foreach (string clue in get_col_clues ()) {
+            if (clue != get_label_text_from_working (index, true)) {
+                return false;
+            }
+
+            index++;
+        }
+
+        return true;
+    }
+
+    public string[] get_row_clues () {
+        return get_clues (false);
+    }
+
+    public string[] get_col_clues () {
+        return get_clues (true);
+    }
+
+    private string[] get_clues (bool is_column) {
+        var dim = is_column ? cols : rows;
+        var texts = new string [dim];
+
+        for (uint index = 0; index < dim; index++) {
+            texts[index] = get_label_text_from_solution (index, is_column);
+        }
+
+        return texts;
+    }
+
     public string get_label_text_from_solution (uint idx, bool is_column) {
         uint length = is_column ? rows : cols;
         return solution_data.data2text (idx, length, is_column);
@@ -111,6 +152,12 @@ public class Model : GLib.Object {
     public string get_label_text_from_working (uint idx, bool is_column) {
         uint length = is_column ? rows : cols;
         return working_data.data2text (idx, length, is_column);
+    }
+
+    public Gee.ArrayList<int> get_complete_blocks_from_working (uint index, bool is_column) {
+        var csa = new CellState[is_column ? rows : cols];
+        working_data.get_array (index, is_column, ref csa);
+        return Utils.complete_block_array_from_cellstate_array (csa);
     }
 
     public bool get_complete (uint idx, bool is_column) {

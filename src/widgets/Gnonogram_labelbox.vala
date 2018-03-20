@@ -66,7 +66,7 @@ public class LabelBox : Gtk.Grid {
     }
 
     construct {
-        labels = new Label[MAXSIZE];
+        labels = new Clue[MAXSIZE];
         size = 0;
     }
 
@@ -89,40 +89,17 @@ public class LabelBox : Gtk.Grid {
             txt = BLANKLABELTEXT;
         }
 
-        Label? label = labels[index];
+        Clue? label = labels[index];
         if (label != null) {
             label.clue = txt;
         }
     }
 
-    public void update_label_complete (uint index, bool complete, string blocks = "") {
-        Label? label = labels[index];
+    public void update_label_complete (uint index, Gee.ArrayList<int> blocks) {
+        Clue? label = labels[index];
         if (label != null) {
-            var sc = label.get_style_context ();
-
-            if (complete) {
-                if (blocks != label.clue) {
-                    sc.add_class ("warn");
-                    sc.remove_class ("dim");
-                } else {
-                    sc.remove_class ("warn");
-                    sc.add_class ("dim");
-                }
-            } else {
-                sc.remove_class ("warn");
-                sc.remove_class ("dim");
-            }
+            label.update_complete (blocks);
         }
-    }
-
-    public string[] get_clues () {
-        var texts = new string [size];
-
-        for (uint index = 0; index < size; index++) {
-            texts[index] = labels[index].clue;
-        }
-
-        return texts;
     }
 
 /** PRIVATE **/
@@ -133,12 +110,12 @@ public class LabelBox : Gtk.Grid {
     private int min_height = -1;
     /* ----------------------------------------- */
 
-    private Label[] labels;
+    private Clue[] labels;
     private int size;
     private int other_size; /* Size of other label box */
 
-    private Label new_label (bool vertical, uint _other_size) {
-        var label = new Label (vertical);
+    private Clue new_label (bool vertical, uint _other_size) {
+        var label = new Clue (vertical);
         label.size = _other_size;
         label.fontheight = _fontheight;
         label.show_all ();

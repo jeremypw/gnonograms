@@ -20,7 +20,7 @@
 
 namespace Gnonograms {
 
-class Label : Gtk.Label {
+class Clue : Gtk.Label {
 /** PUBLIC **/
     public bool vertical_text { get; construct; }
 
@@ -59,7 +59,10 @@ class Label : Gtk.Label {
         }
     }
 
-    public Label (bool _vertical_text, string label_text = "") {
+    public int[] blocks;
+    public int[] complete_blocks;
+
+    public Clue (bool _vertical_text, string label_text = "") {
         Object (has_tooltip: true,
                 use_markup: true,
                 vertical_text: _vertical_text,
@@ -87,7 +90,29 @@ class Label : Gtk.Label {
         }
     }
 
+    public void update_complete (Gee.ArrayList<int> grid_blocks) {
+        for (int i = 0; i < grid_blocks.size - 1; i++) {
+            var grid_block = grid_blocks[i];
+            var label = block_labels[i];
+            var sc = label.get_style_context ();
+
+            if (grid_block > 0) {
+                if (blocks[i] != grid_block) {
+                    sc.add_class ("warn");
+                    sc.remove_class ("dim");
+                } else {
+                    sc.remove_class ("warn");
+                    sc.add_class ("dim");
+                }
+            } else {
+                sc.remove_class ("warn");
+                sc.remove_class ("dim");
+            }
+        }
+    }
+
 /** PRIVATE **/
+    private Gtk.Label[] block_labels;
     private const string attr_template = "<span size='%i' weight='bold'>";
     private double fontsize;
     private string displayed_text; /* text of clue in final form */
