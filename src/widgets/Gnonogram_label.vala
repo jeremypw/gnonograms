@@ -175,6 +175,30 @@ class Clue : Gtk.Label {
                 grid_index--;
             }
 
+            uint grid_complete = 0;
+            foreach (Block b in grid_blocks) {
+                if (b.is_complete) {
+                    grid_complete++;
+                }
+            }
+
+            if (grid_complete > complete) {
+                foreach (Block b in grid_blocks) {
+                    bool found = false;
+                    if (!b.is_null () && !b.is_complete) {
+                        var len = b.length;
+                        foreach (Block cb in clue_blocks) {
+                            if (!cb.is_complete && cb.length == len) {
+                                found = true;
+                            }
+                        }
+
+                        if (!found) {
+                            errors++;
+                        }
+                    }
+                }
+            }
 
             if (errors > 0) {
                 sc.add_class ("warn");
