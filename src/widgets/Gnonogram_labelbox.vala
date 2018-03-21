@@ -103,7 +103,6 @@ public class LabelBox : Gtk.Grid {
 
         Clue? label = labels[index];
         if (label != null) {
-//~ warning ("LBOX update label complete size %i", grid_blocks.size);
             label.update_complete (grid_blocks);
         }
     }

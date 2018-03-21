@@ -109,20 +109,25 @@ class Clue : Gtk.Label {
         if (!grid_blocks.is_empty) {
             int clue_index = 0;
             int grid_index = 0;
-            while (grid_index < grid_blocks.size && clue_index < clue_blocks.size) {
+            while (grid_index < grid_blocks.size) {
                 var block = grid_blocks.@get (grid_index);
                 if (block.is_null ()) {
                     break;
                 } else {
-                    var clue_block = clue_blocks.@get (clue_index);
-                    if (clue_block.length == block.length) {
-                        clue_block.is_complete = true;
-                        complete++;
-                        clue_block.is_error = false;
+                    if (clue_index < clue_blocks.size) {
+                        var clue_block = clue_blocks.@get (clue_index);
+                        if (clue_block.length == block.length) {
+                            clue_block.is_complete = true;
+                            complete++;
+                            clue_block.is_error = false;
+                        } else {
+                            clue_block.is_complete = false;
+                            clue_block.is_error = true;
+                            errors++;
+                        }
                     } else {
-                        clue_block.is_complete = false;
-                        clue_block.is_error = true;
                         errors++;
+                        break;
                     }
                 }
 
@@ -130,33 +135,39 @@ class Clue : Gtk.Label {
                 grid_index++;
             }
 
-            if (complete == clue_blocks.size) {
-                update_markup ();
+            if (errors > 0 || complete > clue_blocks.size) {
+                sc.add_class ("warn");
+            }
 
+            if (complete == clue_blocks.size && errors == 0) {
+                update_markup ();
                 sc.add_class ("dim");
-                if (errors > 0) {
-                    sc.add_class ("warn");
-                }
                 return;
             }
 
             clue_index = clue_blocks.size - 1;
             grid_index = grid_blocks.size - 1;
 
-            while (clue_index >= 0 && grid_index >= 0) {
+            while (grid_index >= 0) {
                 var block = grid_blocks.@get (grid_index);
                 if (block.is_null ()) {
                     break;
                 } else {
-                    var clue_block = clue_blocks.@get (clue_index);
-                    if (clue_block.length == block.length) {
-                        clue_block.is_complete = true;
-                        clue_block.is_error = false;
-                        complete++;
+                    if (clue_index >= 0) {
+                        var clue_block = clue_blocks.@get (clue_index);
+                        if (clue_block.length == block.length) {
+                            clue_block.is_error = clue_block.is_complete; // Must not mark complete twice
+                            clue_block.is_complete = true;
+
+                            complete++;
+                        } else {
+                            clue_block.is_complete = false;
+                            clue_block.is_error = true;
+                            errors++;
+                        }
                     } else {
-                        clue_block.is_complete = false;
-                        clue_block.is_error = true;
                         errors++;
+                        break;
                     }
                 }
 
@@ -200,10 +211,10 @@ class Clue : Gtk.Label {
          var alloc = vertical_text ? get_allocated_height () : get_allocated_width ();
 
          if (size / 1024 > alloc) {
-            update_markup (fs * 0.95);
-         } else {
-             update_tooltip ();
+            fontsize = fontsize * 0.95;
          }
+
+         update_tooltip ();
     }
 
     private void update_tooltip () {
@@ -232,18 +243,18 @@ class Clue : Gtk.Label {
         string attrib = "";
         string bold = "bold";
         string strikethrough = "false";
-
+        bool warn = get_style_context ().has_class ("warn");
         StringBuilder sb = new StringBuilder ("");
 
         foreach (Block clue_block in clue_blocks) {
-            bool error = clue_block.is_error;
+            strikethrough = "false";
 
-            if (clue_block.is_complete) {
-                bold = error ? "normal" : "light";
+            if (warn) {
+                bold = "normal";
+            } else if (clue_block.is_complete) {
                 strikethrough = "true";
             } else {
-                bold = error ? "normal" : "light";
-                strikethrough = "false";
+                bold = "bold";
             }
 
             attrib = "<span weight='%s' strikethrough='%s'>".printf (bold, strikethrough);

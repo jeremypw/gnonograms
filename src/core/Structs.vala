@@ -32,13 +32,13 @@ public class Block {
     }
 
      public Block.null () {
-        length = 0;
+        length = -1;
         is_complete = false;
         is_error = true;
     }
 
     public bool is_null () {
-        return length == 0;
+        return length < 0;
     }
 }
 

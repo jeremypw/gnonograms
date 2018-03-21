@@ -119,19 +119,17 @@ namespace Utils {
 
     /* Incomplete regions denoted by -1 in returned array */
     public Gee.ArrayList<Block> complete_block_array_from_cellstate_array (CellState[] cellstates) {
-
-
         var blocks = new  Gee.ArrayList<Block> ();
         int count = 0;
-        bool counting = false, valid = true;
+        bool valid = true;
+        var previous_state = CellState.UNDEFINED;
 
         foreach (CellState state in cellstates) {
             switch (state) {
                 case CellState.EMPTY:
-                    if (counting) {
+                    if (count > 0) {
                         blocks.add (new Block (count, true, false));
                         count = 0;
-                        counting = false;
                     } else {
                         valid = true;
                     }
@@ -140,16 +138,14 @@ namespace Utils {
 
                 case CellState.FILLED:
                     if (valid) {
-                        counting = true;
                         count++;
                     }
 
                     break;
 
                 case CellState.UNKNOWN:
-                    if (valid) {
+                    if (valid || previous_state == CellState.FILLED) {
                         valid = false;
-                        counting = false;
                         count = 0;
                         blocks.add (new Block.null ());
                     }
@@ -160,33 +156,73 @@ namespace Utils {
                 default:
                     assert_not_reached ();
             }
+
+            previous_state = state;
+        }
+
+        if (count > 0) {
+            blocks.add (new Block (count, true, false));
         }
 
         return blocks;
     }
 
+    /* For debugging */
+    private string block_list_to_string (Gee.ArrayList<Block> list) {
+        StringBuilder sb = new StringBuilder ("");
+
+        foreach (Block b in list) {
+            sb.append (b.length.to_string () + ",");
+        }
+
+        return sb.str;
+    }
 
     public string block_string_from_cellstate_array (CellState[] cellstates) {
         StringBuilder sb = new StringBuilder ("");
         int count = 0, blocks = 0;
         bool counting = false;
+        CellState count_state = CellState.UNDEFINED;
 
         foreach (var state in cellstates) {
             switch (state) {
                 case CellState.EMPTY:
-                    if (counting) {
+                    if (count_state == CellState.FILLED) {
                         sb.append (count.to_string() + BLOCKSEPARATOR);
-                        counting = false;
-                        count = 0;
                         blocks++;
+                    } else if (count_state == CellState.UNKNOWN) {
+                        sb.append ("?" + BLOCKSEPARATOR);
+
                     }
+                    counting = false;
+                    count_state = CellState.UNDEFINED;
+                    count = 0;
 
                     break;
 
                 case CellState.FILLED:
-                    counting = true;
+                    if (count_state == CellState.UNDEFINED) {
+                        count = 0;
+                        counting = true;
+                    } else if (count_state == CellState.UNKNOWN) {
+                        sb.append ("?" + BLOCKSEPARATOR);
+                        count = 0;
+                    }
+
+                    count_state = CellState.FILLED;
                     count++;
 
+                    break;
+
+                case CellState.UNKNOWN:
+                    if (count_state == CellState.UNDEFINED) {
+                        counting = true;
+                    } else if (count_state == CellState.FILLED) {
+                        sb.append (count.to_string() + BLOCKSEPARATOR);
+                        count = 0;
+                    }
+
+                    count_state = CellState.UNKNOWN;
                     break;
 
                 default:
@@ -194,10 +230,13 @@ namespace Utils {
             }
         }
 
-        if (counting) {
-            sb.append (count.to_string ());
+        if (count_state == CellState.FILLED) {
+            sb.append (count.to_string () + BLOCKSEPARATOR);
             blocks++;
-        } else if (blocks == 0) {
+        } else if (count_state == CellState.UNKNOWN) {
+            sb.append ("?" + BLOCKSEPARATOR);
+            blocks++;
+        } if (blocks == 0) {
             sb.append ("0");
         } else {
             sb.truncate (sb.len - BLOCKSEPARATOR.length); // remove trailing seperator
