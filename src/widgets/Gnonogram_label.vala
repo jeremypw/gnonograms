@@ -21,10 +21,14 @@
 namespace Gnonograms {
 
 class Clue : Gtk.Label {
+
 /** PUBLIC **/
     public bool vertical_text { get; construct; }
 
-    public uint size { /* total number of cells in the row/column to which this label is attached */
+    /* total number of cells in the row/column to which this label is attached
+       Used to calculate freedom */
+
+    public uint size {
         set {
             _size = value;
             update_tooltip ();
@@ -49,33 +53,30 @@ class Clue : Gtk.Label {
 
         set {
             _clue = value;
-            displayed_text = vertical_text ? vertical_string (_clue) : _clue;
-
-            if (!vertical_text) {
-                displayed_text += " ";
-            }
-
+            clue_blocks = Utils.block_struct_array_from_clue (value);
             update_markup ();
         }
     }
 
-    public int[] blocks;
-    public int[] complete_blocks;
+    public Gee.ArrayList<Block> clue_blocks;
+    public Gee.ArrayList<Block> grid_blocks;
 
-    public Clue (bool _vertical_text, string label_text = "") {
-        Object (has_tooltip: true,
-                use_markup: true,
+    construct {
+        clue = "0";
+        has_tooltip = true;
+        use_markup = true;
+        grid_blocks = new Gee.ArrayList<Block> ();
+        clue_blocks = new Gee.ArrayList<Block> ();
+    }
+
+    public Clue (bool _vertical_text) {
+        Object (
                 vertical_text: _vertical_text,
                 xalign: _vertical_text ? (float)0.5 : (float)1.0,
-                yalign: _vertical_text ? (float)1.0 : (float)0.5,
-                size: 0
+                yalign: _vertical_text ? (float)1.0 : (float)0.5
                 );
 
-        if (label_text != "") {
-            clue = label_text;
-        } else {
-            clue = "?,?,?";
-        }
+
 
         size_allocate.connect (() => {
             update_markup ();
@@ -90,52 +91,123 @@ class Clue : Gtk.Label {
         }
     }
 
-    public void update_complete (Gee.ArrayList<int> grid_blocks) {
-        for (int i = 0; i < grid_blocks.size - 1; i++) {
-            var grid_block = grid_blocks[i];
-            var label = block_labels[i];
-            var sc = label.get_style_context ();
+    public void update_complete (Gee.ArrayList<Block> _grid_blocks) {
+        grid_blocks = _grid_blocks;
 
-            if (grid_block > 0) {
-                if (blocks[i] != grid_block) {
-                    sc.add_class ("warn");
-                    sc.remove_class ("dim");
+        foreach (Block block in clue_blocks) {
+            block.is_complete = false;
+            block.is_error = false;
+        }
+
+        var sc = get_style_context ();
+        sc.remove_class ("warn");
+        sc.remove_class ("dim");
+
+        uint complete = 0;
+        uint errors = 0;
+
+        if (!grid_blocks.is_empty) {
+            int clue_index = 0;
+            int grid_index = 0;
+            while (grid_index < grid_blocks.size && clue_index < clue_blocks.size) {
+                var block = grid_blocks.@get (grid_index);
+                if (block.is_null ()) {
+                    break;
                 } else {
-                    sc.remove_class ("warn");
-                    sc.add_class ("dim");
+                    var clue_block = clue_blocks.@get (clue_index);
+                    if (clue_block.length == block.length) {
+                        clue_block.is_complete = true;
+                        complete++;
+                        clue_block.is_error = false;
+                    } else {
+                        clue_block.is_complete = false;
+                        clue_block.is_error = true;
+                        errors++;
+                    }
                 }
-            } else {
-                sc.remove_class ("warn");
-                sc.remove_class ("dim");
+
+                clue_index++;
+                grid_index++;
+            }
+
+            if (complete == clue_blocks.size) {
+                update_markup ();
+
+                sc.add_class ("dim");
+                if (errors > 0) {
+                    sc.add_class ("warn");
+                }
+                return;
+            }
+
+            clue_index = clue_blocks.size - 1;
+            grid_index = grid_blocks.size - 1;
+
+            while (clue_index >= 0 && grid_index >= 0) {
+                var block = grid_blocks.@get (grid_index);
+                if (block.is_null ()) {
+                    break;
+                } else {
+                    var clue_block = clue_blocks.@get (clue_index);
+                    if (clue_block.length == block.length) {
+                        clue_block.is_complete = true;
+                        clue_block.is_error = false;
+                        complete++;
+                    } else {
+                        clue_block.is_complete = false;
+                        clue_block.is_error = true;
+                        errors++;
+                    }
+                }
+
+                clue_index--;
+                grid_index--;
+            }
+
+
+            if (errors > 0) {
+                sc.add_class ("warn");
             }
         }
+
+        update_markup ();
     }
 
 /** PRIVATE **/
-    private Gtk.Label[] block_labels;
-    private const string attr_template = "<span size='%i' weight='bold'>";
+    const string UNFINISHED_WEIGHT = "bold";
+    const string TIP_WEIGHT = "normal";
+    const string FINISHED_WEIGHT = "light";
+    const string UNFINISHED_STRIKE = "false";
+    const string FINISHED_STRIKE = "true";
+    const string NO_ERROR_COLOR = "black";
+    const string ERROR_COLOR = "red";
+
+    private const string attr_template = "<span size='%i' weight='%s' strikethrough='%s'>";
+    private const string tip_template = "<span size='%i'>";
     private double fontsize;
     private string displayed_text; /* text of clue in final form */
     private string _clue; /* text of clue in horizontal form */
     private uint _size;
 
     private void update_markup (double fs = fontsize) {
-        set_markup (attr_template.printf ((int)fs) + displayed_text + "</span>");
-        var layout = get_layout ();
-        int w, h;
-        layout.get_size (out w, out h);
-        var size = vertical_text ? h : w;
-        var alloc = vertical_text ? get_allocated_height () : get_allocated_width ();
+        string markup = "<span size='%i'>".printf ((int)fs) + get_markup () + "</span>";
+        set_markup (markup);
 
-        if (size / 1024 > alloc) {
+         var layout = get_layout ();
+         int w, h;
+         layout.get_size (out w, out h);
+         var size = vertical_text ? h : w;
+         var alloc = vertical_text ? get_allocated_height () : get_allocated_width ();
+
+         if (size / 1024 > alloc) {
             update_markup (fs * 0.95);
-        } else {
-            update_tooltip ();
-        }
+         } else {
+             update_tooltip ();
+         }
     }
 
     private void update_tooltip () {
-        set_tooltip_markup (attr_template.printf ((int)fontsize) +
+        set_tooltip_markup (tip_template.printf ((int)fontsize / 2) +
                             _("Freedom = %u").printf (size - Utils.blockextent_from_clue (_clue)) +
                             "</span>");
     }
@@ -152,6 +224,44 @@ class Clue : Gtk.Label {
         }
 
         sb.truncate (sb.len - 1);
+
+        return sb.str;
+    }
+
+    private string get_markup () {
+        string attrib = "";
+        string bold = "bold";
+        string strikethrough = "false";
+
+        StringBuilder sb = new StringBuilder ("");
+
+        foreach (Block clue_block in clue_blocks) {
+            bool error = clue_block.is_error;
+
+            if (clue_block.is_complete) {
+                bold = error ? "normal" : "light";
+                strikethrough = "true";
+            } else {
+                bold = error ? "normal" : "light";
+                strikethrough = "false";
+            }
+
+            attrib = "<span weight='%s' strikethrough='%s'>".printf (bold, strikethrough);
+            sb.append (attrib);
+            sb.append (clue_block.length.to_string ());
+            sb.append ("</span>");
+            if (vertical_text) {
+                sb.append ("\n");
+            } else {
+                sb.append (", ");
+            }
+        }
+
+        if (vertical_text) {
+            sb.truncate (sb.len - 1);
+        } else {
+            sb.truncate (sb.len - 2);
+        }
 
         return sb.str;
     }

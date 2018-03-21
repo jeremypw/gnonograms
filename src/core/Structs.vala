@@ -20,6 +20,28 @@
  */
 
 namespace Gnonograms {
+public class Block {
+    public int length;
+    public bool is_complete;
+    public bool is_error;
+
+    public Block (int len, bool complete = false, bool error = false) {
+        length = len;
+        is_complete= complete;
+        is_error = error;
+    }
+
+     public Block.null () {
+        length = 0;
+        is_complete = false;
+        is_error = true;
+    }
+
+    public bool is_null () {
+        return length == 0;
+    }
+}
+
 public struct Cell {
     public uint row;
     public uint col;

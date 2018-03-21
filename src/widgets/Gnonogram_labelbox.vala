@@ -32,6 +32,10 @@ public class LabelBox : Gtk.Grid {
                 resize (value);
             }
         }
+
+        private get {
+            return _dimensions;
+        }
     }
 
     public double fontheight {
@@ -95,10 +99,12 @@ public class LabelBox : Gtk.Grid {
         }
     }
 
-    public void update_label_complete (uint index, Gee.ArrayList<int> blocks) {
+    public void update_label_complete (uint index, Gee.ArrayList<Block?> grid_blocks) {
+
         Clue? label = labels[index];
         if (label != null) {
-            label.update_complete (blocks);
+//~ warning ("LBOX update label complete size %i", grid_blocks.size);
+            label.update_complete (grid_blocks);
         }
     }
 
@@ -114,9 +120,9 @@ public class LabelBox : Gtk.Grid {
     private int size;
     private int other_size; /* Size of other label box */
 
-    private Clue new_label (bool vertical, uint _other_size) {
+    private Clue new_label (bool vertical) {
         var label = new Clue (vertical);
-        label.size = _other_size;
+        label.size = (int)(vertical_labels ? dimensions.height : dimensions.width);
         label.fontheight = _fontheight;
         label.show_all ();
 
@@ -130,14 +136,8 @@ public class LabelBox : Gtk.Grid {
         var new_size = (int)(vertical_labels ? dimensions.width : dimensions.height);
         var new_other_size = (int)(vertical_labels ? dimensions.height : dimensions.width);
 
-        if (new_other_size != other_size && size > 0) {
-            for (uint index = 0; index < size; index++) {
-                labels[index].size = new_other_size;
-            }
-        }
-
         while (size < new_size) {
-            var label = new_label (vertical_labels, new_other_size);
+            var label = new_label (vertical_labels);
             if (size > 0) {
                 var last_label = labels[size - 1];
                 attach_next_to (label, last_label, attach_position, 1, 1);
@@ -161,6 +161,10 @@ public class LabelBox : Gtk.Grid {
 
         size = new_size;
         other_size = new_other_size;
+
+        for (uint index = 0; index < size; index++) {
+            labels[index].size = other_size;
+        }
 
         for (uint index = 0; index < size; index++) {
             labels[index].clue = ("0");

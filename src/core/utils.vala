@@ -49,6 +49,17 @@ namespace Utils {
         }
     }
 
+    public Gee.ArrayList<Block?> block_struct_array_from_clue (string s) {
+        string[] blocks = remove_blank_lines (s.split_set (", "));
+        var block_array = new Gee.ArrayList<Block?> ();
+
+        foreach (string block in blocks) {
+            block_array.add (new Block (int.parse (block), false, false));
+        }
+
+        return block_array;
+    }
+
     public int blockextent_from_clue (string? s) {
         if (s == null) {
             return 0;
@@ -107,8 +118,10 @@ namespace Utils {
     }
 
     /* Incomplete regions denoted by -1 in returned array */
-    public Gee.ArrayList<int> complete_block_array_from_cellstate_array (CellState[] cellstates) {
-        var blocks = new  Gee.ArrayList<int>();
+    public Gee.ArrayList<Block> complete_block_array_from_cellstate_array (CellState[] cellstates) {
+
+
+        var blocks = new  Gee.ArrayList<Block> ();
         int count = 0;
         bool counting = false, valid = true;
 
@@ -116,7 +129,7 @@ namespace Utils {
             switch (state) {
                 case CellState.EMPTY:
                     if (counting) {
-                        blocks.add (count);
+                        blocks.add (new Block (count, true, false));
                         count = 0;
                         counting = false;
                     } else {
@@ -138,7 +151,7 @@ namespace Utils {
                         valid = false;
                         counting = false;
                         count = 0;
-                        blocks.add (-1);
+                        blocks.add (new Block.null ());
                     }
 
                     break;
@@ -151,6 +164,7 @@ namespace Utils {
 
         return blocks;
     }
+
 
     public string block_string_from_cellstate_array (CellState[] cellstates) {
         StringBuilder sb = new StringBuilder ("");

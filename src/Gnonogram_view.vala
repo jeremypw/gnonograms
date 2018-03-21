@@ -594,7 +594,7 @@ public class View : Gtk.ApplicationWindow {
 
     private void update_label_complete (uint idx, bool is_col) {
         var lbox = is_col ? column_clue_box : row_clue_box;
-        Gee.ArrayList<int> blocks = model.get_complete_blocks_from_working (idx, is_col);
+        Gee.ArrayList<Block?> blocks = model.get_complete_blocks_from_working (idx, is_col);
 
         lbox.update_label_complete (idx, blocks);
     }

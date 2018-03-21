@@ -154,7 +154,7 @@ public class Model : GLib.Object {
         return working_data.data2text (idx, length, is_column);
     }
 
-    public Gee.ArrayList<int> get_complete_blocks_from_working (uint index, bool is_column) {
+    public Gee.ArrayList<Block?> get_complete_blocks_from_working (uint index, bool is_column) {
         var csa = new CellState[is_column ? rows : cols];
         working_data.get_array (index, is_column, ref csa);
         return Utils.complete_block_array_from_cellstate_array (csa);
