@@ -49,9 +49,9 @@ namespace Utils {
         }
     }
 
-    public Gee.ArrayList<Block?> block_struct_array_from_clue (string s) {
+    public Gee.ArrayList<Block> block_struct_array_from_clue (string s) {
         string[] blocks = remove_blank_lines (s.split_set (", "));
-        var block_array = new Gee.ArrayList<Block?> ();
+        var block_array = new Gee.ArrayList<Block> ();
 
         foreach (string block in blocks) {
             block_array.add (new Block (int.parse (block), false, false));

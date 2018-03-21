@@ -42,7 +42,6 @@ public class LabelBox : Gtk.Grid {
         set {
             if (size < 1) {
                 return;
-
             }
             var fh = value.clamp (Gnonograms.MINFONTSIZE, Gnonograms.MAXFONTSIZE);
 
@@ -112,8 +111,7 @@ public class LabelBox : Gtk.Grid {
         }
     }
 
-    public void update_label_complete (uint index, Gee.ArrayList<Block?> grid_blocks) {
-
+    public void update_label_complete (uint index, Gee.ArrayList<Block> grid_blocks) {
         Clue? label = labels[index];
         if (label != null) {
             label.update_complete (grid_blocks);
