@@ -117,7 +117,6 @@ namespace Utils {
         return clues;
     }
 
-    /* Incomplete regions denoted by -1 in returned array */
     public Gee.ArrayList<Block> complete_block_array_from_cellstate_array (CellState[] cellstates) {
         var blocks = new  Gee.ArrayList<Block> ();
         int count = 0;

@@ -78,7 +78,11 @@ class Clue : Gtk.Label {
 
 
 
-        size_allocate.connect (() => {
+        size_allocate.connect_after (() => {
+            update_markup ();
+        });
+
+        realize.connect_after (() => {
             update_markup ();
         });
     }
@@ -209,14 +213,6 @@ class Clue : Gtk.Label {
     }
 
 /** PRIVATE **/
-    const string UNFINISHED_WEIGHT = "bold";
-    const string TIP_WEIGHT = "normal";
-    const string FINISHED_WEIGHT = "light";
-    const string UNFINISHED_STRIKE = "false";
-    const string FINISHED_STRIKE = "true";
-    const string NO_ERROR_COLOR = "black";
-    const string ERROR_COLOR = "red";
-
     private const string attr_template = "<span size='%i' weight='%s' strikethrough='%s'>";
     private const string tip_template = "<span size='%i'>";
     private double fontsize;
@@ -225,20 +221,25 @@ class Clue : Gtk.Label {
     private uint _size;
 
     private void update_markup (double fs = fontsize) {
+        var alloc = vertical_text ? get_allocated_height () : get_allocated_width ();
+        if (!get_realized () || alloc < 10 || fontsize < 1000) {
+            return;
+        }
+
         string markup = "<span size='%i'>".printf ((int)fs) + get_markup () + "</span>";
         set_markup (markup);
 
-         var layout = get_layout ();
-         int w, h;
-         layout.get_size (out w, out h);
-         var size = vertical_text ? h : w;
-         var alloc = vertical_text ? get_allocated_height () : get_allocated_width ();
+        var layout = get_layout ();
+        int w, h;
+        layout.get_size (out w, out h);
+        var size = (int)((vertical_text ? h : w) / 1024);
 
-         if (size / 1024 > alloc) {
-            fontsize = fontsize * 0.95;
-         }
+        if (size - alloc > 6) {
+            update_markup (fs * 0.9);
+        } else {
 
-         update_tooltip ();
+            update_tooltip ();
+        }
     }
 
     private void update_tooltip () {

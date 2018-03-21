@@ -273,7 +273,7 @@ public class View : Gtk.ApplicationWindow {
 
         main_grid.attach (cell_grid, 1, 1, 1, 1);
 
-        main_grid.row_spacing = 6;
+        main_grid.row_spacing = 0;
         main_grid.column_spacing = 6;
         main_grid.border_width = 6;
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for rows */
@@ -352,14 +352,6 @@ public class View : Gtk.ApplicationWindow {
             }
         });
     }
-
-//~     public string[] get_row_clues () {
-//~         return row_clue_box.get_clues ();
-//~     }
-
-//~     public string[] get_col_clues () {
-//~         return column_clue_box.get_clues ();
-//~     }
 
     public void update_labels_from_string_array (string[] clues, bool is_column) {
         var clue_box = is_column ? column_clue_box : row_clue_box;

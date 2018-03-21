@@ -40,21 +40,32 @@ public class LabelBox : Gtk.Grid {
 
     public double fontheight {
         set {
+            if (size < 1) {
+                return;
+
+            }
             var fh = value.clamp (Gnonograms.MINFONTSIZE, Gnonograms.MAXFONTSIZE);
+
+            var r = _dimensions.rows ();
+            var c = _dimensions.cols ();
+            var cell = 2 * fh;
+
+            /* Estimate maximum likely size required for random clues.
+             * If this is exceeded then label will reduce its fontsize. */
+            if (vertical_labels) {
+                min_width = (int)(c * cell);
+                min_height = (int)((r * 0.25 + 2) * cell * 1.1);
+            } else {
+                min_width = (int)((c * 0.25 + 2) * cell * 0.8);
+                min_height = (int)(r * cell);
+            }
+
             if (fh != _fontheight) {
                 for (uint index = 0; index < size; index++) {
                     labels[index].fontheight = fh;
                 }
 
                 _fontheight = fh;
-            }
-
-            if (vertical_labels) {
-                min_width = (int)(_dimensions.cols () * 2 * fh);
-                min_height = (int)((_dimensions.rows () * 0.5 + 2) * fh);
-            } else {
-                min_width = (int)((_dimensions.cols () * 0.5 + 1) * fh);
-                min_height = (int)(_dimensions.rows () * 2 * fh);
             }
         }
     }
@@ -72,6 +83,8 @@ public class LabelBox : Gtk.Grid {
     construct {
         labels = new Clue[MAXSIZE];
         size = 0;
+        row_spacing = 0;
+        column_spacing = 0;
     }
 
     public void highlight (uint index, bool is_highlight) {
