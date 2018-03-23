@@ -266,7 +266,7 @@ class Clue : Gtk.Label {
 
     private string get_markup () {
         string attrib = "";
-        string bold = "bold";
+        string weight = "bold";
         string strikethrough = "false";
         bool warn = get_style_context ().has_class ("warn");
         StringBuilder sb = new StringBuilder ("");
@@ -274,15 +274,16 @@ class Clue : Gtk.Label {
         foreach (Block clue_block in clue_blocks) {
             strikethrough = "false";
 
-            if (warn) {
-                bold = "normal";
-            } else if (clue_block.is_complete) {
+            weight = "normal";
+
+            if (clue_block.is_complete) {
                 strikethrough = "true";
+                weight = "light";
             } else {
-                bold = "bold";
+                weight = "bold";
             }
 
-            attrib = "<span weight='%s' strikethrough='%s'>".printf (bold, strikethrough);
+            attrib = "<span weight='%s' strikethrough='%s'>".printf (weight, strikethrough);
             sb.append (attrib);
             sb.append (clue_block.length.to_string ());
             sb.append ("</span>");
