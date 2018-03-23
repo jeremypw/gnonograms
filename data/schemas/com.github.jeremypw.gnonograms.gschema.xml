@@ -58,6 +58,16 @@
             The directory to which to save games, if not the default location.
           </description>
         </key>
+
+        <key type="b" name="clue-help">
+          <default>true</default>
+          <summary>Visual hints in clues</summary>
+          <description>
+            Use strikethrough for each contiguous completed block from edge in clue label.
+            Mark clue in red if there is a definite error in the corresponding region.
+            Fade clue if corresponding region is completed without definite error.
+          </description>
+        </key>
     </schema>
 
     <schema path="/com/github/jeremypw/gnonograms/saved-state/" id="com.github.jeremypw.gnonograms.saved-state">

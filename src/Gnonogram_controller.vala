@@ -110,7 +110,7 @@ public class Controller : GLib.Object {
         saved_state.bind ("mode", this, "game_state", SettingsBindFlags.DEFAULT);
         /* Delay binding font-height so can be applied after loading game */
         settings.bind ("grade", this, "generator_grade", SettingsBindFlags.DEFAULT);
-
+        settings.bind ("clue-help", view, "strikeout-complete", SettingsBindFlags.DEFAULT);
     }
 
     public Controller (File? game = null) {
