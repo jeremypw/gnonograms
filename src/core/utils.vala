@@ -166,6 +166,7 @@ namespace Utils {
         return blocks;
     }
 
+#if 0
     /* For debugging */
     private string block_list_to_string (Gee.ArrayList<Block> list) {
         StringBuilder sb = new StringBuilder ("");
@@ -176,6 +177,7 @@ namespace Utils {
 
         return sb.str;
     }
+#endif
 
     public string block_string_from_cellstate_array (CellState[] cellstates) {
         StringBuilder sb = new StringBuilder ("");

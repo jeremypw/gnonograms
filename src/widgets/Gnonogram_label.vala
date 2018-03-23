@@ -58,15 +58,10 @@ class Clue : Gtk.Label {
         }
     }
 
-    public Gee.ArrayList<Block> clue_blocks;
-    public Gee.ArrayList<Block> grid_blocks;
-
     construct {
         clue = "0";
         has_tooltip = true;
         use_markup = true;
-        grid_blocks = new Gee.ArrayList<Block> ();
-        clue_blocks = new Gee.ArrayList<Block> ();
     }
 
     public Clue (bool _vertical_text) {
@@ -95,7 +90,7 @@ class Clue : Gtk.Label {
         }
     }
 
-    public void update_complete (Gee.ArrayList<Block> _grid_blocks) {
+    public void update_complete (Gee.List<Block> _grid_blocks) {
         grid_blocks = _grid_blocks;
 
         foreach (Block block in clue_blocks) {
@@ -213,10 +208,11 @@ class Clue : Gtk.Label {
     }
 
 /** PRIVATE **/
+    private Gee.List<Block> clue_blocks;
+    private Gee.List<Block> grid_blocks;
     private const string attr_template = "<span size='%i' weight='%s' strikethrough='%s'>";
     private const string tip_template = "<span size='%i'>";
     private double fontsize;
-    private string displayed_text; /* text of clue in final form */
     private string _clue; /* text of clue in horizontal form */
     private uint _size;
 
@@ -248,22 +244,6 @@ class Clue : Gtk.Label {
                             "</span>");
     }
 
-    private string vertical_string (string s) {
-        string[] sa = s.split_set (", ");
-        StringBuilder sb = new StringBuilder ("");
-
-        foreach (string ss in sa) {
-            if (ss != "") {
-              sb.append (ss);
-              sb.append ("\n");
-            }
-        }
-
-        sb.truncate (sb.len - 1);
-
-        return sb.str;
-    }
-
     private string get_markup () {
         string attrib = "";
         string weight = "bold";
@@ -273,10 +253,9 @@ class Clue : Gtk.Label {
 
         foreach (Block clue_block in clue_blocks) {
             strikethrough = "false";
-
-            weight = "normal";
-
-            if (clue_block.is_complete) {
+            if (warn) {
+                weight = "normal";
+            } else if (clue_block.is_complete) {
                 strikethrough = "true";
                 weight = "light";
             } else {

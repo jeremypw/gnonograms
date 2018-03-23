@@ -27,11 +27,13 @@ class AppMenu : Gtk.MenuButton {
     private AppSetting row_setting;
     private AppSetting column_setting;
     private AppSetting title_setting;
+    private AppSetting strikeout_setting;
     private Gtk.Grid grid;
 
     public Dimensions dimensions {get; set;}
     public Difficulty grade {get; set;}
     public string title {get; set;}
+    public bool strikeout_complete {get; set;}
 
     construct {
         popover = new AppPopover (this);
@@ -44,22 +46,26 @@ class AppMenu : Gtk.MenuButton {
         row_setting = new ScaleGrid (_("Rows"), 10, 50, 5);
         column_setting = new ScaleGrid (_("Columns"), 10, 50, 5);
         title_setting = new TitleEntry ();
+        strikeout_setting = new SettingSwitch (_("Strike out complete blocks"));
 
         int pos = 0;
         add_setting (ref pos, grade_setting);
         add_setting (ref pos, row_setting);
         add_setting (ref pos, column_setting);
         add_setting (ref pos, title_setting);
+        add_setting (ref pos, strikeout_setting);
 
         grid.margin = 12;
         grid.row_spacing = 6;
         grid.column_spacing = 6;
+        grid.column_homogeneous = false;
 
         toggled.connect (() => { /* Allow parent to set values first */
             if (active) {
                 update_dimension_settings ();
                 update_grade_setting ();
                 update_title_setting ();
+                update_strikeout_setting ();
                 popover.show_all ();
             }
         });
@@ -79,6 +85,12 @@ class AppMenu : Gtk.MenuButton {
         notify["title"].connect (() => {
             update_title_setting ();
         });
+
+        notify["strikeout-complete"].connect (() => {
+            update_strikeout_setting ();
+        });
+
+
     }
 
     public AppMenu () {
@@ -99,12 +111,17 @@ class AppMenu : Gtk.MenuButton {
         title_setting.set_text (title);
     }
 
+    private void update_strikeout_setting () {
+        strikeout_setting.set_state (strikeout_complete);
+    }
+
     private void update_properties () {
         var rows = (uint)(row_setting.get_value ());
         var cols = (uint)(column_setting.get_value ());
         dimensions = {cols, rows};
         grade = (Difficulty)(grade_setting.get_value ());
         title = title_setting.get_text ();
+        strikeout_complete = strikeout_setting.get_state ();
     }
 
     private void add_setting (ref int pos, AppSetting setting) {
@@ -170,7 +187,6 @@ class AppMenu : Gtk.MenuButton {
             scale.value_changed.connect (() => {
                 var val = (uint)(scale.get_value ());
                 val_label.label = val.to_string ();
-                changed ();
             });
 
             heading_label = new Gtk.Label (heading);
@@ -238,10 +254,6 @@ class AppMenu : Gtk.MenuButton {
                 cb.append (((uint)d).to_string (), d.to_string ());
             }
 
-            cb.changed.connect (() => {
-                changed ();
-            });
-
             cb.expand = false;
             heading = new Gtk.Label (_("Generated games"));
         }
@@ -261,7 +273,6 @@ class AppMenu : Gtk.MenuButton {
         public override Gtk.Widget get_chooser () {
             return cb;
         }
-
     }
 
     protected class TitleEntry : AppSetting {
@@ -281,14 +292,39 @@ class AppMenu : Gtk.MenuButton {
         public override unowned string get_text () {return entry.text;}
         public override void set_text (string text) {
             entry.text = text;
-            changed ();
         }
     }
 
+    protected class SettingSwitch : AppSetting {
+        public Gtk.Switch @switch {get; construct;}
+        public Gtk.Label label {get; construct;}
+
+        construct {
+            @switch = new Gtk.Switch ();
+            @switch.halign = Gtk.Align.START;
+            @switch.hexpand = false;
+            @switch.state = false;
+        }
+
+        public SettingSwitch (string heading) {
+            Object (
+                label: new Gtk.Label (heading)
+            );
+        }
+
+        public override Gtk.Label get_heading () {return label;}
+        public override Gtk.Widget get_chooser () {return @switch;}
+
+        public override bool get_state () {return @switch.state;}
+        public override void set_state (bool state) {@switch.state = state;}
+
+    }
+
     protected abstract class AppSetting : Object {
-        public signal void changed ();
         public virtual void set_value (uint val) {return;}
         public virtual uint get_value () {return 0;}
+        public virtual void set_state (bool active) {return;}
+        public virtual bool get_state () {return false;}
         public virtual void set_text (string text) {}
         public virtual unowned string get_text () {return "";}
         public abstract Gtk.Label get_heading ();

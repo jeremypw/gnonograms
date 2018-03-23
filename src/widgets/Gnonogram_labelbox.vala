@@ -111,8 +111,9 @@ public class LabelBox : Gtk.Grid {
         }
     }
 
-    public void update_label_complete (uint index, Gee.ArrayList<Block> grid_blocks) {
+    public void update_label_complete (uint index, Gee.List<Block> grid_blocks) {
         Clue? label = labels[index];
+
         if (label != null) {
             label.update_complete (grid_blocks);
         }

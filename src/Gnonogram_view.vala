@@ -42,6 +42,7 @@ public class View : Gtk.ApplicationWindow {
     public Dimensions dimensions {get; set;}
     public Difficulty generator_grade {get; set;}
     public GameState game_state {get; set;}
+    public bool strikeout_complete {get; set;}
     public string game_name {get; set; default = "";}
 
     private Difficulty _game_grade = Difficulty.UNDEFINED;
@@ -230,6 +231,7 @@ public class View : Gtk.ApplicationWindow {
         bind_property ("dimensions", app_menu, "dimensions", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
         bind_property ("generator-grade", app_menu, "grade", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
         bind_property ("game-name", app_menu, "title", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
+        bind_property ("strikeout-complete", app_menu, "strikeout-complete", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
 
         mode_switch = new ViewModeButton ();
         bind_property ("game-state", mode_switch, "mode", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
@@ -350,6 +352,10 @@ public class View : Gtk.ApplicationWindow {
             if (drawing_with_state != CellState.UNDEFINED) {
                 make_move_at_cell ();
             }
+        });
+
+        notify["strikeout-complete"].connect (() => {
+            update_all_labels_completeness ();
         });
     }
 
@@ -586,7 +592,11 @@ public class View : Gtk.ApplicationWindow {
 
     private void update_label_complete (uint idx, bool is_col) {
         var lbox = is_col ? column_clue_box : row_clue_box;
-        Gee.ArrayList<Block> blocks = model.get_complete_blocks_from_working (idx, is_col);
+        var blocks = Gee.List.empty<Block> ();
+
+        if (strikeout_complete) {
+             blocks = model.get_complete_blocks_from_working (idx, is_col);
+        }
 
         lbox.update_label_complete (idx, blocks);
     }
