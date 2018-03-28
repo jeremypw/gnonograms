@@ -1,3 +1,14 @@
+com.github.jeremypw.gnonograms (1.2.0) xenial; urgency=low
+
+  * Hint button
+  * Strikethrough completed blocks in clue label (with option to disable)
+  * Clue label turns red if completed incorrectly (with option to disable)
+  * Additional shortcuts
+  * Some code refactoring and cleanup
+  * Various bug fixes
+
+ -- Jeremy Wootten <jeremywootten@gmail.com>  Wed, 28 Mar 2018 17:01:00 +0000
+
 com.github.jeremypw.gnonograms (1.1.0) xenial; urgency=low
 
   * Save and restore move history

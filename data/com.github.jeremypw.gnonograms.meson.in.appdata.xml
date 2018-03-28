@@ -27,8 +27,11 @@
             <description>
                 <ul>
                     <li>Hint button</li>
-                    <li>Strikethrough completed blocks in clue label</li>
+                    <li>Strikethrough completed blocks in clue label (with option to disable)</li>
+                    <li>Clue label turns red if completed incorrectly (with option to disable)</li>
+                    <li>Additional shortcuts</li>
                     <li>Some code refactoring and cleanup</li>
+                    <li>Various bug fixes</li>
                 </ul>
             </description>
         </release>
