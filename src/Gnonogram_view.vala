@@ -140,8 +140,8 @@ public class View : Gtk.ApplicationWindow {
         application.set_accels_for_action ("view.move-cursor((1, 0))", {"Down"});
         application.set_accels_for_action ("view.move-cursor((0, -1))", {"Left"});
         application.set_accels_for_action ("view.move-cursor((0, 1))", {"Right"});
-        application.set_accels_for_action ("view.zoom_in", {"<Ctrl>plus", "<Ctrl>equal", "<Ctrl>KP_Add"});
-        application.set_accels_for_action ("view.zoom_out", {"<Ctrl>minus", "<Ctrl>KP_Subtract"});
+        application.set_accels_for_action ("view.zoom(int32 1)", {"<Ctrl>plus", "<Ctrl>equal", "<Ctrl>KP_Add"});
+        application.set_accels_for_action ("view.zoom(int32 -1)", {"<Ctrl>minus", "<Ctrl>KP_Subtract"});
         application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.SETTING), {"<Ctrl>1"});
         application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.SOLVING), {"<Ctrl>2"});
         application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.GENERATING), {"<Ctrl>3", "<Ctrl>N"});
