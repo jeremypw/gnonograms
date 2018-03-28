@@ -529,10 +529,11 @@ public class View : Gtk.ApplicationWindow {
          * Window width approx 1.25 * grid width.
          * Cell dimensions approx 2.0 * font height
          * Make allowance for unusable monitor height - approx 10%;
+         * These equations are related to the inverse of those used in labelbox to calculate its dimensions
          */
 
-        var max_h = (double)(monitor_area.height * 0.90) / 1.4 / (double)rows / 2.0;
-        var max_w = (double)(monitor_area.width) / 1.25 / (double)cols / 2.0;
+        var max_h = (double)(monitor_area.height * 0.90) / ((double)rows * 2.55 + 4.4);
+        var max_w = (double)(monitor_area.width * 0.95) / ((double)cols * 2.4 + 3.2);
 
         return double.min (max_h, max_w);
     }
