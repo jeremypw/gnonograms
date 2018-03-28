@@ -350,7 +350,7 @@ namespace Gnonograms {
                         guesser.cancel_previous_guess ();
                         state = SolverState.UNDEFINED;
                     } else {
-                        critical ("unexpected initial sState %s", initial_state.to_string ());
+                        critical ("unexpected initial state %s", initial_state.to_string ());
                         assert_not_reached ();
                     }
 
