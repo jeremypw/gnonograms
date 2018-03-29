@@ -33,6 +33,7 @@ public class Controller : GLib.Object {
     public GameState game_state {get; set;}
     public Dimensions dimensions {get; set;}
     public Difficulty generator_grade {get; set;}
+    public string game_name {get; set; default = "";}
 
     construct {
         model = new Model ();
@@ -64,6 +65,7 @@ public class Controller : GLib.Object {
 
         notify["dimensions"].connect (() => {
             solver = new Solver (dimensions);
+            game_name = "";
         });
 
         var schema_source = GLib.SettingsSchemaSource.get_default ();
@@ -102,6 +104,7 @@ public class Controller : GLib.Object {
 
         bind_property ("game-state", model, "game-state");
         bind_property ("game-state", view, "game-state", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
+        bind_property ("game-name", view, "game-name", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
 
 
         history.bind_property ("can-go-back", view, "can-go-back", BindingFlags.SYNC_CREATE | BindingFlags.DEFAULT);
@@ -203,17 +206,6 @@ public class Controller : GLib.Object {
             return view.cols;
         }
     }
-
-    private string game_name {
-        get {
-            return view.game_name;
-        }
-
-        set {
-            view.game_name = value;
-        }
-    }
-
 
     private void clear () {
         model.clear ();
