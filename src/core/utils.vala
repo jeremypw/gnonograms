@@ -152,8 +152,8 @@ namespace Utils {
                     break;
 
 
-                default:
-                    assert_not_reached ();
+                default: /* Can occur when dragging beyond grid */
+                    break;
             }
 
             previous_state = state;
