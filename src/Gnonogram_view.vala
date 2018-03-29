@@ -44,6 +44,7 @@ public class View : Gtk.ApplicationWindow {
     public GameState game_state {get; set;}
     public bool strikeout_complete {get; set;}
     public string game_name {get; set; default = "";}
+    public bool readonly {get; set; default = false;}
 
     private Difficulty _game_grade = Difficulty.UNDEFINED;
     public Difficulty game_grade { // Difficulty of game actually loaded
@@ -54,19 +55,6 @@ public class View : Gtk.ApplicationWindow {
         set {
             _game_grade = value;
             header_bar.subtitle = game_grade.to_string ();;
-        }
-    }
-
-    private bool _readonly;
-    public bool readonly {
-
-        get {
-            return _readonly;
-        }
-
-        set {
-            _readonly = value;
-            update_header_bar ();
         }
     }
 
@@ -332,6 +320,10 @@ public class View : Gtk.ApplicationWindow {
         });
 
         notify["game-name"].connect (() => {
+            update_header_bar ();
+        });
+
+        notify["readonly"].connect (() => {
             update_header_bar ();
         });
 

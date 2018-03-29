@@ -35,6 +35,10 @@ public class Controller : GLib.Object {
     public Difficulty generator_grade {get; set;}
     public string game_name {get; set; default = "";}
 
+    /* Any game that was not saved by this app is regarded as read only - any alterations
+     * must be "Saved As" - which by default is writable. */
+    public bool is_readonly {get; set; default = false;}
+
     construct {
         model = new Model ();
         view = new View (model);
@@ -105,6 +109,7 @@ public class Controller : GLib.Object {
         bind_property ("game-state", model, "game-state");
         bind_property ("game-state", view, "game-state", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         bind_property ("game-name", view, "game-name", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
+        bind_property ("is-readonly", view, "readonly", BindingFlags.SYNC_CREATE | BindingFlags.DEFAULT);
 
 
         history.bind_property ("can-go-back", view, "can-go-back", BindingFlags.SYNC_CREATE | BindingFlags.DEFAULT);
@@ -180,14 +185,6 @@ public class Controller : GLib.Object {
     private string? load_game_dir = null;
     private string current_game_path;
     private string? temporary_game_path = null;
-    private bool is_readonly {
-        get {
-            return view.readonly;
-        }
-        set {
-            view.readonly = value;
-        }
-    }
 
     private bool is_solving {
         get {
@@ -197,13 +194,13 @@ public class Controller : GLib.Object {
 
     private uint rows {
         get {
-            return view.rows;
+            return dimensions.rows ();
         }
     }
 
     private uint cols {
         get {
-            return view.cols;
+            return dimensions.cols ();
         }
     }
 
