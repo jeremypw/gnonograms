@@ -1,3 +1,10 @@
+com.github.jeremypw.gnonograms (1.2.1) xenial; urgency=low
+
+  * Fix crash when dragging across grid edge
+  * Clear puzzle name when resized
+
+ -- Jeremy Wootten <jeremywootten@gmail.com>  Wed, 30 Mar 2018 17:01:00 +0000
+
 com.github.jeremypw.gnonograms (1.2.0) xenial; urgency=low
 
   * Hint button

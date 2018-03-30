@@ -23,6 +23,14 @@
         <category>LogicGame</category>
     </categories>
     <releases>
+        <release version="1.2.1" date="2018-03-30" urgency="low">
+            <description>
+                <ul>
+                    <li>Fix crash when dragging across grid edge</li>
+                    <li>Clear puzzle name when resized</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.2.0" date="2018-03-28" urgency="low">
             <description>
                 <ul>
