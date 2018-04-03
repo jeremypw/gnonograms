@@ -116,19 +116,7 @@ public class CellGrid : Gtk.DrawingArea {
             return;
         }
 
-#if HAVE_GDK_3_22
-        var dc = this.window ().begin_draw_frame (new Cairo.Region ());
-        cr = dc.get_cairo_context ();
-#else
-        var cr = Gdk.cairo_create (this.get_window ());
-#endif
-        cell.state = array.get_data_from_rc (cell.row, cell.col);
-        draw_cell (cr, cell, highlight);
-        draw_grid (cr);
-
-#if HAVE_GDK_3_22
-        this.window ().end_draw_frame ();
-#endif
+        queue_draw (); /* Scrolling does not work if just draw cell */
     }
 
 /*************/
