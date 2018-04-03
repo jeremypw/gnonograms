@@ -58,41 +58,7 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    public uint rows {
-        get {
-            return dimensions.rows ();
-        }
-    }
-
-    public uint cols {
-        get {
-            return dimensions.cols ();
-        }
-    }
-
-    private double _fontheight = -1;
-    public double fontheight {
-        get {
-            return _fontheight;
-        }
-
-        set {
-            if (value == _fontheight ||
-                value < MINFONTSIZE ||
-                value > MAXFONTSIZE) {
-
-                return;
-            }
-
-            bool smaller = value < _fontheight;
-            _fontheight = value;
-            row_clue_box.fontheight = _fontheight;
-            column_clue_box.fontheight = _fontheight;
-
-            set_window_size (smaller, !smaller);
-        }
-    }
-
+    public double fontheight { get; set; }
     public bool can_go_back {get; set;}
     public bool can_go_forward {get; set;}
 
@@ -294,6 +260,8 @@ public class View : Gtk.ApplicationWindow {
 
         bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
         bind_property ("previous-cell", cell_grid, "previous-cell", BindingFlags.BIDIRECTIONAL);
+        bind_property ("fontheight", row_clue_box, "fontheight", BindingFlags.DEFAULT);
+        bind_property ("fontheight", column_clue_box, "fontheight", BindingFlags.DEFAULT);
 
         /* Set actions */
         undo_button.set_action_name ("view.undo");
@@ -356,6 +324,13 @@ public class View : Gtk.ApplicationWindow {
 
         notify["strikeout-complete"].connect (() => {
             update_all_labels_completeness ();
+        });
+
+        notify["fontheight"].connect (() => {
+            fontheight = fontheight.clamp (MINFONTSIZE, MAXFONTSIZE);
+            bool smaller = fontheight < last_fontheight;
+            set_window_size (smaller, !smaller);
+            last_fontheight = fontheight;
         });
     }
 
@@ -513,6 +488,19 @@ public class View : Gtk.ApplicationWindow {
     private uint drawing_with_key;
     private int last_width = -1;
     private int last_height = -1;
+    private double last_fontheight = -1;
+
+    private uint rows {
+        get {
+            return dimensions.rows ();
+        }
+    }
+
+    private uint cols {
+        get {
+            return dimensions.cols ();
+        }
+    }
 
     private bool is_solving {
         get {

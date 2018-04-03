@@ -38,36 +38,7 @@ public class LabelBox : Gtk.Grid {
         }
     }
 
-    public double fontheight {
-        set {
-            if (size < 1) {
-                return;
-            }
-            var fh = value.clamp (Gnonograms.MINFONTSIZE, Gnonograms.MAXFONTSIZE);
-
-            var r = _dimensions.rows ();
-            var c = _dimensions.cols ();
-            var cell = 2 * fh;
-
-            /* Estimate maximum likely size required for random clues.
-             * If this is exceeded then label will reduce its fontsize. */
-            if (vertical_labels) {
-                min_width = (int)(c * cell);
-                min_height = (int)((r * 0.25 + 2) * cell * 1.1);
-            } else {
-                min_width = (int)((c * 0.25 + 2) * cell * 0.8);
-                min_height = (int)(r * cell);
-            }
-
-            if (fh != _fontheight) {
-                for (uint index = 0; index < size; index++) {
-                    labels[index].fontheight = fh;
-                }
-
-                _fontheight = fh;
-            }
-        }
-    }
+    public double fontheight { get; set; }
 
     public LabelBox (Gtk.Orientation orientation) {
         Object (column_homogeneous: true,
@@ -84,6 +55,30 @@ public class LabelBox : Gtk.Grid {
         size = 0;
         row_spacing = 0;
         column_spacing = 0;
+
+        notify["fontheight"].connect (() => {
+            if (size < 1) {
+                return;
+            }
+
+            var r = _dimensions.rows ();
+            var c = _dimensions.cols ();
+            var cell = 2 * fontheight;
+
+            /* Estimate maximum likely size required for random clues.
+             * If this is exceeded then label will reduce its fontsize. */
+            if (vertical_labels) {
+                min_width = (int)(c * cell);
+                min_height = (int)((r * 0.25 + 2) * cell * 1.1);
+            } else {
+                min_width = (int)((c * 0.25 + 2) * cell * 0.8);
+                min_height = (int)(r * cell);
+            }
+
+            for (uint index = 0; index < size; index++) {
+                labels[index].fontheight = fontheight;
+            }
+        });
     }
 
     public void highlight (uint index, bool is_highlight) {
@@ -120,9 +115,7 @@ public class LabelBox : Gtk.Grid {
     }
 
 /** PRIVATE **/
-    /* Backing variables - do not assign directly */
     private Dimensions _dimensions;
-    private double _fontheight;
     private int min_width = -1;
     private int min_height = -1;
     /* ----------------------------------------- */
