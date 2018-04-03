@@ -70,21 +70,26 @@ public class View : Gtk.ApplicationWindow {
         }
     }
 
-    private double _fontheight;
+    private double _fontheight = -1;
     public double fontheight {
         get {
             return _fontheight;
         }
 
         set {
-            if (value < MINFONTSIZE || value > MAXFONTSIZE) {
+            if (value == _fontheight ||
+                value < MINFONTSIZE ||
+                value > MAXFONTSIZE) {
+
                 return;
             }
 
+            bool smaller = value < _fontheight;
             _fontheight = value;
             row_clue_box.fontheight = _fontheight;
             column_clue_box.fontheight = _fontheight;
-            queue_draw ();
+
+            set_window_size (smaller, !smaller);
         }
     }
 
@@ -145,7 +150,7 @@ public class View : Gtk.ApplicationWindow {
         application.set_accels_for_action ("view.debug-row", {"<Alt>R"});
         application.set_accels_for_action ("view.debug-col", {"<Alt>C"});
 
-        resizable = false;
+        resizable = true;
         drawing_with_state = CellState.UNDEFINED;
 
         var provider = new Gtk.CssProvider ();
@@ -259,13 +264,13 @@ public class View : Gtk.ApplicationWindow {
         bind_property ("dimensions", column_clue_box, "dimensions");
 
         cell_grid = new CellGrid (model);
-        main_grid = new Gtk.Grid ();
 
+        main_grid = new Gtk.Grid ();
         main_grid.attach (cell_grid, 1, 1, 1, 1);
 
         main_grid.row_spacing = 0;
-        main_grid.column_spacing = 6;
-        main_grid.border_width = 6;
+        main_grid.column_spacing = GRID_COLUMN_SPACING;
+        main_grid.border_width = GRID_BORDER;
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for rows */
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
 
@@ -274,7 +279,10 @@ public class View : Gtk.ApplicationWindow {
         ev.scroll_event.connect (on_grid_scroll_event);
 
         ev.add (main_grid);
-        overlay.add (ev);
+        var sw = new Gtk.ScrolledWindow (null, null);
+        sw.add (ev);
+
+        overlay.add (sw);
         add (overlay);
 
         /* Connect signal handlers */
@@ -312,7 +320,7 @@ public class View : Gtk.ApplicationWindow {
             row_clue_box.dimensions = dimensions;
             column_clue_box.dimensions = dimensions;
             fontheight = get_default_fontheight_from_dimensions ();
-            queue_draw ();
+            set_window_size ();
         });
 
         notify["generator-grade"].connect (() => {
@@ -411,6 +419,10 @@ public class View : Gtk.ApplicationWindow {
     /**PRIVATE**/
     private const uint NOTIFICATION_TIMEOUT_SEC = 10;
     private const uint PROGRESS_DELAY_MSEC = 500;
+    private const int GRID_COLUMN_SPACING = 6;
+    private const int GRID_BORDER = 6;
+    private const int BOTTOM_BORDER = 12;
+    private const int END_BORDER = BOTTOM_BORDER + GRID_COLUMN_SPACING;
 
     private string BRAND_STYLESHEET = """
         @define-color textColorPrimary %s;
@@ -499,6 +511,8 @@ public class View : Gtk.ApplicationWindow {
 
     private CellState drawing_with_state;
     private uint drawing_with_key;
+    private int last_width = -1;
+    private int last_height = -1;
 
     private bool is_solving {
         get {
@@ -528,6 +542,41 @@ public class View : Gtk.ApplicationWindow {
         var max_w = (double)(monitor_area.width * 0.95) / ((double)cols * 2.4 + 3.2);
 
         return double.min (max_h, max_w);
+    }
+
+    private void set_window_size (bool no_grow = false, bool no_shrink = false) {
+
+        if (no_grow && no_shrink) {
+            return;
+        }
+
+        Gdk.Window? window = get_window ();
+        if (window == null) {
+            return;
+        }
+
+        var monitor_area  = Utils.get_monitor_area (screen, window);
+        Gtk.Requisition rmr, rnr, cmr, cnr;
+
+        row_clue_box.get_preferred_size (out rmr, out rnr);
+        column_clue_box.get_preferred_size (out cmr, out cnr);
+        var w = int.min ((int)(monitor_area.width), rnr.width + cnr.width + END_BORDER);
+        var h = int.min ((int)(monitor_area.height * 0.9), rnr.height + cnr.height + BOTTOM_BORDER);
+
+        if (no_grow && last_width > 0) {
+            w = int.min (last_width, w);
+            h = int.min (last_height, h);
+        } else if (no_shrink) {
+            w = int.max (last_width, w);
+            h = int.max (last_height, h);
+        }
+
+        last_width = w;
+        last_height = h;
+
+        this.resize (w, h);
+
+        queue_draw ();
     }
 
     private void update_header_bar () {
