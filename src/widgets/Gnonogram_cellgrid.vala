@@ -106,17 +106,8 @@ public class CellGrid : Gtk.DrawingArea {
         leave_notify_event.connect (on_leave_notify);
 
         notify["current-cell"].connect (() => {
-            highlight_cell (previous_cell, false);
-            highlight_cell (current_cell, true);
+            queue_draw ();
         });
-    }
-
-    public void highlight_cell (Cell cell, bool highlight) {
-        if (cell.equal (NULL_CELL)) {
-            return;
-        }
-
-        queue_draw (); /* Scrolling does not work if just draw cell */
     }
 
 /*************/
@@ -191,7 +182,8 @@ public class CellGrid : Gtk.DrawingArea {
         if (array != null) {
             /* Note, even tho' array holds CellStates, its iterator returns Cells */
             foreach (Cell c in array) {
-                draw_cell (cr, c);
+                bool highlight = (c.row == current_cell.row && c.col == current_cell.col);
+                draw_cell (cr, c, highlight);
             }
         }
 
@@ -208,15 +200,17 @@ public class CellGrid : Gtk.DrawingArea {
         uint c =  ((uint)(e.x / cell_width));
         /* Construct cell beneath pointer */
         Cell cell = {r, c, array.get_data_from_rc (r, c)};
-        update_current_cell (cell);
+        if (!cell.equal (current_cell)) {
+            update_current_cell (cell);
+        }
 
         return true;
     }
 
 /*** --------------------------------------------------- ***/
     private void update_current_cell (Cell target) {
-        previous_cell = current_cell;
-        current_cell = target;
+        previous_cell = current_cell.clone ();
+        current_cell = target.clone ();
     }
 
     private void draw_grid (Cairo.Context cr) {
@@ -331,24 +325,29 @@ public class CellGrid : Gtk.DrawingArea {
                 break;
         }
 
-        /* Draw cell body (draws over any previous highlight) */
+        cr.save ();
         cell_pattern.move_to (x, y); /* Not needed for plain fill, but may use a pattern later */
         cr.set_line_width (0.0);
         cr.rectangle (x, y, cell_body_width, cell_body_height);
         cr.set_source (cell_pattern.pattern);
         cr.fill ();
+        cr.restore ();
 
         if (highlight) {
+            cr.save ();
             /* Ensure highlight centred and slightly overlapping grid */
             highlight_pattern.move_to (x, y);
             cr.rectangle (x, y, cell_body_width, cell_body_width);
+            cr.clip ();
             cr.set_source (highlight_pattern.pattern);
+            cr.set_operator (Cairo.Operator.OVER);
             cr.paint ();
+            cr.restore ();
         }
     }
 
     private bool on_leave_notify () {
-        highlight_cell (current_cell, false);
+        previous_cell = NULL_CELL;
         current_cell = NULL_CELL;
         return false;
     }
@@ -381,7 +380,9 @@ public class CellGrid : Gtk.DrawingArea {
             context.fill ();
 
             pattern = new Cairo.Pattern.for_surface (surface);
+            pattern.set_extend (Cairo.Extend.NONE);
             pattern.set_matrix (matrix);
+
         }
 
         construct {
