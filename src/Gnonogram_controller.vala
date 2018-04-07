@@ -25,11 +25,7 @@ public class Controller : GLib.Object {
 /** PUBLIC SIGNALS, PROPERTIES, FUNCTIONS AND CONSTRUCTOR **/
     public signal void quit_app ();
 
-    public Gtk.Window window {
-        get {
-            return (Gtk.Window)view;
-        }
-    }
+    public Gtk.Window window {get {return (Gtk.Window)view;}}
     public GameState game_state {get; set;}
     public Dimensions dimensions {get; set;}
     public Difficulty generator_grade {get; set;}
@@ -38,6 +34,22 @@ public class Controller : GLib.Object {
     /* Any game that was not saved by this app is regarded as read only - any alterations
      * must be "Saved As" - which by default is writable. */
     public bool is_readonly {get; set; default = false;}
+
+    private View view;
+    private Model model;
+    private AbstractSolver? solver;
+    private AbstractGameGenerator? generator;
+    private GLib.Settings? settings;
+    private GLib.Settings? saved_state;
+    private Gnonograms.History history;
+    private string? save_game_dir = null;
+    private string? load_game_dir = null;
+    private string current_game_path;
+    private string? temporary_game_path = null;
+
+    private bool is_solving {get {return game_state == GameState.SOLVING;}}
+    private uint rows {get {return dimensions.rows ();}}
+    private uint cols {get {return dimensions.cols ();}}
 
     construct {
         model = new Model ();
@@ -174,35 +186,6 @@ public class Controller : GLib.Object {
     }
 
 /** PRIVATE **/
-    private View view;
-    private Model model;
-    private AbstractSolver? solver;
-    private AbstractGameGenerator? generator;
-    private GLib.Settings? settings;
-    private GLib.Settings? saved_state;
-    private Gnonograms.History history;
-    private string? save_game_dir = null;
-    private string? load_game_dir = null;
-    private string current_game_path;
-    private string? temporary_game_path = null;
-
-    private bool is_solving {
-        get {
-            return game_state == GameState.SOLVING;
-        }
-    }
-
-    private uint rows {
-        get {
-            return dimensions.rows ();
-        }
-    }
-
-    private uint cols {
-        get {
-            return dimensions.cols ();
-        }
-    }
 
     private void clear () {
         model.clear ();

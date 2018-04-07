@@ -45,42 +45,116 @@ public class View : Gtk.ApplicationWindow {
     public bool strikeout_complete {get; set;}
     public string game_name {get; set; default = "";}
     public bool readonly {get; set; default = false;}
-
-    private Difficulty _game_grade = Difficulty.UNDEFINED;
-    public Difficulty game_grade { // Difficulty of game actually loaded
-        get {
-            return _game_grade;
-        }
-
-        set {
-            _game_grade = value;
-            header_bar.subtitle = game_grade.to_string ();;
-        }
-    }
-
+    public Difficulty game_grade {get; set; default = Difficulty.UNDEFINED;}
     public double fontheight { get; set; }
     public bool can_go_back {get; set;}
     public bool can_go_forward {get; set;}
+    public bool restart_destructive {get; set; default = false;}
 
-    private bool _restart_destructive;
-    public bool restart_destructive {
-        private get {
-            return _restart_destructive;
+    /**PRIVATE**/
+    private const uint NOTIFICATION_TIMEOUT_SEC = 10;
+    private const uint PROGRESS_DELAY_MSEC = 500;
+    private const int GRID_COLUMN_SPACING = 6;
+    private const int GRID_BORDER = 6;
+    private const int BOTTOM_BORDER = 12;
+    private const int END_BORDER = BOTTOM_BORDER + GRID_COLUMN_SPACING;
+
+    private string BRAND_STYLESHEET = """
+        @define-color textColorPrimary %s;
+        @define-color textColorPrimaryShadow %s;
+        @define-color colorPrimary %s;
+        @define-color colorDarkBackground %s;
+        @define-color colorPaleBackground %s;
+
+        .linked {
+            border-radius: 4px 4px 4px 4px;
+            background-color: @colorPaleBackground;
+            color: @colorDarkBackground;
         }
 
-        set {
-            if (value) {
-                restart_button.image.get_style_context ().add_class ("warn");
-                restart_button.image.get_style_context ().remove_class ("dim");
-            } else {
-                restart_button.image.get_style_context ().remove_class ("warn");
-                restart_button.image.get_style_context ().add_class ("dim");
-
-            }
-
-            restart_button.sensitive = value;
+        *.label:selected {
+            background-color: @colorPaleBackground;
         }
-    }
+
+        *.dim {
+            opacity: 0.4;
+        }
+
+        .tooltip {
+            background-color: @colorPrimary;
+            border-radius: 4px 4px 4px 4px;
+        }
+
+        .progress  {
+            opacity: 1.0;
+            color: @textColorPrimary;
+            font-weight: bold
+        }
+
+        .warn {
+          color:  @error_color;
+        }
+
+        separator.vertical {
+            margin: 2px;
+        }
+
+    """.printf (Gnonograms.PALE_TEXT,
+                Gnonograms.DARK_SHADOW,
+                Gnonograms.DARK_BACKGROUND,
+                Gnonograms.DARK_BACKGROUND,
+                Gnonograms.PALE_BACKGROUND);
+
+    private const GLib.ActionEntry [] view_action_entries = {
+        {"undo", action_undo},
+        {"redo", action_redo},
+        {"zoom", action_zoom, "i"},
+        {"move-cursor", action_move_cursor, "(ii)"},
+        {"set-mode", action_set_mode, "u"},
+        {"open", action_open},
+        {"save", action_save},
+        {"save-as", action_save_as},
+        {"paint-cell", action_paint_cell, "u"},
+        {"check-errors", action_check_errors},
+        {"restart", action_restart},
+        {"solve", action_solve},
+        {"hint", action_hint},
+        {"debug-row", action_debug_row},
+        {"debug-col", action_debug_col}
+    };
+
+    private Gnonograms.LabelBox row_clue_box;
+    private Gnonograms.LabelBox column_clue_box;
+    private CellGrid cell_grid;
+    private Gtk.HeaderBar header_bar;
+    private AppMenu app_menu;
+    private Gtk.Grid main_grid;
+    private Gtk.Overlay overlay;
+    private Gnonograms.Progress_indicator progress_indicator;
+    private Granite.Widgets.Toast toast;
+    private ViewModeButton mode_switch;
+    private Gtk.Button load_game_button;
+    private Gtk.Button save_game_button;
+    private Gtk.Button save_game_as_button;
+    private Gtk.Button undo_button;
+    private Gtk.Button redo_button;
+    private Gtk.Button check_correct_button;
+    private Gtk.Button hint_button;
+    private Gtk.Button auto_solve_button;
+    private Gtk.Button restart_button;
+    /* ----------------------------------------- */
+
+    private CellState drawing_with_state;
+    private uint drawing_with_key;
+    private int last_width = -1;
+    private int last_height = -1;
+    private double last_fontheight = -1;
+
+    private uint rows {get {return dimensions.rows ();}}
+    private uint cols {get {return dimensions.cols ();}}
+    private bool is_solving {get {return game_state == GameState.SOLVING;}}
+    public Cell current_cell {get; set;}
+    public Cell previous_cell {get; set;}
 
     public View (Model _model) {
         Object (
@@ -170,7 +244,7 @@ public class View : Gtk.ApplicationWindow {
         check_correct_button.tooltip_text = _("Go Back to Last Correct Position");
         check_correct_button.sensitive = false;
 
-        restart_button = new Gtk.Button ();
+        restart_button = new RestartButton (); /* private class - see below */
         img = new Gtk.Image.from_icon_name ("view-refresh-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         restart_button.image = img;
 
@@ -187,13 +261,7 @@ public class View : Gtk.ApplicationWindow {
         auto_solve_button.sensitive = false;
 
         app_menu = new AppMenu ();
-        bind_property ("dimensions", app_menu, "dimensions", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
-        bind_property ("generator-grade", app_menu, "grade", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
-        bind_property ("game-name", app_menu, "title", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
-        bind_property ("strikeout-complete", app_menu, "strikeout-complete", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
-
         mode_switch = new ViewModeButton ();
-        bind_property ("game-state", mode_switch, "mode", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
 
         progress_indicator = new Gnonograms.Progress_indicator ();
         progress_indicator.get_style_context ().add_class ("progress");
@@ -226,9 +294,6 @@ public class View : Gtk.ApplicationWindow {
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL);
 
-        bind_property ("dimensions", row_clue_box, "dimensions");
-        bind_property ("dimensions", column_clue_box, "dimensions");
-
         cell_grid = new CellGrid (model);
 
         main_grid = new Gtk.Grid ();
@@ -255,13 +320,7 @@ public class View : Gtk.ApplicationWindow {
         cell_grid.leave_notify_event.connect (on_grid_leave);
         cell_grid.button_press_event.connect (on_grid_button_press);
         cell_grid.button_release_event.connect (stop_painting);
-
         key_release_event.connect (on_key_release_event);
-
-        bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
-        bind_property ("previous-cell", cell_grid, "previous-cell", BindingFlags.BIDIRECTIONAL);
-        bind_property ("fontheight", row_clue_box, "fontheight", BindingFlags.DEFAULT);
-        bind_property ("fontheight", column_clue_box, "fontheight", BindingFlags.DEFAULT);
 
         /* Set actions */
         undo_button.set_action_name ("view.undo");
@@ -274,6 +333,21 @@ public class View : Gtk.ApplicationWindow {
         hint_button.set_action_name ("view.hint");
         auto_solve_button.set_action_name ("view.solve");
 
+        /* Bind some properties */
+        bind_property ("restart-destructive", restart_button, "restart-destructive", BindingFlags.DEFAULT | BindingFlags.SYNC_CREATE);
+        bind_property ("dimensions", app_menu, "dimensions", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
+        bind_property ("generator-grade", app_menu, "grade", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
+        bind_property ("game-name", app_menu, "title", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
+        bind_property ("strikeout-complete", app_menu, "strikeout-complete", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
+        bind_property ("game-state", mode_switch, "mode", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
+        bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
+        bind_property ("previous-cell", cell_grid, "previous-cell", BindingFlags.BIDIRECTIONAL);
+        bind_property ("fontheight", row_clue_box, "fontheight", BindingFlags.DEFAULT);
+        bind_property ("fontheight", column_clue_box, "fontheight", BindingFlags.DEFAULT);
+        bind_property ("dimensions", row_clue_box, "dimensions");
+        bind_property ("dimensions", column_clue_box, "dimensions");
+
+
         /* Monitor certain bound properties */
         notify["game-state"].connect (() => {
             if (game_state != GameState.UNDEFINED) {
@@ -282,6 +356,10 @@ public class View : Gtk.ApplicationWindow {
                 update_all_labels_completeness ();
                 queue_draw ();
             }
+        });
+
+        notify["game-grade"].connect (() => {
+            header_bar.subtitle = game_grade.to_string ();
         });
 
         notify["dimensions"].connect (() => {
@@ -391,126 +469,7 @@ public class View : Gtk.ApplicationWindow {
         queue_draw ();
     }
 
-    /**PRIVATE**/
-    private const uint NOTIFICATION_TIMEOUT_SEC = 10;
-    private const uint PROGRESS_DELAY_MSEC = 500;
-    private const int GRID_COLUMN_SPACING = 6;
-    private const int GRID_BORDER = 6;
-    private const int BOTTOM_BORDER = 12;
-    private const int END_BORDER = BOTTOM_BORDER + GRID_COLUMN_SPACING;
-
-    private string BRAND_STYLESHEET = """
-        @define-color textColorPrimary %s;
-        @define-color textColorPrimaryShadow %s;
-        @define-color colorPrimary %s;
-        @define-color colorDarkBackground %s;
-        @define-color colorPaleBackground %s;
-
-        .linked {
-            border-radius: 4px 4px 4px 4px;
-            background-color: @colorPaleBackground;
-            color: @colorDarkBackground;
-        }
-
-        *.label:selected {
-            background-color: @colorPaleBackground;
-        }
-
-        *.dim {
-            opacity: 0.4;
-        }
-
-        .tooltip {
-            background-color: @colorPrimary;
-            border-radius: 4px 4px 4px 4px;
-        }
-
-        .progress  {
-            opacity: 1.0;
-            color: @textColorPrimary;
-            font-weight: bold
-        }
-
-        .warn {
-          color:  @error_color;
-        }
-
-        separator.vertical {
-            margin: 2px;
-        }
-
-    """.printf (Gnonograms.PALE_TEXT,
-                Gnonograms.DARK_SHADOW,
-                Gnonograms.DARK_BACKGROUND,
-                Gnonograms.DARK_BACKGROUND,
-                Gnonograms.PALE_BACKGROUND);
-
-    private const GLib.ActionEntry [] view_action_entries = {
-        {"undo", action_undo},
-        {"redo", action_redo},
-        {"zoom", action_zoom, "i"},
-        {"move-cursor", action_move_cursor, "(ii)"},
-        {"set-mode", action_set_mode, "u"},
-        {"open", action_open},
-        {"save", action_save},
-        {"save-as", action_save_as},
-        {"paint-cell", action_paint_cell, "u"},
-        {"check-errors", action_check_errors},
-        {"restart", action_restart},
-        {"solve", action_solve},
-        {"hint", action_hint},
-        {"debug-row", action_debug_row},
-        {"debug-col", action_debug_col}
-    };
-
-    private Gnonograms.LabelBox row_clue_box;
-    private Gnonograms.LabelBox column_clue_box;
-    private CellGrid cell_grid;
-    private Gtk.HeaderBar header_bar;
-    private AppMenu app_menu;
-    private Gtk.Grid main_grid;
-    private Gtk.Overlay overlay;
-    private Gnonograms.Progress_indicator progress_indicator;
-    private Granite.Widgets.Toast toast;
-    private ViewModeButton mode_switch;
-    private Gtk.Button load_game_button;
-    private Gtk.Button save_game_button;
-    private Gtk.Button save_game_as_button;
-    private Gtk.Button undo_button;
-    private Gtk.Button redo_button;
-    private Gtk.Button check_correct_button;
-    private Gtk.Button hint_button;
-    private Gtk.Button auto_solve_button;
-    private Gtk.Button restart_button;
-    /* ----------------------------------------- */
-
-    private CellState drawing_with_state;
-    private uint drawing_with_key;
-    private int last_width = -1;
-    private int last_height = -1;
-    private double last_fontheight = -1;
-
-    private uint rows {
-        get {
-            return dimensions.rows ();
-        }
-    }
-
-    private uint cols {
-        get {
-            return dimensions.cols ();
-        }
-    }
-
-    private bool is_solving {
-        get {
-            return game_state == GameState.SOLVING;
-        }
-    }
-
-    public Cell current_cell {get; set;}
-    public Cell previous_cell {get; set;}
-
+    /*** PRIVATE ***/
     private double get_default_fontheight_from_dimensions () {
         var monitor_area = Gdk.Rectangle () {width = 1024, height = 768};
 
@@ -624,7 +583,7 @@ public class View : Gtk.ApplicationWindow {
         var lbox = is_col ? column_clue_box : row_clue_box;
         var blocks = Gee.List.empty<Block> ();
 
-        if (strikeout_complete) {
+        if (game_state == GameState.SOLVING && strikeout_complete) {
              blocks = model.get_complete_blocks_from_working (idx, is_col);
         }
 
@@ -735,6 +694,7 @@ public class View : Gtk.ApplicationWindow {
         return false;
     }
 
+    /** Action callbacks **/
     private void action_restart () {
         restart_request ();
     }
@@ -790,7 +750,6 @@ public class View : Gtk.ApplicationWindow {
         param.get_child (0, "i", out dr);
         param.get_child (1, "i", out dc);
 
-    /* The relative coords are given as a point */
         if (current_cell == NULL_CELL) {
             return;
         }
@@ -824,6 +783,27 @@ public class View : Gtk.ApplicationWindow {
         }
 
         make_move_at_cell ();
+    }
+}
+
+private class RestartButton : Gtk.Button {
+    public bool restart_destructive {get; set;}
+
+    construct {
+        restart_destructive = false;
+
+        notify["restart-destructive"].connect (() => {
+            if (restart_destructive) {
+                image.get_style_context ().add_class ("warn");
+                image.get_style_context ().remove_class ("dim");
+            } else {
+                image.get_style_context ().remove_class ("warn");
+                image.get_style_context ().add_class ("dim");
+
+            }
+        });
+
+        bind_property ("sensitive", this, "restart-destructive", BindingFlags.DEFAULT);
     }
 }
 }
