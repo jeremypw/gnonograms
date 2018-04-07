@@ -49,26 +49,7 @@ public class View : Gtk.ApplicationWindow {
     public double fontheight { get; set; }
     public bool can_go_back {get; set;}
     public bool can_go_forward {get; set;}
-
-    private bool _restart_destructive;
-    public bool restart_destructive {
-        private get {
-            return _restart_destructive;
-        }
-
-        set {
-            if (value) {
-                restart_button.image.get_style_context ().add_class ("warn");
-                restart_button.image.get_style_context ().remove_class ("dim");
-            } else {
-                restart_button.image.get_style_context ().remove_class ("warn");
-                restart_button.image.get_style_context ().add_class ("dim");
-
-            }
-
-            restart_button.sensitive = value;
-        }
-    }
+    public bool restart_destructive {get; set; default = false;}
 
     public View (Model _model) {
         Object (
@@ -158,7 +139,7 @@ public class View : Gtk.ApplicationWindow {
         check_correct_button.tooltip_text = _("Go Back to Last Correct Position");
         check_correct_button.sensitive = false;
 
-        restart_button = new Gtk.Button ();
+        restart_button = new RestartButton (); /* private class - see below */
         img = new Gtk.Image.from_icon_name ("view-refresh-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
         restart_button.image = img;
 
@@ -175,13 +156,7 @@ public class View : Gtk.ApplicationWindow {
         auto_solve_button.sensitive = false;
 
         app_menu = new AppMenu ();
-        bind_property ("dimensions", app_menu, "dimensions", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
-        bind_property ("generator-grade", app_menu, "grade", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
-        bind_property ("game-name", app_menu, "title", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
-        bind_property ("strikeout-complete", app_menu, "strikeout-complete", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
-
         mode_switch = new ViewModeButton ();
-        bind_property ("game-state", mode_switch, "mode", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
 
         progress_indicator = new Gnonograms.Progress_indicator ();
         progress_indicator.get_style_context ().add_class ("progress");
@@ -214,9 +189,6 @@ public class View : Gtk.ApplicationWindow {
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL);
 
-        bind_property ("dimensions", row_clue_box, "dimensions");
-        bind_property ("dimensions", column_clue_box, "dimensions");
-
         cell_grid = new CellGrid (model);
 
         main_grid = new Gtk.Grid ();
@@ -243,13 +215,7 @@ public class View : Gtk.ApplicationWindow {
         cell_grid.leave_notify_event.connect (on_grid_leave);
         cell_grid.button_press_event.connect (on_grid_button_press);
         cell_grid.button_release_event.connect (stop_painting);
-
         key_release_event.connect (on_key_release_event);
-
-        bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
-        bind_property ("previous-cell", cell_grid, "previous-cell", BindingFlags.BIDIRECTIONAL);
-        bind_property ("fontheight", row_clue_box, "fontheight", BindingFlags.DEFAULT);
-        bind_property ("fontheight", column_clue_box, "fontheight", BindingFlags.DEFAULT);
 
         /* Set actions */
         undo_button.set_action_name ("view.undo");
@@ -261,6 +227,21 @@ public class View : Gtk.ApplicationWindow {
         restart_button.set_action_name ("view.restart");
         hint_button.set_action_name ("view.hint");
         auto_solve_button.set_action_name ("view.solve");
+
+        /* Bind some properties */
+        bind_property ("restart-destructive", restart_button, "restart-destructive", BindingFlags.DEFAULT | BindingFlags.SYNC_CREATE);
+        bind_property ("dimensions", app_menu, "dimensions", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
+        bind_property ("generator-grade", app_menu, "grade", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
+        bind_property ("game-name", app_menu, "title", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
+        bind_property ("strikeout-complete", app_menu, "strikeout-complete", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
+        bind_property ("game-state", mode_switch, "mode", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
+        bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
+        bind_property ("previous-cell", cell_grid, "previous-cell", BindingFlags.BIDIRECTIONAL);
+        bind_property ("fontheight", row_clue_box, "fontheight", BindingFlags.DEFAULT);
+        bind_property ("fontheight", column_clue_box, "fontheight", BindingFlags.DEFAULT);
+        bind_property ("dimensions", row_clue_box, "dimensions");
+        bind_property ("dimensions", column_clue_box, "dimensions");
+
 
         /* Monitor certain bound properties */
         notify["game-state"].connect (() => {
@@ -482,24 +463,9 @@ public class View : Gtk.ApplicationWindow {
     private int last_height = -1;
     private double last_fontheight = -1;
 
-    private uint rows {
-        get {
-            return dimensions.rows ();
-        }
-    }
-
-    private uint cols {
-        get {
-            return dimensions.cols ();
-        }
-    }
-
-    private bool is_solving {
-        get {
-            return game_state == GameState.SOLVING;
-        }
-    }
-
+    private uint rows {get {return dimensions.rows ();}}
+    private uint cols {get {return dimensions.cols ();}}
+    private bool is_solving {get {return game_state == GameState.SOLVING;}}
     public Cell current_cell {get; set;}
     public Cell previous_cell {get; set;}
 
@@ -727,6 +693,7 @@ public class View : Gtk.ApplicationWindow {
         return false;
     }
 
+    /** Action callbacks **/
     private void action_restart () {
         restart_request ();
     }
@@ -782,7 +749,6 @@ public class View : Gtk.ApplicationWindow {
         param.get_child (0, "i", out dr);
         param.get_child (1, "i", out dc);
 
-    /* The relative coords are given as a point */
         if (current_cell == NULL_CELL) {
             return;
         }
@@ -816,6 +782,27 @@ public class View : Gtk.ApplicationWindow {
         }
 
         make_move_at_cell ();
+    }
+}
+
+private class RestartButton : Gtk.Button {
+    public bool restart_destructive {get; set;}
+
+    construct {
+        restart_destructive = false;
+
+        notify["restart-destructive"].connect (() => {
+            if (restart_destructive) {
+                image.get_style_context ().add_class ("warn");
+                image.get_style_context ().remove_class ("dim");
+            } else {
+                image.get_style_context ().remove_class ("warn");
+                image.get_style_context ().add_class ("dim");
+
+            }
+        });
+
+        bind_property ("sensitive", this, "restart-destructive", BindingFlags.DEFAULT);
     }
 }
 }
