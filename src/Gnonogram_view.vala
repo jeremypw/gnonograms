@@ -51,6 +51,111 @@ public class View : Gtk.ApplicationWindow {
     public bool can_go_forward {get; set;}
     public bool restart_destructive {get; set; default = false;}
 
+    /**PRIVATE**/
+    private const uint NOTIFICATION_TIMEOUT_SEC = 10;
+    private const uint PROGRESS_DELAY_MSEC = 500;
+    private const int GRID_COLUMN_SPACING = 6;
+    private const int GRID_BORDER = 6;
+    private const int BOTTOM_BORDER = 12;
+    private const int END_BORDER = BOTTOM_BORDER + GRID_COLUMN_SPACING;
+
+    private string BRAND_STYLESHEET = """
+        @define-color textColorPrimary %s;
+        @define-color textColorPrimaryShadow %s;
+        @define-color colorPrimary %s;
+        @define-color colorDarkBackground %s;
+        @define-color colorPaleBackground %s;
+
+        .linked {
+            border-radius: 4px 4px 4px 4px;
+            background-color: @colorPaleBackground;
+            color: @colorDarkBackground;
+        }
+
+        *.label:selected {
+            background-color: @colorPaleBackground;
+        }
+
+        *.dim {
+            opacity: 0.4;
+        }
+
+        .tooltip {
+            background-color: @colorPrimary;
+            border-radius: 4px 4px 4px 4px;
+        }
+
+        .progress  {
+            opacity: 1.0;
+            color: @textColorPrimary;
+            font-weight: bold
+        }
+
+        .warn {
+          color:  @error_color;
+        }
+
+        separator.vertical {
+            margin: 2px;
+        }
+
+    """.printf (Gnonograms.PALE_TEXT,
+                Gnonograms.DARK_SHADOW,
+                Gnonograms.DARK_BACKGROUND,
+                Gnonograms.DARK_BACKGROUND,
+                Gnonograms.PALE_BACKGROUND);
+
+    private const GLib.ActionEntry [] view_action_entries = {
+        {"undo", action_undo},
+        {"redo", action_redo},
+        {"zoom", action_zoom, "i"},
+        {"move-cursor", action_move_cursor, "(ii)"},
+        {"set-mode", action_set_mode, "u"},
+        {"open", action_open},
+        {"save", action_save},
+        {"save-as", action_save_as},
+        {"paint-cell", action_paint_cell, "u"},
+        {"check-errors", action_check_errors},
+        {"restart", action_restart},
+        {"solve", action_solve},
+        {"hint", action_hint},
+        {"debug-row", action_debug_row},
+        {"debug-col", action_debug_col}
+    };
+
+    private Gnonograms.LabelBox row_clue_box;
+    private Gnonograms.LabelBox column_clue_box;
+    private CellGrid cell_grid;
+    private Gtk.HeaderBar header_bar;
+    private AppMenu app_menu;
+    private Gtk.Grid main_grid;
+    private Gtk.Overlay overlay;
+    private Gnonograms.Progress_indicator progress_indicator;
+    private Granite.Widgets.Toast toast;
+    private ViewModeButton mode_switch;
+    private Gtk.Button load_game_button;
+    private Gtk.Button save_game_button;
+    private Gtk.Button save_game_as_button;
+    private Gtk.Button undo_button;
+    private Gtk.Button redo_button;
+    private Gtk.Button check_correct_button;
+    private Gtk.Button hint_button;
+    private Gtk.Button auto_solve_button;
+    private Gtk.Button restart_button;
+    /* ----------------------------------------- */
+
+    private CellState drawing_with_state;
+    private uint drawing_with_key;
+    private int last_width = -1;
+    private int last_height = -1;
+    private double last_fontheight = -1;
+
+    private uint rows {get {return dimensions.rows ();}}
+    private uint cols {get {return dimensions.cols ();}}
+    private bool is_solving {get {return game_state == GameState.SOLVING;}}
+    public Cell current_cell {get; set;}
+    public Cell previous_cell {get; set;}
+
     public View (Model _model) {
         Object (
             model: _model
@@ -364,111 +469,7 @@ public class View : Gtk.ApplicationWindow {
         queue_draw ();
     }
 
-    /**PRIVATE**/
-    private const uint NOTIFICATION_TIMEOUT_SEC = 10;
-    private const uint PROGRESS_DELAY_MSEC = 500;
-    private const int GRID_COLUMN_SPACING = 6;
-    private const int GRID_BORDER = 6;
-    private const int BOTTOM_BORDER = 12;
-    private const int END_BORDER = BOTTOM_BORDER + GRID_COLUMN_SPACING;
-
-    private string BRAND_STYLESHEET = """
-        @define-color textColorPrimary %s;
-        @define-color textColorPrimaryShadow %s;
-        @define-color colorPrimary %s;
-        @define-color colorDarkBackground %s;
-        @define-color colorPaleBackground %s;
-
-        .linked {
-            border-radius: 4px 4px 4px 4px;
-            background-color: @colorPaleBackground;
-            color: @colorDarkBackground;
-        }
-
-        *.label:selected {
-            background-color: @colorPaleBackground;
-        }
-
-        *.dim {
-            opacity: 0.4;
-        }
-
-        .tooltip {
-            background-color: @colorPrimary;
-            border-radius: 4px 4px 4px 4px;
-        }
-
-        .progress  {
-            opacity: 1.0;
-            color: @textColorPrimary;
-            font-weight: bold
-        }
-
-        .warn {
-          color:  @error_color;
-        }
-
-        separator.vertical {
-            margin: 2px;
-        }
-
-    """.printf (Gnonograms.PALE_TEXT,
-                Gnonograms.DARK_SHADOW,
-                Gnonograms.DARK_BACKGROUND,
-                Gnonograms.DARK_BACKGROUND,
-                Gnonograms.PALE_BACKGROUND);
-
-    private const GLib.ActionEntry [] view_action_entries = {
-        {"undo", action_undo},
-        {"redo", action_redo},
-        {"zoom", action_zoom, "i"},
-        {"move-cursor", action_move_cursor, "(ii)"},
-        {"set-mode", action_set_mode, "u"},
-        {"open", action_open},
-        {"save", action_save},
-        {"save-as", action_save_as},
-        {"paint-cell", action_paint_cell, "u"},
-        {"check-errors", action_check_errors},
-        {"restart", action_restart},
-        {"solve", action_solve},
-        {"hint", action_hint},
-        {"debug-row", action_debug_row},
-        {"debug-col", action_debug_col}
-    };
-
-    private Gnonograms.LabelBox row_clue_box;
-    private Gnonograms.LabelBox column_clue_box;
-    private CellGrid cell_grid;
-    private Gtk.HeaderBar header_bar;
-    private AppMenu app_menu;
-    private Gtk.Grid main_grid;
-    private Gtk.Overlay overlay;
-    private Gnonograms.Progress_indicator progress_indicator;
-    private Granite.Widgets.Toast toast;
-    private ViewModeButton mode_switch;
-    private Gtk.Button load_game_button;
-    private Gtk.Button save_game_button;
-    private Gtk.Button save_game_as_button;
-    private Gtk.Button undo_button;
-    private Gtk.Button redo_button;
-    private Gtk.Button check_correct_button;
-    private Gtk.Button hint_button;
-    private Gtk.Button auto_solve_button;
-    private Gtk.Button restart_button;
-    /* ----------------------------------------- */
-
-    private CellState drawing_with_state;
-    private uint drawing_with_key;
-    private int last_width = -1;
-    private int last_height = -1;
-    private double last_fontheight = -1;
-
-    private uint rows {get {return dimensions.rows ();}}
-    private uint cols {get {return dimensions.cols ();}}
-    private bool is_solving {get {return game_state == GameState.SOLVING;}}
-    public Cell current_cell {get; set;}
-    public Cell previous_cell {get; set;}
-
+    /*** PRIVATE ***/
     private double get_default_fontheight_from_dimensions () {
         var monitor_area = Gdk.Rectangle () {width = 1024, height = 768};
 
