@@ -198,8 +198,13 @@ public class CellGrid : Gtk.DrawingArea {
         /* Calculate which cell the pointer is over */
         uint r =  ((uint)((e.y) / cell_height));
         uint c =  ((uint)(e.x / cell_width));
+
+        if (r >= rows || c >= cols) {
+            return true;
+        }
         /* Construct cell beneath pointer */
         Cell cell = {r, c, array.get_data_from_rc (r, c)};
+
         if (!cell.equal (current_cell)) {
             update_current_cell (cell);
         }
