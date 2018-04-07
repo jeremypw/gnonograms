@@ -624,7 +624,7 @@ public class View : Gtk.ApplicationWindow {
         var lbox = is_col ? column_clue_box : row_clue_box;
         var blocks = Gee.List.empty<Block> ();
 
-        if (strikeout_complete) {
+        if (game_state == GameState.SOLVING && strikeout_complete) {
              blocks = model.get_complete_blocks_from_working (idx, is_col);
         }
 
