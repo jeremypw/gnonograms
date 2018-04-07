@@ -45,19 +45,7 @@ public class View : Gtk.ApplicationWindow {
     public bool strikeout_complete {get; set;}
     public string game_name {get; set; default = "";}
     public bool readonly {get; set; default = false;}
-
-    private Difficulty _game_grade = Difficulty.UNDEFINED;
-    public Difficulty game_grade { // Difficulty of game actually loaded
-        get {
-            return _game_grade;
-        }
-
-        set {
-            _game_grade = value;
-            header_bar.subtitle = game_grade.to_string ();;
-        }
-    }
-
+    public Difficulty game_grade {get; set; default = Difficulty.UNDEFINED;}
     public double fontheight { get; set; }
     public bool can_go_back {get; set;}
     public bool can_go_forward {get; set;}
@@ -282,6 +270,10 @@ public class View : Gtk.ApplicationWindow {
                 update_all_labels_completeness ();
                 queue_draw ();
             }
+        });
+
+        notify["game-grade"].connect (() => {
+            header_bar.subtitle = game_grade.to_string ();
         });
 
         notify["dimensions"].connect (() => {
