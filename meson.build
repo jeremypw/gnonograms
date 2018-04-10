@@ -11,6 +11,15 @@ add_global_arguments (
     language:'c'
 )
 
+GTK322 = dependency('gtk+-3.0', version: '>=3.22')
+
+if GTK322.found ()
+    add_project_arguments (
+        '--define=HAVE_GTK_3_22',
+        language:'vala'
+    )
+endif
+
 executable (
     meson.project_name (),
     'src/gnonograms.vala',
