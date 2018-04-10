@@ -142,6 +142,7 @@ public class Controller : GLib.Object {
             load_game.begin (game, true, (obj, res) => {
                 view.fontheight = fh; /* Ensure restored fontheight applied */
                 if (!load_game.end (res)) {
+                    warning ("Load game failed");
                     restore_dimensions ();
                     new_or_random_game ();
                 }
@@ -150,6 +151,7 @@ public class Controller : GLib.Object {
             restore_game.begin ((obj, res) => {
                 view.fontheight = fh; /* Ensure restored fontheight applied */
                 if (!restore_game.end (res)) {
+                    warning ("Restore game failed");
                     restore_dimensions ();
                     new_game ();
                 }

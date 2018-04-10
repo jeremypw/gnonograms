@@ -106,13 +106,22 @@ public class Filereader : Object {
         string[] bodies = {};
 
         stream.read_upto ("[", 1, out header_length, null);
+        stream.read_byte ();
 
-        while (true) {
-            headings += stream.read_upto ("]", 1, out header_length, null);
-            bodies += stream.read_upto ("[", 1, out body_length, null);
-            if (header_length == 0  ||  body_length == 0) {
-                break;
+        try {
+            while (true) {
+                    headings += stream.read_upto ("]", 1, out header_length, null);
+                    stream.read_byte ();
+                    bodies += stream.read_upto ("[", 1, out body_length, null);
+                    stream.read_byte ();
+
+                if (header_length == 0  ||  body_length == 0) {
+                    break;
+                }
             }
+
+        } catch (GLib.Error e) {
+            /* Ignore read error caused by end of file */
         }
 
         if (!parse_gnonogram_headings_and_bodies (headings, bodies)) {
@@ -123,6 +132,13 @@ public class Filereader : Object {
     private bool parse_gnonogram_headings_and_bodies (string[] headings, string[] bodies) {
         bool in_error = false;
         int index = 0;
+
+        var hl = headings.length;
+        var bl = bodies.length;
+
+        if (hl < 3 || bl < 3 || hl != bl) { /* Need at least dimensions and clues */
+            return false;
+        }
 
         foreach (var heading in headings) {
             string body = bodies[index];
