@@ -137,11 +137,11 @@ public class Controller : GLib.Object {
         var fh = saved_state.get_double ("font-height");
         saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
 
+        dimensions = {15, 10}; /* Fallback dimensions */
         if (game != null) {
             load_game.begin (game, true, (obj, res) => {
                 view.fontheight = fh; /* Ensure restored fontheight applied */
                 if (!load_game.end (res)) {
-                    critical ("Unable to load specified game");
                     restore_dimensions ();
                     new_or_random_game ();
                 }
@@ -151,7 +151,6 @@ public class Controller : GLib.Object {
                 view.fontheight = fh; /* Ensure restored fontheight applied */
                 if (!restore_game.end (res)) {
                     restore_dimensions ();
-                    critical ("Unable to restore game");
                     new_game ();
                 }
             });
@@ -309,10 +308,8 @@ public class Controller : GLib.Object {
 
     private void restore_dimensions () {
         if (settings != null) {
-            dimensions = {settings.get_uint ("columns"), settings.get_uint ("rows")};
-        } else {
-            dimensions = {15, 10};
-        };
+            dimensions = {settings.get_uint ("columns").clamp (10, 50), settings.get_uint ("rows").clamp (10, 50)};
+        }
     }
 
     private async bool restore_game () {
@@ -384,7 +381,7 @@ public class Controller : GLib.Object {
 
                 /* Avoid error dialog on first run */
                 if (basename != Gnonograms.UNSAVED_FILENAME) {
-                   Utils.show_error_dialog (_("Unable to load %s").printf (basename), e.message, window);
+                    view.send_notification (_("Unable to load game. %s").printf (e.message));
                 }
             }
 
@@ -416,8 +413,7 @@ public class Controller : GLib.Object {
                 load_game_dir = reader.game_file.get_parent ().get_uri ();
             }
         } else {
-            /* There is something wrong with the file being loaded */
-            Utils.show_error_dialog (_("Invalid game file"), reader.err_msg, window);
+            view.send_notification (_("Unable to load game. %s").printf (reader.err_msg));
             return false;
         }
 

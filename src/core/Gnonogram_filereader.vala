@@ -105,11 +105,11 @@ public class Filereader : Object {
         string[] headings = {};
         string[] bodies = {};
 
-        stream.read_until ("[", out header_length, null);
+        stream.read_upto ("[", 1, out header_length, null);
 
         while (true) {
-            headings += stream.read_until ("]", out header_length, null);
-            bodies += stream.read_until ("[", out body_length, null);
+            headings += stream.read_upto ("]", 1, out header_length, null);
+            bodies += stream.read_upto ("[", 1, out body_length, null);
             if (header_length == 0  ||  body_length == 0) {
                 break;
             }
