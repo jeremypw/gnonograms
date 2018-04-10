@@ -309,18 +309,6 @@ namespace Utils {
         return response;
     }
 
-    public static void show_info_dialog (string primary_text, string? secondary_text = null,
-                                 Gtk.Window? parent = null) {
-
-        show_dlg (primary_text, Gtk.MessageType.INFO, secondary_text, parent);
-    }
-
-    public static void show_warning_dialog (string primary_text, string? secondary_text = null,
-                                            Gtk.Window? parent = null) {
-
-        show_dlg (primary_text, Gtk.MessageType.WARNING, secondary_text, parent);
-    }
-
     public static void show_error_dialog (string primary_text, string? secondary_text = null,
                                           Gtk.Window? parent = null) {
 
