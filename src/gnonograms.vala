@@ -38,7 +38,7 @@ public class App : Granite.Application {
         });
 
         add_action (quit_action);
-        add_accelerator ("<Ctrl>q", "app.quit", null);
+        set_accels_for_action ("app.quit", {"<Ctrl>q"});
     }
 
     public override void startup () {
