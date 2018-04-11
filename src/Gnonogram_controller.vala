@@ -29,7 +29,7 @@ public class Controller : GLib.Object {
     public GameState game_state {get; set;}
     public Dimensions dimensions {get; set;}
     public Difficulty generator_grade {get; set;}
-    public string game_name {get; set; default = "";}
+    public string game_name {get; set;}
 
     /* Any game that was not saved by this app is regarded as read only - any alterations
      * must be "Saved As" - which by default is writable. */
@@ -52,6 +52,7 @@ public class Controller : GLib.Object {
     private uint cols {get {return dimensions.cols ();}}
 
     construct {
+        game_name = UNTITLED_NAME;
         model = new Model ();
         view = new View (model);
         history = new Gnonograms.History ();

@@ -56,7 +56,7 @@ public class View : Gtk.ApplicationWindow {
     private const uint PROGRESS_DELAY_MSEC = 500;
     private const int GRID_COLUMN_SPACING = 6;
     private const int GRID_BORDER = 6;
-    private const int BOTTOM_BORDER = 12;
+    private const int BOTTOM_BORDER = 100;
     private const int END_BORDER = BOTTOM_BORDER + GRID_COLUMN_SPACING;
 
     private string BRAND_STYLESHEET = """
