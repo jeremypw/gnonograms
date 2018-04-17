@@ -52,7 +52,6 @@ public class View : Gtk.ApplicationWindow {
     public bool restart_destructive {get; set; default = false;}
 
     /**PRIVATE**/
-    private const uint NOTIFICATION_TIMEOUT_SEC = 10;
     private const uint PROGRESS_DELAY_MSEC = 500;
     private const int GRID_COLUMN_SPACING = 6;
     private const int GRID_BORDER = 6;
@@ -440,12 +439,8 @@ public class View : Gtk.ApplicationWindow {
     }
 
     public void send_notification (string text) {
-        toast.title = text;
+        toast.title = text.dup ();
         toast.send_notification ();
-        Timeout.add_seconds (NOTIFICATION_TIMEOUT_SEC, () => {
-            toast.reveal_child = false;
-            return false;
-        });
     }
 
     public void show_working (Cancellable cancellable, string text = "") {
