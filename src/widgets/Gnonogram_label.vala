@@ -134,13 +134,17 @@ class Clue : Gtk.Label {
                 grid_index++;
             }
 
-            if (errors > 0 || complete > clue_blocks.size) {
+            if (errors > 0) {
                 sc.add_class ("warn");
             }
 
             if (complete == clue_blocks.size && errors == 0) {
                 update_markup ();
                 sc.add_class ("dim");
+                return;
+            }
+
+            if (grid_index >= grid_blocks.size) {
                 return;
             }
 
@@ -154,10 +158,12 @@ class Clue : Gtk.Label {
                 } else {
                     if (clue_index >= 0) {
                         var clue_block = clue_blocks.@get (clue_index);
-                        if (clue_block.length == block.length) {
-                            clue_block.is_error = clue_block.is_complete; // Must not mark complete twice
-                            clue_block.is_complete = true;
+                        if (clue_block.is_complete || clue_block.is_error) {
+                            break;
+                        }
 
+                        if (clue_block.length == block.length) {
+                            clue_block.is_complete = true;
                             complete++;
                         } else {
                             clue_block.is_complete = false;
@@ -181,10 +187,11 @@ class Clue : Gtk.Label {
                 }
             }
 
+            /* Make sure any unmatched complete grid blocks could be correct */
             if (grid_complete > complete) {
                 foreach (Block b in grid_blocks) {
                     bool found = false;
-                    if (!b.is_null () && !b.is_complete) {
+                    if (b.is_complete) {
                         var len = b.length;
                         foreach (Block cb in clue_blocks) {
                             if (!cb.is_complete && cb.length == len) {
