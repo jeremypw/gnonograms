@@ -55,7 +55,7 @@ public class View : Gtk.ApplicationWindow {
     private const uint PROGRESS_DELAY_MSEC = 500;
     private const int GRID_COLUMN_SPACING = 6;
     private const int GRID_BORDER = 6;
-    private const int BOTTOM_BORDER = 100;
+    private const int BOTTOM_BORDER = 24;
     private const int END_BORDER = BOTTOM_BORDER + GRID_COLUMN_SPACING;
 
     private string BRAND_STYLESHEET = """
@@ -145,9 +145,6 @@ public class View : Gtk.ApplicationWindow {
 
     private CellState drawing_with_state;
     private uint drawing_with_key;
-    private int last_width = -1;
-    private int last_height = -1;
-    private double last_fontheight = -1;
 
     private uint rows {get {return dimensions.rows ();}}
     private uint cols {get {return dimensions.cols ();}}
@@ -362,8 +359,6 @@ public class View : Gtk.ApplicationWindow {
         });
 
         notify["dimensions"].connect (() => {
-            row_clue_box.dimensions = dimensions;
-            column_clue_box.dimensions = dimensions;
             fontheight = get_default_fontheight_from_dimensions ();
             set_window_size ();
         });
@@ -405,9 +400,7 @@ public class View : Gtk.ApplicationWindow {
 
         notify["fontheight"].connect (() => {
             fontheight = fontheight.clamp (MINFONTSIZE, MAXFONTSIZE);
-            bool smaller = fontheight < last_fontheight;
-            set_window_size (smaller, !smaller);
-            last_fontheight = fontheight;
+            set_window_size ();
         });
     }
 
@@ -486,38 +479,22 @@ public class View : Gtk.ApplicationWindow {
         return double.min (max_h, max_w);
     }
 
-    private void set_window_size (bool no_grow = false, bool no_shrink = false) {
-
-        if (no_grow && no_shrink) {
-            return;
-        }
-
+    private void set_window_size () {
         Gdk.Window? window = get_window ();
         if (window == null) {
             return;
         }
 
         var monitor_area  = Utils.get_monitor_area (screen, window);
-        Gtk.Requisition rmr, rnr, cmr, cnr;
+        var w = int.min ((int)(monitor_area.width), row_clue_box.min_width + column_clue_box.min_width + END_BORDER);
+        var h = int.min ((int)(monitor_area.height * 0.9), row_clue_box.min_height + column_clue_box.min_height + BOTTOM_BORDER);
 
-        row_clue_box.get_preferred_size (out rmr, out rnr);
-        column_clue_box.get_preferred_size (out cmr, out cnr);
-        var w = int.min ((int)(monitor_area.width), rnr.width + cnr.width + END_BORDER);
-        var h = int.min ((int)(monitor_area.height * 0.9), rnr.height + cnr.height + BOTTOM_BORDER);
+        var hints = Gdk.Geometry ();
+        hints.min_width = w;
+        hints.min_height = h;
 
-        if (no_grow && last_width > 0) {
-            w = int.min (last_width, w);
-            h = int.min (last_height, h);
-        } else if (no_shrink) {
-            w = int.max (last_width, w);
-            h = int.max (last_height, h);
-        }
-
-        last_width = w;
-        last_height = h;
-
-        this.resize (w, h);
-
+        set_geometry_hints (overlay, hints, Gdk.WindowHints.MIN_SIZE);
+        resize (w, h);
         queue_draw ();
     }
 

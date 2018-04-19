@@ -25,19 +25,9 @@ public class LabelBox : Gtk.Grid {
     public Gtk.PositionType attach_position {get; construct;}
     public bool vertical_labels  {get; construct;} /* True if contains column labels */
 
-    public Dimensions dimensions {
-        set {
-            if (value != _dimensions) {
-                _dimensions = value;
-                resize (value);
-            }
-        }
-
-        private get {
-            return _dimensions;
-        }
-    }
-
+    public Dimensions dimensions {get; set;}
+    public int min_width {get; private set; default = -1;}
+    public int min_height {get; private set; default = -1;}
     public double fontheight { get; set; }
 
     public LabelBox (Gtk.Orientation orientation) {
@@ -57,28 +47,37 @@ public class LabelBox : Gtk.Grid {
         column_spacing = 0;
 
         notify["fontheight"].connect (() => {
-            if (size < 1) {
-                return;
-            }
-
-            var r = _dimensions.rows ();
-            var c = _dimensions.cols ();
-            var cell = 2 * fontheight;
-
-            /* Estimate maximum likely size required for random clues.
-             * If this is exceeded then label will reduce its fontsize. */
-            if (vertical_labels) {
-                min_width = (int)(c * cell);
-                min_height = (int)((r * 0.25 + 2) * cell * 1.1);
-            } else {
-                min_width = (int)((c * 0.25 + 2) * cell * 0.8);
-                min_height = (int)(r * cell);
-            }
-
-            for (uint index = 0; index < size; index++) {
-                labels[index].fontheight = fontheight;
-            }
+            recalc_size ();
         });
+
+        notify["dimensions"].connect (() => {
+            resize (dimensions);
+            recalc_size ();
+        });
+    }
+
+    private void recalc_size () {
+        if (size < 1) {
+            return;
+        }
+
+        var r = dimensions.rows ();
+        var c = dimensions.cols ();
+        var cell = 2 * fontheight;
+
+        /* Estimate maximum likely size required for random clues.
+         * If this is exceeded then label will reduce its fontsize. */
+        if (vertical_labels) {
+            min_width = (int)(c * cell);
+            min_height = (int)((r * 0.25 + 2) * cell * 1.1);
+        } else {
+            min_width = (int)((c * 0.25 + 2) * cell * 0.8);
+            min_height = (int)(r * cell);
+        }
+
+        for (uint index = 0; index < size; index++) {
+            labels[index].fontheight = fontheight;
+        }
     }
 
     public void highlight (uint index, bool is_highlight) {
@@ -115,11 +114,6 @@ public class LabelBox : Gtk.Grid {
     }
 
 /** PRIVATE **/
-    private Dimensions _dimensions;
-    private int min_width = -1;
-    private int min_height = -1;
-    /* ----------------------------------------- */
-
     private Clue[] labels;
     private int size;
     private int other_size; /* Size of other label box */
