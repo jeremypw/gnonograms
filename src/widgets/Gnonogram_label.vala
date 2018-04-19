@@ -206,10 +206,12 @@ class Clue : Gtk.Label {
                     }
                 }
             }
+        } else if (clue != "0") { /* Zero grid blocks should only occur if cellstates all "empty" */
+            errors++;
+        }
 
-            if (errors > 0) {
-                sc.add_class ("warn");
-            }
+        if (errors > 0) {
+            sc.add_class ("warn");
         }
 
         update_markup ();

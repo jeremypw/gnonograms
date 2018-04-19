@@ -121,7 +121,7 @@ namespace Utils {
         var blocks = new  Gee.ArrayList<Block> ();
         int count = 0;
         bool valid = true;
-        var previous_state = CellState.UNDEFINED;
+        var previous_state = CellState.UNKNOWN;
 
         foreach (CellState state in cellstates) {
             switch (state) {
@@ -143,7 +143,7 @@ namespace Utils {
                     break;
 
                 case CellState.UNKNOWN:
-                    if (valid || previous_state == CellState.FILLED) {
+                    if (valid || previous_state != CellState.UNKNOWN) {
                         valid = false;
                         count = 0;
                         blocks.add (new Block.null ());
