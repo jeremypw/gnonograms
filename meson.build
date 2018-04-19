@@ -11,6 +11,7 @@ add_global_arguments (
     language:'c'
 )
 
+dependency('gtk+-3.0', version: '>=3.18', required: true)
 GTK322 = dependency('gtk+-3.0', version: '>=3.22', required: false)
 
 if GTK322.found ()

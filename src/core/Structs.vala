@@ -34,7 +34,7 @@ public class Block {
      public Block.null () {
         length = -1;
         is_complete = false;
-        is_error = true;
+        is_error = false;
     }
 
     public bool is_null () {
