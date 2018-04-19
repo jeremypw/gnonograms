@@ -145,6 +145,7 @@ class Clue : Gtk.Label {
             }
 
             if (grid_index >= grid_blocks.size) {
+                update_markup ();
                 return;
             }
 
