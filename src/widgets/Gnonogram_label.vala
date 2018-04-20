@@ -92,7 +92,6 @@ class Clue : Gtk.Label {
 
     public void update_complete (Gee.List<Block> _grid_blocks) {
         grid_blocks = _grid_blocks;
-
         foreach (Block block in clue_blocks) {
             block.is_complete = false;
             block.is_error = false;
@@ -104,6 +103,13 @@ class Clue : Gtk.Label {
 
         uint complete = 0;
         uint errors = 0;
+        uint grid_complete = 0;
+
+        foreach (Block b in grid_blocks) {
+            if (b.is_complete) {
+                grid_complete++;
+            }
+        }
 
         if (!grid_blocks.is_empty) {
             int clue_index = 0;
@@ -117,6 +123,7 @@ class Clue : Gtk.Label {
                         var clue_block = clue_blocks.@get (clue_index);
                         if (clue_block.length == block.length) {
                             clue_block.is_complete = true;
+                            block.is_complete = false; /* mark as matched */
                             complete++;
                             clue_block.is_error = false;
                         } else {
@@ -165,6 +172,7 @@ class Clue : Gtk.Label {
 
                         if (clue_block.length == block.length) {
                             clue_block.is_complete = true;
+                            block.is_complete = false; /* mark as matched */
                             complete++;
                         } else {
                             clue_block.is_complete = false;
@@ -181,18 +189,11 @@ class Clue : Gtk.Label {
                 grid_index--;
             }
 
-            uint grid_complete = 0;
-            foreach (Block b in grid_blocks) {
-                if (b.is_complete) {
-                    grid_complete++;
-                }
-            }
-
             /* Make sure any unmatched complete grid blocks could be correct */
             if (grid_complete > complete) {
                 foreach (Block b in grid_blocks) {
-                    bool found = false;
-                    if (b.is_complete) {
+                    if (b.is_complete && !b.is_null ()) {
+                        bool found = false;
                         var len = b.length;
                         foreach (Block cb in clue_blocks) {
                             if (!cb.is_complete && cb.length == len) {
