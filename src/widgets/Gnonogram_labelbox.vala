@@ -105,6 +105,14 @@ public class LabelBox : Gtk.Grid {
         }
     }
 
+    public void clear_formatting (uint index) {
+        Clue? label = labels[index];
+
+        if (label != null) {
+            label.clear_formatting ();
+        }
+    }
+
     public void update_label_complete (uint index, Gee.List<Block> grid_blocks) {
         Clue? label = labels[index];
 

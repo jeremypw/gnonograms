@@ -90,6 +90,12 @@ class Clue : Gtk.Label {
         }
     }
 
+    public void clear_formatting () {
+        var sc = get_style_context ();
+        sc.remove_class ("warn");
+        sc.remove_class ("dim");
+    }
+
     public void update_complete (Gee.List<Block> _grid_blocks) {
         grid_blocks = _grid_blocks;
         foreach (Block block in clue_blocks) {

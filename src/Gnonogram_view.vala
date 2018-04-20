@@ -336,6 +336,7 @@ public class View : Gtk.ApplicationWindow {
         bind_property ("game-state", mode_switch, "mode", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
         bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
         bind_property ("previous-cell", cell_grid, "previous-cell", BindingFlags.BIDIRECTIONAL);
+        bind_property ("game-state", cell_grid, "game-state", BindingFlags.DEFAULT | BindingFlags.SYNC_CREATE);
         bind_property ("fontheight", row_clue_box, "fontheight", BindingFlags.DEFAULT);
         bind_property ("fontheight", column_clue_box, "fontheight", BindingFlags.DEFAULT);
         bind_property ("dimensions", row_clue_box, "dimensions");
@@ -345,7 +346,6 @@ public class View : Gtk.ApplicationWindow {
         /* Monitor certain bound properties */
         notify["game-state"].connect (() => {
             if (game_state != GameState.UNDEFINED) {
-                cell_grid.game_state = game_state;
                 update_header_bar ();
                 update_all_labels_completeness ();
             }
@@ -548,13 +548,14 @@ public class View : Gtk.ApplicationWindow {
 
     private void update_label_complete (uint idx, bool is_col) {
         var lbox = is_col ? column_clue_box : row_clue_box;
-        var blocks = Gee.List.empty<Block> ();
 
         if (game_state == GameState.SOLVING && strikeout_complete) {
-             blocks = model.get_complete_blocks_from_working (idx, is_col);
+            var blocks = Gee.List.empty<Block> ();
+            blocks = model.get_complete_blocks_from_working (idx, is_col);
+            lbox.update_label_complete (idx, blocks);
+        } else {
+            lbox.clear_formatting (idx);
         }
-
-        lbox.update_label_complete (idx, blocks);
     }
 
     private void make_move_at_cell (CellState state = drawing_with_state, Cell target = current_cell) {
