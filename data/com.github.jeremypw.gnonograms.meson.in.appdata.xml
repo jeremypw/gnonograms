@@ -23,6 +23,18 @@
         <category>LogicGame</category>
     </categories>
     <releases>
+        <release version="1.2.2" date="2018-04-20" urgency="low">
+            <description>
+                <ul>
+                    <li>Use scrolled window when grid larger than screen</li>
+                    <li>Fix some bugs with clue label formating</li>
+                    <li>Toast has own copy of message to avoid possible crash</li>
+                    <li>Conditional compilation with Gtk version  >=3.22</li>
+                    <li>Some code refactoring and cleanup</li>
+                    <li>Various small bug fixes</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.2.1" date="2018-03-30" urgency="low">
             <description>
                 <ul>
