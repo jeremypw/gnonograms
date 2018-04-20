@@ -628,12 +628,8 @@ public class Controller : GLib.Object {
 
         if (model.count_errors () > 0) {
             rewind_until_correct ();
-        } else {
-            if (computer_hint ()) {
-                view.queue_draw ();
-            } else if (!solver.solved ()){
-                view.send_notification (_("Failed to find a hint using simple logic - multi-line logic (trial and error) required"));
-            }
+        } else if (!computer_hint () && !solver.solved ()){
+            view.send_notification (_("Failed to find a hint using simple logic - multi-line logic (trial and error) required"));
         }
     }
 

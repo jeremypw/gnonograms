@@ -20,6 +20,8 @@
 namespace Gnonograms {
 public class Model : GLib.Object {
     /** PUBLIC **/
+    public signal void changed ();
+
     public GameState game_state {get; set; default = GameState.UNDEFINED; }
     public My2DCellArray solution_data { get; private set; }
     public My2DCellArray working_data { get; private set; }
@@ -44,6 +46,11 @@ public class Model : GLib.Object {
         notify["dimensions"].connect (() => {
             solution_data = new My2DCellArray (dimensions, CellState.EMPTY);
             working_data = new My2DCellArray (dimensions, CellState.UNKNOWN);
+            changed ();
+        });
+
+        notify["game-state"].connect (() => {
+            changed ();
         });
     }
 
@@ -89,10 +96,12 @@ public class Model : GLib.Object {
 
     public void blank_solution () {
         solution_data.set_all (CellState.EMPTY);
+        changed ();
     }
 
     public void blank_working () {
         working_data.set_all (CellState.UNKNOWN);
+        changed ();
     }
 
     public bool is_blank (GameState state) {
@@ -175,17 +184,21 @@ public class Model : GLib.Object {
 
     public void set_data_from_cell (Cell cell) {
         display_data.set_data_from_cell (cell);
+        changed ();
     }
 
     public void set_data_from_rc (uint r, uint c, CellState state) {
         display_data.set_data_from_rc (r, c, state);
+        changed ();
     }
 
     public void set_solution_from_array (My2DCellArray array) {
         solution_data.copy (array);
+        changed ();
     }
     public void set_working_from_array (My2DCellArray array) {
         working_data.copy (array);
+        changed ();
     }
 
     public CellState get_data_for_cell (Cell cell) {
@@ -196,21 +209,23 @@ public class Model : GLib.Object {
         return display_data.get_data_from_rc (r, c);
     }
 
-    private void set_row_data_from_string_array (string[] row_clues, My2DCellArray array) {
-        assert (row_clues.length == rows);
+    private void set_row_data_from_string_array (string[] row_data_strings, My2DCellArray array) {
+        assert (row_data_strings.length == rows);
         int row = 0;
-        foreach (var clue in row_clues) {
-            array.set_row (row, Utils.cellstate_array_from_string (clue));
+        foreach (var row_string in row_data_strings) {
+            array.set_row (row, Utils.cellstate_array_from_string (row_string));
             row++;
         }
+
+        changed ();
     }
 
-    public void set_working_data_from_string_array (string[] row_clues) {
-        set_row_data_from_string_array (row_clues, working_data);
+    public void set_working_data_from_string_array (string[] row_data_strings) {
+        set_row_data_from_string_array (row_data_strings, working_data);
     }
 
-    public void set_solution_data_from_string_array (string[] row_clues) {
-        set_row_data_from_string_array (row_clues, solution_data);
+    public void set_solution_data_from_string_array (string[] row_data_strings) {
+        set_row_data_from_string_array (row_data_strings, solution_data);
     }
 }
 }

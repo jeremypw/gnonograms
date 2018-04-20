@@ -50,6 +50,8 @@ public class View : Gtk.ApplicationWindow {
     public bool can_go_back {get; set;}
     public bool can_go_forward {get; set;}
     public bool restart_destructive {get; set; default = false;}
+    public Cell current_cell {get; set;}
+    public Cell previous_cell {get; set;}
 
     /**PRIVATE**/
     private const uint PROGRESS_DELAY_MSEC = 500;
@@ -141,17 +143,13 @@ public class View : Gtk.ApplicationWindow {
     private Gtk.Button hint_button;
     private Gtk.Button auto_solve_button;
     private Gtk.Button restart_button;
-    /* ----------------------------------------- */
-
     private CellState drawing_with_state;
     private uint drawing_with_key;
-
     private uint rows {get {return dimensions.rows ();}}
     private uint cols {get {return dimensions.cols ();}}
     private bool is_solving {get {return game_state == GameState.SOLVING;}}
-    public Cell current_cell {get; set;}
-    public Cell previous_cell {get; set;}
 
+    /* ----------------------------------------- */
     public View (Model _model) {
         Object (
             model: _model
@@ -350,7 +348,6 @@ public class View : Gtk.ApplicationWindow {
                 cell_grid.game_state = game_state;
                 update_header_bar ();
                 update_all_labels_completeness ();
-                queue_draw ();
             }
         });
 
@@ -454,7 +451,6 @@ public class View : Gtk.ApplicationWindow {
 
         update_all_labels_completeness ();
         update_header_bar ();
-        queue_draw ();
     }
 
     /*** PRIVATE ***/
@@ -495,7 +491,6 @@ public class View : Gtk.ApplicationWindow {
 
         set_geometry_hints (overlay, hints, Gdk.WindowHints.MIN_SIZE);
         resize (w, h);
-        queue_draw ();
     }
 
     private void update_header_bar () {
@@ -606,7 +601,6 @@ public class View : Gtk.ApplicationWindow {
         progress_timeout_id = Timeout.add_full (Priority.HIGH_IDLE, PROGRESS_DELAY_MSEC, () => {
             progress_indicator.cancellable = cancellable;
             header_bar.set_custom_title (progress_indicator);
-            queue_draw ();
             progress_timeout_id = 0;
             return false;
         });

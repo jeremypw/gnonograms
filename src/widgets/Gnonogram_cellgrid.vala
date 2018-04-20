@@ -20,22 +20,14 @@
 
 namespace Gnonograms {
 public class CellGrid : Gtk.DrawingArea {
+    /*** PUBLIC ***/
+
     public signal void cursor_moved (Cell from, Cell to);
 
-    public Model? model { get; set; }
-
-    private My2DCellArray? array {
-        get {
-            if (model != null) {
-                return model.display_data;
-            } else {
-                return null;
-            }
-        }
-    } /* model display data */
-
+    public Model? model { get; construct; }
     public Cell current_cell {get; set;}
     public Cell previous_cell {get; set;}
+    public bool frozen { get; set; }
 
     /* Could have more options for cell pattern - only plain implemented for elementaryos*/
     public CellPatternType cell_pattern_type {
@@ -68,51 +60,12 @@ public class CellGrid : Gtk.DrawingArea {
             unknown_color = colors[(int)value, (int)CellState.UNKNOWN];
             fill_color = colors[(int)value, (int)CellState.FILLED];
             empty_color = colors[(int)value, (int)CellState.EMPTY];
-
             cell_pattern_type = CellPatternType.UNDEFINED; /* Causes refresh of existing pattern */
-
-            queue_draw ();
         }
     }
+    /*---------------------------------------------------------*/
 
-    public bool frozen { get; set; }
-
-    public CellGrid (Model model) {
-        Object (model: model);
-
-        model.notify["dimensions"].connect (dimensions_updated);
-    }
-
-    construct {
-        _current_cell = NULL_CELL;
-        colors = new Gdk.RGBA[2, 3];
-        grid_color.parse (Gnonograms.GRID_COLOR);
-        game_state = GameState.SETTING;
-        cell_pattern_type = CellPatternType.CELL;
-        set_colors ();
-
-        this.add_events (
-            Gdk.EventMask.BUTTON_PRESS_MASK|
-            Gdk.EventMask.BUTTON_RELEASE_MASK|
-            Gdk.EventMask.POINTER_MOTION_MASK|
-            Gdk.EventMask.KEY_PRESS_MASK|
-            Gdk.EventMask.KEY_RELEASE_MASK|
-            Gdk.EventMask.LEAVE_NOTIFY_MASK
-        );
-
-        motion_notify_event.connect (on_pointer_moved);
-        draw.connect (on_draw_event);
-        size_allocate.connect (on_size_allocate);
-        leave_notify_event.connect (on_leave_notify);
-
-        notify["current-cell"].connect (() => {
-            queue_draw ();
-        });
-    }
-
-/*************/
-/** PRIVATE **/
-/*************/
+    /*** PRIVATE ***/
     private const double MAJOR_GRID_LINE_WIDTH = 3.0;
     private const double MINOR_GRID_LINE_WIDTH = 1.0;
     private Gdk.RGBA[, ] colors;
@@ -133,6 +86,7 @@ public class CellGrid : Gtk.DrawingArea {
     private CellPatternType _cell_pattern_type;
     /*------------------------------------------*/
 
+    private bool dirty = false; /* Whether a redraw is needed */
     private double alloc_width; /* Width of drawing area less frame*/
     private double alloc_height; /* Height of drawing area less frame */
     private double cell_body_width; /* Width of cell excluding frame */
@@ -162,6 +116,61 @@ public class CellGrid : Gtk.DrawingArea {
         colors[solving, (int)CellState.FILLED].parse (Gnonograms.SOLVING_FILLED_COLOR);
     }
 
+    private My2DCellArray? array {
+        get {
+            if (model != null) {
+                return model.display_data;
+            } else {
+                return null;
+            }
+        }
+    } /* model display data */
+
+    /*---------------------------------------------------------*/
+    public CellGrid (Model model) {
+        Object (model: model);
+    }
+
+    construct {
+        _current_cell = NULL_CELL;
+        colors = new Gdk.RGBA[2, 3];
+        grid_color.parse (Gnonograms.GRID_COLOR);
+        game_state = GameState.SETTING;
+        cell_pattern_type = CellPatternType.CELL;
+        set_colors ();
+
+        this.add_events (
+            Gdk.EventMask.BUTTON_PRESS_MASK|
+            Gdk.EventMask.BUTTON_RELEASE_MASK|
+            Gdk.EventMask.POINTER_MOTION_MASK|
+            Gdk.EventMask.KEY_PRESS_MASK|
+            Gdk.EventMask.KEY_RELEASE_MASK|
+            Gdk.EventMask.LEAVE_NOTIFY_MASK
+        );
+
+        motion_notify_event.connect (on_pointer_moved);
+        draw.connect (on_draw_event);
+        size_allocate.connect (on_size_allocate);
+        leave_notify_event.connect (on_leave_notify);
+
+        notify["current-cell"].connect (() => {
+            queue_draw ();
+        });
+
+        model.notify["dimensions"].connect (dimensions_updated);
+        model.changed.connect (() => {
+            if (!dirty) {
+                dirty = true;
+                queue_draw ();
+            }
+        });
+    }
+
+/*************/
+/** PRIVATE **/
+/*************/
+
+
 /*** Signal Handlers ***/
     private void on_size_allocate (Gtk.Allocation rect) {
         alloc_width = (double)(rect.width);
@@ -179,6 +188,8 @@ public class CellGrid : Gtk.DrawingArea {
     }
 
     private bool on_draw_event (Cairo.Context cr) {
+        dirty = false;
+
         if (array != null) {
             /* Note, even tho' array holds CellStates, its iterator returns Cells */
             foreach (Cell c in array) {
