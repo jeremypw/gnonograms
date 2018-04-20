@@ -48,7 +48,7 @@ namespace Gnonograms {
     public const string DARK_TEXT       = "#000000"; /* Elementary Black 900 */
     public const string PALE_TEXT       = "#fafafa"; /* Elementary Silver 100 */
     public const string DARK_BACKGROUND = "#180297"; /* Gnonograms Dark Purple */
-    public const string PALE_BACKGROUND = "#ddd9f0"; /* Gnonograms Pale Purple */
+    public const string PALE_BACKGROUND = "#cdc9e0"; /* Gnonograms Pale Purple */
     public const string DARK_SHADOW     = "#1a1a1a"; /* Elementary Black 700 */
     public const string PALE_SHADOW     = "#fafafa"; /* Elementary Silver 100 */
 

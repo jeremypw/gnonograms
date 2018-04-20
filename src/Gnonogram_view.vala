@@ -76,7 +76,7 @@ public class View : Gtk.ApplicationWindow {
         }
 
         *.dim {
-            opacity: 0.4;
+            color: shade (@textColorPrimary, 0.6);
         }
 
         .tooltip {
