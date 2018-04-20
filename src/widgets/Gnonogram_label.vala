@@ -104,10 +104,13 @@ class Clue : Gtk.Label {
         uint complete = 0;
         uint errors = 0;
         uint grid_complete = 0;
+        uint grid_null = 0;
 
         foreach (Block b in grid_blocks) {
             if (b.is_complete) {
                 grid_complete++;
+            } else if (b.is_null ()) {
+                grid_null++;
             }
         }
 
@@ -145,7 +148,7 @@ class Clue : Gtk.Label {
                 sc.add_class ("warn");
             }
 
-            if (complete == clue_blocks.size && errors == 0) {
+            if (complete == clue_blocks.size && errors == 0 && grid_null == 0) {
                 update_markup ();
                 sc.add_class ("dim");
                 return;
