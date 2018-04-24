@@ -342,8 +342,8 @@ public class Controller : GLib.Object {
 
             file_writer.difficulty = view.game_grade;
             file_writer.game_state = gs;
-            file_writer.working.copy (model.working_data);
-            file_writer.solution.copy (model.solution_data);
+            file_writer.working = model.copy_working_data ();
+            file_writer.solution = model.copy_solution_data ();
             file_writer.is_readonly = is_readonly;
 
             if (save_state) {
@@ -533,7 +533,7 @@ public class Controller : GLib.Object {
         col_clues = model.get_col_clues ();
 
         solver.configure_from_grade (Difficulty.CHALLENGING);
-        var moves = solver.hint (row_clues, col_clues, model.working_data);
+        var moves = solver.hint (row_clues, col_clues, model.copy_working_data ());
 
         foreach (Move mv in moves) {
             make_move (mv);
@@ -644,7 +644,7 @@ public class Controller : GLib.Object {
         col_clues = model.get_col_clues ();
 
         solver.configure_from_grade (Difficulty.CHALLENGING);
-        var moves = solver.debug (idx, is_column, row_clues, col_clues, model.working_data);
+        var moves = solver.debug (idx, is_column, row_clues, col_clues, model.copy_working_data ());
 
         foreach (Move mv in moves) {
             make_move (mv);
@@ -685,12 +685,12 @@ public class Controller : GLib.Object {
                 if (solver.state.solved ()) {
                     game_state = GameState.SOLVING;
                     if (copy_to_solution) {
-                        model.solution_data.copy (solver.grid);
+                        model.copy_to_solution_data (solver.grid);
                     }
                 }
 
                 if (copy_to_working) {
-                    model.working_data.copy (solver.grid);
+                    model.copy_to_working_data (solver.grid);
                 }
 
                 view.end_working ();

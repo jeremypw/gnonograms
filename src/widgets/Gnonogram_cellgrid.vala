@@ -158,6 +158,7 @@ public class CellGrid : Gtk.DrawingArea {
         });
 
         model.notify["dimensions"].connect (dimensions_updated);
+
         model.changed.connect (() => {
             if (!dirty) {
                 dirty = true;

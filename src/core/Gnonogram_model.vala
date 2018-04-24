@@ -23,10 +23,7 @@ public class Model : GLib.Object {
     public signal void changed ();
 
     public GameState game_state {get; set; default = GameState.UNDEFINED; }
-    public My2DCellArray solution_data { get; private set; }
-    public My2DCellArray working_data { get; private set; }
     public Dimensions dimensions { get; set; }
-
     public uint rows { get {return dimensions.height;} }
     public uint cols  { get {return dimensions.width;} }
 
@@ -41,6 +38,9 @@ public class Model : GLib.Object {
             return count_state (GameState.SOLVING, CellState.UNKNOWN) == 0;
         }
     }
+
+    private My2DCellArray solution_data { get; set; }
+    private My2DCellArray working_data { get; set; }
 
     construct {
         notify["dimensions"].connect (() => {
@@ -226,6 +226,28 @@ public class Model : GLib.Object {
 
     public void set_solution_data_from_string_array (string[] row_data_strings) {
         set_row_data_from_string_array (row_data_strings, solution_data);
+    }
+
+    public void copy_to_working_data (My2DCellArray grid) {
+        working_data.copy (grid);
+        changed ();
+    }
+
+    public void copy_to_solution_data (My2DCellArray grid) {
+        solution_data.copy (grid);
+        changed ();
+    }
+
+    public My2DCellArray copy_working_data () {
+        var grid = new My2DCellArray (dimensions, CellState.UNKNOWN);
+        grid.copy (working_data);
+        return grid;
+    }
+
+    public My2DCellArray copy_solution_data () {
+        var grid = new My2DCellArray (dimensions, CellState.UNKNOWN);
+        grid.copy (solution_data);
+        return grid;
     }
 }
 }
