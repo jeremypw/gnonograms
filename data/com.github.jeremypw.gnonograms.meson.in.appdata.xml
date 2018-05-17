@@ -23,7 +23,7 @@
         <category>LogicGame</category>
     </categories>
     <releases>
-        <release version="1.2.2" date="2018-04-20" urgency="low">
+        <release version="1.2.2" date="2018-05-17" urgency="low">
             <description>
                 <ul>
                     <li>Use scrolled window when grid larger than screen</li>
