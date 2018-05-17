@@ -55,10 +55,6 @@ public class View : Gtk.ApplicationWindow {
 
     /**PRIVATE**/
     private const uint PROGRESS_DELAY_MSEC = 500;
-    private const int GRID_COLUMN_SPACING = 6;
-    private const int GRID_BORDER = 6;
-    private const int BOTTOM_BORDER = 24;
-    private const int END_BORDER = BOTTOM_BORDER + GRID_COLUMN_SPACING;
 
     private string BRAND_STYLESHEET = """
         @define-color textColorPrimary %s;
@@ -462,15 +458,13 @@ public class View : Gtk.ApplicationWindow {
             monitor_area  = Utils.get_monitor_area (screen, window);
         }
 
-        /* Window height excluding header is approx 1.4 * grid height
-         * Window width approx 1.25 * grid width.
-         * Cell dimensions approx 2.0 * font height
+         /* Cell dimensions approx 2.0 * font height
          * Make allowance for unusable monitor height - approx 10%;
          * These equations are related to the inverse of those used in labelbox to calculate its dimensions
          */
 
-        var max_h = (double)(monitor_area.height * 0.90) / ((double)rows * 2.55 + 4.4);
-        var max_w = (double)(monitor_area.width * 0.95) / ((double)cols * 2.4 + 3.2);
+        var max_h = (double)(monitor_area.height * Gnonograms.USABLE_MONITOR_HEIGHT - Gnonograms.HEADER_HEIGHT - 2 * Gnonograms.GRID_BORDER) / ((double)rows * (1.0 + Gnonograms.TYPICAL_MAX_BLOCKS_RATIO * Gnonograms.FONT_ASPECT_RATIO) * 2.0);
+        var max_w = (double)(monitor_area.width * Gnonograms.USABLE_MONITOR_WIDTH - 2 * Gnonograms.GRID_BORDER - Gnonograms.GRID_COLUMN_SPACING) / ((double)cols * (1.0 + Gnonograms.TYPICAL_MAX_BLOCKS_RATIO / FONT_ASPECT_RATIO) * 2.0);
 
         return double.min (max_h, max_w);
     }
@@ -482,8 +476,8 @@ public class View : Gtk.ApplicationWindow {
         }
 
         var monitor_area  = Utils.get_monitor_area (screen, window);
-        var w = int.min ((int)(monitor_area.width), row_clue_box.min_width + column_clue_box.min_width + END_BORDER);
-        var h = int.min ((int)(monitor_area.height * 0.9), row_clue_box.min_height + column_clue_box.min_height + BOTTOM_BORDER);
+        var w = int.min ((int)(monitor_area.width * Gnonograms.USABLE_MONITOR_WIDTH), row_clue_box.min_width + column_clue_box.min_width + 2 * Gnonograms.GRID_BORDER + Gnonograms.GRID_COLUMN_SPACING);
+        var h = int.min ((int)(monitor_area.height * USABLE_MONITOR_HEIGHT), row_clue_box.min_height + column_clue_box.min_height + 2 * Gnonograms.GRID_BORDER + Gnonograms.HEADER_HEIGHT);
 
         var hints = Gdk.Geometry ();
         hints.min_width = w;

@@ -26,6 +26,15 @@ namespace Gnonograms {
     public static double MINFONTSIZE = 8.0;
     public static double MAXFONTSIZE = 36.0;
     public static int FAILED_PASSES = 0;
+
+    public static double FONT_ASPECT_RATIO = 1.2;
+    public static int HEADER_HEIGHT = Gtk.IconSize.LARGE_TOOLBAR;
+    public static int GRID_BORDER = 6;
+    public static int GRID_COLUMN_SPACING = 6;
+    public static double TYPICAL_MAX_BLOCKS_RATIO = 0.3;
+    public static double USABLE_MONITOR_HEIGHT = 0.85;
+    public static double USABLE_MONITOR_WIDTH = 0.95;
+
     public const string BLOCKSEPARATOR = ", ";
     public const string BLANKLABELTEXT = _("?");
     public const string GAMEFILEEXTENSION = ".gno";

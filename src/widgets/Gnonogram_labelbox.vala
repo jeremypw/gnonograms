@@ -26,8 +26,8 @@ public class LabelBox : Gtk.Grid {
     public bool vertical_labels  {get; construct;} /* True if contains column labels */
 
     public Dimensions dimensions {get; set;}
-    public int min_width {get; private set; default = -1;}
-    public int min_height {get; private set; default = -1;}
+    public int min_width {get; private set;}
+    public int min_height {get; private set;}
     public double fontheight { get; set; }
 
     public LabelBox (Gtk.Orientation orientation) {
@@ -45,8 +45,13 @@ public class LabelBox : Gtk.Grid {
         size = 0;
         row_spacing = 0;
         column_spacing = 0;
+        min_width = 0;
+        min_height = 0;
 
         notify["fontheight"].connect (() => {
+            for (uint index = 0; index < size; index++) {
+                labels[index].fontheight = fontheight;
+            }
             recalc_size ();
         });
 
@@ -69,14 +74,10 @@ public class LabelBox : Gtk.Grid {
          * If this is exceeded then label will reduce its fontsize. */
         if (vertical_labels) {
             min_width = (int)(c * cell);
-            min_height = (int)((r * 0.25 + 2) * cell * 1.1);
+            min_height = (int)((r * Gnonograms.TYPICAL_MAX_BLOCKS_RATIO) * cell * Gnonograms.FONT_ASPECT_RATIO);
         } else {
-            min_width = (int)((c * 0.25 + 2) * cell * 0.8);
+            min_width = (int)((c * Gnonograms.TYPICAL_MAX_BLOCKS_RATIO) * cell / Gnonograms.FONT_ASPECT_RATIO);
             min_height = (int)(r * cell);
-        }
-
-        for (uint index = 0; index < size; index++) {
-            labels[index].fontheight = fontheight;
         }
     }
 
