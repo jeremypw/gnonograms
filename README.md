@@ -26,7 +26,7 @@ ninja
 ### Installing & executing
 ```
 sudo ninja install
-com.github.jeremy.gnonograms
+com.github.jeremypw.gnonograms
 ```
 
 ### Uninstalling
