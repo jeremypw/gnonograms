@@ -30,10 +30,10 @@ class AppMenu : Gtk.MenuButton {
     private AppSetting strikeout_setting;
     private Gtk.Grid grid;
 
-    public Dimensions dimensions {get; set;}
-    public Difficulty grade {get; set;}
-    public string title {get; set;}
-    public bool strikeout_complete {get; set;}
+    public Dimensions dimensions { get; set; }
+    public Difficulty grade { get; set; }
+    public string title { get; set; }
+    public bool strikeout_complete { get; set; }
 
     construct {
         popover = new AppPopover (this);
@@ -165,11 +165,11 @@ class AppMenu : Gtk.MenuButton {
 
     /** Setting Widget using a Scale limited to integral values separated by step **/
     protected class ScaleGrid : AppSetting {
-        public string heading {get; set;}
-        public Gtk.Grid chooser {get; set;}
-        public Gtk.Label heading_label {get; set;}
-        public Gtk.Label val_label {get; set;}
-        public AppScale scale {get; set;}
+        public string heading { get; set; }
+        public Gtk.Grid chooser { get; set; }
+        public Gtk.Label heading_label { get; set; }
+        public Gtk.Label val_label { get; set; }
+        public AppScale scale { get; set; }
 
         construct {
             val_label = new Gtk.Label ("");
@@ -296,8 +296,8 @@ class AppMenu : Gtk.MenuButton {
     }
 
     protected class SettingSwitch : AppSetting {
-        public Gtk.Switch @switch {get; construct;}
-        public Gtk.Label label {get; construct;}
+        public Gtk.Switch @switch { get; construct; }
+        public Gtk.Label label { get; construct; }
 
         construct {
             @switch = new Gtk.Switch ();

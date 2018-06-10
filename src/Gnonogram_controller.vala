@@ -26,14 +26,14 @@ public class Controller : GLib.Object {
     public signal void quit_app ();
 
     public Gtk.Window window {get {return (Gtk.Window)view;}}
-    public GameState game_state {get; set;}
-    public Dimensions dimensions {get; set;}
-    public Difficulty generator_grade {get; set;}
-    public string game_name {get; set;}
+    public GameState game_state { get; set; }
+    public Dimensions dimensions { get; set; }
+    public Difficulty generator_grade { get; set; }
+    public string game_name { get; set; }
 
     /* Any game that was not saved by this app is regarded as read only - any alterations
      * must be "Saved As" - which by default is writable. */
-    public bool is_readonly {get; set; default = false;}
+    public bool is_readonly { get; set; default = false;}
 
     private View view;
     private Model model;
@@ -628,7 +628,7 @@ public class Controller : GLib.Object {
 
         if (model.count_errors () > 0) {
             rewind_until_correct ();
-        } else if (!computer_hint () && !solver.solved ()){
+        } else if (!computer_hint () && !solver.solved ()) {
             view.send_notification (_("Failed to find a hint using simple logic - multi-line logic (trial and error) required"));
         }
     }
@@ -671,7 +671,7 @@ public class Controller : GLib.Object {
                 msg = _("Solving was cancelled");
             } else if (solver.state.solved ()) {
                 msg =  _("Solution found. %s").printf (diff.to_string ());
-            } else{
+            } else {
                 msg = _("No solution found");
             }
 

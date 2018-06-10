@@ -25,8 +25,8 @@ public class CellGrid : Gtk.DrawingArea {
     public signal void cursor_moved (Cell from, Cell to);
 
     public Model? model { get; construct; }
-    public Cell current_cell {get; set;}
-    public Cell previous_cell {get; set;}
+    public Cell current_cell { get; set; }
+    public Cell previous_cell { get; set; }
     public bool frozen { get; set; }
 
     /* Could have more options for cell pattern - only plain implemented for elementaryos*/
@@ -55,7 +55,7 @@ public class CellGrid : Gtk.DrawingArea {
         }
     }
 
-    public GameState game_state  { /* Do we need different colors for game state? */
+    public GameState game_state { /* Do we need different colors for game state? */
         set {
             unknown_color = colors[(int)value, (int)CellState.UNKNOWN];
             fill_color = colors[(int)value, (int)CellState.FILLED];

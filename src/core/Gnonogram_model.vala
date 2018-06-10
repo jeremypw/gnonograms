@@ -22,12 +22,12 @@ public class Model : GLib.Object {
     /** PUBLIC **/
     public signal void changed ();
 
-    public GameState game_state {get; set; default = GameState.UNDEFINED; }
+    public GameState game_state { get; set; default = GameState.UNDEFINED; }
     public Dimensions dimensions { get; set; }
     public uint rows { get {return dimensions.height;} }
-    public uint cols  { get {return dimensions.width;} }
+    public uint cols { get {return dimensions.width;} }
 
-    public My2DCellArray display_data  {
+    public My2DCellArray display_data {
         get {
             return game_state == GameState.SETTING ? solution_data : working_data;
         }

@@ -28,8 +28,8 @@ namespace Gnonograms {
 
     public SolverState state { get; set; }
 
-    public My2DCellArray grid {get; protected set;} // Shared with Regions which can update the contents
-    public My2DCellArray solution {get; protected set;}
+    public My2DCellArray grid { get; protected set; } // Shared with Regions which can update the contents
+    public My2DCellArray solution { get; protected set; }
     public Cancellable? cancellable { get; set; }
     public bool cancelled {
         get {

@@ -39,19 +39,19 @@ public class View : Gtk.ApplicationWindow {
     public signal void changed_cell (Cell cell, CellState previous_state);
 
     public Model model {private get; construct; }
-    public Dimensions dimensions {get; set;}
-    public Difficulty generator_grade {get; set;}
-    public GameState game_state {get; set;}
-    public bool strikeout_complete {get; set;}
-    public string game_name {get; set; default = "";}
-    public bool readonly {get; set; default = false;}
-    public Difficulty game_grade {get; set; default = Difficulty.UNDEFINED;}
+    public Dimensions dimensions { get; set; }
+    public Difficulty generator_grade { get; set; }
+    public GameState game_state { get; set; }
+    public bool strikeout_complete { get; set; }
+    public string game_name { get; set; default = "";}
+    public bool readonly { get; set; default = false;}
+    public Difficulty game_grade { get; set; default = Difficulty.UNDEFINED;}
     public double fontheight { get; set; }
-    public bool can_go_back {get; set;}
-    public bool can_go_forward {get; set;}
-    public bool restart_destructive {get; set; default = false;}
-    public Cell current_cell {get; set;}
-    public Cell previous_cell {get; set;}
+    public bool can_go_back { get; set; }
+    public bool can_go_forward { get; set; }
+    public bool restart_destructive { get; set; default = false;}
+    public Cell current_cell { get; set; }
+    public Cell previous_cell { get; set; }
 
     /**PRIVATE**/
     private const uint PROGRESS_DELAY_MSEC = 500;
@@ -748,7 +748,7 @@ public class View : Gtk.ApplicationWindow {
 }
 
 private class RestartButton : Gtk.Button {
-    public bool restart_destructive {get; set;}
+    public bool restart_destructive { get; set; }
 
     construct {
         restart_destructive = false;

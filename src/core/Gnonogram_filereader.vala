@@ -24,31 +24,31 @@ public class Filereader : Object {
     /** PUBLIC **/
     public string err_msg = "";
 
-    public File? game_file {get; set; default = null;}
-    public GameState state {get; private set; default = GameState.UNDEFINED;}
+    public File? game_file { get; set; default = null;}
+    public GameState state { get; private set; default = GameState.UNDEFINED;}
 
-    public int rows {get; private set; default = 0;}
-    public int cols {get; private set; default = 0;}
+    public int rows { get; private set; default = 0;}
+    public int cols { get; private set; default = 0;}
 
-    public string[] row_clues {get; private set;}
-    public string[] col_clues {get; private set;}
-    public string[] solution {get; private set;}
-    public string[] working {get; private set;}
+    public string[] row_clues { get; private set; }
+    public string[] col_clues { get; private set; }
+    public string[] solution { get; private set; }
+    public string[] working { get; private set; }
 
-    public string name {get; private set; default = "";}
-    public string date {get; private set; default = "";}
-    public Difficulty difficulty {get; private set; default = Difficulty.UNDEFINED;}
-    public string license {get; private set; default = "";}
-    public string original_path {get; private set; default = "";}
-    public string moves {get; private set; default = "";}
+    public string name { get; private set; default = "";}
+    public string date { get; private set; default = "";}
+    public Difficulty difficulty { get; private set; default = Difficulty.UNDEFINED;}
+    public string license { get; private set; default = "";}
+    public string original_path { get; private set; default = "";}
+    public string moves { get; private set; default = "";}
 
-    public bool has_dimensions {get; private set; default = false;}
-    public bool has_row_clues {get; private set; default = false;}
-    public bool has_col_clues {get; private set; default = false;}
-    public bool has_solution {get; private set; default = false;}
-    public bool has_working {get; private set; default = false;}
-    public bool has_state {get; private set; default = false;}
-    public bool is_readonly {get; private set; default = true;}
+    public bool has_dimensions { get; private set; default = false;}
+    public bool has_row_clues { get; private set; default = false;}
+    public bool has_col_clues { get; private set; default = false;}
+    public bool has_solution { get; private set; default = false;}
+    public bool has_working { get; private set; default = false;}
+    public bool has_state { get; private set; default = false;}
+    public bool is_readonly { get; private set; default = true;}
 
     public bool valid {
         get {

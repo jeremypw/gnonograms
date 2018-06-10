@@ -43,11 +43,11 @@ namespace Gnonograms {
 
 public class Region { /* Not a GObject, to reduce weight */
     /** PUBLIC **/
-    public bool is_column  { get; private set; }
-    public bool in_error  { get; private set;  default = false; }
+    public bool is_column { get; private set; }
+    public bool in_error { get; private set;  default = false; }
     public bool is_completed { get; private set; default = false; }
-    public uint index  { get; private set; }
-    public int n_cells  { get; private set; }
+    public uint index { get; private set; }
+    public int n_cells { get; private set; }
     public int block_total { get; private set; }  //total cells to be filled
     public string message;
 
@@ -163,7 +163,7 @@ public class Region { /* Not a GObject, to reduce weight */
           }
 
           is_completed = true;
-        } else  {
+        } else {
             initial_fix ();
         }
 
@@ -312,7 +312,7 @@ public class Region { /* Not a GObject, to reduce weight */
     }
 
     /* For debugging and testing */
-    public string to_string ()  {
+    public string to_string () {
         var sb =  new StringBuilder ("");
         sb.append (this.get_id ());
         sb.append ("\n\r status before:\n\r");
@@ -1510,7 +1510,7 @@ public class Region { /* Not a GObject, to reduce weight */
             return 0;
         }
 
-        if ((direction == Region.FORWARDS) && idx >= limit)  {
+        if ((direction == Region.FORWARDS) && idx >= limit) {
             return limit;
         } else if ((direction == Region.BACKWARDS) && (idx <= limit)) {
             return limit;
@@ -1518,7 +1518,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
         for (int i = idx; i != limit; i += direction) {
 
-            if (status[i] == cs)  {
+            if (status[i] == cs) {
                 return i;
             }
         }
@@ -1911,7 +1911,7 @@ public class Region { /* Not a GObject, to reduce weight */
         if (is_invalid_data (start, block, length)) {
             in_error = true;
             message = "remove_block_from_range";
-        } else  {
+        } else {
 
             for (int i = start; i < start + length; i++) {
                 tags[i, block] = false;

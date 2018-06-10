@@ -23,7 +23,7 @@ namespace Gnonograms {
    *        of the calling function.
 ***/
 public class My2DCellArray  : GLib.Object {
-    public Dimensions dimensions {get; construct;}
+    public Dimensions dimensions { get; construct; }
 
     public uint rows {
         get {
@@ -153,9 +153,9 @@ public class My2DCellArray  : GLib.Object {
     }
 
     public class Iterator {
-        private uint row_limit {get; set;}
-        private uint col_limit {get; set;}
-        private CellState [ , ] data {get; set;}
+        private uint row_limit { get; set; }
+        private uint col_limit { get; set; }
+        private CellState [ , ] data { get; set; }
 
         private uint row_index = 0;
         private uint col_index = 0;

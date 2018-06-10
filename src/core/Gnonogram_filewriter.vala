@@ -22,23 +22,23 @@
 namespace Gnonograms {
 public class Filewriter : Object {
     /** PUBLIC **/
-    public DateTime date {get; construct;}
-    public uint rows {get; construct;}
-    public uint cols {get; construct;}
-    public string name {get; construct;}
-    public string[] row_clues {get; construct;}
-    public string[] col_clues {get; construct;}
-    public History history {get; construct;}
-    public string? game_path {get; private set;}
+    public DateTime date { get; construct; }
+    public uint rows { get; construct; }
+    public uint cols { get; construct; }
+    public string name { get; construct; }
+    public string[] row_clues { get; construct; }
+    public string[] col_clues { get; construct; }
+    public History history { get; construct; }
+    public string? game_path { get; private set; }
 
-    public bool is_readonly {get; set; default = true;}
-    public string author {get; set; default = "";}
-    public string license {get; set; default = "";}
-    public Difficulty difficulty {get; set; default = Difficulty.UNDEFINED;}
-    public GameState game_state {get; set; default = GameState.UNDEFINED;}
+    public bool is_readonly { get; set; default = true;}
+    public string author { get; set; default = "";}
+    public string license { get; set; default = "";}
+    public Difficulty difficulty { get; set; default = Difficulty.UNDEFINED;}
+    public GameState game_state { get; set; default = GameState.UNDEFINED;}
     private bool save_solution = true;
-    public My2DCellArray? solution {get; set; default = null;}
-    public My2DCellArray? working {get; set; default = null;}
+    public My2DCellArray? solution { get; set; default = null;}
+    public My2DCellArray? working { get; set; default = null;}
 
     public Filewriter (Gtk.Window? parent,
                        string? save_dir_path,

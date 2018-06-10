@@ -274,7 +274,7 @@ namespace Gnonograms {
         int contra = 0;
 
         state = SolverState.UNDEFINED;
-        while (state == SolverState.UNDEFINED)  {
+        while (state == SolverState.UNDEFINED) {
             changed_count++;
 
             if (!guesser.next_guess ()) {
