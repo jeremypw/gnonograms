@@ -25,7 +25,6 @@ namespace Gnonograms {
     public static int MINSIZE = 5; // Change to 1 when debugging
     public static double MINFONTSIZE = 8.0;
     public static double MAXFONTSIZE = 36.0;
-    public static int FAILED_PASSES = 0;
 
     public static double FONT_ASPECT_RATIO = 1.2;
     public static int HEADER_HEIGHT = Gtk.IconSize.LARGE_TOOLBAR;
@@ -39,7 +38,6 @@ namespace Gnonograms {
     public const string BLANKLABELTEXT = N_("?");
     public const string GAMEFILEEXTENSION = ".gno";
     public const string UNSAVED_FILENAME = "Unsaved Game" + GAMEFILEEXTENSION;
-    public const int MAX_TRIES_PER_GRADE = 1000;
     public const string UNTITLED_NAME = N_("Untitled");
 
     public const string APP_ID = "com.github.jeremypw.gnonograms";
