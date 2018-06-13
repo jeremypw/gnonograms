@@ -455,7 +455,7 @@ public class View : Gtk.ApplicationWindow {
 
         Gdk.Window? window = get_window ();
         if (window != null) {
-            monitor_area  = Utils.get_monitor_area (screen, window);
+            monitor_area = Utils.get_monitor_area (screen, window);
         }
 
          /* Cell dimensions approx 2.0 * font height
@@ -475,7 +475,7 @@ public class View : Gtk.ApplicationWindow {
             return;
         }
 
-        var monitor_area  = Utils.get_monitor_area (screen, window);
+        var monitor_area = Utils.get_monitor_area (screen, window);
         var w = int.min ((int)(monitor_area.width * Gnonograms.USABLE_MONITOR_WIDTH), row_clue_box.min_width + column_clue_box.min_width + 2 * Gnonograms.GRID_BORDER + Gnonograms.GRID_COLUMN_SPACING);
         var h = int.min ((int)(monitor_area.height * USABLE_MONITOR_HEIGHT), row_clue_box.min_height + column_clue_box.min_height + 2 * Gnonograms.GRID_BORDER + Gnonograms.HEADER_HEIGHT);
 

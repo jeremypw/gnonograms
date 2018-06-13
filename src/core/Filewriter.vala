@@ -102,17 +102,17 @@ public class Filewriter : Object {
         stream.printf ("%u\n", difficulty);
 
         if (license == null || license.length > 0) {
-            stream.printf("[License]\n");
-            stream.printf("%s\n", license);
+            stream.printf ("[License]\n");
+            stream.printf ("%s\n", license);
         }
 
         if (rows == 0 || cols == 0) {
             throw new IOError.NOT_INITIALIZED ("No dimensions to save");
         }
 
-        stream.printf("[Dimensions]\n");
-        stream.printf("%u\n", rows);
-        stream.printf("%u\n", cols);
+        stream.printf ("[Dimensions]\n");
+        stream.printf ("%u\n", rows);
+        stream.printf ("%u\n", cols);
 
         if (row_clues.length == 0 || col_clues.length == 0) {
             throw new IOError.NOT_INITIALIZED ("No clues to save");
@@ -122,17 +122,17 @@ public class Filewriter : Object {
             throw new IOError.NOT_INITIALIZED ("Clues do not match dimensions");
         }
 
-        stream.printf("[Row clues]\n");
+        stream.printf ("[Row clues]\n");
         foreach (string s in row_clues) {
-            stream.printf("%s\n", s);
+            stream.printf ("%s\n", s);
         }
 
-        stream.printf("[Column clues]\n");
+        stream.printf ("[Column clues]\n");
         foreach (string s in col_clues) {
-            stream.printf("%s\n", s);
+            stream.printf ("%s\n", s);
         }
 
-        stream.flush();
+        stream.flush ();
 
         if (save_solution) {
             stream.printf ("[Solution grid]\n");
@@ -156,9 +156,9 @@ public class Filewriter : Object {
         write_game_file ();
 
         stream.printf ("[Working grid]\n");
-        stream.printf (working.to_string());
+        stream.printf (working.to_string ());
         stream.printf ("[State]\n");
-        stream.printf (game_state.to_string() + "\n");
+        stream.printf (game_state.to_string () + "\n");
 
         if (name != _(UNTITLED_NAME)) {
             stream.printf ("[Original path]\n");
@@ -186,7 +186,7 @@ public class Filewriter : Object {
             _("Name and save this puzzle"),
             filters,
             save_dir_path,
-            out with_solution  // cannot use save_solution directly (will not compile)
+            out with_solution // cannot use save_solution directly (will not compile)
         );
 
         if (path != null) {

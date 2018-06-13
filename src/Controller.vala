@@ -115,7 +115,7 @@ public class Controller : GLib.Object {
         restore_settings (); /* May change load_game_dir and save_game_dir */
 
         bind_property ("dimensions", model, "dimensions", BindingFlags.DEFAULT);
-        bind_property ("dimensions", view, "dimensions",  BindingFlags.BIDIRECTIONAL);
+        bind_property ("dimensions", view, "dimensions", BindingFlags.BIDIRECTIONAL);
 
         bind_property ("generator-grade", view, "generator-grade", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
 
@@ -472,10 +472,10 @@ public class Controller : GLib.Object {
         }
 
 #if 0 //To be implemented (maybe)
-        view.set_source(reader.author);
-        view.set_date(reader.date);
-        view.set_license(reader.license);
-        view.set_score(reader.score);
+        view.set_source (reader.author);
+        view.set_date (reader.date);
+        view.set_license (reader.license);
+        view.set_score (reader.score);
 #endif
 
         return true;
@@ -670,7 +670,7 @@ public class Controller : GLib.Object {
             if (cancellable != null && cancellable.is_cancelled ()) {
                 msg = _("Solving was cancelled");
             } else if (solver.state.solved ()) {
-                msg =  _("Solution found. %s").printf (diff.to_string ());
+                msg = _("Solution found. %s").printf (diff.to_string ());
             } else {
                 msg = _("No solution found");
             }

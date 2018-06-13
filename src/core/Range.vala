@@ -22,7 +22,7 @@
 
 namespace Gnonograms {
 
-public class Range {  //can use for filled subregions or ranges of filled and unknown cells
+public class Range { //can use for filled subregions or ranges of filled and unknown cells
     public int start;
     public int end;
     public int filled;

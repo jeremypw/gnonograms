@@ -115,7 +115,7 @@ public class Filereader : Object {
                     bodies += stream.read_upto ("[", 1, out body_length, null);
                     stream.read_byte ();
 
-                if (header_length == 0  ||  body_length == 0) {
+                if (header_length == 0 || body_length == 0) {
                     break;
                 }
             }
@@ -314,7 +314,7 @@ public class Filereader : Object {
         state = GameState.SOLVING;
 
         if (body != null) {
-            string[] s = Utils.remove_blank_lines (body.split("\n"));
+            string[] s = Utils.remove_blank_lines (body.split ("\n"));
 
             if (s != null && s.length == 1) {
                 var state_string = s[0];
@@ -336,7 +336,7 @@ public class Filereader : Object {
             return true;
         }
 
-        string[] s = Utils.remove_blank_lines (body.split("\n"));
+        string[] s = Utils.remove_blank_lines (body.split ("\n"));
 
         if (s.length >= 1) {
             name = Uri.unescape_string (s[0]);
@@ -363,7 +363,7 @@ public class Filereader : Object {
             return true; /* Not mandatory */
         }
 
-        string[] s = Utils.remove_blank_lines (body.split("\n"));
+        string[] s = Utils.remove_blank_lines (body.split ("\n"));
 
         bool result = true;
         if (s.length >= 1) {
@@ -379,7 +379,7 @@ public class Filereader : Object {
         string result = "";
 
         if (body != null) {
-            string[] s = Utils.remove_blank_lines (body.split("\n"));
+            string[] s = Utils.remove_blank_lines (body.split ("\n"));
 
             if (s.length >= 1) {
                 result = s[0];

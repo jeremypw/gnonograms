@@ -118,7 +118,7 @@ namespace Utils {
     }
 
     public Gee.ArrayList<Block> complete_block_array_from_cellstate_array (CellState[] cellstates) {
-        var blocks = new  Gee.ArrayList<Block> ();
+        var blocks = new Gee.ArrayList<Block> ();
         int count = 0;
         bool valid = true;
         var previous_state = CellState.UNKNOWN;
@@ -189,7 +189,7 @@ namespace Utils {
             switch (state) {
                 case CellState.EMPTY:
                     if (count_state == CellState.FILLED) {
-                        sb.append (count.to_string() + BLOCKSEPARATOR);
+                        sb.append (count.to_string () + BLOCKSEPARATOR);
                         blocks++;
                     } else if (count_state == CellState.UNKNOWN) {
                         sb.append ("?" + BLOCKSEPARATOR);
@@ -219,7 +219,7 @@ namespace Utils {
                     if (count_state == CellState.UNDEFINED) {
                         counting = true;
                     } else if (count_state == CellState.FILLED) {
-                        sb.append (count.to_string() + BLOCKSEPARATOR);
+                        sb.append (count.to_string () + BLOCKSEPARATOR);
                         count = 0;
                     }
 
@@ -258,7 +258,7 @@ namespace Utils {
     }
 
     public string string_from_cellstate_array (CellState[] cs) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder ();
 
         foreach (uint state in cs) {
             sb.append (state.to_string ());
@@ -370,7 +370,7 @@ namespace Utils {
                     );
 
             foreach (var info in filters) {
-                var fc = new Gtk.FileFilter();
+                var fc = new Gtk.FileFilter ();
                 fc.set_filter_name (info.name);
                 fc.add_pattern (info.pattern);
                 dialog.add_filter (fc);
@@ -440,7 +440,7 @@ namespace Utils {
         Gdk.Rectangle rect;
 
 #if HAVE_GTK_3_22
-        var display = Gdk.Display.get_default();
+        var display = Gdk.Display.get_default ();
         var monitor = display.get_monitor_at_window (window);
         rect = monitor.get_geometry ();
 #else

@@ -45,9 +45,9 @@ namespace Gnonograms {
 
         double length = (double)(dimensions.length ());
 
-        moderate_threshold = (uint)((length / MODERATE_CPP + 0.5));  /* Round up */
-        hard_threshold = (uint)((length / HARD_CPP + 0.5));  /* Round up */
-        challenging_threshold = (uint)((length / CHALLENGING_CPP - 0.5));  /* Round down */
+        moderate_threshold = (uint)((length / MODERATE_CPP + 0.5)); /* Round up */
+        hard_threshold = (uint)((length / HARD_CPP + 0.5)); /* Round up */
+        challenging_threshold = (uint)((length / CHALLENGING_CPP - 0.5)); /* Round down */
     }
 
     public override void configure_from_grade (Difficulty grade) {
@@ -105,8 +105,8 @@ namespace Gnonograms {
         return passes_to_grade (result);
     }
 
-    public override Gee.ArrayQueue<Move>  debug (uint idx, bool is_column, string[] row_clues, string[] col_clues, My2DCellArray working) {
-        var moves = new Gee.ArrayQueue<Move>();
+    public override Gee.ArrayQueue<Move> debug (uint idx, bool is_column, string[] row_clues, string[] col_clues, My2DCellArray working) {
+        var moves = new Gee.ArrayQueue<Move> ();
         initialize (row_clues, col_clues, working, null);
         var r= regions[idx + (is_column ? rows : 0)];
         var changed = r.debug ();
@@ -146,7 +146,7 @@ namespace Gnonograms {
         bool changed = false;
         uint count = 0;
 
-        var moves = new Gee.ArrayQueue<Move>();
+        var moves = new Gee.ArrayQueue<Move> ();
 
         /* Initialize may have changed state of some cells during initial fix */
         foreach (Region r in regions) {
@@ -440,8 +440,8 @@ namespace Gnonograms {
 
     /** Store the grid in linearised form **/
         private CellState[] gs;
-        private  My2DCellArray _grid;
-        public  My2DCellArray grid {
+        private My2DCellArray _grid;
+        public My2DCellArray grid {
             get {
                 return _grid;
             }

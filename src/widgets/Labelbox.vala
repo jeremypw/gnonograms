@@ -138,7 +138,7 @@ public class LabelBox : Gtk.Grid {
 
     private void resize (Dimensions dimensions) {
         assert (size >= 0);
-        unhighlight_all();
+        unhighlight_all ();
 
         var new_size = (int)(vertical_labels ? dimensions.width : dimensions.height);
         var new_other_size = (int)(vertical_labels ? dimensions.height : dimensions.width);

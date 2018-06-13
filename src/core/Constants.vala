@@ -46,15 +46,15 @@ namespace Gnonograms {
     public const string SETTING_FILLED_COLOR = "#000000"; /* Elementary Black 900 */
     public const string SETTING_EMPTY_COLOR = "#fafafa"; /* Elementary Silver 100 */
     public const string SOLVING_FILLED_COLOR = "#180297"; /* Gnonograms Dark Purple */
-    public const string SOLVING_EMPTY_COLOR = "#ffff00";  /* Pure Yellow */
+    public const string SOLVING_EMPTY_COLOR = "#ffff00"; /* Pure Yellow */
     public const string UNKNOWN_COLOR = "#d4d4d4"; /* Elementary Silver 300 */
     public const string GRID_COLOR = "#000000"; /* Elementary Black 900 */
 
-    public const string DARK_TEXT       = "#000000"; /* Elementary Black 900 */
-    public const string PALE_TEXT       = "#fafafa"; /* Elementary Silver 100 */
+    public const string DARK_TEXT = "#000000"; /* Elementary Black 900 */
+    public const string PALE_TEXT = "#fafafa"; /* Elementary Silver 100 */
     public const string DARK_BACKGROUND = "#180297"; /* Gnonograms Dark Purple */
     public const string PALE_BACKGROUND = "#cdc9e0"; /* Gnonograms Pale Purple */
-    public const string DARK_SHADOW     = "#1a1a1a"; /* Elementary Black 700 */
-    public const string PALE_SHADOW     = "#fafafa"; /* Elementary Silver 100 */
+    public const string DARK_SHADOW = "#1a1a1a"; /* Elementary Black 700 */
+    public const string PALE_SHADOW = "#fafafa"; /* Elementary Silver 100 */
 
 }

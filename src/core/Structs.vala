@@ -66,7 +66,7 @@ public struct Cell {
 
     }
 
-    public Cell inverse() {
+    public Cell inverse () {
         Cell c = {row, col, CellState.UNKNOWN };
 
         if (this.state == CellState.EMPTY) {
@@ -83,7 +83,7 @@ public struct Cell {
     }
 
     public string to_string () {
-        return "Row %u, Col %u,  State %s".printf (row, col, state.to_string ());
+        return "Row %u, Col %u, State %s".printf (row, col, state.to_string ());
     }
 }
 

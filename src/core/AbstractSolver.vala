@@ -23,7 +23,7 @@ namespace Gnonograms {
  public abstract class AbstractSolver : GLib.Object {
     protected static uint MAX_PASSES = 200;
     protected Region[] regions;
-    protected uint n_regions { get { return dimensions.length(); }}
+    protected uint n_regions { get { return dimensions.length (); }}
     protected bool should_check_solution;
 
     public SolverState state { get; set; }
@@ -197,7 +197,7 @@ namespace Gnonograms {
         return new Gee.ArrayQueue<Move> ();
     }
 
-    public virtual  Gee.ArrayQueue<Move>  debug (uint idx, bool is_column, string[] row_clues, string[] col_clues, My2DCellArray working) {
+    public virtual Gee.ArrayQueue<Move> debug (uint idx, bool is_column, string[] row_clues, string[] col_clues, My2DCellArray working) {
         return new Gee.ArrayQueue<Move> ();
     }
 

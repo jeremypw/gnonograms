@@ -89,7 +89,7 @@ public class History : GLib.Object {
     }
 
     public void from_string (string? s) {
-        clear_all();
+        clear_all ();
 
         if (s == null) {
             return;

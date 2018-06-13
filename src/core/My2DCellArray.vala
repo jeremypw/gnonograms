@@ -22,7 +22,7 @@ namespace Gnonograms {
 /*** NOTE:  This class does not range check coordinates passed as parameters - that is the responsibility
    *        of the calling function.
 ***/
-public class My2DCellArray  : GLib.Object {
+public class My2DCellArray : GLib.Object {
     public Dimensions dimensions { get; construct; }
 
     public uint rows {
@@ -99,7 +99,7 @@ public class My2DCellArray  : GLib.Object {
 
     public void get_array (uint idx, bool iscolumn, ref CellState[] sa, uint start = 0) {
         if (iscolumn) {
-            get_col(idx, ref sa, start);
+            get_col (idx, ref sa, start);
         } else {
             get_row (idx, ref sa, start);
         }
@@ -109,7 +109,7 @@ public class My2DCellArray  : GLib.Object {
         if (iscolumn) {
             set_col (idx, sa, start);
         } else {
-            set_row(idx, sa, start);
+            set_row (idx, sa, start);
         }
     }
 
@@ -148,7 +148,7 @@ public class My2DCellArray  : GLib.Object {
         return sb.str;
     }
 
-    public Iterator iterator() {
+    public Iterator iterator () {
         return new Iterator (data, dimensions);
     }
 
