@@ -19,15 +19,11 @@
  */
 
 namespace Gnonograms {
-public class App : Granite.Application {
+public class App : Gtk.Application {
     public Controller controller;
 
     construct {
         application_id = Gnonograms.APP_ID;
-        program_name = Gnonograms.APP_NAME;
-        app_launcher = Gnonograms.LAUNCHER;
-        build_version = Gnonograms.VERSION;
-
         flags = ApplicationFlags.HANDLES_OPEN;
 
         SimpleAction quit_action = new SimpleAction ("quit", null);

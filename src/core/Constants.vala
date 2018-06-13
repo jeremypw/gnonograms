@@ -44,8 +44,6 @@ namespace Gnonograms {
 
     public const string APP_ID = "com.github.jeremypw.gnonograms";
     public const string APP_NAME = _("Gnonograms");
-    public const string LAUNCHER = "com.github.jeremypw.gnonograms.desktop";
-    public const string VERSION = "1.2.2"; // For benefit of Granite.Application terminal output.
 
     public const string SETTING_FILLED_COLOR = "#000000"; /* Elementary Black 900 */
     public const string SETTING_EMPTY_COLOR = "#fafafa"; /* Elementary Silver 100 */
