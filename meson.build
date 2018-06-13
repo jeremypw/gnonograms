@@ -23,7 +23,7 @@ endif
 
 executable (
     meson.project_name (),
-    'src/gnonograms.vala',
+    'src/Application.vala',
     'src/Gnonogram_controller.vala',
     'src/Gnonogram_view.vala',
     'src/RandomPatternGenerator.vala',
