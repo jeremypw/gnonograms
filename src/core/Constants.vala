@@ -21,18 +21,18 @@
 
 namespace Gnonograms {
     public const Cell NULL_CELL = { uint.MAX, uint.MAX, CellState.UNDEFINED };
-    public static int MAXSIZE = 50; // max number rows or columns
-    public static int MINSIZE = 5; // Change to 1 when debugging
-    public static double MINFONTSIZE = 8.0;
-    public static double MAXFONTSIZE = 36.0;
+    public const int MAXSIZE = 50; // max number rows or columns
+    public const int MINSIZE = 5; // Change to 1 when debugging
+    public const double MINFONTSIZE = 8.0;
+    public const double MAXFONTSIZE = 36.0;
 
-    public static double FONT_ASPECT_RATIO = 1.2;
-    public static int HEADER_HEIGHT = Gtk.IconSize.LARGE_TOOLBAR;
-    public static int GRID_BORDER = 6;
-    public static int GRID_COLUMN_SPACING = 6;
-    public static double TYPICAL_MAX_BLOCKS_RATIO = 0.3;
-    public static double USABLE_MONITOR_HEIGHT = 0.85;
-    public static double USABLE_MONITOR_WIDTH = 0.95;
+    public const double FONT_ASPECT_RATIO = 1.2;
+    public const int HEADER_HEIGHT = Gtk.IconSize.LARGE_TOOLBAR;
+    public const int GRID_BORDER = 6;
+    public const int GRID_COLUMN_SPACING = 6;
+    public const double TYPICAL_MAX_BLOCKS_RATIO = 0.3;
+    public const double USABLE_MONITOR_HEIGHT = 0.85;
+    public const double USABLE_MONITOR_WIDTH = 0.95;
 
     public const string BLOCKSEPARATOR = ", ";
     public const string BLANKLABELTEXT = N_("?");
