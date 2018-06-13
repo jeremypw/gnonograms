@@ -50,7 +50,7 @@ public class Filewriter : Object {
                        History history) throws IOError {
 
         Object (
-            name: name ?? Gnonograms.UNTITLED_NAME,
+            name: name ?? _(UNTITLED_NAME),
             rows: dimensions.rows (),
             cols: dimensions.cols (),
             row_clues: row_clues,
@@ -160,7 +160,7 @@ public class Filewriter : Object {
         stream.printf ("[State]\n");
         stream.printf (game_state.to_string() + "\n");
 
-        if (name != Gnonograms.UNTITLED_NAME) {
+        if (name != _(UNTITLED_NAME)) {
             stream.printf ("[Original path]\n");
             stream.printf (game_path.to_string () + "\n");
         }

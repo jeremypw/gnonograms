@@ -97,7 +97,7 @@ public class LabelBox : Gtk.Grid {
 
     public void update_label_text (uint index, string? txt) {
         if (txt == null) {
-            txt = BLANKLABELTEXT;
+            txt = _(BLANKLABELTEXT);
         }
 
         Clue? label = labels[index];

@@ -52,7 +52,7 @@ public class Controller : GLib.Object {
     private uint cols {get {return dimensions.cols ();}}
 
     construct {
-        game_name = UNTITLED_NAME;
+        game_name = _(UNTITLED_NAME);
         model = new Model ();
         view = new View (model);
         history = new Gnonograms.History ();
@@ -95,7 +95,7 @@ public class Controller : GLib.Object {
 
         string data_home_folder_current = Path.build_path (Path.DIR_SEPARATOR_S,
                                                            Environment.get_user_data_dir (),
-                                                           Gnonograms.APP_NAME,
+                                                           APP_NAME,
                                                            "unsaved"
                                                            );
         File file;
@@ -199,7 +199,7 @@ public class Controller : GLib.Object {
     private void new_game () {
         clear ();
         game_state = GameState.SETTING;
-        game_name = Gnonograms.UNTITLED_NAME;
+        game_name = _(UNTITLED_NAME);
     }
 
     private void on_new_random_request () {

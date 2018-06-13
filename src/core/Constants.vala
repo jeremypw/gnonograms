@@ -36,14 +36,14 @@ namespace Gnonograms {
     public static double USABLE_MONITOR_WIDTH = 0.95;
 
     public const string BLOCKSEPARATOR = ", ";
-    public const string BLANKLABELTEXT = _("?");
+    public const string BLANKLABELTEXT = N_("?");
     public const string GAMEFILEEXTENSION = ".gno";
     public const string UNSAVED_FILENAME = "Unsaved Game" + GAMEFILEEXTENSION;
     public const int MAX_TRIES_PER_GRADE = 1000;
-    public const string UNTITLED_NAME = _("Untitled");
+    public const string UNTITLED_NAME = N_("Untitled");
 
     public const string APP_ID = "com.github.jeremypw.gnonograms";
-    public const string APP_NAME = _("Gnonograms");
+    public const string APP_NAME = "Gnonograms";
 
     public const string SETTING_FILLED_COLOR = "#000000"; /* Elementary Black 900 */
     public const string SETTING_EMPTY_COLOR = "#fafafa"; /* Elementary Silver 100 */

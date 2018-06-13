@@ -227,7 +227,7 @@ namespace Utils {
                     break;
 
                 default:
-                    return BLANKLABELTEXT;
+                    return _(BLANKLABELTEXT);
             }
         }
 
