@@ -10,7 +10,7 @@
     ​</mimetypes>
     <summary>Create and solve gnonogram puzzles</summary>
     <description>
-        <p>An implementation of the Japanese logic puzzle "Nonograms"</p>
+        <p>An implementation of the Japanese logic puzzle "Nonograms" written in Vala for elementaryos.</p>
         <p>
             <ul>
                 <li>Draw puzzles</li>
@@ -18,7 +18,9 @@
             </ul>
         </p>
     </description>
-    <content_rating type="oars-1.0" />
+    <content_rating type="oars-1.1">
+    <content_attribute id="social-info">none</content_attribute>
+    </content_rating>
     <categories>
         <category>Game</category>
         <category>LogicGame</category>
@@ -154,7 +156,7 @@
         </screenshot>
     </screenshots>
 
-    <developer_name>Jeremy P Wootten</developer_name>
+    <developer_name>Jeremy Paul Wootten</developer_name>
     <url type="homepage">https://github.com/jeremypw/gnonograms</url>
     <url type="bugtracker">https://github.com/jeremypw/gnonograms/issues</url>
     <url type="help">https://github.com/jeremypw/gnonograms</url>
