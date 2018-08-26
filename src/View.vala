@@ -56,7 +56,7 @@ public class View : Gtk.ApplicationWindow {
     /**PRIVATE**/
     private const uint PROGRESS_DELAY_MSEC = 500;
 
-    private string BRAND_STYLESHEET = """
+    private string brand_stylesheet = """
         @define-color textColorPrimary %s;
         @define-color textColorPrimaryShadow %s;
         @define-color colorPrimary %s;
@@ -102,7 +102,7 @@ public class View : Gtk.ApplicationWindow {
                 Gnonograms.DARK_BACKGROUND,
                 Gnonograms.PALE_BACKGROUND);
 
-    private const GLib.ActionEntry [] view_action_entries = {
+    private const GLib.ActionEntry [] VIEW_ACTION_ENTRIES = {
         {"undo", action_undo},
         {"redo", action_redo},
         {"zoom", action_zoom, "i"},
@@ -127,7 +127,7 @@ public class View : Gtk.ApplicationWindow {
     private AppMenu app_menu;
     private Gtk.Grid main_grid;
     private Gtk.Overlay overlay;
-    private Gnonograms.Progress_indicator progress_indicator;
+    private Gnonograms.ProgressIndicator progress_indicator;
     private Granite.Widgets.Toast toast;
     private ViewModeButton mode_switch;
     private Gtk.Button load_game_button;
@@ -154,7 +154,8 @@ public class View : Gtk.ApplicationWindow {
 
     construct {
         var view_actions = new GLib.SimpleActionGroup ();
-        view_actions.add_action_entries (view_action_entries, this);
+        view_actions.add_action_entries (VIEW_ACTION_ENTRIES, this);
+        view_actions.add_action_entries (VIEW_ACTION_ENTRIES, this);
         insert_action_group ("view", view_actions);
         var application = Gnonograms.get_app ();
         application.set_accels_for_action ("view.undo", {"<Ctrl>Z"});
@@ -185,7 +186,7 @@ public class View : Gtk.ApplicationWindow {
 
         var provider = new Gtk.CssProvider ();
         try {
-            provider.load_from_data (BRAND_STYLESHEET, -1);
+            provider.load_from_data (brand_stylesheet, -1);
             Gtk.StyleContext.add_provider_for_screen (get_screen (), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
         } catch (Error e) {
             warning ("Could not create CSS Provider: %s", e.message);
@@ -253,7 +254,7 @@ public class View : Gtk.ApplicationWindow {
         app_menu = new AppMenu ();
         mode_switch = new ViewModeButton ();
 
-        progress_indicator = new Gnonograms.Progress_indicator ();
+        progress_indicator = new Gnonograms.ProgressIndicator ();
         progress_indicator.get_style_context ().add_class ("progress");
         header_bar.pack_start (load_game_button);
         header_bar.pack_start (save_game_button);

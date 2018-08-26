@@ -20,7 +20,7 @@
 
 namespace Gnonograms {
 /** Widget to show working when generating or solving and allow cancel **/
-public class Progress_indicator : Gtk.Grid {
+public class ProgressIndicator : Gtk.Grid {
 
     private Gtk.Spinner spinner;
     private Gtk.Button cancel_button;
@@ -34,7 +34,7 @@ public class Progress_indicator : Gtk.Grid {
 
     public Cancellable? cancellable { get; set; }
 
-    public Progress_indicator () {
+    public ProgressIndicator () {
         Object (
             orientation: Gtk.Orientation.HORIZONTAL,
             column_homogeneous: false,

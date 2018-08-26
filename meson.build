@@ -33,7 +33,7 @@ executable (
     'src/widgets/Cellgrid.vala',
     'src/widgets/AppMenu.vala',
     'src/widgets/ViewModeButton.vala',
-    'src/widgets/Progress_indicator.vala',
+    'src/widgets/ProgressIndicator.vala',
     'src/core/AbstractPatternGenerator.vala',
     'src/core/AbstractGameGenerator.vala',
     'src/core/AbstractSolver.vala',

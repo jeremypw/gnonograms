@@ -21,7 +21,7 @@
 
 namespace Gnonograms {
  public abstract class AbstractSolver : GLib.Object {
-    protected static uint MAX_PASSES = 200;
+    protected const uint MAX_PASSES = 200;
     protected Region[] regions;
     protected uint n_regions { get { return dimensions.length (); }}
     protected bool should_check_solution;

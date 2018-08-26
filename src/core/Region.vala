@@ -394,9 +394,9 @@ public class Region { /* Not a GObject, to reduce weight */
     /** PRIVATE **/
     private My2DCellArray grid;
 
-    private static int MAXCYCLES = 2;
-    private static int FORWARDS = 1;
-    private static int BACKWARDS = -1;
+    private const int MAXCYCLES = 2;
+    private const int FORWARDS = 1;
+    private const int BACKWARDS = -1;
 
     private bool is_completed_backup;
     private bool[] completed_blocks;

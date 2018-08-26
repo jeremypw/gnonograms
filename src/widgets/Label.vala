@@ -230,8 +230,8 @@ class Clue : Gtk.Label {
 /** PRIVATE **/
     private Gee.List<Block> clue_blocks;
     private Gee.List<Block> grid_blocks;
-    private const string attr_template = "<span size='%i' weight='%s' strikethrough='%s'>";
-    private const string tip_template = "<span size='%i'>";
+    private const string ATTR_TEMPLATE = "<span size='%i' weight='%s' strikethrough='%s'>";
+    private const string TIP_TEMPLATE = "<span size='%i'>";
     private double fontsize;
     private string _clue; /* text of clue in horizontal form */
     private uint _size;
@@ -259,7 +259,7 @@ class Clue : Gtk.Label {
     }
 
     private void update_tooltip () {
-        set_tooltip_markup (tip_template.printf ((int)fontsize / 2) +
+        set_tooltip_markup (TIP_TEMPLATE.printf ((int)fontsize / 2) +
                             _("Freedom = %u").printf (size - Utils.blockextent_from_clue (_clue)) +
                             "</span>");
     }

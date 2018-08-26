@@ -433,9 +433,9 @@ namespace Gnonograms {
         private int clim;
         private int turn;
         private uint max_turns;
-        private const uint initial_max_turns = 3;
+        private uint initial_max_turns = 3;
         private CellState initial_cell_state = CellState.EMPTY;
-        private const uint max_guesswork = 9999;
+        private const uint MAX_GUESSES = 9999;
         private bool human_only;
 
     /** Store the grid in linearised form **/
