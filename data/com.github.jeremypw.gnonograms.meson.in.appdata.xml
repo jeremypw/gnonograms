@@ -18,6 +18,7 @@
             </ul>
         </p>
     </description>
+    <content_rating type="oars-1.0" />
     <categories>
         <category>Game</category>
         <category>LogicGame</category>
