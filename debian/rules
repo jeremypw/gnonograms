@@ -11,6 +11,3 @@
 
 %:
 	dh $@ --buildsystem=meson
-
-	override_dh_missing:
-			dh_missing --fail-missing

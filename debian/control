@@ -1,5 +1,5 @@
 Source: com.github.jeremypw.gnonograms
-Maintainer: Jeremy Wootten <jeremywootten@gmail.com>
+Maintainer: Jeremy Paul Wootten <jeremywootten@gmail.com>
 Section: x11
 Priority: extra
 Build-Depends: meson,
