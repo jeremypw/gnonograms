@@ -34,10 +34,9 @@
 
 # Build files
 *build/*
-debian/build/*
-debian/com.github*
-debian/*debhelper*
-debian/files
+
+# Packaging files (now in orphan branch)
+debian/*
 
 #Misc untracked
 untracked/*
