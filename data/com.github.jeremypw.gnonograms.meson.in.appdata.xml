@@ -25,6 +25,7 @@
         <content_attribute id="violence-sexual">none</content_attribute>
         <content_attribute id="violence-desecration">none</content_attribute>
         <content_attribute id="violence-slavery">none</content_attribute>
+        <content_attribute id="violence-worship">none</content_attribute>
         <content_attribute id="drugs-alcohol">none</content_attribute>
         <content_attribute id="drugs-tobacco">none</content_attribute>
         <content_attribute id="sex-nudity">none</content_attribute>
@@ -37,6 +38,8 @@
         <content_attribute id="language-profanity">none</content_attribute>
         <content_attribute id="language-humor">none</content_attribute>
         <content_attribute id="language-discrimination">none</content_attribute>
+        <content_attribute id="money-purchasing">none</content_attribute>
+        <content_attribute id="money-gambling">none</content_attribute>
         <content_attribute id="social-chat">none</content_attribute>
         <content_attribute id="social-audio">none</content_attribute>
         <content_attribute id="social-location">none</content_attribute>
