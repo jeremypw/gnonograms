@@ -1,8 +1,11 @@
 com.github.jeremypw.gnonograms (1.3) bionic; urgency=low
 
   * Prepare for Juno
+  * Use Houston CI for testing
+  * Use separate packaging branch
+  * Add content rating tags
 
- -- Jeremy Paul Wootten <jeremywootten@gmail.com>  Thu, 26 Aug 2018 18:01:00 +0000
+ -- Jeremy Paul Wootten <jeremywootten@gmail.com>  Mon, 27 Aug 2018 18:01:00 +0000
 
 com.github.jeremypw.gnonograms (1.2.2) xenial; urgency=low
 

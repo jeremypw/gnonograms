@@ -1,7 +1,7 @@
 Source: com.github.jeremypw.gnonograms
 Maintainer: Jeremy Paul Wootten <jeremywootten@gmail.com>
 Section: x11
-Priority: extra
+Priority: optional
 Build-Depends: meson,
                desktop-file-utils,
                appstream,
@@ -16,6 +16,19 @@ Standards-Version: 4.1.1
 Package: com.github.jeremypw.gnonograms
 Architecture: any
 Description: Generate, draw and solve nonogram logic puzzles
+ This application allows you to design or generate and solve Japanese logic
+ puzzles of the nonogram type, also known as Tsunami or Griddler puzzles, on
+ grids up to 50 x 50.
+ .
+ Generated puzzles are random patterns. The difficulty of solving the generated
+ puzzles is adjustable.
+ .
+ The user can also design their own puzzles and allow the computer to check
+ they have a unique solution and to give an approximate measure of difficulty.
+ .
+ The state of the program is restored after closing and re-opening.
+ .
+ Puzzles can be saved to files which have their own mime-type and icon.
 Depends: ${misc:Depends}, ${shlibs:Depends}
 
 
