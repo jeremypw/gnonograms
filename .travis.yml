@@ -24,6 +24,7 @@ cache:
 matrix:
   include:
     - env: DIST=juno
+    - env: DIST=loki
 
 install:
   - npm install @elementaryos/houston
