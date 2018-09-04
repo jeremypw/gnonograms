@@ -5,10 +5,12 @@ import subprocess
 
 schemadir = "@schema_install_dir@"
 schemapath = "@schema_path@"
-tmpdirpath = "@tmp_dir_path@"
 icondir = "@icon_dir_path@"
 mimedir = "@mime_dir_path@"
 desktopdir = "@desktop_dir_path@"
+# The name used for temp directory is set in source code (controller) and and was changed in Release v 1.0.6
+tmp_dir_path1 = '/.local/share/' + 'gnonograms' + '/'
+tmp_dir_path2 = '/.local/share/' + 'Gnonograms' + '/'
 
 print('Compiling gsettings schemas...' + schemadir)
 subprocess.call(['glib-compile-schemas', schemadir])
@@ -22,7 +24,9 @@ subprocess.call(['update-mime-database', mimedir])
 print('Updating desktop database...')
 subprocess.call(['update-desktop-database', desktopdir])
 
-print('Removing temporary game directory')
+print('Removing temporary game directories')
 homedir = os.environ['HOME']
-subprocess.call(['rm', '-R', homedir + tmpdirpath]);
+# Remove temporary directories created by all versions
+subprocess.call(['rm', '-R', homedir + tmp_dir_path1]);
+subprocess.call(['rm', '-R', homedir + tmp_dir_path2]);
 print ('You must manually remove any games directories you created')
