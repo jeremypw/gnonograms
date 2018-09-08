@@ -24,7 +24,6 @@ public class Gnonograms.ScaleGrid : Gnonograms.AppSetting {
     public Gtk.Label heading_label { get; set; }
     private Gtk.Label val_label;
     private Gtk.Scale scale;
-    private Gtk.Adjustment adj;
 
     public signal void value_changed (uint @value);
 
@@ -39,7 +38,8 @@ public class Gnonograms.ScaleGrid : Gnonograms.AppSetting {
         var step = (double)Gnonograms.SIZESTEP;
         var start = (double)Gnonograms.MINSIZE / step;
         var end = (double)Gnonograms.MAXSIZE / step + 1.0;
-        adj = new Gtk.Adjustment (start, start, end, 1.0, 1.0, 1.0);
+        var adj = new Gtk.Adjustment (start, start, end, 1.0, 1.0, 1.0);
+
         scale = new Gtk.Scale (Gtk.Orientation.HORIZONTAL, adj);
         scale.can_focus = false;
         scale.expand = false;
@@ -78,9 +78,10 @@ public class Gnonograms.ScaleGrid : Gnonograms.AppSetting {
         }
 
         var scale_val = (double)(val / Gnonograms.SIZESTEP);
-        if ((uint)(adj.@value) * Gnonograms.SIZESTEP  == val) {
+        if (scale.get_value () * Gnonograms.SIZESTEP  == val) {
             value_changed (val);
         }
+
         scale.set_value (scale_val);
         val_label.label = val.to_string ();
     }
