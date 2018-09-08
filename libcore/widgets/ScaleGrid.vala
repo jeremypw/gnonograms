@@ -20,8 +20,8 @@
 /** Setting Widget using a Scale limited to integral values separated by step **/
 public class Gnonograms.ScaleGrid : Gnonograms.AppSetting {
     public string heading { get; set; }
-    public Gtk.Grid chooser { get; set; }
-    public Gtk.Label heading_label { get; set; }
+    private Gtk.Grid chooser { get; set; }
+    private Gtk.Label heading_label { get; set; }
     private Gtk.Label val_label;
     private Gtk.Scale scale;
 
@@ -31,16 +31,14 @@ public class Gnonograms.ScaleGrid : Gnonograms.AppSetting {
         val_label = new Gtk.Label ("");
         chooser = new Gtk.Grid ();
         chooser.column_spacing = 6;
-    }
 
-    public ScaleGrid (string _heading) {
-        Object (heading: _heading);
         var step = (double)Gnonograms.SIZESTEP;
         var start = (double)Gnonograms.MINSIZE / step;
         var end = (double)Gnonograms.MAXSIZE / step + 1.0;
         var adj = new Gtk.Adjustment (start, start, end, 1.0, 1.0, 1.0);
 
         scale = new Gtk.Scale (Gtk.Orientation.HORIZONTAL, adj);
+
         scale.can_focus = false;
         scale.expand = false;
         scale.hexpand = true;
@@ -51,6 +49,8 @@ public class Gnonograms.ScaleGrid : Gnonograms.AppSetting {
         for (var val = start; val <= end; val += 1.0) {
             scale.add_mark (val, Gtk.PositionType.BOTTOM, null);
         }
+
+        chooser.attach (scale, 0, 0, 1, 1);
 
         /* Connecting to scale.value_changed does not work as library dependency */
         adj.notify["value"].connect (() => {
@@ -64,12 +64,16 @@ public class Gnonograms.ScaleGrid : Gnonograms.AppSetting {
                 set_value (val);
             }
         });
+    }
+
+    public ScaleGrid (string _heading) {
+        Object (heading: _heading);
 
         heading_label = new Gtk.Label (heading);
         val_label.xalign = 0;
-
-        chooser.attach (scale, 0, 0, 1, 1);
         chooser.attach (val_label, 1, 0, 1, 1);
+
+
     }
 
     public override void set_value (uint val) {
