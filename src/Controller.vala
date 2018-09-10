@@ -153,7 +153,8 @@ public class Controller : GLib.Object {
         } else {
             restore_game.begin ((obj, res) => {
                 if (!restore_game.end (res)) {
-                    warning ("Restore game failed");
+                    /* Error normally thrown if running without installing */
+                    debug ("Restore game failed");
                     restore_dimensions ();
                     new_game ();
                 }
@@ -267,7 +268,8 @@ public class Controller : GLib.Object {
                 var current_game = File.new_for_path (temporary_game_path);
                 current_game.@delete ();
             } catch (GLib.Error e) {
-                warning ("Error deleting temporary game file %s - %s", temporary_game_path, e.message);
+                /* Error normally thrown on first run */
+                debug ("Error deleting temporary game file %s - %s", temporary_game_path, e.message);
             } finally {
                 /* Save solution and current state */
                 write_game (temporary_game_path, true);
@@ -303,7 +305,8 @@ public class Controller : GLib.Object {
             current_game_path = saved_state.get_string ("current-game-path");
             window.move (x, y);
         } else {
-            warning ("Unable to restore settings - using defaults"); /* Maybe running uninstalled */
+            /* Error normally thrown running uninstalled */
+            debug ("Unable to restore settings - using defaults"); /* Maybe running uninstalled */
             /* Default puzzle parameters */
             game_state = GameState.SETTING;
             generator_grade = Difficulty.MODERATE;
