@@ -157,6 +157,7 @@ public class View : Gtk.ApplicationWindow {
         view_actions.add_action_entries (VIEW_ACTION_ENTRIES, this);
         view_actions.add_action_entries (VIEW_ACTION_ENTRIES, this);
         insert_action_group ("view", view_actions);
+
         var application = Gnonograms.get_app ();
         application.set_accels_for_action ("view.undo", {"<Ctrl>Z"});
         application.set_accels_for_action ("view.redo", {"<Ctrl><Shift>Z"});
@@ -253,8 +254,8 @@ public class View : Gtk.ApplicationWindow {
 
         app_menu = new AppMenu ();
         mode_switch = new ViewModeButton ();
-
         progress_indicator = new Gnonograms.ProgressIndicator ();
+
         progress_indicator.get_style_context ().add_class ("progress");
         header_bar.pack_start (load_game_button);
         header_bar.pack_start (save_game_button);
@@ -396,6 +397,8 @@ public class View : Gtk.ApplicationWindow {
             fontheight = fontheight.clamp (MINFONTSIZE, MAXFONTSIZE);
             set_window_size ();
         });
+
+        realize.connect (set_window_size);
     }
 
     public void update_labels_from_string_array (string[] clues, bool is_column) {
@@ -472,6 +475,7 @@ public class View : Gtk.ApplicationWindow {
 
     private void set_window_size () {
         Gdk.Window? window = get_window ();
+
         if (window == null) {
             return;
         }

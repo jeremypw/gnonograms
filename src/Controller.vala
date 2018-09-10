@@ -86,7 +86,8 @@ public class Controller : GLib.Object {
         });
 
         var schema_source = GLib.SettingsSchemaSource.get_default ();
-        if (schema_source.lookup ("com.github.jeremypw.gnonograms.settings", true) != null &&
+        if (schema_source != null &&
+            schema_source.lookup ("com.github.jeremypw.gnonograms.settings", true) != null &&
             schema_source.lookup ("com.github.jeremypw.gnonograms.saved-state", true) != null) {
 
             settings = new Settings ("com.github.jeremypw.gnonograms.settings");
@@ -128,20 +129,21 @@ public class Controller : GLib.Object {
         history.bind_property ("can-go-back", view, "can-go-back", BindingFlags.SYNC_CREATE | BindingFlags.DEFAULT);
         history.bind_property ("can-go-forward", view, "can-go-forward", BindingFlags.SYNC_CREATE | BindingFlags.DEFAULT);
 
-        saved_state.bind ("mode", this, "game_state", SettingsBindFlags.DEFAULT);
-        /* Delay binding font-height so can be applied after loading game */
-        settings.bind ("grade", this, "generator_grade", SettingsBindFlags.DEFAULT);
-        settings.bind ("clue-help", view, "strikeout-complete", SettingsBindFlags.DEFAULT);
+        if (saved_state != null && settings != null) {
+            saved_state.bind ("mode", this, "game_state", SettingsBindFlags.DEFAULT);
+            /* Delay binding font-height so can be applied after loading game */
+            settings.bind ("grade", this, "generator_grade", SettingsBindFlags.DEFAULT);
+            settings.bind ("clue-help", view, "strikeout-complete", SettingsBindFlags.DEFAULT);
+
+            var fh = saved_state.get_double ("font-height");
+            saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
+            view.fontheight = fh; /* Ensure restored fontheight applied */
+        }
     }
 
     public Controller (File? game = null) {
-        var fh = saved_state.get_double ("font-height");
-        saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
-
-        dimensions = {15, 10}; /* Fallback dimensions */
         if (game != null) {
             load_game.begin (game, true, (obj, res) => {
-                view.fontheight = fh; /* Ensure restored fontheight applied */
                 if (!load_game.end (res)) {
                     warning ("Load game failed");
                     restore_dimensions ();
@@ -150,7 +152,6 @@ public class Controller : GLib.Object {
             });
         } else {
             restore_game.begin ((obj, res) => {
-                view.fontheight = fh; /* Ensure restored fontheight applied */
                 if (!restore_game.end (res)) {
                     warning ("Restore game failed");
                     restore_dimensions ();
@@ -302,7 +303,7 @@ public class Controller : GLib.Object {
             current_game_path = saved_state.get_string ("current-game-path");
             window.move (x, y);
         } else {
-            critical ("Unable to restore settings - using defaults");
+            warning ("Unable to restore settings - using defaults"); /* Maybe running uninstalled */
             /* Default puzzle parameters */
             game_state = GameState.SETTING;
             generator_grade = Difficulty.MODERATE;
@@ -312,6 +313,8 @@ public class Controller : GLib.Object {
     private void restore_dimensions () {
         if (settings != null) {
             dimensions = {settings.get_uint ("columns").clamp (10, 50), settings.get_uint ("rows").clamp (10, 50)};
+        } else {
+            dimensions = {15, 10}; /* Fallback dimensions */
         }
     }
 

@@ -35,11 +35,11 @@ class AppMenu : Gtk.MenuButton {
     public bool strikeout_complete { get; set; }
 
     construct {
-        popover = new AppPopover (this);
-        app_popover = (AppPopover)popover;
-
         grid = new Gtk.Grid ();
-        popover.add (grid);
+        grid.margin = 12;
+        grid.row_spacing = 6;
+        grid.column_spacing = 6;
+        grid.column_homogeneous = false;
 
         grade_setting = new GradeChooser ();
         row_setting = new ScaleGrid (_("Rows"));
@@ -54,24 +54,9 @@ class AppMenu : Gtk.MenuButton {
         add_setting (ref pos, title_setting);
         add_setting (ref pos, strikeout_setting);
 
-        grid.margin = 12;
-        grid.row_spacing = 6;
-        grid.column_spacing = 6;
-        grid.column_homogeneous = false;
-
-        image = new Gtk.Image.from_icon_name ("open-menu", Gtk.IconSize.LARGE_TOOLBAR);
-        tooltip_text = _("Options");
-
-        toggled.connect (() => { /* Allow parent to set values first */
-            if (active) {
-                update_dimension_settings ();
-                update_grade_setting ();
-                update_title_setting ();
-                update_strikeout_setting ();
-                popover.show_all ();
-            }
-        });
-
+        app_popover = new AppPopover ();
+        app_popover.add (grid);
+        set_popover (app_popover);
         app_popover.apply_settings.connect (() => {
             update_properties ();
         });
@@ -91,6 +76,23 @@ class AppMenu : Gtk.MenuButton {
         notify["strikeout-complete"].connect (() => {
             update_strikeout_setting ();
         });
+
+        toggled.connect (() => { /* Allow parent to set values first */
+            if (active) {
+                update_dimension_settings ();
+                update_grade_setting ();
+                update_title_setting ();
+                update_strikeout_setting ();
+                popover.show_all ();
+            }
+        });
+    }
+
+    public AppMenu () {
+        Object (
+            image: new Gtk.Image.from_icon_name ("open-menu", Gtk.IconSize.LARGE_TOOLBAR),
+            tooltip_text: _("Options")
+        );
     }
 
     private void update_dimension_settings () {
@@ -151,10 +153,6 @@ class AppMenu : Gtk.MenuButton {
                     hide ();
                 }
             });
-        }
-
-        public AppPopover (Gtk.Widget widget) {
-            Object (relative_to: widget);
         }
     }
 }
