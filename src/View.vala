@@ -334,7 +334,6 @@ public class View : Gtk.ApplicationWindow {
         bind_property ("game-state", mode_switch, "mode", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
         bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
         bind_property ("previous-cell", cell_grid, "previous-cell", BindingFlags.BIDIRECTIONAL);
-        bind_property ("game-state", cell_grid, "game-state", BindingFlags.DEFAULT | BindingFlags.SYNC_CREATE);
         bind_property ("fontheight", row_clue_box, "fontheight", BindingFlags.DEFAULT);
         bind_property ("fontheight", column_clue_box, "fontheight", BindingFlags.DEFAULT);
         bind_property ("dimensions", row_clue_box, "dimensions");

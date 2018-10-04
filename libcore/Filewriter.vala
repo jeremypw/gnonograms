@@ -28,7 +28,7 @@ public class Filewriter : Object {
     public string name { get; construct; }
     public string[] row_clues { get; construct; }
     public string[] col_clues { get; construct; }
-    public History history { get; construct; }
+    public History? history { get; construct; }
     public string? game_path { get; private set; }
 
     public bool is_readonly { get; set; default = true;}
@@ -47,7 +47,7 @@ public class Filewriter : Object {
                        Dimensions dimensions,
                        string[] row_clues,
                        string[] col_clues,
-                       History history) throws IOError {
+                       History? history) throws IOError {
 
         Object (
             name: name ?? _(UNTITLED_NAME),
@@ -165,8 +165,10 @@ public class Filewriter : Object {
             stream.printf (game_path.to_string () + "\n");
         }
 
-        stream.printf ("[History]\n");
-        stream.printf (history.to_string () + "\n");
+        if (history != null) {
+            stream.printf ("[History]\n");
+            stream.printf (history.to_string () + "\n");
+        }
 
         stream.flush ();
     }

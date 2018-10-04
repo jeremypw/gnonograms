@@ -24,10 +24,11 @@ public class CellGrid : Gtk.DrawingArea {
 
     public signal void cursor_moved (Cell from, Cell to);
 
-    public Model? model { get; construct; }
+    public Model model { get; construct; }
     public Cell current_cell { get; set; }
     public Cell previous_cell { get; set; }
     public bool frozen { get; set; }
+    public bool draw_only { get; set; default = false;}
 
     /* Could have more options for cell pattern - only plain implemented for elementaryos*/
     public CellPatternType cell_pattern_type {
@@ -158,6 +159,7 @@ public class CellGrid : Gtk.DrawingArea {
         });
 
         model.notify["dimensions"].connect (dimensions_updated);
+        model.bind_property ("game-state", this, "game-state");
 
         model.changed.connect (() => {
             if (!dirty) {
@@ -204,7 +206,7 @@ public class CellGrid : Gtk.DrawingArea {
     }
 
     private bool on_pointer_moved (Gdk.EventMotion e) {
-        if (e.x < 0 || e.y < 0) {
+        if (draw_only || e.x < 0 || e.y < 0) {
             return false;
         }
         /* Calculate which cell the pointer is over */
@@ -350,7 +352,7 @@ public class CellGrid : Gtk.DrawingArea {
         cr.fill ();
         cr.restore ();
 
-        if (highlight) {
+        if (highlight && !draw_only) {
             cr.save ();
             /* Ensure highlight centred and slightly overlapping grid */
             highlight_pattern.move_to (x, y);
