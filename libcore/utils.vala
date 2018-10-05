@@ -297,6 +297,8 @@ namespace Utils {
                                                                           secondary_text ?? "",
                                                                           icon_name, buttons);
 
+        dialog.set_transient_for (parent);
+
         if (type == Gtk.MessageType.QUESTION) {
             dialog.add_button ("YES", Gtk.ResponseType.YES);
             dialog.add_button ("NO", Gtk.ResponseType.NO);
