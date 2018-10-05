@@ -25,10 +25,11 @@ public class Filewriter : Object {
     public DateTime date { get; construct; }
     public uint rows { get; construct; }
     public uint cols { get; construct; }
-    public string name { get; construct; }
+    public string name { get; set; }
     public string[] row_clues { get; construct; }
     public string[] col_clues { get; construct; }
     public History? history { get; construct; }
+    public Gtk.Window? parent { get; construct; }
     public string? game_path { get; private set; }
 
     public bool is_readonly { get; set; default = true;}
@@ -40,23 +41,36 @@ public class Filewriter : Object {
     public My2DCellArray? solution { get; set; default = null;}
     public My2DCellArray? working { get; set; default = null;}
 
+
     public Filewriter (Gtk.Window? parent,
-                       string? save_dir_path,
-                       string? path,
-                       string? name,
                        Dimensions dimensions,
                        string[] row_clues,
                        string[] col_clues,
                        History? history) throws IOError {
 
         Object (
-            name: name ?? _(UNTITLED_NAME),
+            name: _(UNTITLED_NAME),
+            parent: parent,
             rows: dimensions.rows (),
             cols: dimensions.cols (),
             row_clues: row_clues,
             col_clues: col_clues,
             history: history
         );
+    }
+
+    construct {
+        date = new DateTime.now_local ();
+    }
+
+    /*** Writes minimum information required for valid game file ***/
+    public void write_game_file (string? save_dir_path = null,
+                                 string? path = null,
+                                 string? _name = null) throws IOError {
+
+        if (_name != null) {
+            name = _name;
+        }
 
         if (path == null || path.length <= 4) {
             game_path = get_save_file_path (parent, save_dir_path);
@@ -71,14 +85,6 @@ public class Filewriter : Object {
             game_path = game_path + Gnonograms.GAMEFILEEXTENSION;
         }
 
-    }
-
-    construct {
-        date = new DateTime.now_local ();
-    }
-
-    /*** Writes minimum information required for valid game file ***/
-    public void write_game_file () throws IOError {
         if (game_path == null) {
             throw new IOError.CANCELLED ("No path selected");
         }
@@ -142,17 +148,16 @@ public class Filewriter : Object {
     }
 
     /*** Writes complete information to reload game state ***/
-    public void write_position_file () throws IOError {
+    public void write_position_file (string? save_dir_path = null,
+                                     string? path = null,
+                                     string? name = null) throws IOError {
         if (working == null) {
             throw (new IOError.NOT_INITIALIZED ("No working grid to save"));
-        } else if (solution == null) {
-            throw (new IOError.NOT_INITIALIZED ("No solution grid to save"));
         } else if (game_state == GameState.UNDEFINED) {
             throw (new IOError.NOT_INITIALIZED ("No game state to save"));
         }
 
-        write_game_file ();
-
+        write_game_file (save_dir_path, path, name );
         stream.printf ("[Working grid]\n");
         stream.printf (working.to_string ());
         stream.printf ("[State]\n");
@@ -176,7 +181,8 @@ public class Filewriter : Object {
 
     private string? get_save_file_path (Gtk.Window? parent, string? save_dir_path) {
 
-        var action = Gnonograms.FileChooserAction.SAVE_WITH_SOLUTION;
+        var action = save_solution && solution != null ? 
+                     Gnonograms.FileChooserAction.SAVE_WITH_SOLUTION : Gnonograms.FileChooserAction.SAVE_NO_SOLUTION;
 
         bool with_solution;
         FilterInfo info = {_("Gnonogram puzzles"), "*" + Gnonograms.GAMEFILEEXTENSION};
@@ -192,7 +198,7 @@ public class Filewriter : Object {
         if (path != null) {
             save_solution = with_solution;
 
-            if (!save_solution) {
+            if (!save_solution && solution != null) {
                 save_solution = !Utils.show_confirm_dialog (_("Confirm save without solution"),
                                                             _("Do not save computer insoluble clues without solution"),
                                                             parent);

@@ -337,9 +337,6 @@ public class Controller : GLib.Object {
 
         try {
             file_writer = new Filewriter (window,
-                                          save_game_dir,
-                                          path,
-                                          game_name,
                                           dimensions,
                                           model.get_row_clues (),
                                           model.get_col_clues (),
@@ -353,9 +350,9 @@ public class Controller : GLib.Object {
             file_writer.is_readonly = is_readonly;
 
             if (save_state) {
-                file_writer.write_position_file ();
+                file_writer.write_position_file (save_game_dir, path, game_name);
             } else {
-                file_writer.write_game_file ();
+                file_writer.write_game_file (save_game_dir, path, game_name);
             }
 
         } catch (IOError e) {
@@ -474,7 +471,7 @@ public class Controller : GLib.Object {
         if (reader.original_path != null && reader.original_path != "") {
             current_game_path = reader.original_path;
         } else {
-            current_game_path = reader.game_file.get_uri ();
+            current_game_path = reader.game_file.get_path ();
         }
 
 #if 0 //To be implemented (maybe)
@@ -564,6 +561,8 @@ public class Controller : GLib.Object {
             }
 
             view.end_working ();
+        } else if (!is_solving) {
+            solver.state = SolverState.UNDEFINED;
         }
     }
 
@@ -591,7 +590,7 @@ public class Controller : GLib.Object {
     }
 
     private void on_save_game_request () {
-        if (is_readonly) {
+        if (is_readonly || current_game_path == temporary_game_path) {
             on_save_game_as_request ();
         } else {
             var path = write_game (current_game_path, false);

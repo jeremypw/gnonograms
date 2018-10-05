@@ -385,13 +385,15 @@ namespace Utils {
             grid.orientation = Gtk.Orientation.HORIZONTAL;
             grid.column_spacing = 6;
 
-            save_solution_switch = new Gtk.Switch ();
-            save_solution_switch.state = save_solution;
+            if (action == Gnonograms.FileChooserAction.SAVE_WITH_SOLUTION) {
+                save_solution_switch = new Gtk.Switch ();
+                save_solution_switch.state = save_solution;
 
-            var save_solution_label = new Gtk.Label (_("Save solution too"));
+                var save_solution_label = new Gtk.Label (_("Save solution too"));
 
-            grid.add (save_solution_label);
-            grid.add (save_solution_switch);
+                grid.add (save_solution_label);
+                grid.add (save_solution_switch);
+            }
 
             ((Gtk.Container)(dialog.get_action_area ())).add (grid);
 
