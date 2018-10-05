@@ -71,8 +71,6 @@ public class Filewriter : Object {
             game_path = game_path + Gnonograms.GAMEFILEEXTENSION;
         }
 
-        working = new My2DCellArray (dimensions);
-        solution = new My2DCellArray (dimensions);
     }
 
     construct {
@@ -134,7 +132,7 @@ public class Filewriter : Object {
 
         stream.flush ();
 
-        if (save_solution) {
+        if (solution != null && save_solution) {
             stream.printf ("[Solution grid]\n");
             stream.printf ("%s", solution.to_string ());
         }
