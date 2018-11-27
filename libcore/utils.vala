@@ -374,7 +374,9 @@ namespace Utils {
             foreach (var info in filters) {
                 var fc = new Gtk.FileFilter ();
                 fc.set_filter_name (info.name);
-                fc.add_pattern (info.pattern);
+                foreach (var pattern in info.patterns) {
+                    fc.add_pattern (pattern);
+                }
                 dialog.add_filter (fc);
             }
 

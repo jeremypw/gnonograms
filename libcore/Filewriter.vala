@@ -181,11 +181,11 @@ public class Filewriter : Object {
 
     private string? get_save_file_path (Gtk.Window? parent, string? save_dir_path) {
 
-        var action = save_solution && solution != null ? 
+        var action = save_solution && solution != null ?
                      Gnonograms.FileChooserAction.SAVE_WITH_SOLUTION : Gnonograms.FileChooserAction.SAVE_NO_SOLUTION;
 
         bool with_solution;
-        FilterInfo info = {_("Gnonogram puzzles"), "*" + Gnonograms.GAMEFILEEXTENSION};
+        FilterInfo info = {_("Gnonogram puzzles"), {"*" + Gnonograms.GAMEFILEEXTENSION}};
         FilterInfo [] filters = {info};
         var path = Utils.get_file_path (parent,
             action,

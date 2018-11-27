@@ -23,8 +23,8 @@ namespace Gnonograms {
 class AppMenu : Gtk.MenuButton {
     private AppPopover app_popover;
     private AppSetting grade_setting;
-    private AppSetting row_setting;
-    private AppSetting column_setting;
+    private AppSetting rows_setting;
+    private AppSetting columns_setting;
     private AppSetting title_setting;
     private AppSetting strikeout_setting;
     private Gtk.Grid grid;
@@ -42,15 +42,15 @@ class AppMenu : Gtk.MenuButton {
         grid.column_homogeneous = false;
 
         grade_setting = new GradeChooser ();
-        row_setting = new ScaleGrid (_("Rows"));
-        column_setting = new ScaleGrid (_("Columns"));
+        rows_setting = new ScaleGrid (_("Rows"));
+        columns_setting = new ScaleGrid (_("Columns"));
         title_setting = new TitleEntry ();
         strikeout_setting = new SettingSwitch (_("Strike out complete blocks"));
 
         int pos = 0;
         add_setting (ref pos, grade_setting);
-        add_setting (ref pos, row_setting);
-        add_setting (ref pos, column_setting);
+        add_setting (ref pos, rows_setting);
+        add_setting (ref pos, columns_setting);
         add_setting (ref pos, title_setting);
         add_setting (ref pos, strikeout_setting);
 
@@ -96,8 +96,8 @@ class AppMenu : Gtk.MenuButton {
     }
 
     private void update_dimension_settings () {
-        row_setting.@value = dimensions.rows ();
-        column_setting.@value = dimensions.cols ();
+        rows_setting.@value = dimensions.rows ();
+        columns_setting.@value = dimensions.cols ();
     }
 
     private void update_grade_setting () {
@@ -113,8 +113,8 @@ class AppMenu : Gtk.MenuButton {
     }
 
     private void update_properties () {
-        var rows = row_setting.@value;
-        var cols = column_setting.@value;
+        var rows = rows_setting.@value;
+        var cols = columns_setting.@value;
         dimensions = {cols, rows};
         grade = (Difficulty)(grade_setting.@value);
         title = title_setting.text;

@@ -114,6 +114,6 @@ public struct Dimensions {
 
 public struct FilterInfo {
     string name;
-    string pattern;
+    string[] patterns;
 }
 }
