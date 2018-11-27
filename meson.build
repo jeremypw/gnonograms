@@ -3,7 +3,7 @@ shortname = 'gnonograms'
 domain = 'com.github.jeremypw.'
 schema_path = '/com/github/jeremypw/' + shortname + '/'
 
-libver = '1.3.0'
+libver = '1.4.0'
 libname = shortname + '-core'
 
 i18n = import ('i18n')
