@@ -96,29 +96,29 @@ class AppMenu : Gtk.MenuButton {
     }
 
     private void update_dimension_settings () {
-        row_setting.set_value (dimensions.rows ());
-        column_setting.set_value (dimensions.cols ());
+        row_setting.@value = dimensions.rows ();
+        column_setting.@value = dimensions.cols ();
     }
 
     private void update_grade_setting () {
-        grade_setting.set_value ((uint)grade);
+        grade_setting.@value = (uint)grade;
     }
 
     private void update_title_setting () {
-        title_setting.set_text (title);
+        title_setting.text = title;
     }
 
     private void update_strikeout_setting () {
-        strikeout_setting.set_state (strikeout_complete);
+        strikeout_setting.state = strikeout_complete;
     }
 
     private void update_properties () {
-        var rows = (uint)(row_setting.get_value ());
-        var cols = (uint)(column_setting.get_value ());
+        var rows = row_setting.@value;
+        var cols = column_setting.@value;
         dimensions = {cols, rows};
-        grade = (Difficulty)(grade_setting.get_value ());
-        title = title_setting.get_text ();
-        strikeout_complete = strikeout_setting.get_state ();
+        grade = (Difficulty)(grade_setting.@value);
+        title = title_setting.text;
+        strikeout_complete = strikeout_setting.state;
     }
 
     private void add_setting (ref int pos, AppSetting setting) {

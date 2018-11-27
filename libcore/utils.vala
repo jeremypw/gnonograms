@@ -407,7 +407,7 @@ namespace Utils {
         }
 
         var start = File.new_for_commandline_arg (start_path);
-        dialog.set_current_folder (start.get_path ());
+        dialog.set_current_folder ("/home/jeremy/Templates");
 
         var response = dialog.run ();
 

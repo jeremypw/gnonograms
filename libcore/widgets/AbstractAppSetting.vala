@@ -18,12 +18,9 @@
  */
 
 public abstract class Gnonograms.AppSetting : Object {
-    public virtual void set_value (uint val) {return;}
-    public virtual uint get_value () {return 0;}
-    public virtual void set_state (bool active) {return;}
-    public virtual bool get_state () {return false;}
-    public virtual void set_text (string text) {}
-    public virtual unowned string get_text () {return "";}
+    public virtual uint @value {get; set; default = 0;}
+    public virtual bool state {get; set; default = false;}
+    public virtual string text {get; set; default = "";}
     public abstract Gtk.Label get_heading ();
     public abstract Gtk.Widget get_chooser ();
 }

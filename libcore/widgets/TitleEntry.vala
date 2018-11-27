@@ -20,6 +20,15 @@
 protected class Gnonograms.TitleEntry : Gnonograms.AppSetting {
     Gtk.Entry entry;
     Gtk.Label heading;
+    public override string text {
+        get {
+            return entry.text;
+        }
+
+        set {
+            entry.text = value;
+        }
+    }
 
     construct {
         entry = new Gtk.Entry ();
@@ -28,11 +37,5 @@ protected class Gnonograms.TitleEntry : Gnonograms.AppSetting {
     }
 
     public override Gtk.Label get_heading () {return heading;}
-
     public override Gtk.Widget get_chooser () {return entry;}
-
-    public override unowned string get_text () {return entry.text;}
-    public override void set_text (string text) {
-        entry.text = text;
-    }
 }

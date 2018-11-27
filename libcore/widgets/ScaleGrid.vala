@@ -24,6 +24,25 @@ public class Gnonograms.ScaleGrid : Gnonograms.AppSetting {
     private Gtk.Label heading_label { get; set; }
     private Gtk.Label val_label;
     private Gtk.Scale scale;
+    public override uint @value {
+        get {
+            return (uint)(scale.get_value () * Gnonograms.SIZESTEP);
+        }
+
+        set {
+            if (value < Gnonograms.MINSIZE || value > Gnonograms.MAXSIZE) {
+                return;
+            }
+
+            var scale_val = (double)(value / Gnonograms.SIZESTEP);
+            if (scale.get_value () * Gnonograms.SIZESTEP  != value) {
+                value_changed (value);
+            }
+
+            scale.set_value (scale_val);
+            val_label.label = value.to_string ();
+        }
+    }
 
     public signal void value_changed (uint @value);
 
@@ -57,12 +76,7 @@ public class Gnonograms.ScaleGrid : Gnonograms.AppSetting {
             var scale_val = adj.@value;
             var round_val = (uint)(scale_val + 0.1);
             var val = round_val * Gnonograms.SIZESTEP;
-            val_label.label = val.to_string ();
-            value_changed (val);
-
-            if ((double)round_val != scale_val) {
-                set_value (val);
-            }
+            @value = val;
         });
     }
 
@@ -75,25 +89,6 @@ public class Gnonograms.ScaleGrid : Gnonograms.AppSetting {
 
 
     }
-
-    public override void set_value (uint val) {
-        if (val < Gnonograms.MINSIZE || val > Gnonograms.MAXSIZE) {
-            return;
-        }
-
-        var scale_val = (double)(val / Gnonograms.SIZESTEP);
-        if (scale.get_value () * Gnonograms.SIZESTEP  == val) {
-            value_changed (val);
-        }
-
-        scale.set_value (scale_val);
-        val_label.label = val.to_string ();
-    }
-
-    public override uint get_value () {
-        return (uint)(scale.get_value () * Gnonograms.SIZESTEP);
-    }
-
     public override Gtk.Label get_heading () {
         return heading_label;
     }

@@ -20,6 +20,15 @@
 public class Gnonograms.GradeChooser : Gnonograms.AppSetting {
     Gtk.ComboBoxText cb;
     Gtk.Label heading;
+    public override uint @value {
+        get {
+            return (uint)(int.parse (cb.active_id));
+        }
+
+        set {
+            cb.active_id = value.clamp (MIN_GRADE, Difficulty.MAXIMUM).to_string ();
+        }
+    }
 
     construct {
         cb = new Gtk.ComboBoxText ();
@@ -30,14 +39,6 @@ public class Gnonograms.GradeChooser : Gnonograms.AppSetting {
 
         cb.expand = false;
         heading = new Gtk.Label (_("Generated games"));
-    }
-
-    public override void set_value (uint grade) {
-        cb.active_id = grade.clamp (MIN_GRADE, Difficulty.MAXIMUM).to_string ();
-    }
-
-    public override uint get_value () {
-        return (uint)(int.parse (cb.active_id));
     }
 
     public override Gtk.Label get_heading () {

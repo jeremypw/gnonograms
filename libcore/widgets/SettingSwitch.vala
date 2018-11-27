@@ -20,6 +20,15 @@
 public class Gnonograms.SettingSwitch : Gnonograms.AppSetting {
     public Gtk.Switch @switch { get; construct; }
     public Gtk.Label label { get; construct; }
+    public override bool state {
+        get {
+            return @switch.state;
+        }
+
+        set {
+            @switch.state = value;
+        }
+    }
 
     construct {
         @switch = new Gtk.Switch ();
@@ -36,8 +45,4 @@ public class Gnonograms.SettingSwitch : Gnonograms.AppSetting {
 
     public override Gtk.Label get_heading () {return label;}
     public override Gtk.Widget get_chooser () {return @switch;}
-
-    public override bool get_state () {return @switch.state;}
-    public override void set_state (bool state) {@switch.state = state;}
-
 }
