@@ -1,23 +1,24 @@
+# French translations for com.github.jeremypw.gnonograms package package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms package'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package package.
+# NathanBnm, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms package\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-09-06 18:03+0100\n"
-"PO-Revision-Date: 2017-04-14 23:21+0000\n"
-"Last-Translator: Corentin Noël <corentin@elementary.io>\n"
-"Language-Team: French <https://l10n.elementary.io/projects/calculator/"
-"calculator/fr/>\n"
+"PO-Revision-Date: 2019-01-19 21:45+0100\n"
+"Last-Translator: NathanBnm\n"
+"Language-Team: Français\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 2.13-dev\n"
-"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
 
 #: src/gnonograms.vala:34
 msgid "Gnonograms"
-msgstr ""
+msgstr "Gnonograms"
 
 #: src/gnonograms.vala:46
 msgid "translator-credits"
@@ -30,211 +31,214 @@ msgstr ""
 "  Samuel Cardoso https://launchpad.net/~samu-cadoso\n"
 "  mbodj https://launchpad.net/~toundembodj24\n"
 "  Éfrit https://launchpad.net/~efrit"
+"\n"
+"Other Contributions:\n"
+"  NathanBnm"
 
 #: src/core/Gnonogram_filewriter.vala:170
 msgid "Name and save this puzzle"
-msgstr ""
+msgstr "Nommez et enregistrez ce puzzle"
 
 #: src/core/Gnonogram_filewriter.vala:171 src/core/Gnonogram_filereader.vala:86
 msgid "Gnonogram puzzles"
-msgstr ""
+msgstr "Puzzles Gnonogram"
 
 #: src/core/Enums.vala:36
 msgid "Very Easy"
-msgstr ""
+msgstr "Très facile"
 
 #: src/core/Enums.vala:38
 msgid "Easy"
-msgstr ""
+msgstr "Facile"
 
 #: src/core/Enums.vala:40
 msgid "Moderately difficult"
-msgstr ""
+msgstr "Moyen"
 
 #: src/core/Enums.vala:42
 msgid "Difficult"
-msgstr ""
+msgstr "Difficile"
 
 #: src/core/Enums.vala:44
 msgid "Very Difficult"
-msgstr ""
+msgstr "Très difficile"
 
 #: src/core/Enums.vala:46
 msgid "Advanced logic required"
-msgstr ""
+msgstr "Logique avancée requise"
 
 #: src/core/Enums.vala:48
 msgid "Possibly ambiguous"
-msgstr ""
+msgstr "Possiblement ambigü"
 
 #: src/core/Constants.vala:30
 msgid "?"
-msgstr ""
+msgstr "?"
 
 #: src/core/utils.vala:247
 msgid "Built in puzzles"
-msgstr ""
+msgstr "Puzzles intégrés"
 
 #: src/core/utils.vala:256
 msgid "Save solution too"
-msgstr ""
+msgstr "Enregistre aussi la solution"
 
 #: src/core/Gnonogram_filereader.vala:85
 msgid "Choose a puzzle"
-msgstr ""
+msgstr "Choisir un puzzle"
 
 #: src/core/Gnonogram_filereader.vala:223
 msgid "Missing clues"
-msgstr ""
+msgstr "Indices manquants"
 
 #: src/core/Gnonogram_filereader.vala:231
 msgid "Invalid clue"
-msgstr ""
+msgstr "Indices invalides"
 
 #: src/core/Gnonogram_filereader.vala:243
 msgid "Solution grid or working grid missing"
-msgstr ""
+msgstr "Grille de solution ou grille de jeu manquante"
 
 #: src/core/Gnonogram_filereader.vala:250
 msgid "Wrong number of rows in solution or working grid"
-msgstr ""
+msgstr "Nombre de lignes erroné dans la grille de solution ou de jeu"
 
 #: src/core/Gnonogram_filereader.vala:257
 msgid "Wrong number of columns in solution or working grid"
-msgstr ""
+msgstr "Nombre de colonnes erroné dans la grille de solution ou de jeu"
 
 #: src/core/Gnonogram_filereader.vala:264
 msgid "Invalid cell state"
-msgstr ""
+msgstr "État de cellule invalide"
 
 #: src/core/Gnonogram_filereader.vala:284
 msgid "Missing game state"
-msgstr ""
+msgstr "État du jeu manquant"
 
 #: src/core/Gnonogram_filereader.vala:291
 msgid "Could not determine game state in loaded game file"
-msgstr ""
+msgstr "Impossible de déterminer l'état du jeu dans le fichier de jeu chargé"
 
 #: src/core/Gnonogram_filereader.vala:302
 #, c-format
 msgid "Invalid game state '%s' in loaded game file"
-msgstr ""
+msgstr "État du jeu invalide « %s » dans le fichier de jeu chargé"
 
 #: src/widgets/Gnonogram_label.vala:119
 #, c-format
 msgid "Freedom = %u"
-msgstr ""
+msgstr "Liberté = %u"
 
 #: src/widgets/ViewModeButton.vala:49
 msgid "Draw a pattern"
-msgstr ""
+msgstr "Dessiner un motif"
 
 #: src/widgets/ViewModeButton.vala:50
 msgid "Solve a puzzle"
-msgstr ""
+msgstr "Résoudre un puzzle"
 
 #: src/widgets/AppMenu.vala:76
 msgid "Rows"
-msgstr ""
+msgstr "Lignes"
 
 #: src/widgets/AppMenu.vala:77
 msgid "Columns"
-msgstr ""
+msgstr "Colonnes"
 
 #: src/widgets/AppMenu.vala:105
 msgid "Options"
-msgstr ""
+msgstr "Options"
 
 #: src/widgets/AppMenu.vala:257
 msgid "Difficulty"
-msgstr ""
+msgstr "Difficulté"
 
 #: src/widgets/Progress_indicator.vala:54
 msgid "Cancel solving"
-msgstr ""
+msgstr "Annuler la résolution"
 
 #: src/Gnonogram_controller.vala:226
 msgid "Blank sheet"
-msgstr ""
+msgstr "Feuille vierge"
 
 #: src/Gnonogram_controller.vala:237
 msgid "Random pattern"
-msgstr ""
+msgstr "Motif aléatoire"
 
 #: src/Gnonogram_controller.vala:264
 msgid "Game generation was cancelled"
-msgstr ""
+msgstr "La génération du jeu à été annulée"
 
 #: src/Gnonogram_controller.vala:266
 msgid "Failed to generate game of required grade"
-msgstr ""
+msgstr "Échec de la génération du jeu ou de la difficulté requise"
 
 #: src/Gnonogram_controller.vala:270
 #, c-format
 msgid "Difficulty: %s"
-msgstr ""
+msgstr "Difficulté : %s"
 
 #: src/Gnonogram_controller.vala:272
 msgid "Error occurred in solver"
-msgstr ""
+msgstr "Une erreur s'est produite dans le solutionneur"
 
 #: src/Gnonogram_controller.vala:459
 msgid "Dimensions too large"
-msgstr ""
+msgstr "Dimensions trop grandes"
 
 #: src/Gnonogram_controller.vala:462
 msgid "Dimensions too small"
-msgstr ""
+msgstr "Dimensions trop petites"
 
 #: src/Gnonogram_controller.vala:468
 msgid "Dimensions missing"
-msgstr ""
+msgstr "Dimensions manquantes"
 
 #: src/Gnonogram_controller.vala:476
 msgid "Clues missing"
-msgstr ""
+msgstr "Indices manquants"
 
 #: src/Gnonogram_controller.vala:501
 msgid "Clues contradictory"
-msgstr ""
+msgstr "Indices contradictoires"
 
 #: src/Gnonogram_controller.vala:504
 msgid "Puzzle not solved by computer - may not be possible"
-msgstr ""
+msgstr "Puzzle non résolu par l'ordinateur - peut-être impossible"
 
 #: src/Gnonogram_controller.vala:554
 msgid "Correct solution"
-msgstr ""
+msgstr "Corriger la solution"
 
 #: src/Gnonogram_controller.vala:557
 msgid "There are errors"
-msgstr ""
+msgstr "Il y a des erreurs"
 
 #: src/Gnonogram_controller.vala:773 src/Gnonogram_controller.vala:794
 msgid "Solving was cancelled"
-msgstr ""
+msgstr "La résolution à été annulée"
 
 #: src/Gnonogram_controller.vala:776
 #, c-format
 msgid "Simple solution found. %s"
-msgstr ""
+msgstr "Solution simple trouvée. %s"
 
 #: src/Gnonogram_controller.vala:779
 msgid "No simple solution found"
-msgstr ""
+msgstr "Pas de solution simple trouvée"
 
 #: src/Gnonogram_controller.vala:797
 #, c-format
 msgid "Advanced solution found. %s"
-msgstr ""
+msgstr "Solution avancée trouvée. %s"
 
 #: src/Gnonogram_controller.vala:799
 msgid "No advanced solution found"
-msgstr ""
+msgstr "Pas de solution avancée trouvée"
 
 #: src/Gnonogram_view.vala:125
 msgid "Setting"
-msgstr ""
+msgstr "Paramètres"
 
 #: src/Gnonogram_view.vala:126
 #, fuzzy
@@ -243,53 +247,53 @@ msgstr "Effacer l'entrée"
 
 #: src/Gnonogram_view.vala:129 src/Gnonogram_view.vala:309
 msgid "Solving"
-msgstr ""
+msgstr "Résolution"
 
 #: src/Gnonogram_view.vala:130
 msgid "Restart solving"
-msgstr ""
+msgstr "Recommencer la résolution"
 
 #: src/Gnonogram_view.vala:158
 msgid "Gnonograms for Elementary"
-msgstr ""
+msgstr "Gnonograms pour elementary"
 
 #: src/Gnonogram_view.vala:163
 msgid "Load a Game from File"
-msgstr ""
+msgstr "Charger une partie depuis un fichier"
 
 #: src/Gnonogram_view.vala:168
 msgid "Save a Game to File"
-msgstr ""
+msgstr "Enregistrer une partie dans un fichier"
 
 #: src/Gnonogram_view.vala:173
 msgid "Generate a Random Game"
-msgstr ""
+msgstr "Générer une partie aléatoire"
 
 #: src/Gnonogram_view.vala:178
 msgid "Undo Any Errors"
-msgstr ""
+msgstr "Annuler toutes les erreurs"
 
 #: src/Gnonogram_view.vala:189
 msgid "Solve by Computer"
-msgstr ""
+msgstr "Résoudre par l'ordinateur"
 
 #: src/Gnonogram_view.vala:316
 msgid "Generating"
-msgstr ""
+msgstr "Génération"
 
 #: src/Gnonogram_view.vala:754
 #, c-format
 msgid "%u error found"
-msgstr ""
+msgstr "%u erreur trouvée"
 
 #: src/Gnonogram_view.vala:754
 #, c-format
 msgid "%u errors found"
-msgstr ""
+msgstr "%u erreurs trouvées"
 
 #: src/Gnonogram_view.vala:757
 msgid "No errors"
-msgstr ""
+msgstr "Pas d'erreurs"
 
 #~ msgid "Calculator"
 #~ msgstr "Calculatrice"
@@ -376,7 +380,7 @@ msgstr ""
 #~ msgstr "Cacher les fonctionnalités avancées"
 
 #~ msgid "'%s' is invalid."
-#~ msgstr "'%s' est invalide."
+#~ msgstr "« %s » est invalide."
 
 #~ msgid "'%s' is unknown."
-#~ msgstr "'%s' est inconnu."
+#~ msgstr "« %s » est inconnu."
