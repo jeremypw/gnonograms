@@ -1,7 +1,9 @@
-project ('com.github.jeremypw.gnonograms', 'vala', 'c')
+project ('com.github.jeremypw.gnonograms', 'vala', 'c', meson_version: '>= 0.42.0')
 shortname = 'gnonograms'
 domain = 'com.github.jeremypw.'
 schema_path = '/com/github/jeremypw/' + shortname + '/'
+
+vala_version_required = '0.34.0'
 
 libver = '1.4.0'
 libname = shortname + '-core'
@@ -13,15 +15,9 @@ add_global_arguments (
     language:'c'
 )
 
-dependency('gtk+-3.0', version: '>=3.18', required: true)
-GTK322 = dependency('gtk+-3.0', version: '>=3.22', required: false)
-
-if GTK322.found ()
-    add_project_arguments (
-        '--define=HAVE_GTK_3_22',
-        language:'vala'
-    )
-endif
+GTK3 = dependency('gtk+-3.0', version: '>=3.22', required: true)
+GEE = dependency('gee-0.8', version: '>=0.20', required: true)
+GRANITE= dependency('granite', version: '>=5.2.0', required: true)
 
 lib = shared_library (
     libname,
@@ -51,9 +47,9 @@ lib = shared_library (
     'libcore/Constants.vala',
 
     dependencies : [
-        dependency ('gtk+-3.0'),
-        dependency ('gee-0.8'),
-        dependency ('granite')
+        GTK3,
+        GEE,
+        GRANITE
     ],
 
     install: true,
@@ -84,9 +80,9 @@ executable (
     'src/widgets/ProgressIndicator.vala',
 
     dependencies : [
-        dependency ('gtk+-3.0'),
-        dependency ('gee-0.8'),
-        dependency ('granite')
+        GTK3,
+        GEE,
+        GRANITE
     ],
 
     install: true,
