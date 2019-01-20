@@ -6,6 +6,7 @@ Keywords=game;puzzle;logic;nonograms;Tsunami;Picross;Griddlers;Japanese Crosswor
 GenericName=Logic Game
 
 Exec=com.github.jeremypw.gnonograms %f
+#TRANSLATORS: Please do not translate the icon name
 Icon=com.github.jeremypw.gnonograms
 Terminal=false
 StartupNotify=true
