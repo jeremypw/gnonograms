@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-20 17:01+0000\n"
+"POT-Creation-Date: 2019-01-21 15:55+0000\n"
 "PO-Revision-Date: 2016-05-27 15:28+0000\n"
 "Last-Translator: Maxwell Barvian <Unknown>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -203,39 +203,41 @@ msgstr ""
 msgid "%u errors found"
 msgstr ""
 
-#: src/Controller.vala:556
+#. TRANSLATORS: "Correct" is used as an adjective, indicating that a correct (valid) solution has been found.
+#: src/Controller.vala:557
 msgid "Correct solution"
 msgstr ""
 
-#: src/Controller.vala:558
+#: src/Controller.vala:559
 msgid "Alternative solution found"
 msgstr ""
 
-#: src/Controller.vala:560
+#: src/Controller.vala:561
 msgid "There are errors"
 msgstr ""
 
-#: src/Controller.vala:617
+#: src/Controller.vala:618
 #, c-format
 msgid "Saved to %s"
 msgstr ""
 
-#: src/Controller.vala:637
+#: src/Controller.vala:638
 msgid ""
 "Failed to find a hint using simple logic - multi-line logic (trial and "
 "error) required"
 msgstr ""
 
-#: src/Controller.vala:676
+#: src/Controller.vala:677
 msgid "Solving was cancelled"
 msgstr ""
 
-#: src/Controller.vala:678
+#. TRANSLATORS:  Do not translate '%s'. It is a placeholder for words indicating the difficulty of the solution.
+#: src/Controller.vala:680
 #, c-format
 msgid "Solution found. %s"
 msgstr ""
 
-#: src/Controller.vala:680
+#: src/Controller.vala:682
 msgid "No solution found"
 msgstr ""
 
@@ -292,16 +294,17 @@ msgstr ""
 msgid "Clear canvas"
 msgstr ""
 
-#: src/View.vala:504
+#. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
+#: src/View.vala:505
 #, c-format
 msgid "Solving %s"
 msgstr ""
 
-#: src/View.vala:505
+#: src/View.vala:506
 msgid "Restart solving"
 msgstr ""
 
-#: src/View.vala:709
+#: src/View.vala:710
 msgid "No errors"
 msgstr ""
 
@@ -321,20 +324,21 @@ msgstr ""
 msgid "Options"
 msgstr ""
 
-#: src/widgets/ViewModeButton.vala:29
+#. TRANSLATORS: '%s' is a placeholder for an adjective describing the difficulty of the puzze. It can be moved but not translated.
+#: src/widgets/ViewModeButton.vala:30
 #, c-format
 msgid "Generate %s puzzle"
 msgstr ""
 
-#: src/widgets/ViewModeButton.vala:61
+#: src/widgets/ViewModeButton.vala:62
 msgid "Draw pattern"
 msgstr ""
 
-#: src/widgets/ViewModeButton.vala:62
+#: src/widgets/ViewModeButton.vala:63
 msgid "Solve puzzle"
 msgstr ""
 
-#: src/widgets/ViewModeButton.vala:63
+#: src/widgets/ViewModeButton.vala:64
 msgid "Generate new random puzzle"
 msgstr ""
 
