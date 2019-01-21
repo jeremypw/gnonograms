@@ -26,6 +26,7 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
 
     public Difficulty grade {
         set {
+            ///TRANSLATORS: '%s' is a placeholder for an adjective describing the difficulty of the puzze. It can be moved but not translated.
             generating_icon.tooltip_text = _("Generate %s puzzle").printf (value.to_string ());
         }
     }

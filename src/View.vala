@@ -501,6 +501,7 @@ public class View : Gtk.ApplicationWindow {
 
                 break;
             case GameState.SOLVING:
+                ///TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
                 header_bar.title = _("Solving %s").printf (game_name);
                 restart_button.tooltip_text = _("Restart solving");
                 set_buttons_sensitive (true);

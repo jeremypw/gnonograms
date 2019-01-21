@@ -553,6 +553,7 @@ public class Controller : GLib.Object {
         /* Check if puzzle finished */
         if (is_solving && model.is_finished) {
             if (model.count_errors () == 0) {
+                ///TRANSLATORS: "Correct" is used as an adjective, indicating that a correct (valid) solution has been found.
                 view.send_notification (_("Correct solution"));
             } else if (model.working_matches_clues ()) {
                 view.send_notification (_("Alternative solution found"));
@@ -675,6 +676,7 @@ public class Controller : GLib.Object {
             if (cancellable != null && cancellable.is_cancelled ()) {
                 msg = _("Solving was cancelled");
             } else if (solver.state.solved ()) {
+                ///TRANSLATORS:  Do not translate '%s'. It is a placeholder for words indicating the difficulty of the solution.
                 msg = _("Solution found. %s").printf (diff.to_string ());
             } else {
                 msg = _("No solution found");
