@@ -1,19 +1,21 @@
+# Bulgarian translations for com.github.jeremypw.gnonograms package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# Automatically generated, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 15:55+0000\n"
-"PO-Revision-Date: 2017-06-18 12:31+0000\n"
-"Last-Translator: Valentin Kirilov <val.kirilov@gmail.com>\n"
-"Language-Team: Bulgarian <https://l10n.elementary.io/projects/calculator/"
-"calculator/bg/>\n"
+"POT-Creation-Date: 2019-01-21 16:08+0000\n"
+"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
 "Language: bg\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2.14\n"
-"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: libcore/widgets/GradeChooser.vala:41
 msgid "Generated games"
@@ -293,9 +295,8 @@ msgid "Save will Overwrite"
 msgstr ""
 
 #: src/View.vala:499
-#, fuzzy
 msgid "Clear canvas"
-msgstr "Изчистване на въведеното"
+msgstr ""
 
 #. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
 #: src/View.vala:505
@@ -348,101 +349,3 @@ msgstr ""
 #: src/widgets/ProgressIndicator.vala:58
 msgid "Cancel solving"
 msgstr ""
-
-#~ msgid "translator-credits"
-#~ msgstr ""
-#~ "Launchpad Contributions:\n"
-#~ "  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount\n"
-#~ "  Petar Djakov https://launchpad.net/~shinnobivalley\n"
-#~ "  felroric https://launchpad.net/~toddi222\n"
-#~ "  Адмирал АнимЕ https://launchpad.net/~aeternus-arcis"
-
-#~ msgid "Calculator"
-#~ msgstr "Калкулатор"
-
-#~ msgid "History"
-#~ msgstr "Хронология"
-
-#~ msgid "Value to add:"
-#~ msgstr "Стойност за добавяне:"
-
-#~ msgid "Result"
-#~ msgstr "Резултат"
-
-#~ msgid "Expression"
-#~ msgstr "Израз"
-
-#~ msgid "Close"
-#~ msgstr "Затваряне"
-
-#~ msgid "Add"
-#~ msgstr "Добавяне"
-
-#~ msgid "Show extended functionality"
-#~ msgstr "Показване на разширените функции"
-
-#~ msgid "Calculate Result"
-#~ msgstr "Смятане на резултата"
-
-#~ msgid "Add last result"
-#~ msgstr "Добавяне на последния резултат"
-
-#~ msgid "Backspace"
-#~ msgstr "Изтриване на предишния знак"
-
-#~ msgid "Subtract"
-#~ msgstr "Изваждане"
-
-#~ msgid "Multiply"
-#~ msgstr "Умножаване"
-
-#~ msgid "Divide"
-#~ msgstr "Деление"
-
-#~ msgid "Percentage"
-#~ msgstr "Процент"
-
-#~ msgid "Start Group"
-#~ msgstr "Начална група"
-
-#~ msgid "End Group"
-#~ msgstr "Крайна група"
-
-#~ msgid "Exponent"
-#~ msgstr "Експонента"
-
-#~ msgid "Root"
-#~ msgstr "Корен"
-
-#~ msgid "Sine"
-#~ msgstr "Синус"
-
-#~ msgid "Hyperbolic Sine"
-#~ msgstr "Хиперболичен синус"
-
-#~ msgid "Cosine"
-#~ msgstr "Косинус"
-
-#~ msgid "Hyperbolic Cosine"
-#~ msgstr "Хиперболичен косинус"
-
-#~ msgid "Tangent"
-#~ msgstr "Тангенс"
-
-#~ msgid "Hyperbolic Tangent"
-#~ msgstr "Хиперболичен тангенс"
-
-#~ msgid "Pi"
-#~ msgstr "Пи"
-
-#~ msgid "Euler's Number"
-#~ msgstr "Число на Ойлер"
-
-#~ msgid "Hide extended functionality"
-#~ msgstr "Скрий разширени функции"
-
-#~ msgid "'%s' is invalid."
-#~ msgstr "'%s' не е валидно."
-
-#~ msgid "'%s' is unknown."
-#~ msgstr "'%s'  е непознат символ."

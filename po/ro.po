@@ -1,20 +1,22 @@
+# Romanian translations for com.github.jeremypw.gnonograms package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# Automatically generated, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 15:55+0000\n"
-"PO-Revision-Date: 2017-06-12 20:55+0000\n"
-"Last-Translator: Nicolae Crefelean <kneekoo@yahoo.com>\n"
-"Language-Team: Romanian <https://l10n.elementary.io/projects/calculator/"
-"calculator/ro/>\n"
+"POT-Creation-Date: 2019-01-21 16:08+0000\n"
+"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2;\n"
-"X-Generator: Weblate 2.14\n"
-"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
 
 #: libcore/widgets/GradeChooser.vala:41
 msgid "Generated games"
@@ -294,9 +296,8 @@ msgid "Save will Overwrite"
 msgstr ""
 
 #: src/View.vala:499
-#, fuzzy
 msgid "Clear canvas"
-msgstr "Șterge intrarea"
+msgstr ""
 
 #. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
 #: src/View.vala:505
@@ -349,106 +350,3 @@ msgstr ""
 #: src/widgets/ProgressIndicator.vala:58
 msgid "Cancel solving"
 msgstr ""
-
-#~ msgid "translator-credits"
-#~ msgstr ""
-#~ "Contribuții Launchpad:\n"
-#~ "  AbsoluteVasilii https://launchpad.net/~basil-russu\n"
-#~ "  Danny https://launchpad.net/~dani-bejan2000\n"
-#~ "  Edi https://launchpad.net/~edi-frb\n"
-#~ "  Furkan Ege Öztürk https://launchpad.net/~furkanegeozturk\n"
-#~ "  Marius Albina https://launchpad.net/~marius-albina\n"
-#~ "  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount\n"
-#~ "  TDT https://launchpad.net/~the-dirtchamber\n"
-#~ "  Ungurianu Alexandru https://launchpad.net/~alexandru-ungurianu\n"
-#~ "  Nicolae Crefelean https://launchpad.net/~kneekoo"
-
-#~ msgid "Calculator"
-#~ msgstr "Calculator"
-
-#~ msgid "History"
-#~ msgstr "Istoric"
-
-#~ msgid "Value to add:"
-#~ msgstr "Valoare de adăugat:"
-
-#~ msgid "Result"
-#~ msgstr "Rezultat"
-
-#~ msgid "Expression"
-#~ msgstr "Expresie"
-
-#~ msgid "Close"
-#~ msgstr "Închide"
-
-#~ msgid "Add"
-#~ msgstr "Adaugă"
-
-#~ msgid "Show extended functionality"
-#~ msgstr "Afișează facilitățile extinse"
-
-#~ msgid "Calculate Result"
-#~ msgstr "Calculează rezultatul"
-
-#~ msgid "Add last result"
-#~ msgstr "Adaugă ultimul rezultat"
-
-#~ msgid "Backspace"
-#~ msgstr "șterge"
-
-#~ msgid "Subtract"
-#~ msgstr "Scade"
-
-#~ msgid "Multiply"
-#~ msgstr "Înmulţeşte"
-
-#~ msgid "Divide"
-#~ msgstr "Împarte"
-
-#~ msgid "Percentage"
-#~ msgstr "Procentaj"
-
-#~ msgid "Start Group"
-#~ msgstr "Start grup"
-
-#~ msgid "End Group"
-#~ msgstr "Sfârșit grup"
-
-#~ msgid "Exponent"
-#~ msgstr "Exponent"
-
-#~ msgid "Root"
-#~ msgstr "Rădăcina"
-
-#~ msgid "Sine"
-#~ msgstr "Sinus"
-
-#~ msgid "Hyperbolic Sine"
-#~ msgstr "Sinus hiperbolic"
-
-#~ msgid "Cosine"
-#~ msgstr "Cosinus"
-
-#~ msgid "Hyperbolic Cosine"
-#~ msgstr "Cosinus hiperbolic"
-
-#~ msgid "Tangent"
-#~ msgstr "Tangentă"
-
-#~ msgid "Hyperbolic Tangent"
-#~ msgstr "Tangentă hiperbolică"
-
-#~ msgid "Pi"
-#~ msgstr "Pi"
-
-#~ msgid "Euler's Number"
-#~ msgstr "Numărul lui Euler"
-
-#~ msgid "Hide extended functionality"
-#~ msgstr "Ascunde funcționalitățile extinse"
-
-#~ msgid "'%s' is invalid."
-#~ msgstr "'%s' nu este valid."
-
-#~ msgid "'%s' is unknown."
-#~ msgstr "'%s' este necunoscut."

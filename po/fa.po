@@ -1,17 +1,20 @@
+# Persian translations for com.github.jeremypw.gnonograms package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# Automatically generated, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 15:55+0000\n"
-"PO-Revision-Date: 2016-05-27 15:28+0000\n"
-"Last-Translator: Maxwell Barvian <Unknown>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2019-01-21 16:08+0000\n"
+"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: fa\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
-"X-Generator: Launchpad (build 18298)\n"
 
 #: libcore/widgets/GradeChooser.vala:41
 msgid "Generated games"
@@ -291,9 +294,8 @@ msgid "Save will Overwrite"
 msgstr ""
 
 #: src/View.vala:499
-#, fuzzy
 msgid "Clear canvas"
-msgstr "پاک کردن ورودی"
+msgstr ""
 
 #. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
 #: src/View.vala:505
@@ -346,50 +348,3 @@ msgstr ""
 #: src/widgets/ProgressIndicator.vala:58
 msgid "Cancel solving"
 msgstr ""
-
-#~ msgid "translator-credits"
-#~ msgstr ""
-#~ "Launchpad Contributions:\n"
-#~ "  Hessam Shafiei Moqaddam https://launchpad.net/~hessam\n"
-#~ "  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount\n"
-#~ "  Mohammad Hossein Mojatehdi https://launchpad.net/~mhm5000\n"
-#~ "  awat https://launchpad.net/~awat"
-
-#~ msgid "Calculator"
-#~ msgstr "ماشین‌حساب"
-
-#~ msgid "History"
-#~ msgstr "پیشینه"
-
-#~ msgid "Value to add:"
-#~ msgstr "مقدار برای اضافه شدن"
-
-#~ msgid "Result"
-#~ msgstr "نتیجه"
-
-#~ msgid "Expression"
-#~ msgstr "عبارت"
-
-#~ msgid "Close"
-#~ msgstr "بستن"
-
-#~ msgid "Add"
-#~ msgstr "افزودن"
-
-#~ msgid "Show extended functionality"
-#~ msgstr "نمایش قابلیت های بیشتر"
-
-#~ msgid "Add last result"
-#~ msgstr "افزودن آخرین نتیجه"
-
-#~ msgid "Backspace"
-#~ msgstr "Backspace"
-
-#~ msgid "Hide extended functionality"
-#~ msgstr "پنهان کردن قابلیت های اضافی"
-
-#~ msgid "'%s' is invalid."
-#~ msgstr "'%s' غیر قابل قبول است"
-
-#~ msgid "'%s' is unknown."
-#~ msgstr "'%s' ناشناخته است"

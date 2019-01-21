@@ -1,17 +1,22 @@
+# Polish translations for com.github.jeremypw.gnonograms package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# Automatically generated, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 15:55+0000\n"
-"PO-Revision-Date: 2016-05-27 15:29+0000\n"
-"Last-Translator: Maxwell Barvian <Unknown>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2019-01-21 16:08+0000\n"
+"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: pl\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
-"X-Generator: Launchpad (build 18298)\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
+"|| n%100>=20) ? 1 : 2);\n"
 
 #: libcore/widgets/GradeChooser.vala:41
 msgid "Generated games"
@@ -291,9 +296,8 @@ msgid "Save will Overwrite"
 msgstr ""
 
 #: src/View.vala:499
-#, fuzzy
 msgid "Clear canvas"
-msgstr "Wyczyść"
+msgstr ""
 
 #. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
 #: src/View.vala:505
@@ -346,105 +350,3 @@ msgstr ""
 #: src/widgets/ProgressIndicator.vala:58
 msgid "Cancel solving"
 msgstr ""
-
-#~ msgid "translator-credits"
-#~ msgstr ""
-#~ "Launchpad Contributions:\n"
-#~ "  Adrian Widerski https://launchpad.net/~adrian-widerski\n"
-#~ "  Damian Dygulski https://launchpad.net/~dygulski13\n"
-#~ "  Jakub Polok https://launchpad.net/~chusall\n"
-#~ "  Jonasz https://launchpad.net/~joni99\n"
-#~ "  Marcin Wierzbicki https://launchpad.net/~marcin-wierzb\n"
-#~ "  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount\n"
-#~ "  Piotr Strębski https://launchpad.net/~strebski\n"
-#~ "  Tomasz Gałkowski https://launchpad.net/~galkowski-t"
-
-#~ msgid "Calculator"
-#~ msgstr "Kalkulator"
-
-#~ msgid "History"
-#~ msgstr "Historia"
-
-#~ msgid "Value to add:"
-#~ msgstr "Wartość do dodania:"
-
-#~ msgid "Result"
-#~ msgstr "Wynik"
-
-#~ msgid "Expression"
-#~ msgstr "Wyrażenie"
-
-#~ msgid "Close"
-#~ msgstr "Zamknij"
-
-#~ msgid "Add"
-#~ msgstr "Dodaj"
-
-#~ msgid "Show extended functionality"
-#~ msgstr "Pokaż opcje zaawansowane"
-
-#~ msgid "Calculate Result"
-#~ msgstr "Wynik obliczenia"
-
-#~ msgid "Add last result"
-#~ msgstr "Dodaj ostatni wynik"
-
-#~ msgid "Backspace"
-#~ msgstr "Cofnij"
-
-#~ msgid "Subtract"
-#~ msgstr "Odejmowanie"
-
-#~ msgid "Multiply"
-#~ msgstr "Mnożenie"
-
-#~ msgid "Divide"
-#~ msgstr "Dzielenie"
-
-#~ msgid "Percentage"
-#~ msgstr "Procentowo"
-
-#~ msgid "Start Group"
-#~ msgstr "Otwórz nawias"
-
-#~ msgid "End Group"
-#~ msgstr "Zamknij nawias"
-
-#~ msgid "Exponent"
-#~ msgstr "Spotęguj"
-
-#~ msgid "Root"
-#~ msgstr "Pierwiastek"
-
-#~ msgid "Sine"
-#~ msgstr "Sinus"
-
-#~ msgid "Hyperbolic Sine"
-#~ msgstr "Sinus hiperboliczny"
-
-#~ msgid "Cosine"
-#~ msgstr "Cosinus"
-
-#~ msgid "Hyperbolic Cosine"
-#~ msgstr "Cosinus hiperboliczny"
-
-#~ msgid "Tangent"
-#~ msgstr "Tangens"
-
-#~ msgid "Hyperbolic Tangent"
-#~ msgstr "Tangens hiperboliczny"
-
-#~ msgid "Pi"
-#~ msgstr "Pi"
-
-#~ msgid "Euler's Number"
-#~ msgstr "Liczba Eulera"
-
-#~ msgid "Hide extended functionality"
-#~ msgstr "Ukryj opcje zaawansowane"
-
-#~ msgid "'%s' is invalid."
-#~ msgstr "'%s' jest nieprawidłowy."
-
-#~ msgid "'%s' is unknown."
-#~ msgstr "'%s' jest nieznany."

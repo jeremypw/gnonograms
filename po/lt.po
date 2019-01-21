@@ -1,17 +1,22 @@
+# Lithuanian translations for com.github.jeremypw.gnonograms package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# Automatically generated, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 15:55+0000\n"
-"PO-Revision-Date: 2016-08-04 20:47+0000\n"
-"Last-Translator: Moo <hazap@hotmail.com>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2019-01-21 16:08+0000\n"
+"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: lt\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
-"X-Generator: Launchpad (build 18298)\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && (n"
+"%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #: libcore/widgets/GradeChooser.vala:41
 msgid "Generated games"
@@ -291,9 +296,8 @@ msgid "Save will Overwrite"
 msgstr ""
 
 #: src/View.vala:499
-#, fuzzy
 msgid "Clear canvas"
-msgstr "Išvalyti įrašą"
+msgstr ""
 
 #. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
 #: src/View.vala:505
@@ -346,100 +350,3 @@ msgstr ""
 #: src/widgets/ProgressIndicator.vala:58
 msgid "Cancel solving"
 msgstr ""
-
-#~ msgid "translator-credits"
-#~ msgstr ""
-#~ "Launchpad Contributions:\n"
-#~ "  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount\n"
-#~ "  Moo https://launchpad.net/~mooo\n"
-#~ "  pencininkas4 https://launchpad.net/~pencininkas4"
-
-#~ msgid "Calculator"
-#~ msgstr "Skaičiuotuvas"
-
-#~ msgid "History"
-#~ msgstr "Istorija"
-
-#~ msgid "Value to add:"
-#~ msgstr "Reikšmė, kurią pridėti:"
-
-#~ msgid "Result"
-#~ msgstr "Rezultatas"
-
-#~ msgid "Expression"
-#~ msgstr "Reiškinys"
-
-#~ msgid "Close"
-#~ msgstr "Užverti"
-
-#~ msgid "Add"
-#~ msgstr "Pridėti"
-
-#~ msgid "Show extended functionality"
-#~ msgstr "Rodyti išplėstinį funkcionalumą"
-
-#~ msgid "Calculate Result"
-#~ msgstr "Apskaičiuoti rezultatą"
-
-#~ msgid "Add last result"
-#~ msgstr "Pridėti paskiausią atsakymą"
-
-#~ msgid "Backspace"
-#~ msgstr "Naikinti"
-
-#~ msgid "Subtract"
-#~ msgstr "Atimti"
-
-#~ msgid "Multiply"
-#~ msgstr "Dauginti"
-
-#~ msgid "Divide"
-#~ msgstr "Dalinti"
-
-#~ msgid "Percentage"
-#~ msgstr "Procentinė dalis"
-
-#~ msgid "Start Group"
-#~ msgstr "Pradėti grupę"
-
-#~ msgid "End Group"
-#~ msgstr "Užbaigti grupę"
-
-#~ msgid "Exponent"
-#~ msgstr "Laipsnio rodiklis"
-
-#~ msgid "Root"
-#~ msgstr "Šaknis"
-
-#~ msgid "Sine"
-#~ msgstr "Sinusas"
-
-#~ msgid "Hyperbolic Sine"
-#~ msgstr "Hiperbolinis sinusas"
-
-#~ msgid "Cosine"
-#~ msgstr "Kosinusas"
-
-#~ msgid "Hyperbolic Cosine"
-#~ msgstr "Hiperbolinis kosinusas"
-
-#~ msgid "Tangent"
-#~ msgstr "Tangentas"
-
-#~ msgid "Hyperbolic Tangent"
-#~ msgstr "Hiperbolinis tangentas"
-
-#~ msgid "Pi"
-#~ msgstr "Pi"
-
-#~ msgid "Euler's Number"
-#~ msgstr "Eulerio skaičius"
-
-#~ msgid "Hide extended functionality"
-#~ msgstr "Slėpti išplėstinį funkcionalumą"
-
-#~ msgid "'%s' is invalid."
-#~ msgstr "\"%s\" yra neteisinga."
-
-#~ msgid "'%s' is unknown."
-#~ msgstr "\"%s\" yra nežinoma."

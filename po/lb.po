@@ -1,19 +1,20 @@
+# Letzeburgesch translations for com.github.jeremypw.gnonograms package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# Automatically generated, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 15:55+0000\n"
-"PO-Revision-Date: 2017-08-09 15:11+0000\n"
-"Last-Translator: Yvo Marques <macghivo@gmail.com>\n"
-"Language-Team: Luxembourgish <https://weblate.elementary.io/projects/"
-"calculator/calculator/lb/>\n"
+"POT-Creation-Date: 2019-01-21 16:08+0000\n"
+"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
 "Language: lb\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2.15\n"
-"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
 
 #: libcore/widgets/GradeChooser.vala:41
 msgid "Generated games"
@@ -293,9 +294,8 @@ msgid "Save will Overwrite"
 msgstr ""
 
 #: src/View.vala:499
-#, fuzzy
 msgid "Clear canvas"
-msgstr "Läschen"
+msgstr ""
 
 #. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
 #: src/View.vala:505
@@ -348,48 +348,3 @@ msgstr ""
 #: src/widgets/ProgressIndicator.vala:58
 msgid "Cancel solving"
 msgstr ""
-
-#~ msgid "translator-credits"
-#~ msgstr ""
-#~ "Launchpad Contributions:\n"
-#~ "  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount\n"
-#~ "  Yvo Marques https://launchpad.net/~macghivo"
-
-#~ msgid "Calculator"
-#~ msgstr "Rechner"
-
-#~ msgid "History"
-#~ msgstr "Verlaf"
-
-#~ msgid "Value to add:"
-#~ msgstr "Wert setzten:"
-
-#~ msgid "Result"
-#~ msgstr "Resultat"
-
-#~ msgid "Expression"
-#~ msgstr "Expressioun"
-
-#~ msgid "Close"
-#~ msgstr "Zoumaachen"
-
-#~ msgid "Add"
-#~ msgstr "Dobäisetzen"
-
-#~ msgid "Show extended functionality"
-#~ msgstr "Erweidert fonctiounnen uweisen"
-
-#~ msgid "Add last result"
-#~ msgstr "letzten resultat dobäisetzen"
-
-#~ msgid "Backspace"
-#~ msgstr "Zeréck-Tast"
-
-#~ msgid "Hide extended functionality"
-#~ msgstr "Erweidert fonctiounnen verstoppen"
-
-#~ msgid "'%s' is invalid."
-#~ msgstr "'%s' aas Inkorrekt."
-
-#~ msgid "'%s' is unknown."
-#~ msgstr "'%s' aas onbekannt."

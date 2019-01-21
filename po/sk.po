@@ -1,19 +1,21 @@
+# Slovak translations for com.github.jeremypw.gnonograms package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# Automatically generated, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 15:55+0000\n"
-"PO-Revision-Date: 2017-07-04 14:54+0000\n"
-"Last-Translator: Bokor Pavol <bokor.pavol@gmail.com>\n"
-"Language-Team: Slovak <https://l10n.elementary.io/projects/calculator/"
-"calculator/sk/>\n"
+"POT-Creation-Date: 2019-01-21 16:08+0000\n"
+"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
 "Language: sk\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Weblate 2.14\n"
-"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
 
 #: libcore/widgets/GradeChooser.vala:41
 msgid "Generated games"
@@ -293,9 +295,8 @@ msgid "Save will Overwrite"
 msgstr ""
 
 #: src/View.vala:499
-#, fuzzy
 msgid "Clear canvas"
-msgstr "Vymazať položku"
+msgstr ""
 
 #. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
 #: src/View.vala:505
@@ -348,101 +349,3 @@ msgstr ""
 #: src/widgets/ProgressIndicator.vala:58
 msgid "Cancel solving"
 msgstr ""
-
-#~ msgid "translator-credits"
-#~ msgstr ""
-#~ "Launchpad Contributions:\n"
-#~ "  Ivan Cizik https://launchpad.net/~ivancizik\n"
-#~ "  Lukáš Papík https://launchpad.net/~stereo839\n"
-#~ "  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount\n"
-#~ "  Ľubomír Hlavko https://launchpad.net/~5lubo555"
-
-#~ msgid "Calculator"
-#~ msgstr "Kalkulačka"
-
-#~ msgid "History"
-#~ msgstr "História"
-
-#~ msgid "Value to add:"
-#~ msgstr "Hodnota, ktorú chcete pridať:"
-
-#~ msgid "Result"
-#~ msgstr "Výsledok"
-
-#~ msgid "Expression"
-#~ msgstr "Výraz"
-
-#~ msgid "Close"
-#~ msgstr "Zatvoriť"
-
-#~ msgid "Add"
-#~ msgstr "Pridaj"
-
-#~ msgid "Show extended functionality"
-#~ msgstr "Zobraz rozšírene funkcie"
-
-#~ msgid "Calculate Result"
-#~ msgstr "Vypočítať výsledok"
-
-#~ msgid "Add last result"
-#~ msgstr "Pridaj posledný výsledok"
-
-#~ msgid "Backspace"
-#~ msgstr "Späť"
-
-#~ msgid "Subtract"
-#~ msgstr "Odčítať"
-
-#~ msgid "Multiply"
-#~ msgstr "Násobiť"
-
-#~ msgid "Divide"
-#~ msgstr "Deliť"
-
-#~ msgid "Percentage"
-#~ msgstr "Percentá"
-
-#~ msgid "Start Group"
-#~ msgstr "Začať Skupinu"
-
-#~ msgid "End Group"
-#~ msgstr "Ukončiť Skupinu"
-
-#~ msgid "Exponent"
-#~ msgstr "Exponent (mocniteľ)"
-
-#~ msgid "Root"
-#~ msgstr "Koreň"
-
-#~ msgid "Sine"
-#~ msgstr "Sínus"
-
-#~ msgid "Hyperbolic Sine"
-#~ msgstr "Hyperbolický sínus"
-
-#~ msgid "Cosine"
-#~ msgstr "Kosínus"
-
-#~ msgid "Hyperbolic Cosine"
-#~ msgstr "Hyperbolický kosínus"
-
-#~ msgid "Tangent"
-#~ msgstr "Tangens"
-
-#~ msgid "Hyperbolic Tangent"
-#~ msgstr "Hyperbolický tangens"
-
-#~ msgid "Pi"
-#~ msgstr "Pí"
-
-#~ msgid "Euler's Number"
-#~ msgstr "Eulerovo číslo"
-
-#~ msgid "Hide extended functionality"
-#~ msgstr "Skryť rozšírené funkcie"
-
-#~ msgid "'%s' is invalid."
-#~ msgstr "'%s' je neplatný."
-
-#~ msgid "'%s' is unknown."
-#~ msgstr "'%s' je neznáme."

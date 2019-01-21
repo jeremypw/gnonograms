@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-09-06 18:03+0100\n"
+"POT-Creation-Date: 2019-01-21 16:09+0000\n"
 "PO-Revision-Date: 2019-01-19 22:45+0100\n"
 "Last-Translator: NathanBnm\n"
 "Language-Team: Français\n"
@@ -16,46 +16,66 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#. (itstool) path: component/summary
-#: data/gnonograms-elementary.meson.in.appdata.xml:8
-msgid "Create and solve gnonogram puzzles"
-msgstr "Créez et résolvez des puzzles gnonogram"
-
-#. (itstool) path: description/_p
-#: data/gnonograms-elementary.meson.in.appdata.xml:10
-msgid ""
-"Gnonograms is an implementation of the Japanese logic puzzle \"Nonograms\", "
-"also known as \"Tsunami\", \"Griddlers\", and other names. The object of the "
-"game is to discover the pattern in the grid which is encoded in the clues "
-"which are given for each row and column. Random soluble pattern puzzles can "
-"be generated. New puzzles can be designed and saved."
+#: data/com.github.jeremypw.gnonograms.meson.in.desktop:4
+#: data/com.github.jeremypw.gnonograms.meson.in.appdata.xml:7
+msgid "Gnonograms"
 msgstr ""
-"Gnonograms est une implémentation du puzzle logique japonais « Nonograms », "
-"également connu sous le nom de « Tsunami », « Griddlers », et autres noms. Le but "
-"du jeu est de découvrir le motif dans la grille qui est encodé dans les indices "
-"qui sont donnés pour chaque ligne et colonne. Des puzzles à motifs aléatoires solubles peuvent "
-"être générés. De nouveaux puzzles peuvent être conçus et sauvegardés."
 
-#. (itstool) path: component/developer_name
-#: data/gnonograms-elementary.meson.in.appdata.xml:34
-msgid "Jeremy P Wootten"
-msgstr "Jeremy P Wootten"
-
-#: data/com.github.jeremypw.gnonograms-elementary.meson.in.desktop:8
-#: data/com.github.jeremypw.gnonograms-elementary.meson.in.desktop:12
-#: data/com.github.jeremypw.gnonograms-elementary.meson.in.desktop:3
-#: data/com.github.jeremypw.gnonograms-elementary.meson.in.desktop:9
-msgid "gnonograms-elementary"
-msgstr "gnonograms-elementary"
-
-#: data/com.github.jeremypw.gnonograms-elementary.meson.in.desktop:4
+#: data/com.github.jeremypw.gnonograms.meson.in.desktop:5
 msgid "Create and solve nonogram puzzles."
 msgstr "Créez et résolvez des puzzles gnonogram."
 
-#: data/com.github.jeremypw.gnonograms-elementary.meson.in.desktop:5
-msgid "game;puzzle;logic;grid;pattern"
-msgstr "jeu;puzzle;logique;grille;motif"
+#: data/com.github.jeremypw.gnonograms.meson.in.desktop:6
+msgid ""
+"game;puzzle;logic;nonograms;Tsunami;Picross;Griddlers;Japanese Crossword;"
+msgstr ""
 
-#: data/com.github.jeremypw.gnonograms-elementary.meson.in.desktop:6
+#: data/com.github.jeremypw.gnonograms.meson.in.desktop:7
 msgid "Logic Game"
 msgstr "Jeu de logique"
+
+#. TRANSLATORS: Please do not translate the icon name
+#: data/com.github.jeremypw.gnonograms.meson.in.desktop:11
+msgid "com.github.jeremypw.gnonograms"
+msgstr ""
+
+#: data/com.github.jeremypw.gnonograms.meson.in.desktop:22
+msgid "About Gnonograms"
+msgstr ""
+
+#: data/com.github.jeremypw.gnonograms.meson.in.appdata.xml:11
+msgid "Create and solve gnonogram puzzles"
+msgstr "Créez et résolvez des puzzles gnonogram"
+
+#: data/com.github.jeremypw.gnonograms.meson.in.appdata.xml:15
+msgid "Draw puzzles"
+msgstr ""
+
+#: data/com.github.jeremypw.gnonograms.meson.in.appdata.xml:16
+msgid "Generate random puzzles of chosen difficulty"
+msgstr ""
+
+#: data/com.github.jeremypw.gnonograms.meson.in.appdata.xml:196
+#, fuzzy
+msgid "Jeremy Paul Wootten"
+msgstr "Jeremy P Wootten"
+
+#~ msgid ""
+#~ "Gnonograms is an implementation of the Japanese logic puzzle \"Nonograms"
+#~ "\", also known as \"Tsunami\", \"Griddlers\", and other names. The object "
+#~ "of the game is to discover the pattern in the grid which is encoded in "
+#~ "the clues which are given for each row and column. Random soluble pattern "
+#~ "puzzles can be generated. New puzzles can be designed and saved."
+#~ msgstr ""
+#~ "Gnonograms est une implémentation du puzzle logique japonais « Nonograms "
+#~ "», également connu sous le nom de « Tsunami », « Griddlers », et autres "
+#~ "noms. Le but du jeu est de découvrir le motif dans la grille qui est "
+#~ "encodé dans les indices qui sont donnés pour chaque ligne et colonne. Des "
+#~ "puzzles à motifs aléatoires solubles peuvent être générés. De nouveaux "
+#~ "puzzles peuvent être conçus et sauvegardés."
+
+#~ msgid "gnonograms-elementary"
+#~ msgstr "gnonograms-elementary"
+
+#~ msgid "game;puzzle;logic;grid;pattern"
+#~ msgstr "jeu;puzzle;logique;grille;motif"

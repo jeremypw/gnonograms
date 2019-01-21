@@ -1,17 +1,21 @@
+# Esperanto translations for com.github.jeremypw.gnonograms package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# Automatically generated, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 15:55+0000\n"
-"PO-Revision-Date: 2016-05-27 15:29+0000\n"
-"Last-Translator: Maxwell Barvian <Unknown>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2019-01-21 16:08+0000\n"
+"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: eo\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
-"X-Generator: Launchpad (build 18298)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: libcore/widgets/GradeChooser.vala:41
 msgid "Generated games"
@@ -345,90 +349,3 @@ msgstr ""
 #: src/widgets/ProgressIndicator.vala:58
 msgid "Cancel solving"
 msgstr ""
-
-#~ msgid "translator-credits"
-#~ msgstr ""
-#~ "Launchpad Contributions:\n"
-#~ "  Félix Brezo https://launchpad.net/~febrezo\n"
-#~ "  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount"
-
-#~ msgid "Calculator"
-#~ msgstr "Kalkulilo"
-
-#~ msgid "History"
-#~ msgstr "Historio"
-
-#~ msgid "Result"
-#~ msgstr "Rezulto"
-
-#~ msgid "Expression"
-#~ msgstr "Esprimo"
-
-#~ msgid "Close"
-#~ msgstr "Malfermi"
-
-#~ msgid "Add"
-#~ msgstr "Aldoni"
-
-#~ msgid "Calculate Result"
-#~ msgstr "Kalkuli rezulton"
-
-#~ msgid "Add last result"
-#~ msgstr "Aldoni lastan rezulton"
-
-#~ msgid "Backspace"
-#~ msgstr "Retroklavo"
-
-#~ msgid "Subtract"
-#~ msgstr "Subtrahi"
-
-#~ msgid "Multiply"
-#~ msgstr "Multobligi"
-
-#~ msgid "Divide"
-#~ msgstr "Dividi"
-
-#~ msgid "Percentage"
-#~ msgstr "Procento"
-
-#~ msgid "Start Group"
-#~ msgstr "Komenci grupon"
-
-#~ msgid "End Group"
-#~ msgstr "Fini grupon"
-
-#~ msgid "Exponent"
-#~ msgstr "Eksponento"
-
-#~ msgid "Root"
-#~ msgstr "Radiko"
-
-#~ msgid "Sine"
-#~ msgstr "Sinuso"
-
-#~ msgid "Hyperbolic Sine"
-#~ msgstr "Hiperbola sinuso"
-
-#~ msgid "Cosine"
-#~ msgstr "Kosinuso"
-
-#~ msgid "Hyperbolic Cosine"
-#~ msgstr "Hiperbola kosinuso"
-
-#~ msgid "Tangent"
-#~ msgstr "Tangento"
-
-#~ msgid "Hyperbolic Tangent"
-#~ msgstr "Hiperbola tangento"
-
-#~ msgid "Pi"
-#~ msgstr "Pi"
-
-#~ msgid "Euler's Number"
-#~ msgstr "Eŭlera nombro"
-
-#~ msgid "'%s' is invalid."
-#~ msgstr "'%s' estas nevalida."
-
-#~ msgid "'%s' is unknown."
-#~ msgstr "'%s' estas nekonata."

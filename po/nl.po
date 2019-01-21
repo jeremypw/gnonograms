@@ -1,19 +1,21 @@
+# Dutch translations for com.github.jeremypw.gnonograms package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# Automatically generated, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 15:55+0000\n"
-"PO-Revision-Date: 2017-06-17 21:41+0000\n"
-"Last-Translator: Dieter Debast <dieter_debast@hotmail.com>\n"
-"Language-Team: Dutch <https://l10n.elementary.io/projects/calculator/"
-"calculator/nl/>\n"
+"POT-Creation-Date: 2019-01-21 16:08+0000\n"
+"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2.14\n"
-"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: libcore/widgets/GradeChooser.vala:41
 msgid "Generated games"
@@ -293,9 +295,8 @@ msgid "Save will Overwrite"
 msgstr ""
 
 #: src/View.vala:499
-#, fuzzy
 msgid "Clear canvas"
-msgstr "Invoer wissen"
+msgstr ""
 
 #. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
 #: src/View.vala:505
@@ -348,104 +349,3 @@ msgstr ""
 #: src/widgets/ProgressIndicator.vala:58
 msgid "Cancel solving"
 msgstr ""
-
-#~ msgid "translator-credits"
-#~ msgstr ""
-#~ "Launchpad Contributions:\n"
-#~ "  Dmitri https://launchpad.net/~dvtxc\n"
-#~ "  Leo https://launchpad.net/~thebrain2807\n"
-#~ "  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount\n"
-#~ "  Perry Peeters https://launchpad.net/~perry-a\n"
-#~ "  Peter https://launchpad.net/~5-peter-r\n"
-#~ "  Stefan Cloudt https://launchpad.net/~stefan-cloudt\n"
-#~ "  Thomas Berends https://launchpad.net/~thomasberends"
-
-#~ msgid "Calculator"
-#~ msgstr "Rekenmachine"
-
-#~ msgid "History"
-#~ msgstr "Geschiedenis"
-
-#~ msgid "Value to add:"
-#~ msgstr "Waarde om toe te voegen:"
-
-#~ msgid "Result"
-#~ msgstr "Resultaat"
-
-#~ msgid "Expression"
-#~ msgstr "Uitdrukking"
-
-#~ msgid "Close"
-#~ msgstr "Sluiten"
-
-#~ msgid "Add"
-#~ msgstr "Toevoegen"
-
-#~ msgid "Show extended functionality"
-#~ msgstr "Toon uitgebreide functionaliteit"
-
-#~ msgid "Calculate Result"
-#~ msgstr "Bereken resultaat"
-
-#~ msgid "Add last result"
-#~ msgstr "Voeg laatste resultaat toe"
-
-#~ msgid "Backspace"
-#~ msgstr "Backspace"
-
-#~ msgid "Subtract"
-#~ msgstr "Aftrekking"
-
-#~ msgid "Multiply"
-#~ msgstr "Vermenigvuldig"
-
-#~ msgid "Divide"
-#~ msgstr "Deel"
-
-#~ msgid "Percentage"
-#~ msgstr "Percentage"
-
-#~ msgid "Start Group"
-#~ msgstr "Start groep"
-
-#~ msgid "End Group"
-#~ msgstr "Beëindig groep"
-
-#~ msgid "Exponent"
-#~ msgstr "Exponent"
-
-#~ msgid "Root"
-#~ msgstr "Wortel"
-
-#~ msgid "Sine"
-#~ msgstr "Sinus"
-
-#~ msgid "Hyperbolic Sine"
-#~ msgstr "Sinus hyperbolicus"
-
-#~ msgid "Cosine"
-#~ msgstr "Cosinus"
-
-#~ msgid "Hyperbolic Cosine"
-#~ msgstr "Cosinus hyperbolicus"
-
-#~ msgid "Tangent"
-#~ msgstr "Tangens"
-
-#~ msgid "Hyperbolic Tangent"
-#~ msgstr "Tangens hyperbolicus"
-
-#~ msgid "Pi"
-#~ msgstr "Pi"
-
-#~ msgid "Euler's Number"
-#~ msgstr "Getal van Euler"
-
-#~ msgid "Hide extended functionality"
-#~ msgstr "Verberg uitgebreide functionaliteit"
-
-#~ msgid "'%s' is invalid."
-#~ msgstr "'%s' is ongeldig."
-
-#~ msgid "'%s' is unknown."
-#~ msgstr "'%s' is onbekend."

@@ -1,19 +1,20 @@
+# Tamil translations for com.github.jeremypw.gnonograms package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# Automatically generated, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 15:55+0000\n"
-"PO-Revision-Date: 2017-06-16 17:33+0000\n"
-"Last-Translator: Rajeev Kumar <irajeevankumar@gmail.com>\n"
-"Language-Team: Tamil <https://l10n.elementary.io/projects/calculator/"
-"calculator/ta/>\n"
+"POT-Creation-Date: 2019-01-21 16:08+0000\n"
+"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
 "Language: ta\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2.14\n"
-"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
 
 #: libcore/widgets/GradeChooser.vala:41
 msgid "Generated games"
@@ -293,9 +294,8 @@ msgid "Save will Overwrite"
 msgstr ""
 
 #: src/View.vala:499
-#, fuzzy
 msgid "Clear canvas"
-msgstr "பதிவை அழி"
+msgstr ""
 
 #. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
 #: src/View.vala:505
@@ -348,100 +348,3 @@ msgstr ""
 #: src/widgets/ProgressIndicator.vala:58
 msgid "Cancel solving"
 msgstr ""
-
-#~ msgid "translator-credits"
-#~ msgstr ""
-#~ "Launchpad Contributions:\n"
-#~ "  Afrish Khan S https://launchpad.net/~ryanafrish7\n"
-#~ "  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount\n"
-#~ "  அவினாஷ் Avinash https://launchpad.net/~avinashachu007"
-
-#~ msgid "Calculator"
-#~ msgstr "கால்குலேட்டர்"
-
-#~ msgid "History"
-#~ msgstr "வரலாறு"
-
-#~ msgid "Value to add:"
-#~ msgstr "கூட்ட வேண்டிய மதிப்புகள்:"
-
-#~ msgid "Result"
-#~ msgstr "முடிவு"
-
-#~ msgid "Expression"
-#~ msgstr "கோவை"
-
-#~ msgid "Close"
-#~ msgstr "மூடு"
-
-#~ msgid "Add"
-#~ msgstr "கூட்டு"
-
-#~ msgid "Show extended functionality"
-#~ msgstr "நீட்டிக்கப்பட்ட செயல்பாடுகள் காட்ட"
-
-#~ msgid "Calculate Result"
-#~ msgstr "முடிவை கணக்கிடு"
-
-#~ msgid "Add last result"
-#~ msgstr "கடைசி பதிலை கூட்டு"
-
-#~ msgid "Backspace"
-#~ msgstr "பின்நகர்வு"
-
-#~ msgid "Subtract"
-#~ msgstr "கழித்தல்"
-
-#~ msgid "Multiply"
-#~ msgstr "பெருக்கல்"
-
-#~ msgid "Divide"
-#~ msgstr "வகுத்தல்"
-
-#~ msgid "Percentage"
-#~ msgstr "சதவிகிதம்"
-
-#~ msgid "Start Group"
-#~ msgstr "குழுவை ஆரம்பி"
-
-#~ msgid "End Group"
-#~ msgstr "குழுவை முடி"
-
-#~ msgid "Exponent"
-#~ msgstr "அடுக்குக்குறி"
-
-#~ msgid "Root"
-#~ msgstr "வர்க்க மூலம்"
-
-#~ msgid "Sine"
-#~ msgstr "சைன்"
-
-#~ msgid "Hyperbolic Sine"
-#~ msgstr "குவிபிறை சைன்"
-
-#~ msgid "Cosine"
-#~ msgstr "கோசைன்"
-
-#~ msgid "Hyperbolic Cosine"
-#~ msgstr "குவிபிறை கோசைன்"
-
-#~ msgid "Tangent"
-#~ msgstr "தொடுகோடு"
-
-#~ msgid "Hyperbolic Tangent"
-#~ msgstr "குவிபிறை தொடுகோடு"
-
-#~ msgid "Pi"
-#~ msgstr "பை"
-
-#~ msgid "Euler's Number"
-#~ msgstr "ஆய்லர் எண்"
-
-#~ msgid "Hide extended functionality"
-#~ msgstr "நீட்டிக்கப்பட்ட செயல்பாடு மறை"
-
-#~ msgid "'%s' is invalid."
-#~ msgstr "'%s' தவறானது."
-
-#~ msgid "'%s' is unknown."
-#~ msgstr "'%s' அறியப்படாதது."

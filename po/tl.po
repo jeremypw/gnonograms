@@ -1,17 +1,20 @@
+# Tagalog translations for com.github.jeremypw.gnonograms package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# Automatically generated, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 15:55+0000\n"
-"PO-Revision-Date: 2016-05-27 15:29+0000\n"
-"Last-Translator: Maxwell Barvian <Unknown>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2019-01-21 16:08+0000\n"
+"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: tl\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
-"X-Generator: Launchpad (build 18298)\n"
 
 #: libcore/widgets/GradeChooser.vala:41
 msgid "Generated games"
@@ -291,9 +294,8 @@ msgid "Save will Overwrite"
 msgstr ""
 
 #: src/View.vala:499
-#, fuzzy
 msgid "Clear canvas"
-msgstr "Burahin ang laman"
+msgstr ""
 
 #. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
 #: src/View.vala:505
@@ -346,87 +348,3 @@ msgstr ""
 #: src/widgets/ProgressIndicator.vala:58
 msgid "Cancel solving"
 msgstr ""
-
-#~ msgid "translator-credits"
-#~ msgstr ""
-#~ "Launchpad Contributions:\n"
-#~ "  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount\n"
-#~ "  yavinfour https://launchpad.net/~anjelo.delcarmen"
-
-#~ msgid "Calculator"
-#~ msgstr "Kalkulador"
-
-#~ msgid "History"
-#~ msgstr "Kasaysayan"
-
-#~ msgid "Value to add:"
-#~ msgstr "Halaga ng idadagdag:"
-
-#~ msgid "Result"
-#~ msgstr "Resulta"
-
-#~ msgid "Expression"
-#~ msgstr "Ekspresyon"
-
-#~ msgid "Close"
-#~ msgstr "Isara"
-
-#~ msgid "Add"
-#~ msgstr "I-dagdag"
-
-#~ msgid "Calculate Result"
-#~ msgstr "Kalkulahin ang resulta"
-
-#~ msgid "Add last result"
-#~ msgstr "Idagdag ang huling resulta"
-
-#~ msgid "Backspace"
-#~ msgstr "Backspace"
-
-#~ msgid "Subtract"
-#~ msgstr "Ibawas"
-
-#~ msgid "Multiply"
-#~ msgstr "Magparami"
-
-#~ msgid "Divide"
-#~ msgstr "Hatiin"
-
-#~ msgid "Percentage"
-#~ msgstr "Porsyento"
-
-#~ msgid "Start Group"
-#~ msgstr "Magsimula ng Grupo"
-
-#~ msgid "Exponent"
-#~ msgstr "Kapangyarihan"
-
-#~ msgid "Root"
-#~ msgstr "Root"
-
-#~ msgid "Hyperbolic Sine"
-#~ msgstr "Sine na Hyperbolic"
-
-#~ msgid "Cosine"
-#~ msgstr "Cosine"
-
-#~ msgid "Hyperbolic Cosine"
-#~ msgstr "Cosine na Hyperbolic"
-
-#~ msgid "Tangent"
-#~ msgstr "Tengent"
-
-#~ msgid "Hyperbolic Tangent"
-#~ msgstr "Tangent na Hyperbolic"
-
-#~ msgid "Pi"
-#~ msgstr "Pi"
-
-#~ msgid "Euler's Number"
-#~ msgstr "Numero ni Euler"
-
-#~ msgid "'%s' is invalid."
-#~ msgstr "'%s' ay hindi pwede"
-
-#~ msgid "'%s' is unknown."
-#~ msgstr "'%s' ay hindi alam"

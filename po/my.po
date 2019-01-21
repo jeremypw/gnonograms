@@ -1,17 +1,20 @@
+# Burmese translations for com.github.jeremypw.gnonograms package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# Automatically generated, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 15:55+0000\n"
-"PO-Revision-Date: 2016-06-26 17:01+0000\n"
-"Last-Translator: Bone Pyae Sone <bone.burma@gmail.com>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2019-01-21 16:08+0000\n"
+"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: my\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
-"X-Generator: Launchpad (build 18298)\n"
 
 #: libcore/widgets/GradeChooser.vala:41
 msgid "Generated games"
@@ -291,9 +294,8 @@ msgid "Save will Overwrite"
 msgstr ""
 
 #: src/View.vala:499
-#, fuzzy
 msgid "Clear canvas"
-msgstr "အားလုံးဖျက်"
+msgstr ""
 
 #. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
 #: src/View.vala:505
@@ -346,98 +348,3 @@ msgstr ""
 #: src/widgets/ProgressIndicator.vala:58
 msgid "Cancel solving"
 msgstr ""
-
-#~ msgid "translator-credits"
-#~ msgstr ""
-#~ "Launchpad Contributions:\n"
-#~ "  Bone Pyae Sone https://launchpad.net/~bonepyaesone"
-
-#~ msgid "Calculator"
-#~ msgstr "ဂဏန်းတွက်စက်"
-
-#~ msgid "History"
-#~ msgstr "မှတ်တမ်း"
-
-#~ msgid "Value to add:"
-#~ msgstr "ထပ်ပေါင်းမည့်တန်ဖိုး"
-
-#~ msgid "Result"
-#~ msgstr "ရလဒ်"
-
-#~ msgid "Expression"
-#~ msgstr "ထုတ်ဖော်ချက်"
-
-#~ msgid "Close"
-#~ msgstr "ပိတ်"
-
-#~ msgid "Add"
-#~ msgstr "ပေါင်းထည့်"
-
-#~ msgid "Show extended functionality"
-#~ msgstr "ထပ်တိုးထားသည့် ဖန်ရှင်များပြ"
-
-#~ msgid "Calculate Result"
-#~ msgstr "အဖြေတွက်"
-
-#~ msgid "Add last result"
-#~ msgstr "နောက်ဆုံးအဖြေကို ထပ်ထည့်"
-
-#~ msgid "Backspace"
-#~ msgstr "Backspace"
-
-#~ msgid "Subtract"
-#~ msgstr "အနှုတ်"
-
-#~ msgid "Multiply"
-#~ msgstr "အမြှောက်"
-
-#~ msgid "Divide"
-#~ msgstr "အစား"
-
-#~ msgid "Percentage"
-#~ msgstr "ရာခိုင်နူန်း"
-
-#~ msgid "Start Group"
-#~ msgstr "အဖွဲ့ဖွဲ့"
-
-#~ msgid "End Group"
-#~ msgstr "အဖွဲ့ပိတ်"
-
-#~ msgid "Exponent"
-#~ msgstr "ထပ်ကိန်း"
-
-#~ msgid "Root"
-#~ msgstr "ကိန်းရင်း"
-
-#~ msgid "Sine"
-#~ msgstr "Sine"
-
-#~ msgid "Hyperbolic Sine"
-#~ msgstr "Hyperbolic Sine"
-
-#~ msgid "Cosine"
-#~ msgstr "Cosine"
-
-#~ msgid "Hyperbolic Cosine"
-#~ msgstr "Hyperbolic Cosine"
-
-#~ msgid "Tangent"
-#~ msgstr "Tangent"
-
-#~ msgid "Hyperbolic Tangent"
-#~ msgstr "Hyperbolic Tangent"
-
-#~ msgid "Pi"
-#~ msgstr "Pi"
-
-#~ msgid "Euler's Number"
-#~ msgstr "Euler's နံပါတ်"
-
-#~ msgid "Hide extended functionality"
-#~ msgstr "ထပ်တိုးဖန်ရှင်"
-
-#~ msgid "'%s' is invalid."
-#~ msgstr "'%s' မှာ မရပါ"
-
-#~ msgid "'%s' is unknown."
-#~ msgstr "'%s' ကို မသိရှိပါ"

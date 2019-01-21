@@ -1,17 +1,20 @@
+# Catalan translations for com.github.jeremypw.gnonograms package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# Automatically generated, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 15:55+0000\n"
-"PO-Revision-Date: 2016-12-20 07:16+0000\n"
-"Last-Translator: Davidmp <rbndavid@gmail.com>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2019-01-21 16:08+0000\n"
+"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: ca\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
-"X-Generator: Launchpad (build 18298)\n"
 
 #: libcore/widgets/GradeChooser.vala:41
 msgid "Generated games"
@@ -291,9 +294,8 @@ msgid "Save will Overwrite"
 msgstr ""
 
 #: src/View.vala:499
-#, fuzzy
 msgid "Clear canvas"
-msgstr "Neteja l'entrada"
+msgstr ""
 
 #. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
 #: src/View.vala:505
@@ -346,102 +348,3 @@ msgstr ""
 #: src/widgets/ProgressIndicator.vala:58
 msgid "Cancel solving"
 msgstr ""
-
-#~ msgid "translator-credits"
-#~ msgstr ""
-#~ "Launchpad Contributions:\n"
-#~ "  Adolfo Jayme https://launchpad.net/~fitojb\n"
-#~ "  Davidmp https://launchpad.net/~davidmp\n"
-#~ "  Ecollvila https://launchpad.net/~ecollvila\n"
-#~ "  Martí https://launchpad.net/~marti-valls-bcn\n"
-#~ "  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount"
-
-#~ msgid "Calculator"
-#~ msgstr "Calculadora"
-
-#~ msgid "History"
-#~ msgstr "Historial"
-
-#~ msgid "Value to add:"
-#~ msgstr "Valor a afegir:"
-
-#~ msgid "Result"
-#~ msgstr "Resultat"
-
-#~ msgid "Expression"
-#~ msgstr "Expressió"
-
-#~ msgid "Close"
-#~ msgstr "Tanca"
-
-#~ msgid "Add"
-#~ msgstr "Suma"
-
-#~ msgid "Show extended functionality"
-#~ msgstr "Mostra més funcions"
-
-#~ msgid "Calculate Result"
-#~ msgstr "Calcula el resultat"
-
-#~ msgid "Add last result"
-#~ msgstr "Suma l’últim resultat"
-
-#~ msgid "Backspace"
-#~ msgstr "Retrocés"
-
-#~ msgid "Subtract"
-#~ msgstr "Resta"
-
-#~ msgid "Multiply"
-#~ msgstr "Multiplica"
-
-#~ msgid "Divide"
-#~ msgstr "Divideix"
-
-#~ msgid "Percentage"
-#~ msgstr "Percentatge"
-
-#~ msgid "Start Group"
-#~ msgstr "Inicia el grup"
-
-#~ msgid "End Group"
-#~ msgstr "Acaba el grup"
-
-#~ msgid "Exponent"
-#~ msgstr "Exponencial"
-
-#~ msgid "Root"
-#~ msgstr "Arrel"
-
-#~ msgid "Sine"
-#~ msgstr "Sinus"
-
-#~ msgid "Hyperbolic Sine"
-#~ msgstr "Sinus hiperbòlic"
-
-#~ msgid "Cosine"
-#~ msgstr "Cosinus"
-
-#~ msgid "Hyperbolic Cosine"
-#~ msgstr "Cosinus hiperbòlic"
-
-#~ msgid "Tangent"
-#~ msgstr "Tangent"
-
-#~ msgid "Hyperbolic Tangent"
-#~ msgstr "Tangent hiperbòlica"
-
-#~ msgid "Pi"
-#~ msgstr "Pi"
-
-#~ msgid "Euler's Number"
-#~ msgstr "Número d'Euler"
-
-#~ msgid "Hide extended functionality"
-#~ msgstr "Mostra menys funcions"
-
-#~ msgid "'%s' is invalid."
-#~ msgstr "«%s» no és vàlid."
-
-#~ msgid "'%s' is unknown."
-#~ msgstr "«%s» és desconegut."

@@ -1,19 +1,20 @@
+# Bengali translations for com.github.jeremypw.gnonograms package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# Automatically generated, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 15:55+0000\n"
-"PO-Revision-Date: 2017-04-29 13:09+0000\n"
-"Last-Translator: Zahidul Hossain <choyan.009@gmail.com>\n"
-"Language-Team: bn (generated) <https://l10n.elementary.io/projects/"
-"calculator/calculator/bn/>\n"
+"POT-Creation-Date: 2019-01-21 16:08+0000\n"
+"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
 "Language: bn\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2.13-dev\n"
-"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
 
 #: libcore/widgets/GradeChooser.vala:41
 msgid "Generated games"
@@ -293,9 +294,8 @@ msgid "Save will Overwrite"
 msgstr ""
 
 #: src/View.vala:499
-#, fuzzy
 msgid "Clear canvas"
-msgstr "এন্ট্রি মুছে ফেলুন"
+msgstr ""
 
 #. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
 #: src/View.vala:505
@@ -348,100 +348,3 @@ msgstr ""
 #: src/widgets/ProgressIndicator.vala:58
 msgid "Cancel solving"
 msgstr ""
-
-#~ msgid "translator-credits"
-#~ msgstr ""
-#~ "Launchpad Contributions:\n"
-#~ "  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount\n"
-#~ "  Mishkat Nur Rahman https://launchpad.net/~mishkat2008\n"
-#~ "  Soumen Kamilya https://launchpad.net/~soumen-kamilya"
-
-#~ msgid "Calculator"
-#~ msgstr "ক্যালকুলেটর"
-
-#~ msgid "History"
-#~ msgstr "পূর্ববর্তী ফলাফল"
-
-#~ msgid "Value to add:"
-#~ msgstr "যা যোগ করতে চান:"
-
-#~ msgid "Result"
-#~ msgstr "ফলাফল"
-
-#~ msgid "Expression"
-#~ msgstr "অভিব্যক্তি"
-
-#~ msgid "Close"
-#~ msgstr "বন্ধ করুন"
-
-#~ msgid "Add"
-#~ msgstr "যোগ করুন"
-
-#~ msgid "Show extended functionality"
-#~ msgstr "বর্ধিত কার্যকারিতা দেখান"
-
-#~ msgid "Calculate Result"
-#~ msgstr "ফলাফল গণনা করুন"
-
-#~ msgid "Add last result"
-#~ msgstr "শেষ ফলাফল যোগ করুন"
-
-#~ msgid "Backspace"
-#~ msgstr "Backspace"
-
-#~ msgid "Subtract"
-#~ msgstr "বিয়োগ করুন"
-
-#~ msgid "Multiply"
-#~ msgstr "গুণ করুন"
-
-#~ msgid "Divide"
-#~ msgstr "ভাগ করুন"
-
-#~ msgid "Percentage"
-#~ msgstr "শতাংশ"
-
-#~ msgid "Start Group"
-#~ msgstr "গ্রুপ শুরু করুন"
-
-#~ msgid "End Group"
-#~ msgstr "গ্রুপ শেষ করুন"
-
-#~ msgid "Exponent"
-#~ msgstr "সূচক"
-
-#~ msgid "Root"
-#~ msgstr "মূল"
-
-#~ msgid "Sine"
-#~ msgstr "সাইন"
-
-#~ msgid "Hyperbolic Sine"
-#~ msgstr "হাইপারবলিক সাইন"
-
-#~ msgid "Cosine"
-#~ msgstr "কোসাইন"
-
-#~ msgid "Hyperbolic Cosine"
-#~ msgstr "হাইপারবলিক কোসাইন"
-
-#~ msgid "Tangent"
-#~ msgstr "ট্যানজেন্ট"
-
-#~ msgid "Hyperbolic Tangent"
-#~ msgstr "হাইপারবলিক ট্যানজেন্ট"
-
-#~ msgid "Pi"
-#~ msgstr "পাই"
-
-#~ msgid "Euler's Number"
-#~ msgstr "ইউলারের নাম্বার"
-
-#~ msgid "Hide extended functionality"
-#~ msgstr "বর্ধিত কার্যকারিতা লুকান"
-
-#~ msgid "'%s' is invalid."
-#~ msgstr "'%s' গ্রহণযোগ্য নয়।"
-
-#~ msgid "'%s' is unknown."
-#~ msgstr "'%s\" অজানা।"

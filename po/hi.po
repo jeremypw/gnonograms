@@ -1,17 +1,20 @@
+# Hindi translations for com.github.jeremypw.gnonograms package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# Automatically generated, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 15:55+0000\n"
-"PO-Revision-Date: 2016-05-27 15:29+0000\n"
-"Last-Translator: Maxwell Barvian <Unknown>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2019-01-21 16:08+0000\n"
+"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: hi\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
-"X-Generator: Launchpad (build 18298)\n"
 
 #: libcore/widgets/GradeChooser.vala:41
 msgid "Generated games"
@@ -291,9 +294,8 @@ msgid "Save will Overwrite"
 msgstr ""
 
 #: src/View.vala:499
-#, fuzzy
 msgid "Clear canvas"
-msgstr "प्रविष्टि साफ करें"
+msgstr ""
 
 #. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
 #: src/View.vala:505
@@ -346,101 +348,3 @@ msgstr ""
 #: src/widgets/ProgressIndicator.vala:58
 msgid "Cancel solving"
 msgstr ""
-
-#~ msgid "translator-credits"
-#~ msgstr ""
-#~ "Launchpad Contributions:\n"
-#~ "  Anand Kumar https://launchpad.net/~anandkumar\n"
-#~ "  Cody Garver https://launchpad.net/~codygarver\n"
-#~ "  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount\n"
-#~ "  Vishal Biswas https://launchpad.net/~vshlbiswas"
-
-#~ msgid "Calculator"
-#~ msgstr "गणक"
-
-#~ msgid "History"
-#~ msgstr "इतिहास"
-
-#~ msgid "Value to add:"
-#~ msgstr "मान को जोड़ें:"
-
-#~ msgid "Result"
-#~ msgstr "परिणाम"
-
-#~ msgid "Expression"
-#~ msgstr "एक्सप्रेशन"
-
-#~ msgid "Close"
-#~ msgstr "बंद"
-
-#~ msgid "Add"
-#~ msgstr "जोड़ें"
-
-#~ msgid "Show extended functionality"
-#~ msgstr "विस्तृत कार्यक्षमता दिखाएँ"
-
-#~ msgid "Calculate Result"
-#~ msgstr "परिणाम गणणा"
-
-#~ msgid "Add last result"
-#~ msgstr "अंतिम परिणाम जोड़ें"
-
-#~ msgid "Backspace"
-#~ msgstr "बैक-स्पेस"
-
-#~ msgid "Subtract"
-#~ msgstr "घटाएँ"
-
-#~ msgid "Multiply"
-#~ msgstr "गुणा"
-
-#~ msgid "Divide"
-#~ msgstr "भाग"
-
-#~ msgid "Percentage"
-#~ msgstr "प्रतिशत"
-
-#~ msgid "Start Group"
-#~ msgstr "समूह शुरू"
-
-#~ msgid "End Group"
-#~ msgstr "अंत समूह"
-
-#~ msgid "Exponent"
-#~ msgstr "घातांक"
-
-#~ msgid "Root"
-#~ msgstr "वर्गमूल"
-
-#~ msgid "Sine"
-#~ msgstr "ज्या"
-
-#~ msgid "Hyperbolic Sine"
-#~ msgstr "अतिपरवलयिक साइन"
-
-#~ msgid "Cosine"
-#~ msgstr "कोटिज्या"
-
-#~ msgid "Hyperbolic Cosine"
-#~ msgstr "अतिपरवलयिक कोसाइन"
-
-#~ msgid "Tangent"
-#~ msgstr "स्पर्शज्या"
-
-#~ msgid "Hyperbolic Tangent"
-#~ msgstr "अतिपरवलयिक टैन्जेन्ट"
-
-#~ msgid "Pi"
-#~ msgstr "Pi"
-
-#~ msgid "Euler's Number"
-#~ msgstr "यूलर का क्रमांक"
-
-#~ msgid "Hide extended functionality"
-#~ msgstr "विस्तृत कार्यक्षमता छिपाएँ"
-
-#~ msgid "'%s' is invalid."
-#~ msgstr "'%s' अमान्य है."
-
-#~ msgid "'%s' is unknown."
-#~ msgstr "'%s' अज्ञात है."

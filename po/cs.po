@@ -1,17 +1,21 @@
+# Czech translations for com.github.jeremypw.gnonograms package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# Automatically generated, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 15:55+0000\n"
-"PO-Revision-Date: 2017-02-27 00:04+0000\n"
-"Last-Translator: Jan Marek <janmarek28@gmail.com>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2019-01-21 16:08+0000\n"
+"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2017-02-28 04:59+0000\n"
-"X-Generator: Launchpad (build 18329)\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
 #: libcore/widgets/GradeChooser.vala:41
 msgid "Generated games"
@@ -291,9 +295,8 @@ msgid "Save will Overwrite"
 msgstr ""
 
 #: src/View.vala:499
-#, fuzzy
 msgid "Clear canvas"
-msgstr "Vymazat pole"
+msgstr ""
 
 #. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
 #: src/View.vala:505
@@ -346,104 +349,3 @@ msgstr ""
 #: src/widgets/ProgressIndicator.vala:58
 msgid "Cancel solving"
 msgstr ""
-
-#~ msgid "translator-credits"
-#~ msgstr ""
-#~ "Launchpad Contributions:\n"
-#~ "  Jan Marek https://launchpad.net/~janmarek28\n"
-#~ "  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount\n"
-#~ "  Pavel Vybíral https://launchpad.net/~vybiral-pav\n"
-#~ "  Tomo Moto https://launchpad.net/~tomasivanek\n"
-#~ "  oko123 https://launchpad.net/~roman-lubij\n"
-#~ "  t.m https://launchpad.net/~t-martykan-m\n"
-#~ "  thecnology https://launchpad.net/~thecnology"
-
-#~ msgid "Calculator"
-#~ msgstr "Kalkulačka"
-
-#~ msgid "History"
-#~ msgstr "Historie"
-
-#~ msgid "Value to add:"
-#~ msgstr "Vložit hodnotu:"
-
-#~ msgid "Result"
-#~ msgstr "Výsledek"
-
-#~ msgid "Expression"
-#~ msgstr "Výraz"
-
-#~ msgid "Close"
-#~ msgstr "Zavřít"
-
-#~ msgid "Add"
-#~ msgstr "Přičíst"
-
-#~ msgid "Show extended functionality"
-#~ msgstr "Zobrazit rozšířené možnosti"
-
-#~ msgid "Calculate Result"
-#~ msgstr "Spočítat výsledek"
-
-#~ msgid "Add last result"
-#~ msgstr "Vložit poslední výsledek"
-
-#~ msgid "Backspace"
-#~ msgstr "Zpět"
-
-#~ msgid "Subtract"
-#~ msgstr "Odečíst"
-
-#~ msgid "Multiply"
-#~ msgstr "Násobit"
-
-#~ msgid "Divide"
-#~ msgstr "Dělit"
-
-#~ msgid "Percentage"
-#~ msgstr "Procenta"
-
-#~ msgid "Start Group"
-#~ msgstr "Začátek skupiny"
-
-#~ msgid "End Group"
-#~ msgstr "Konec skupiny"
-
-#~ msgid "Exponent"
-#~ msgstr "Mocnina"
-
-#~ msgid "Root"
-#~ msgstr "Odmocnina"
-
-#~ msgid "Sine"
-#~ msgstr "Sinus"
-
-#~ msgid "Hyperbolic Sine"
-#~ msgstr "Hyperbolický sinus"
-
-#~ msgid "Cosine"
-#~ msgstr "Kosinus"
-
-#~ msgid "Hyperbolic Cosine"
-#~ msgstr "Hyperbolický kosinus"
-
-#~ msgid "Tangent"
-#~ msgstr "Tangens"
-
-#~ msgid "Hyperbolic Tangent"
-#~ msgstr "Hyperbolický tangens"
-
-#~ msgid "Pi"
-#~ msgstr "Pí"
-
-#~ msgid "Euler's Number"
-#~ msgstr "Eulerovo číslo"
-
-#~ msgid "Hide extended functionality"
-#~ msgstr "Skrýt rozšířené možnosti"
-
-#~ msgid "'%s' is invalid."
-#~ msgstr "'%s' je neplatný."
-
-#~ msgid "'%s' is unknown."
-#~ msgstr "'%s' je neznámý."

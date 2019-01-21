@@ -1,17 +1,21 @@
+# Finnish translations for com.github.jeremypw.gnonograms package.
+# Copyright (C) 2019 THE com.github.jeremypw.gnonograms'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# Automatically generated, 2019.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 15:55+0000\n"
-"PO-Revision-Date: 2016-05-27 15:29+0000\n"
-"Last-Translator: Maxwell Barvian <Unknown>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2019-01-21 16:08+0000\n"
+"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-12-31 04:44+0000\n"
-"X-Generator: Launchpad (build 18298)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: libcore/widgets/GradeChooser.vala:41
 msgid "Generated games"
@@ -291,9 +295,8 @@ msgid "Save will Overwrite"
 msgstr ""
 
 #: src/View.vala:499
-#, fuzzy
 msgid "Clear canvas"
-msgstr "Tyhjennä tietue"
+msgstr ""
 
 #. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
 #: src/View.vala:505
@@ -346,99 +349,3 @@ msgstr ""
 #: src/widgets/ProgressIndicator.vala:58
 msgid "Cancel solving"
 msgstr ""
-
-#~ msgid "translator-credits"
-#~ msgstr ""
-#~ "Launchpad Contributions:\n"
-#~ "  Jiri Grönroos https://launchpad.net/~jiri-gronroos\n"
-#~ "  Maxwell Barvian https://launchpad.net/~mbarvian-deactivatedaccount"
-
-#~ msgid "Calculator"
-#~ msgstr "Laskin"
-
-#~ msgid "History"
-#~ msgstr "Historia"
-
-#~ msgid "Value to add:"
-#~ msgstr "Lisättävä arvo:"
-
-#~ msgid "Result"
-#~ msgstr "Tulos"
-
-#~ msgid "Expression"
-#~ msgstr "Lauseke"
-
-#~ msgid "Close"
-#~ msgstr "Sulje"
-
-#~ msgid "Add"
-#~ msgstr "Lisää"
-
-#~ msgid "Show extended functionality"
-#~ msgstr "Näytä laajennettu toiminnallisuus"
-
-#~ msgid "Calculate Result"
-#~ msgstr "Laske tulos"
-
-#~ msgid "Add last result"
-#~ msgstr "Lisää viimeisin tulos"
-
-#~ msgid "Backspace"
-#~ msgstr "Askelpalautin"
-
-#~ msgid "Subtract"
-#~ msgstr "Vähennä"
-
-#~ msgid "Multiply"
-#~ msgstr "Kerro"
-
-#~ msgid "Divide"
-#~ msgstr "Jaa"
-
-#~ msgid "Percentage"
-#~ msgstr "Prosenttiosuus"
-
-#~ msgid "Start Group"
-#~ msgstr "Aloitusryhmä"
-
-#~ msgid "End Group"
-#~ msgstr "Lopetusryhmä"
-
-#~ msgid "Exponent"
-#~ msgstr "Eksponentti"
-
-#~ msgid "Root"
-#~ msgstr "Juuri"
-
-#~ msgid "Sine"
-#~ msgstr "Sini"
-
-#~ msgid "Hyperbolic Sine"
-#~ msgstr "Hyperbolinen sini"
-
-#~ msgid "Cosine"
-#~ msgstr "Kosini"
-
-#~ msgid "Hyperbolic Cosine"
-#~ msgstr "Hyperbolinen kosini"
-
-#~ msgid "Tangent"
-#~ msgstr "Tangentti"
-
-#~ msgid "Hyperbolic Tangent"
-#~ msgstr "Hyperbolinen tangentti"
-
-#~ msgid "Pi"
-#~ msgstr "Pii"
-
-#~ msgid "Euler's Number"
-#~ msgstr "Neperin luku"
-
-#~ msgid "Hide extended functionality"
-#~ msgstr "Piilota laajennettu toiminnallisuus"
-
-#~ msgid "'%s' is invalid."
-#~ msgstr "'%s' on virheellinen."
-
-#~ msgid "'%s' is unknown."
-#~ msgstr "'%s' on tuntematon."
