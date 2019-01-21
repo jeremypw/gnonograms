@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: com.github.jeremypw.gnonograms package\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-01-20 17:01+0000\n"
-"PO-Revision-Date: 2019-01-19 21:45+0100\n"
+"PO-Revision-Date: 2019-01-20 20:50+0100\n"
 "Last-Translator: NathanBnm\n"
 "Language-Team: Français\n"
 "Language: fr\n"
@@ -19,15 +19,15 @@ msgstr ""
 #: libcore/widgets/GradeChooser.vala:41
 #, fuzzy
 msgid "Generated games"
-msgstr "Générer une partie aléatoire"
+msgstr "Parties générées"
 
 #: libcore/widgets/TitleEntry.vala:35
 msgid "Enter title of game here"
-msgstr ""
+msgstr "Entrez le titre de la partie ici"
 
 #: libcore/widgets/TitleEntry.vala:36
 msgid "Title"
-msgstr ""
+msgstr "Titre"
 
 #: libcore/widgets/Label.vala:263
 #, c-format
@@ -36,20 +36,20 @@ msgstr "Liberté = %u"
 
 #: libcore/utils.vala:347
 msgid "Open"
-msgstr ""
+msgstr "Ouvrir"
 
 #: libcore/utils.vala:353
 msgid "Save"
-msgstr ""
+msgstr "Enregistrer"
 
 #: libcore/utils.vala:358
 msgid "Apply"
-msgstr ""
+msgstr "Appliquer"
 
 #: libcore/utils.vala:369
 #, fuzzy
 msgid "Cancel"
-msgstr "Annuler la résolution"
+msgstr "Annuler"
 
 #: libcore/utils.vala:396
 msgid "Save solution too"
@@ -58,11 +58,11 @@ msgstr "Enregistre aussi la solution"
 #: libcore/utils.vala:435
 #, c-format
 msgid "Overwrite %s"
-msgstr ""
+msgstr "Écraser %s"
 
 #: libcore/utils.vala:435
 msgid "This action will destroy contents of that file"
-msgstr ""
+msgstr "Cette action va détruire le contenu du fichier"
 
 #: libcore/Filereader.vala:85 libcore/Filewriter.vala:188
 msgid "Gnonogram puzzles"
@@ -103,15 +103,15 @@ msgstr "Nommez et enregistrez ce puzzle"
 #: libcore/Filewriter.vala:202
 #, fuzzy
 msgid "Confirm save without solution"
-msgstr "Corriger la solution"
+msgstr "Confirmer l'enregistrement sans solution"
 
 #: libcore/Filewriter.vala:203
 msgid "Do not save computer insoluble clues without solution"
-msgstr ""
+msgstr "Ne pas enregistrer les indices insolubles dans l'ordinateur."
 
 #: libcore/Enums.vala:37
 msgid "Trivial"
-msgstr ""
+msgstr "Simple"
 
 #: libcore/Enums.vala:39
 msgid "Very Easy"
@@ -143,11 +143,11 @@ msgstr "Possiblement ambigü"
 
 #: libcore/Enums.vala:53
 msgid "Super human"
-msgstr ""
+msgstr "Surhumain"
 
 #: libcore/Enums.vala:55
 msgid "Undefined"
-msgstr ""
+msgstr "Indéfini"
 
 #: libcore/Constants.vala:40
 msgid "?"
@@ -155,7 +155,7 @@ msgstr "?"
 
 #: libcore/Constants.vala:43
 msgid "Untitled"
-msgstr ""
+msgstr "Sans titre"
 
 #: src/Controller.vala:216
 msgid "Random pattern"
@@ -172,16 +172,16 @@ msgstr "Échec de la génération du jeu ou de la difficulté requise"
 #: src/Controller.vala:361
 #, c-format
 msgid "Unable to save %s"
-msgstr ""
+msgstr "Impossible d'enregistrer %s"
 
 #: src/Controller.vala:382
 msgid "game"
-msgstr ""
+msgstr "partie"
 
 #: src/Controller.vala:390 src/Controller.vala:422
 #, c-format
 msgid "Unable to load game. %s"
-msgstr ""
+msgstr "Impossible de charger la partie. %s"
 
 #: src/Controller.vala:432
 msgid "Dimensions too large"
@@ -225,13 +225,15 @@ msgstr "Il y a des erreurs"
 #: src/Controller.vala:617
 #, c-format
 msgid "Saved to %s"
-msgstr ""
+msgstr "Enregistré dans %s"
 
 #: src/Controller.vala:637
 msgid ""
 "Failed to find a hint using simple logic - multi-line logic (trial and "
 "error) required"
 msgstr ""
+"Impossible de trouver un indice à l'aide de la logique simple - logique multi-lignes (essai et "
+"erreur) nécessaire"
 
 #: src/Controller.vala:676
 msgid "Solving was cancelled"
@@ -267,19 +269,19 @@ msgstr "Enregistrer une partie dans un fichier"
 
 #: src/View.vala:224
 msgid "Undo Last Move"
-msgstr ""
+msgstr "Annuler le dernier mouvement"
 
 #: src/View.vala:230
 msgid "Redo Last Move"
-msgstr ""
+msgstr "Rétablir le dernier mouvement"
 
 #: src/View.vala:236
 msgid "Go Back to Last Correct Position"
-msgstr ""
+msgstr "Retourner à la dernière position correcte"
 
 #: src/View.vala:246
 msgid "Suggest next move"
-msgstr ""
+msgstr "Suggérer le mouvement suivant"
 
 #: src/View.vala:252
 msgid "Solve by Computer"
@@ -288,15 +290,15 @@ msgstr "Résoudre par l'ordinateur"
 #: src/View.vala:497
 #, c-format
 msgid "Drawing %s"
-msgstr ""
+msgstr "Dessin de %s"
 
 #: src/View.vala:498
 msgid "Read Only - Save to a different file"
-msgstr ""
+msgstr "Lecture seule - Enregistrez dans un fichier différent"
 
 #: src/View.vala:498
 msgid "Save will Overwrite"
-msgstr ""
+msgstr "L'enregstrement va écraser"
 
 #: src/View.vala:499
 #, fuzzy
@@ -306,7 +308,7 @@ msgstr "Effacer l'entrée"
 #: src/View.vala:504
 #, fuzzy, c-format
 msgid "Solving %s"
-msgstr "Résolution"
+msgstr "Résolution de %s"
 
 #: src/View.vala:505
 msgid "Restart solving"
@@ -326,7 +328,7 @@ msgstr "Colonnes"
 
 #: src/widgets/AppMenu.vala:48
 msgid "Strike out complete blocks"
-msgstr ""
+msgstr "Rayer les blocs complets"
 
 #: src/widgets/AppMenu.vala:94
 msgid "Options"
@@ -335,7 +337,7 @@ msgstr "Options"
 #: src/widgets/ViewModeButton.vala:29
 #, fuzzy, c-format
 msgid "Generate %s puzzle"
-msgstr "Puzzles Gnonogram"
+msgstr "Générer %s puzzle"
 
 #: src/widgets/ViewModeButton.vala:61
 #, fuzzy
