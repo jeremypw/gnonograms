@@ -212,7 +212,7 @@ msgstr "%u erreurs trouvées"
 #. TRANSLATORS: "Correct" is used as an adjective, indicating that a correct (valid) solution has been found.
 #: src/Controller.vala:557
 msgid "Correct solution"
-msgstr "Corriger la solution"
+msgstr "Solution correcte"
 
 #: src/Controller.vala:559
 #, fuzzy
@@ -244,12 +244,12 @@ msgstr "La résolution à été annulée"
 #: src/Controller.vala:680
 #, fuzzy, c-format
 msgid "Solution found. %s"
-msgstr "Solution simple trouvée. %s"
+msgstr "Solution trouvée. %s"
 
 #: src/Controller.vala:682
 #, fuzzy
 msgid "No solution found"
-msgstr "Pas de solution simple trouvée"
+msgstr "Pas de solution trouvée"
 
 #: src/View.vala:204
 msgid "Gnonograms for Elementary"
@@ -262,12 +262,12 @@ msgstr "Charger une partie depuis un fichier"
 #: src/View.vala:214
 #, fuzzy
 msgid "Save Game"
-msgstr "Enregistrer une partie dans un fichier"
+msgstr "Enregistrer la partie"
 
 #: src/View.vala:219
 #, fuzzy
 msgid "Save Game to Different File"
-msgstr "Enregistrer une partie dans un fichier"
+msgstr "Enregistrer la partie dans un fichier différent"
 
 #: src/View.vala:224
 msgid "Undo Last Move"
@@ -341,7 +341,7 @@ msgstr "Options"
 #: src/widgets/ViewModeButton.vala:30
 #, fuzzy, c-format
 msgid "Generate %s puzzle"
-msgstr "Générer %s puzzle"
+msgstr "Générer un puzzle %s"
 
 #: src/widgets/ViewModeButton.vala:62
 #, fuzzy
