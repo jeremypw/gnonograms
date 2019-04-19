@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-19 16:48+0200\n"
+"POT-Creation-Date: 2019-04-19 17:17+0200\n"
 "PO-Revision-Date: 2019-01-19 22:45+0100\n"
 "Last-Translator: NathanBnm\n"
 "Language-Team: Français\n"
@@ -75,7 +75,9 @@ msgstr "Ajout des balises d'évaluation de contenu"
 
 #: data/com.github.jeremypw.gnonograms.appdata.xml.in:69
 msgid "Use scrolled window when grid larger than screen"
-msgstr "Utilisation de défilement de la fenêtre quand la grille est plus grande que l'écran"
+msgstr ""
+"Utilisation de défilement de la fenêtre quand la grille est plus grande que "
+"l'écran"
 
 #: data/com.github.jeremypw.gnonograms.appdata.xml.in:70
 msgid "Fix some bugs with clue label formating"
@@ -83,7 +85,9 @@ msgstr "Correction de certains bugs avec le format du texte d'indice"
 
 #: data/com.github.jeremypw.gnonograms.appdata.xml.in:71
 msgid "Toast has own copy of message to avoid possible crash"
-msgstr "Les messages volants ont désormais leur propre copie des messages pour éviter un possible plantage"
+msgstr ""
+"Les messages volants ont désormais leur propre copie des messages pour "
+"éviter un possible plantage"
 
 #: data/com.github.jeremypw.gnonograms.appdata.xml.in:72
 msgid "Conditional compilation with Gtk version &gt;=3.22"
@@ -103,7 +107,8 @@ msgstr "Petites corrections de bugs diverses"
 
 #: data/com.github.jeremypw.gnonograms.appdata.xml.in:81
 msgid "Fix crash when dragging across grid edge"
-msgstr "Correction d'un plnatage lors du glisser déposer vers la bordure de la grille"
+msgstr ""
+"Correction d'un plnatage lors du glisser déposer vers la bordure de la grille"
 
 #: data/com.github.jeremypw.gnonograms.appdata.xml.in:82
 msgid "Clear puzzle name when resized"
@@ -115,11 +120,15 @@ msgstr "Bouton d'indice"
 
 #: data/com.github.jeremypw.gnonograms.appdata.xml.in:90
 msgid "Strikethrough completed blocks in clue label (with option to disable)"
-msgstr "Texte des blocs complétés barrés dans le texte d'indice (avec une option pour le désactiver)"
+msgstr ""
+"Texte des blocs complétés barrés dans le texte d'indice (avec une option "
+"pour le désactiver)"
 
 #: data/com.github.jeremypw.gnonograms.appdata.xml.in:91
 msgid "Clue label turns red if completed incorrectly (with option to disable)"
-msgstr "Le texte d'indice devient rouge si la grille n'est pas complétée correctement (avec une option pour le désactiver)"
+msgstr ""
+"Le texte d'indice devient rouge si la grille n'est pas complétée "
+"correctement (avec une option pour le désactiver)"
 
 #: data/com.github.jeremypw.gnonograms.appdata.xml.in:92
 msgid "Additional shortcuts"
@@ -156,7 +165,8 @@ msgstr "Un peu de reconception"
 
 #: data/com.github.jeremypw.gnonograms.appdata.xml.in:115
 msgid "Add brand styling and update screenshots"
-msgstr "Ajout d'une toute nouvelle apparence et mise à jour des captures d'écran"
+msgstr ""
+"Ajout d'une toute nouvelle apparence et mise à jour des captures d'écran"
 
 #: data/com.github.jeremypw.gnonograms.appdata.xml.in:116
 msgid "Fix possible failed assertion in advanced solver"
@@ -192,7 +202,9 @@ msgstr "Remplacement des éléments Gtk.Stock dépréciés"
 
 #: data/com.github.jeremypw.gnonograms.appdata.xml.in:143
 msgid "Fix first run after clean install problems"
-msgstr "Correction du premier démarrage après des problèmes de nettoyage de l'installation"
+msgstr ""
+"Correction du premier démarrage après des problèmes de nettoyage de "
+"l'installation"
 
 #: data/com.github.jeremypw.gnonograms.appdata.xml.in:144
 msgid "More complete uninstall"
@@ -244,7 +256,8 @@ msgstr "Ajustez la difficulté des puzzles générés"
 
 #: data/com.github.jeremypw.gnonograms.appdata.xml.in:176
 msgid "Save and restore program state and settings"
-msgstr "Enregistrement et restauration de l'état du programme et des paramètres"
+msgstr ""
+"Enregistrement et restauration de l'état du programme et des paramètres"
 
 #: data/com.github.jeremypw.gnonograms.appdata.xml.in:196
 msgid "Jeremy Paul Wootten"
