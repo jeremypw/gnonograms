@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-21 16:09+0000\n"
+"POT-Creation-Date: 2019-04-19 16:48+0200\n"
 "PO-Revision-Date: 2019-01-19 22:45+0100\n"
 "Last-Translator: NathanBnm\n"
 "Language-Team: Français\n"
@@ -16,66 +16,236 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: data/com.github.jeremypw.gnonograms.meson.in.desktop:4
-#: data/com.github.jeremypw.gnonograms.meson.in.appdata.xml:7
+#: data/com.github.jeremypw.gnonograms.desktop.in:4
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:7
 msgid "Gnonograms"
-msgstr ""
+msgstr "Gnonograms"
 
-#: data/com.github.jeremypw.gnonograms.meson.in.desktop:5
+#: data/com.github.jeremypw.gnonograms.desktop.in:5
 msgid "Create and solve nonogram puzzles."
 msgstr "Créez et résolvez des puzzles gnonogram."
 
-#: data/com.github.jeremypw.gnonograms.meson.in.desktop:6
+#: data/com.github.jeremypw.gnonograms.desktop.in:6
 msgid ""
 "game;puzzle;logic;nonograms;Tsunami;Picross;Griddlers;Japanese Crossword;"
 msgstr ""
+"jeu;puzzle;logique:nonograms;Tsunami;Picross;Griddlers;Mots Croisés japonais;"
 
-#: data/com.github.jeremypw.gnonograms.meson.in.desktop:7
+#: data/com.github.jeremypw.gnonograms.desktop.in:7
 msgid "Logic Game"
 msgstr "Jeu de logique"
 
 #. TRANSLATORS: Please do not translate the icon name
-#: data/com.github.jeremypw.gnonograms.meson.in.desktop:11
+#: data/com.github.jeremypw.gnonograms.desktop.in:11
 msgid "com.github.jeremypw.gnonograms"
-msgstr ""
+msgstr "com.github.jeremypw.gnonograms"
 
-#: data/com.github.jeremypw.gnonograms.meson.in.desktop:22
+#: data/com.github.jeremypw.gnonograms.desktop.in:22
 msgid "About Gnonograms"
-msgstr ""
+msgstr "À propos de Gnonograms"
 
-#: data/com.github.jeremypw.gnonograms.meson.in.appdata.xml:11
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:11
 msgid "Create and solve gnonogram puzzles"
 msgstr "Créez et résolvez des puzzles gnonogram"
 
-#: data/com.github.jeremypw.gnonograms.meson.in.appdata.xml:15
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:15
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:171
 msgid "Draw puzzles"
-msgstr ""
+msgstr "Dessinez des puzzles"
 
-#: data/com.github.jeremypw.gnonograms.meson.in.appdata.xml:16
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:16
 msgid "Generate random puzzles of chosen difficulty"
-msgstr ""
+msgstr "Générez des puzzles aléatoirement en fonction de la difficulté choisie"
 
-#: data/com.github.jeremypw.gnonograms.meson.in.appdata.xml:196
-#, fuzzy
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:59
+msgid "Prepare for Juno"
+msgstr "Préparation pour Juno"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:60
+msgid "Use Houston CI for testing"
+msgstr "Utilisation de Houston CI pour les tests"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:61
+msgid "Use separate packaging branch"
+msgstr "Utilisation d'une branche séparée pour les paquets"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:62
+msgid "Add content rating tags"
+msgstr "Ajout des balises d'évaluation de contenu"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:69
+msgid "Use scrolled window when grid larger than screen"
+msgstr "Utilisation de défilement de la fenêtre quand la grille est plus grande que l'écran"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:70
+msgid "Fix some bugs with clue label formating"
+msgstr "Correction de certains bugs avec le format du texte d'indice"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:71
+msgid "Toast has own copy of message to avoid possible crash"
+msgstr "Les messages volants ont désormais leur propre copie des messages pour éviter un possible plantage"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:72
+msgid "Conditional compilation with Gtk version &gt;=3.22"
+msgstr "Compilation conditionnelle avec les version de Gtk &gt;=3.22"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:73
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:93
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:108
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:119
+msgid "Some code refactoring and cleanup"
+msgstr "Réarrangement et nettoyage du code"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:74
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:146
+msgid "Various small bug fixes"
+msgstr "Petites corrections de bugs diverses"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:81
+msgid "Fix crash when dragging across grid edge"
+msgstr "Correction d'un plnatage lors du glisser déposer vers la bordure de la grille"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:82
+msgid "Clear puzzle name when resized"
+msgstr "Effacement du nom du puzzle au redimensionnement"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:89
+msgid "Hint button"
+msgstr "Bouton d'indice"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:90
+msgid "Strikethrough completed blocks in clue label (with option to disable)"
+msgstr "Texte des blocs complétés barrés dans le texte d'indice (avec une option pour le désactiver)"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:91
+msgid "Clue label turns red if completed incorrectly (with option to disable)"
+msgstr "Le texte d'indice devient rouge si la grille n'est pas complétée correctement (avec une option pour le désactiver)"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:92
+msgid "Additional shortcuts"
+msgstr "Raccourcis supplémentaires"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:94
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:106
+msgid "Various bug fixes"
+msgstr "Diverses corrections de bugs"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:101
+msgid "Save and restore move history"
+msgstr "Enregistrement et restauration de l'historique des mouvements"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:102
+msgid "Fade completed clues when solving"
+msgstr "Affichage des indices complétés lors de la résolution"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:103
+msgid "Generate difficult puzzles faster"
+msgstr "Générez des puzzles difficiles plus rapidement"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:104
+msgid "Add redo button"
+msgstr "Ajout d'un bouton refaire"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:105
+msgid "Reorder header bar"
+msgstr "Réorganisation de la barre d'en-tête"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:107
+msgid "Some restyling"
+msgstr "Un peu de reconception"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:115
+msgid "Add brand styling and update screenshots"
+msgstr "Ajout d'une toute nouvelle apparence et mise à jour des captures d'écran"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:116
+msgid "Fix possible failed assertion in advanced solver"
+msgstr "Correction d'une possible erreur dans le résolveur avancé"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:117
+msgid "Fix some resizing isses"
+msgstr "Correction de certains problèlmes de redimensionnement"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:118
+msgid "Fix some loading and saving issues"
+msgstr "Correction de certains problèmes de chargement et de sauvegarde"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:126
+msgid "Fix regression in game generator"
+msgstr "Correction des régressions dans le générateur de jeu"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:127
+msgid "Fix error in solver"
+msgstr "Correction d'un erreur dans le résolveur"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:134
+msgid "Fix post_install.py script"
+msgstr "Correction du script post_install.py"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:135
+msgid "Remove unused or deprecated config variables"
+msgstr "Suppression des variables de configuration inutilisées ou dépréciées"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:136
+msgid "Replace deprecated Gtk.Stock items"
+msgstr "Remplacement des éléments Gtk.Stock dépréciés"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:143
+msgid "Fix first run after clean install problems"
+msgstr "Correction du premier démarrage après des problèmes de nettoyage de l'installation"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:144
+msgid "More complete uninstall"
+msgstr "Désinstallation plus complète"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:145
+msgid "Provide mimeinfo and icon"
+msgstr "Fourniture des informations de type MIME et d'icône"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:153
+msgid "Fix debian files"
+msgstr "Correction des fichiers debian"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:154
+msgid "Fix .desktop file"
+msgstr "Correction du fichier .desktop"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:155
+msgid "Fix .appdata file"
+msgstr "Correction du fichier .appdata"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:156
+msgid "Builds with dpkg-buildpackage and Travis CI"
+msgstr "Compilation avec dpkg-buildpackage et Travis CI"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:163
+msgid "Correct dependencies for xenial build"
+msgstr "Correction des dépendances pour la compilation avec xenial"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:169
+msgid "Initial release."
+msgstr "Version initiale."
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:172
+msgid "Generate random puzzles"
+msgstr "Générez des puzzles aléatoirement"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:173
+msgid "Check for errors while solving"
+msgstr "Vérifiez s'il y a des erreurs pendant la résolution"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:174
+msgid "Adjust size of grid"
+msgstr "Ajustez la taille de la grille"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:175
+msgid "Adjust difficulty of generated puzzles"
+msgstr "Ajustez la difficulté des puzzles générés"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:176
+msgid "Save and restore program state and settings"
+msgstr "Enregistrement et restauration de l'état du programme et des paramètres"
+
+#: data/com.github.jeremypw.gnonograms.appdata.xml.in:196
 msgid "Jeremy Paul Wootten"
-msgstr "Jeremy P Wootten"
-
-#~ msgid ""
-#~ "Gnonograms is an implementation of the Japanese logic puzzle \"Nonograms"
-#~ "\", also known as \"Tsunami\", \"Griddlers\", and other names. The object "
-#~ "of the game is to discover the pattern in the grid which is encoded in "
-#~ "the clues which are given for each row and column. Random soluble pattern "
-#~ "puzzles can be generated. New puzzles can be designed and saved."
-#~ msgstr ""
-#~ "Gnonograms est une implémentation du puzzle logique japonais « Nonograms "
-#~ "», également connu sous le nom de « Tsunami », « Griddlers », et autres "
-#~ "noms. Le but du jeu est de découvrir le motif dans la grille qui est "
-#~ "encodé dans les indices qui sont donnés pour chaque ligne et colonne. Des "
-#~ "puzzles à motifs aléatoires solubles peuvent être générés. De nouveaux "
-#~ "puzzles peuvent être conçus et sauvegardés."
-
-#~ msgid "gnonograms-elementary"
-#~ msgstr "gnonograms-elementary"
-
-#~ msgid "game;puzzle;logic;grid;pattern"
-#~ msgstr "jeu;puzzle;logique;grille;motif"
+msgstr "Jeremy Paul Wootten"
