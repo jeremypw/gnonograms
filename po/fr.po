@@ -17,9 +17,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: libcore/widgets/GradeChooser.vala:41
-#, fuzzy
 msgid "Difficulty"
-msgstr "Difficile"
+msgstr "Difficulté"
 
 #: libcore/widgets/TitleEntry.vala:35
 msgid "Enter title of game here"
@@ -32,7 +31,7 @@ msgstr "Titre"
 #: libcore/widgets/Label.vala:263
 #, c-format
 msgid "Freedom = %u"
-msgstr "Liberté = %u"
+msgstr "Liberté : %u"
 
 #: libcore/utils.vala:347
 msgid "Open"
@@ -160,9 +159,8 @@ msgid "Random pattern"
 msgstr "Motif aléatoire"
 
 #: src/Controller.vala:218
-#, fuzzy
 msgid "Generating"
-msgstr "Parties générées"
+msgstr "Génération"
 
 #: src/Controller.vala:236
 msgid "Game generation was cancelled"
@@ -239,9 +237,8 @@ msgstr ""
 "multi-lignes (essai et erreur) nécessaire"
 
 #: src/Controller.vala:671
-#, fuzzy
 msgid "Solving"
-msgstr "Résolution de %s"
+msgstr "Résolution"
 
 #: src/Controller.vala:677
 msgid "Solving was cancelled"
@@ -258,7 +255,6 @@ msgid "No solution found"
 msgstr "Pas de solution trouvée"
 
 #: src/View.vala:204
-#, fuzzy
 msgid "Gnonograms for elementary"
 msgstr "Gnonograms pour elementary"
 
