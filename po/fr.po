@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: com.github.jeremypw.gnonograms package\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-19 17:17+0200\n"
+"POT-Creation-Date: 2019-04-19 17:32+0200\n"
 "PO-Revision-Date: 2019-01-20 20:50+0100\n"
 "Last-Translator: NathanBnm\n"
 "Language-Team: Français\n"
@@ -17,8 +17,9 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: libcore/widgets/GradeChooser.vala:41
-msgid "Generated games"
-msgstr "Parties générées"
+#, fuzzy
+msgid "Difficulty"
+msgstr "Difficile"
 
 #: libcore/widgets/TitleEntry.vala:35
 msgid "Enter title of game here"
@@ -158,6 +159,11 @@ msgstr "Sans titre"
 msgid "Random pattern"
 msgstr "Motif aléatoire"
 
+#: src/Controller.vala:218
+#, fuzzy
+msgid "Generating"
+msgstr "Parties générées"
+
 #: src/Controller.vala:236
 msgid "Game generation was cancelled"
 msgstr "La génération du jeu à été annulée"
@@ -232,6 +238,11 @@ msgstr ""
 "Impossible de trouver un indice à l'aide de la logique simple - logique "
 "multi-lignes (essai et erreur) nécessaire"
 
+#: src/Controller.vala:671
+#, fuzzy
+msgid "Solving"
+msgstr "Résolution de %s"
+
 #: src/Controller.vala:677
 msgid "Solving was cancelled"
 msgstr "La résolution à été annulée"
@@ -247,7 +258,8 @@ msgid "No solution found"
 msgstr "Pas de solution trouvée"
 
 #: src/View.vala:204
-msgid "Gnonograms for Elementary"
+#, fuzzy
+msgid "Gnonograms for elementary"
 msgstr "Gnonograms pour elementary"
 
 #: src/View.vala:209

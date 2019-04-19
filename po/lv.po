@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-19 17:17+0200\n"
+"POT-Creation-Date: 2019-04-19 17:32+0200\n"
 "PO-Revision-Date: 2019-01-21 16:08+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -19,7 +19,7 @@ msgstr ""
 "2);\n"
 
 #: libcore/widgets/GradeChooser.vala:41
-msgid "Generated games"
+msgid "Difficulty"
 msgstr ""
 
 #: libcore/widgets/TitleEntry.vala:35
@@ -160,6 +160,10 @@ msgstr ""
 msgid "Random pattern"
 msgstr ""
 
+#: src/Controller.vala:218
+msgid "Generating"
+msgstr ""
+
 #: src/Controller.vala:236
 msgid "Game generation was cancelled"
 msgstr ""
@@ -232,6 +236,10 @@ msgid ""
 "error) required"
 msgstr ""
 
+#: src/Controller.vala:671
+msgid "Solving"
+msgstr ""
+
 #: src/Controller.vala:677
 msgid "Solving was cancelled"
 msgstr ""
@@ -247,7 +255,7 @@ msgid "No solution found"
 msgstr ""
 
 #: src/View.vala:204
-msgid "Gnonograms for Elementary"
+msgid "Gnonograms for elementary"
 msgstr ""
 
 #: src/View.vala:209

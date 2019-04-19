@@ -215,7 +215,7 @@ public class Controller : GLib.Object {
 
         game_name = _("Random pattern");
         view.game_grade = Difficulty.UNDEFINED;
-        view.show_working (cancellable, "Generating");
+        view.show_working (cancellable,(_("Generating"));
         start_generating (cancellable, generator);
     }
 
@@ -668,7 +668,7 @@ public class Controller : GLib.Object {
         solver.cancel ();
         solver.cancellable = cancellable;
 
-        view.show_working (cancellable, "Solving");
+        view.show_working (cancellable, (_("Solving"));
 
         new Thread<void*> (null, () => {
             diff = computer_solve_clues ();

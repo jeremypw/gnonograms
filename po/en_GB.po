@@ -7,19 +7,19 @@ msgid ""
 msgstr ""
 "Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-19 17:17+0200\n"
-"PO-Revision-Date: 2019-01-21 16:08+0000\n"
+"POT-Creation-Date: 2019-04-19 17:32+0200\n"
+"PO-Revision-Date: 2019-04-19 17:32+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: en_GB\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: libcore/widgets/GradeChooser.vala:41
-msgid "Generated games"
-msgstr "Generated games"
+msgid "Difficulty"
+msgstr "Difficulty"
 
 #: libcore/widgets/TitleEntry.vala:35
 msgid "Enter title of game here"
@@ -159,6 +159,10 @@ msgstr "Untitled"
 msgid "Random pattern"
 msgstr "Random pattern"
 
+#: src/Controller.vala:218
+msgid "Generating"
+msgstr "Generating"
+
 #: src/Controller.vala:236
 msgid "Game generation was cancelled"
 msgstr "Game generation was cancelled"
@@ -233,6 +237,10 @@ msgstr ""
 "Failed to find a hint using simple logic - multi-line logic (trial and "
 "error) required"
 
+#: src/Controller.vala:671
+msgid "Solving"
+msgstr "Solving"
+
 #: src/Controller.vala:677
 msgid "Solving was cancelled"
 msgstr "Solving was cancelled"
@@ -248,8 +256,8 @@ msgid "No solution found"
 msgstr "No solution found"
 
 #: src/View.vala:204
-msgid "Gnonograms for Elementary"
-msgstr "Gnonograms for Elementary"
+msgid "Gnonograms for elementary"
+msgstr "Gnonograms for elementary"
 
 #: src/View.vala:209
 msgid "Load a Game from File"
