@@ -60,7 +60,7 @@ test (
 
 test (
     'Validate appdata file',
-    find_program ('appstreamcli'),
+    find_program ('appstreamcli', 'appstream-util'),
     args: ['validate', '--pedantic', join_paths (meson.current_build_dir (), meson.project_name () + '.appdata.xml')]
 )
 
