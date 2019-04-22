@@ -52,32 +52,20 @@ i18n.merge_file (
     type: 'xml'
 )
 
-desktop_file_validate = find_program('desktop-file-validate', required: false)
-
-if desktop_file_validate.found()
-  test (
+test (
     'Validate desktop file',
-    desktop_file_validate,
-    args: join_paths(meson.current_build_dir (), meson.project_name() + '.desktop')
-  )
-endif
+    find_program ('desktop-file-validate'),
+    args: join_paths (meson.current_build_dir (),  meson.project_name () + '.desktop')
+)
 
-appstreamcli = find_program(['appstreamcli', 'appstream-util'], required: false)
-
-if appstreamcli.found()
-  test (
+test (
     'Validate appdata file',
-    appstreamcli,
-    args: ['validate', '--pedantic', join_paths(meson.current_build_dir (), meson.project_name() + '.appdata.xml')]
-  )
-endif
+    find_program ('appstreamcli'),
+    args: ['validate', '--pedantic', join_paths (meson.current_build_dir (), meson.project_name () + '.appdata.xml')]
+)
 
-gschema_file_validate = find_program ('glib-compile-schemas', required: false)
-
-if gschema_file_validate.found()
-    test (
-        'Validate gschema file',
-        gschema_file_validate,
-        args: ['--dry-run', '--strict', join_paths (meson.current_source_dir (), 'schemas')]
-    )
-endif
+test (
+    'Validate gschema file',
+    find_program ('glib-compile-schemas'),
+    args: ['--dry-run', '--strict', join_paths (meson.current_source_dir (), 'schemas')]
+)
