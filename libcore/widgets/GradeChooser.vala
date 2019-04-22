@@ -38,7 +38,7 @@ public class Gnonograms.GradeChooser : Gnonograms.AppSetting {
         }
 
         cb.expand = false;
-        heading = new Gtk.Label (_("Generated games"));
+        heading = new Gtk.Label (_("Difficulty"));
     }
 
     public override Gtk.Label get_heading () {

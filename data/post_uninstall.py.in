@@ -18,16 +18,16 @@ libname = "@lib_name@"
 incdir = "@inc_dir_path@"
 vapidir = "@vapi_dir_path@"
 
-print('Compiling gsettings schemas...' + schemadir)
+print('Compiling gsettings schemas…' + schemadir)
 subprocess.call(['glib-compile-schemas', schemadir])
-print('Resetting dconf path ...' + schemapath)
+print('Resetting dconf path …' + schemapath)
 subprocess.call(['dconf', 'reset', '-f', schemapath])
 
-print('Updating icon cache...')
+print('Updating icon cache…')
 subprocess.call(['gtk-update-icon-cache', '-t', '-f', icondir])
-print('Updating mimetype database...')
+print('Updating mimetype database…')
 subprocess.call(['update-mime-database', mimedir])
-print('Updating desktop database...')
+print('Updating desktop database…')
 subprocess.call(['update-desktop-database', desktopdir])
 
 print('Removing temporary game directories')

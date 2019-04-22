@@ -201,7 +201,7 @@ public class View : Gtk.ApplicationWindow {
         header_bar.set_has_subtitle (true);
         header_bar.set_show_close_button (true);
 
-        title = _("Gnonograms for Elementary");
+        title = _("Gnonograms for elementary");
 
         load_game_button = new Gtk.Button ();
         var img = new Gtk.Image.from_icon_name ("document-open", Gtk.IconSize.LARGE_TOOLBAR);
