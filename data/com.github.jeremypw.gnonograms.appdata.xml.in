@@ -5,20 +5,19 @@
     <project_group>jeremypw</project_group>
     <project_license>GPL-3.0+</project_license>
     <name>Gnonograms</name>
-    ​<mimetypes>
-    ​    <mimetype>application/x-gno</mimetype>
-    ​</mimetypes>
+    <mimetypes>
+    ​        <mimetype>application/x-gno</mimetype>
+    </mimetypes>
     <summary>Create and solve gnonogram puzzles</summary>
     <description>
-        <p>An implementation of the Japanese logic puzzle "Nonograms" written in Vala, allowing the user to:
-            <ul>
-                <li>Draw puzzles</li>
-                <li>Generate random puzzles of chosen difficulty</li>
-            </ul>
-        </p>
+        <p>An implementation of the Japanese logic puzzle "Nonograms" written in Vala, allowing the user to:</p>
+        <ul>
+            <li>Draw puzzles</li>
+            <li>Generate random puzzles of chosen difficulty</li>
+        </ul>
     </description>
     <content_rating type="oars-1.1">
-    <content_attribute id="violence-cartoon">none</content_attribute>
+        <content_attribute id="violence-cartoon">none</content_attribute>
         <content_attribute id="violence-fantasy">none</content_attribute>
         <content_attribute id="violence-realistic">none</content_attribute>
         <content_attribute id="violence-bloodshed">none</content_attribute>
@@ -183,12 +182,15 @@
     </provides>
     <screenshots>
         <screenshot type="default">
+            <caption>Manually solving a puzzle</caption>
             <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/Solving.png</image>
         </screenshot>
         <screenshot>
+            <caption>Manually designing a puzzle</caption>
             <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/Designing.png</image>
         </screenshot>
         <screenshot>
+            <caption>A randomly generated puzzle and the settings dialog</caption>
             <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/Settings.png</image>
         </screenshot>
     </screenshots>
