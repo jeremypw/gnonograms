@@ -60,7 +60,7 @@ public class Model : GLib.Object {
 
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols;c++) {
-                cs = working_data.get_data_from_rc (r,c);
+                cs = working_data.get_data_from_rc (r, c);
 
                 if (cs != CellState.UNKNOWN && cs != solution_data.get_data_from_rc (r, c)) {
                     count++;
@@ -78,7 +78,7 @@ public class Model : GLib.Object {
 
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
-                cs = arr.get_data_from_rc (r,c);
+                cs = arr.get_data_from_rc (r, c);
 
                 if (cs == cell_state) {
                     count++;

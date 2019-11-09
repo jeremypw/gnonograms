@@ -105,7 +105,7 @@ public class Controller : GLib.Object {
             file.make_directory_with_parents (null);
         } catch (GLib.Error e) {
             if (!(e is IOError.EXISTS)) {
-                warning ("Could not make %s - %s",file.get_uri (), e.message);
+                warning ("Could not make %s - %s", file.get_uri (), e.message);
             }
         }
 
@@ -215,7 +215,7 @@ public class Controller : GLib.Object {
 
         game_name = _("Random pattern");
         view.game_grade = Difficulty.UNDEFINED;
-        view.show_working (cancellable,(_("Generating")));
+        view.show_working (cancellable, (_("Generating")));
         start_generating (cancellable, generator);
     }
 

@@ -35,7 +35,7 @@ public class Gnonograms.ScaleGrid : Gnonograms.AppSetting {
             }
 
             var scale_val = (double)(value / Gnonograms.SIZESTEP);
-            if (scale.get_value () * Gnonograms.SIZESTEP  != value) {
+            if (scale.get_value () * Gnonograms.SIZESTEP != value) {
                 value_changed (value);
             }
 

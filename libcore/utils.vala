@@ -94,7 +94,7 @@ namespace Utils {
         return (length - filled - (blocks - 1));
     }
 
-    public string[] row_clues_from_2D_array (My2DCellArray array) {
+    public string[] row_clues_from_2D_array (My2DCellArray array) { //vala-lint=naming-convention
         var rows = array.rows;
         var cols = array.cols;
         var clues = new string[rows];
@@ -105,7 +105,7 @@ namespace Utils {
 
         return clues;
     }
-    public string[] col_clues_from_2D_array (My2DCellArray array) {
+    public string[] col_clues_from_2D_array (My2DCellArray array) { //vala-lint=naming-convention
         var rows = array.rows;
         var cols = array.cols;
         var clues = new string[cols];

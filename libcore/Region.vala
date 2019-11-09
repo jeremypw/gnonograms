@@ -489,7 +489,7 @@ public class Region { /* Not a GObject, to reduce weight */
             return true;
         }
 
-        if (capped_range_audit ()|| in_error) {
+        if (capped_range_audit () || in_error) {
             return true;
         }
 

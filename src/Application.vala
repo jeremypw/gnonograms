@@ -77,11 +77,8 @@ public static App get_app () {
 
 private static bool version = false;
 
-private const GLib.OptionEntry[] options = {
-    // --version
+private const GLib.OptionEntry[] OPTIONS = {
     { "version", 0, 0, OptionArg.NONE, ref version, N_("Easy"), null },
-
-    // list terminator
     { null }
 };
 
@@ -89,7 +86,7 @@ public static int main (string[] args) {
     try {
         var opt_context = new OptionContext (N_("[Gnonogram Puzzle File (.gno)]"));
         opt_context.set_translation_domain (Gnonograms.APP_ID);
-        opt_context.add_main_entries (options, Gnonograms.APP_ID);
+        opt_context.add_main_entries (OPTIONS, Gnonograms.APP_ID);
         opt_context.add_group (Gtk.get_option_group (true));
         opt_context.parse (ref args);
     } catch (OptionError e) {
