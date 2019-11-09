@@ -75,7 +75,34 @@ public static App get_app () {
 }
 }
 
+private static bool version = false;
+
+private const GLib.OptionEntry[] options = {
+    // --version
+    { "version", 0, 0, OptionArg.NONE, ref version, N_("Easy"), null },
+
+    // list terminator
+    { null }
+};
+
 public static int main (string[] args) {
+    try {
+        var opt_context = new OptionContext (N_("[Gnonogram Puzzle File (.gno)]"));
+        opt_context.set_translation_domain (Gnonograms.APP_ID);
+        opt_context.add_main_entries (options, Gnonograms.APP_ID);
+        opt_context.add_group (Gtk.get_option_group (true));
+        opt_context.parse (ref args);
+    } catch (OptionError e) {
+        printerr ("error: %s\n", e.message);
+        printerr ("Run '%s --help' to see a full list of available command line options.\n", args[0]);
+        return 1;
+    }
+
+    if (version) {
+        print (Gnonograms.VERSION + "\n");
+        return 0;
+    }
+
     var app = new Gnonograms.App ();
     return app.run (args);
 }
