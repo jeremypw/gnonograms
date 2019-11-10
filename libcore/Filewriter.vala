@@ -70,6 +70,8 @@ public class Filewriter : Object {
 
         if (_name != null) {
             name = _name;
+        } else {
+            name = _(UNTITLED_NAME);
         }
 
         if (path == null || path.length <= 4) {

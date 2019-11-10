@@ -82,7 +82,7 @@ public class Controller : GLib.Object {
 
         notify["dimensions"].connect (() => {
             solver = new Solver (dimensions);
-            game_name = "";
+            game_name = _(UNTITLED_NAME);
         });
 
         var schema_source = GLib.SettingsSchemaSource.get_default ();
