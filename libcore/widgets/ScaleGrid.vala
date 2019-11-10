@@ -24,23 +24,23 @@ public class Gnonograms.ScaleGrid : Gnonograms.AppSetting {
     private Gtk.Label heading_label { get; set; }
     private Gtk.Label val_label;
     private Gtk.Scale scale;
+    private uint _value = 0;
     public override uint @value {
         get {
-            return (uint)(scale.get_value () * Gnonograms.SIZESTEP);
+            return _value;
         }
 
         set {
-            if (value < Gnonograms.MINSIZE || value > Gnonograms.MAXSIZE) {
+            if (value < Gnonograms.MINSIZE ||
+                value > Gnonograms.MAXSIZE) {
                 return;
             }
 
-            var scale_val = (double)(value / Gnonograms.SIZESTEP);
-            if (scale.get_value () * Gnonograms.SIZESTEP != value) {
-                value_changed (value);
-            }
-
+            var scale_val = Math.floor (value / Gnonograms.SIZESTEP);
             scale.set_value (scale_val);
             val_label.label = value.to_string ();
+            _value = value;
+            value_changed (value);
         }
     }
 
@@ -48,24 +48,29 @@ public class Gnonograms.ScaleGrid : Gnonograms.AppSetting {
 
     construct {
         val_label = new Gtk.Label ("");
+        val_label.halign = Gtk.Align.END;
+        val_label.set_size_request (32, -1);
         chooser = new Gtk.Grid ();
-        chooser.column_spacing = 6;
+        chooser.column_spacing = 3;
+        chooser.attach (val_label, 1, 0, 1, 1);
+
 
         var step = (double)Gnonograms.SIZESTEP;
         var start = (double)Gnonograms.MINSIZE / step;
-        var end = (double)Gnonograms.MAXSIZE / step + 1.0;
-        var adj = new Gtk.Adjustment (start, start, end, 1.0, 1.0, 1.0);
+        var end = (double)Gnonograms.MAXSIZE / step;
+        var adj = new Gtk.Adjustment (start, start, end, 0.1, 1.0, 1.0);
 
         scale = new Gtk.Scale (Gtk.Orientation.HORIZONTAL, adj);
-
         scale.can_focus = false;
+        scale.halign = Gtk.Align.START;
+        scale.valign = Gtk.Align.START;
         scale.expand = false;
         scale.hexpand = true;
+        scale.hexpand_set = true;
         scale.draw_value = false;
-        scale.set_size_request ((int)(end - start) * 20, -1);
-        scale.valign = Gtk.Align.START;
+        scale.set_size_request ((int)(end - start + 1) * 24, -1);
 
-        for (var val = start; val <= end; val += 1.0) {
+        for (var val = start; val < end; val += 1.0) {
             scale.add_mark (val, Gtk.PositionType.BOTTOM, null);
         }
 
@@ -74,8 +79,8 @@ public class Gnonograms.ScaleGrid : Gnonograms.AppSetting {
         /* Connecting to scale.value_changed does not work as library dependency */
         adj.notify["value"].connect (() => {
             var scale_val = adj.@value;
-            var round_val = (uint)(scale_val + 0.1);
-            var val = round_val * Gnonograms.SIZESTEP;
+            var round_val = (uint)(scale_val + 0.5); // Round to nearest 1.0
+            uint val = round_val * Gnonograms.SIZESTEP;
             @value = val;
         });
     }
@@ -84,11 +89,8 @@ public class Gnonograms.ScaleGrid : Gnonograms.AppSetting {
         Object (heading: _heading);
 
         heading_label = new Gtk.Label (heading);
-        val_label.xalign = 0;
-        chooser.attach (val_label, 1, 0, 1, 1);
-
-
     }
+
     public override Gtk.Label get_heading () {
         return heading_label;
     }
