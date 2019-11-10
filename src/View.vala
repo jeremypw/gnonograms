@@ -338,8 +338,8 @@ public class View : Gtk.ApplicationWindow {
         auto_solve_button.set_action_name ("view.solve");
 
         /* Bind some properties */
-        var flags = BindingFlags.DEFAULT | BindingFlags.SYNC_CREATE;
-        bind_property ("restart-destructive", restart_button, "restart-destructive", flags) ;
+        var flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
+        bind_property ("restart-destructive", restart_button, "restart-destructive", BindingFlags.SYNC_CREATE) ;
         bind_property ("dimensions", app_menu, "dimensions", flags);
         bind_property ("generator-grade", app_menu, "grade", flags);
         bind_property ("game-name", app_menu, "title", flags);
