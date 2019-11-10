@@ -105,14 +105,15 @@ namespace Gnonograms {
         return passes_to_grade (result);
     }
 
-    public override Gee.ArrayQueue<Move> debug (uint idx, bool is_column, string[] row_clues, string[] col_clues, My2DCellArray working) {
+    public override Gee.ArrayQueue<Move> debug (uint idx, bool is_column, string[] row_clues,
+                                                string[] col_clues, My2DCellArray working) {
+
         var moves = new Gee.ArrayQueue<Move> ();
         initialize (row_clues, col_clues, working, null);
         var r= regions[idx + (is_column ? rows : 0)];
         var changed = r.debug ();
 
         if (r.in_error) {
-            /* TODO Use conditional compilation to print out error if required */
             state = SolverState.ERROR;
             critical ("Debugged Region in error");
         }
@@ -178,7 +179,6 @@ namespace Gnonograms {
                 changed = r.solve ();
 
                 if (r.in_error) {
-                    /* TODO Use conditional compilation to print out error if required */
                     state = SolverState.ERROR;
                     break;
                 }
@@ -208,7 +208,7 @@ namespace Gnonograms {
 
     /** PRIVATE **/
 
-    /** Returns -1 to indicate an error - TODO use throw error instead **/
+    /** Returns -1 to indicate an error **/
     private int simple_solver () {
         bool changed = true;
         int pass = 1;
@@ -228,7 +228,6 @@ namespace Gnonograms {
                 changed |= r.solve ();
 
                 if (r.in_error) {
-                    /* TODO Use conditional compilation to print out error if required */
                     state = SolverState.ERROR;
                     break;
                 }

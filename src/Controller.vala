@@ -115,19 +115,18 @@ public class Controller : GLib.Object {
 
         restore_settings (); /* May change load_game_dir and save_game_dir */
 
-        bind_property ("dimensions", model, "dimensions", BindingFlags.DEFAULT);
+        var flags = BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL;
+        bind_property ("dimensions", model, "dimensions");
         bind_property ("dimensions", view, "dimensions", BindingFlags.BIDIRECTIONAL);
-
-        bind_property ("generator-grade", view, "generator-grade", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
-
+        bind_property ("generator-grade", view, "generator-grade", flags);
         bind_property ("game-state", model, "game-state");
-        bind_property ("game-state", view, "game-state", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
-        bind_property ("game-name", view, "game-name", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
-        bind_property ("is-readonly", view, "readonly", BindingFlags.SYNC_CREATE | BindingFlags.DEFAULT);
+        bind_property ("game-state", view, "game-state", flags);
+        bind_property ("game-name", view, "game-name", flags);
+        bind_property ("is-readonly", view, "readonly", BindingFlags.SYNC_CREATE);
 
 
-        history.bind_property ("can-go-back", view, "can-go-back", BindingFlags.SYNC_CREATE | BindingFlags.DEFAULT);
-        history.bind_property ("can-go-forward", view, "can-go-forward", BindingFlags.SYNC_CREATE | BindingFlags.DEFAULT);
+        history.bind_property ("can-go-back", view, "can-go-back", BindingFlags.SYNC_CREATE);
+        history.bind_property ("can-go-forward", view, "can-go-forward", BindingFlags.SYNC_CREATE);
 
         if (saved_state != null && settings != null) {
             saved_state.bind ("mode", this, "game_state", SettingsBindFlags.DEFAULT);
@@ -635,7 +634,8 @@ public class Controller : GLib.Object {
         if (model.count_errors () > 0) {
             rewind_until_correct ();
         } else if (!computer_hint () && !solver.solved ()) {
-            view.send_notification (_("Failed to find a hint using simple logic - multi-line logic (trial and error) required"));
+            view.send_notification (
+                 _("Failed to find a hint using simple logic - multi-line logic (trial and error) required"));
         }
     }
 

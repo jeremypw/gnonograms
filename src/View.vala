@@ -96,11 +96,11 @@ public class View : Gtk.ApplicationWindow {
             margin: 2px;
         }
 
-    """.printf (Gnonograms.PALE_TEXT,
-                Gnonograms.DARK_SHADOW,
-                Gnonograms.DARK_BACKGROUND,
-                Gnonograms.DARK_BACKGROUND,
-                Gnonograms.PALE_BACKGROUND);
+    """.printf (PALE_TEXT,
+                DARK_SHADOW,
+                DARK_BACKGROUND,
+                DARK_BACKGROUND,
+                PALE_BACKGROUND);
 
     private const GLib.ActionEntry [] VIEW_ACTION_ENTRIES = {
         {"undo", action_undo},
@@ -120,14 +120,14 @@ public class View : Gtk.ApplicationWindow {
         {"debug-col", action_debug_col}
     };
 
-    private Gnonograms.LabelBox row_clue_box;
-    private Gnonograms.LabelBox column_clue_box;
+    private LabelBox row_clue_box;
+    private LabelBox column_clue_box;
     private CellGrid cell_grid;
     private Gtk.HeaderBar header_bar;
     private AppMenu app_menu;
     private Gtk.Grid main_grid;
     private Gtk.Overlay overlay;
-    private Gnonograms.ProgressIndicator progress_indicator;
+    private ProgressIndicator progress_indicator;
     private Granite.Widgets.Toast toast;
     private ViewModeButton mode_switch;
     private Gtk.Button load_game_button;
@@ -158,7 +158,7 @@ public class View : Gtk.ApplicationWindow {
         view_actions.add_action_entries (VIEW_ACTION_ENTRIES, this);
         insert_action_group ("view", view_actions);
 
-        var application = Gnonograms.get_app ();
+        var application = get_app ();
         application.set_accels_for_action ("view.undo", {"<Ctrl>Z"});
         application.set_accels_for_action ("view.redo", {"<Ctrl><Shift>Z"});
         application.set_accels_for_action ("view.move-cursor((-1, 0))", {"Up"});
@@ -167,15 +167,27 @@ public class View : Gtk.ApplicationWindow {
         application.set_accels_for_action ("view.move-cursor((0, 1))", {"Right"});
         application.set_accels_for_action ("view.zoom(int32 1)", {"<Ctrl>plus", "<Ctrl>equal", "<Ctrl>KP_Add"});
         application.set_accels_for_action ("view.zoom(int32 -1)", {"<Ctrl>minus", "<Ctrl>KP_Subtract"});
-        application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.SETTING), {"<Ctrl>1"});
-        application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.SOLVING), {"<Ctrl>2"});
-        application.set_accels_for_action ("view.set-mode(uint32 %u)".printf (GameState.GENERATING), {"<Ctrl>3", "<Ctrl>N"});
+        application.set_accels_for_action ("view.set-mode(uint32 %u)"
+                                           .printf (GameState.SETTING), {"<Ctrl>1"});
+
+        application.set_accels_for_action ("view.set-mode(uint32 %u)"
+                                           .printf (GameState.SOLVING), {"<Ctrl>2"});
+
+        application.set_accels_for_action ("view.set-mode(uint32 %u)"
+                                           .printf (GameState.GENERATING), {"<Ctrl>3", "<Ctrl>N"});
+
         application.set_accels_for_action ("view.open", {"<Ctrl>O"});
         application.set_accels_for_action ("view.save", {"<Ctrl>S"});
         application.set_accels_for_action ("view.save-as", {"<Ctrl><Shift>S"});
-        application.set_accels_for_action ("view.paint-cell(uint32 %u)".printf (CellState.FILLED), {"F"});
-        application.set_accels_for_action ("view.paint-cell(uint32 %u)".printf (CellState.EMPTY), {"E"});
-        application.set_accels_for_action ("view.paint-cell(uint32 %u)".printf (CellState.UNKNOWN), {"X"});
+        application.set_accels_for_action ("view.paint-cell(uint32 %u)"
+                                           .printf (CellState.FILLED), {"F"});
+
+        application.set_accels_for_action ("view.paint-cell(uint32 %u)"
+                                           .printf (CellState.EMPTY), {"E"});
+
+        application.set_accels_for_action ("view.paint-cell(uint32 %u)"
+                                           .printf (CellState.UNKNOWN), {"X"});
+
         application.set_accels_for_action ("view.check-errors", {"F7", "less", "comma"});
         application.set_accels_for_action ("view.restart", {"F5", "<Ctrl>R"});
         application.set_accels_for_action ("view.hint", {"F9", "<Ctrl>H"});
@@ -254,7 +266,7 @@ public class View : Gtk.ApplicationWindow {
 
         app_menu = new AppMenu ();
         mode_switch = new ViewModeButton ();
-        progress_indicator = new Gnonograms.ProgressIndicator ();
+        progress_indicator = new ProgressIndicator ();
 
         progress_indicator.get_style_context ().add_class ("progress");
         header_bar.pack_start (load_game_button);
@@ -326,16 +338,17 @@ public class View : Gtk.ApplicationWindow {
         auto_solve_button.set_action_name ("view.solve");
 
         /* Bind some properties */
-        bind_property ("restart-destructive", restart_button, "restart-destructive", BindingFlags.DEFAULT | BindingFlags.SYNC_CREATE);
-        bind_property ("dimensions", app_menu, "dimensions", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
-        bind_property ("generator-grade", app_menu, "grade", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
-        bind_property ("game-name", app_menu, "title", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
-        bind_property ("strikeout-complete", app_menu, "strikeout-complete", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
-        bind_property ("game-state", mode_switch, "mode", BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE);
+        var flags = BindingFlags.DEFAULT | BindingFlags.SYNC_CREATE;
+        bind_property ("restart-destructive", restart_button, "restart-destructive", flags) ;
+        bind_property ("dimensions", app_menu, "dimensions", flags);
+        bind_property ("generator-grade", app_menu, "grade", flags);
+        bind_property ("game-name", app_menu, "title", flags);
+        bind_property ("strikeout-complete", app_menu, "strikeout-complete", flags);
+        bind_property ("game-state", mode_switch, "mode", flags);
         bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
         bind_property ("previous-cell", cell_grid, "previous-cell", BindingFlags.BIDIRECTIONAL);
-        bind_property ("fontheight", row_clue_box, "fontheight", BindingFlags.DEFAULT);
-        bind_property ("fontheight", column_clue_box, "fontheight", BindingFlags.DEFAULT);
+        bind_property ("fontheight", row_clue_box, "fontheight");
+        bind_property ("fontheight", column_clue_box, "fontheight");
         bind_property ("dimensions", row_clue_box, "dimensions");
         bind_property ("dimensions", column_clue_box, "dimensions");
 
@@ -466,8 +479,11 @@ public class View : Gtk.ApplicationWindow {
          * These equations are related to the inverse of those used in labelbox to calculate its dimensions
          */
 
-        var max_h = (double)(monitor_area.height * Gnonograms.USABLE_MONITOR_HEIGHT - Gnonograms.HEADER_HEIGHT - 2 * Gnonograms.GRID_BORDER) / ((double)rows * (1.0 + Gnonograms.TYPICAL_MAX_BLOCKS_RATIO * Gnonograms.FONT_ASPECT_RATIO) * 2.0);
-        var max_w = (double)(monitor_area.width * Gnonograms.USABLE_MONITOR_WIDTH - 2 * Gnonograms.GRID_BORDER - Gnonograms.GRID_COLUMN_SPACING) / ((double)cols * (1.0 + Gnonograms.TYPICAL_MAX_BLOCKS_RATIO / FONT_ASPECT_RATIO) * 2.0);
+        double max_h = (monitor_area.height * USABLE_MONITOR_HEIGHT - HEADER_HEIGHT - 2 * GRID_BORDER) /
+                       (rows * (1.0 + TYPICAL_MAX_BLOCKS_RATIO * FONT_ASPECT_RATIO) * 2.0);
+
+        double max_w = (monitor_area.width * USABLE_MONITOR_WIDTH - 2 * GRID_BORDER - GRID_COLUMN_SPACING) /
+                       (cols * (1.0 + TYPICAL_MAX_BLOCKS_RATIO / FONT_ASPECT_RATIO) * 2.0);
 
         return double.min (max_h, max_w);
     }
@@ -480,8 +496,13 @@ public class View : Gtk.ApplicationWindow {
         }
 
         var monitor_area = Utils.get_monitor_area (screen, window);
-        var w = int.min ((int)(monitor_area.width * Gnonograms.USABLE_MONITOR_WIDTH), row_clue_box.min_width + column_clue_box.min_width + 2 * Gnonograms.GRID_BORDER + Gnonograms.GRID_COLUMN_SPACING);
-        var h = int.min ((int)(monitor_area.height * USABLE_MONITOR_HEIGHT), row_clue_box.min_height + column_clue_box.min_height + 2 * Gnonograms.GRID_BORDER + Gnonograms.HEADER_HEIGHT);
+        var usable_width = (int)(monitor_area.width * USABLE_MONITOR_WIDTH);
+        var w = int.min (usable_width,
+                         row_clue_box.min_width + column_clue_box.min_width + 2 * GRID_BORDER + GRID_COLUMN_SPACING);
+
+        var usable_height = (int)(monitor_area.height * USABLE_MONITOR_HEIGHT);
+        var h = int.min (usable_height,
+                         row_clue_box.min_height + column_clue_box.min_height + 2 * GRID_BORDER + HEADER_HEIGHT);
 
         var hints = Gdk.Geometry ();
         hints.min_width = w;
@@ -769,7 +790,7 @@ private class RestartButton : Gtk.Button {
             }
         });
 
-        bind_property ("sensitive", this, "restart-destructive", BindingFlags.DEFAULT);
+        bind_property ("sensitive", this, "restart-destructive");
     }
 }
 }

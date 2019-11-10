@@ -21,22 +21,33 @@
 namespace Gnonograms {
 /** Widget to hold variable number of clues, with either vertical or horizontal orientation **/
 public class LabelBox : Gtk.Grid {
-/** PUBLIC **/
-    public Gtk.PositionType attach_position { get; construct; }
-    public bool vertical_labels { get; construct; } /* True if contains column labels */
+    public Gtk.PositionType attach_position {
+        get {
+            if (orientation == Gtk.Orientation.HORIZONTAL) {
+                return Gtk.PositionType.RIGHT;
+            } else {
+                return Gtk.PositionType.BOTTOM;
+            }
+        }
+    }
+
+    public bool vertical_labels {
+        get {
+            return orientation == Gtk.Orientation.HORIZONTAL;
+        }
+    }
 
     public Dimensions dimensions { get; set; }
     public int min_width { get; private set; }
     public int min_height { get; private set; }
     public double fontheight { get; set; }
 
-    public LabelBox (Gtk.Orientation orientation) {
+    public LabelBox (Gtk.Orientation _orientation) {
         Object (column_homogeneous: true,
                 row_homogeneous: true,
                 column_spacing: 0,
                 row_spacing: 0,
-                vertical_labels: (orientation == Gtk.Orientation.HORIZONTAL),
-                attach_position: (orientation == Gtk.Orientation.HORIZONTAL) ? Gtk.PositionType.RIGHT : Gtk.PositionType.BOTTOM
+                orientation: _orientation
                 );
     }
 

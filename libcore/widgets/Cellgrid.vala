@@ -105,7 +105,7 @@ public class CellGrid : Gtk.DrawingArea {
     private CellPattern unknown_cell_pattern;
     private CellPattern highlight_pattern;
 
-    private void set_colors () { /* TODO simplify by having same colors for setting and solving, derived from theme */
+    private void set_colors () {
         int setting = (int)GameState.SETTING;
         colors[setting, (int)CellState.UNKNOWN].parse (Gnonograms.UNKNOWN_COLOR);
         colors[setting, (int)CellState.EMPTY].parse (Gnonograms.SETTING_EMPTY_COLOR);

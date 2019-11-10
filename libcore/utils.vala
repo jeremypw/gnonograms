@@ -432,7 +432,8 @@ namespace Utils {
         if (gtk_action == Gtk.FileChooserAction.SAVE && file_path != null) {
             var file = File.new_for_commandline_arg (file_path);
             if (file.query_exists () &&
-                !show_confirm_dialog (_("Overwrite %s").printf (file_path), _("This action will destroy contents of that file"))) {
+                !show_confirm_dialog (_("Overwrite %s").printf (file_path),
+                                      _("This action will destroy contents of that file"))) {
 
                 file_path = null;
             }

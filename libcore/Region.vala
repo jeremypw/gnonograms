@@ -1265,7 +1265,9 @@ public class Region { /* Not a GObject, to reduce weight */
                 }
 
                 if (count == impossible) {
-                    record_error ("capped range audit", "start %i len %i, n_blocks %u count %i, impossible %i filled cell with no owners".printf (start, length, n_blocks, count, impossible));
+                    record_error ("capped range audit",
+                                  "start %i len %i, n_blocks %u count %i, impossible %i filled cell with no owners"
+                                  .printf (start, length, n_blocks, count, impossible));
                     return false;
                 }
             }
@@ -1430,7 +1432,10 @@ public class Region { /* Not a GObject, to reduce weight */
                 int next_owner = get_sole_owner (i + 1);
                 if (next_owner >= 0 && !tags[i + 1, can_be_empty_pointer]) { // Adjacent owner sole and filled
                     if (owner != next_owner) { // Must be same owner
-                        record_error ("check_collisions", "Adjacent different sole owners idxs %i, %i".printf ( i, i + 1));
+                        record_error ("check_collisions",
+                                      "Adjacent different sole owners idxs %i, %i"
+                                      .printf ( i, i + 1));
+
                         return false;
                     } else {
                         continue; // No collision
@@ -1465,7 +1470,10 @@ public class Region { /* Not a GObject, to reduce weight */
                 int next_owner = get_sole_owner (i - 1);
                 if (next_owner >= 0 && !tags[i - 1, can_be_empty_pointer]) {
                     if (owner != next_owner) {
-                        record_error ("check_collisions", "Adjacent different sole owners idxs %i, %i".printf ( i - 1, FORWARDS));
+                        record_error ("check_collisions",
+                                      "Adjacent different sole owners idxs %i, %i"
+                                      .printf ( i - 1, FORWARDS));
+
                         return false;
                     } else {
                         continue;
@@ -1655,7 +1663,10 @@ public class Region { /* Not a GObject, to reduce weight */
         }
 
         if (count != n_blocks) {
-          record_error ("Check n_blocks", "Wrong number of blocks found " + count.to_string () + " should be " + n_blocks.to_string ());
+          record_error ("Check n_blocks",
+                        "Wrong number of blocks found. %i should be %i"
+                        .printf (count, n_blocks));
+
           return false;
         } else {
             return true;
@@ -2040,7 +2051,10 @@ public class Region { /* Not a GObject, to reduce weight */
         bool changed = false;
 
         if (is_invalid_data (cell, owner)) {
-            record_error ("set_cell_owner", "invalid data %i, %i, %s, %s". printf (cell, owner, exclusive.to_string (), can_be_empty.to_string ()));
+            record_error ("set_cell_owner",
+                          "invalid data %i, %i, %s, %s"
+                          .printf (cell, owner, exclusive.to_string (), can_be_empty.to_string ()));
+
         } else if (status[cell] == CellState.EMPTY) {// do nothing  - not necessarily an error
         } else if (status[cell] == CellState.COMPLETED && tags[cell, owner] == false) {
             record_error ("set_cell_owner", "contradiction cell " + cell.to_string () + " filled but cannot be owner");
@@ -2120,10 +2134,16 @@ public class Region { /* Not a GObject, to reduce weight */
             this.filled = _filled;
 
             if (_filled + _completed > block_total) {
-                record_error ("totals changed", ("too many filled cells filled %i, completed %i, block total %i").printf (_filled, _completed, block_total));
+                record_error ("totals changed",
+                             ("too many filled cells filled %i, completed %i, block total %i")
+                             .printf (_filled, _completed, block_total));
+
             } else if (this.unknown == 0) {
                 if (_filled + _completed < block_total) {
-                    record_error ("totals changed", ("too few filled cells filled %i, completed %i, block total %i").printf (_filled, _completed, block_total));
+                    record_error ("totals changed",
+                                 ("too few filled cells filled %i, completed %i, block total %i")
+                                 .printf (_filled, _completed, block_total));
+
                 } else if (match_clue ()) {
                     this.is_completed = true;
                 } else {
@@ -2242,7 +2262,8 @@ public class Region { /* Not a GObject, to reduce weight */
 
     private void record_error (string method, string errmessage) {
         in_error = true;
-        message = "%s Region %u Record error in %s : %s \n".printf (is_column ? "COL" : "ROW", index, method, errmessage);
+        message = "%s Region %u Record error in %s : %s \n"
+                  .printf (is_column ? "COL" : "ROW", index, method, errmessage);
     }
 }
 }
