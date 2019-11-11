@@ -47,21 +47,13 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
 
     construct {
         /* Icons used are provisional */
-        setting_icon = new Gtk.Image.from_icon_name ("edit-symbolic", Gtk.IconSize.MENU);
-        solving_icon = new Gtk.Image.from_icon_name ("process-working-symbolic", Gtk.IconSize.MENU);
-        generating_icon = new Gtk.Image.from_icon_name ("list-add-symbolic", Gtk.IconSize.MENU);
+        setting_icon = new ModeImage ("edit-symbolic", _("Draw pattern"));
+        solving_icon = new ModeImage ("process-working-symbolic", _("Solve puzzle"));
+        generating_icon = new ModeImage ("list-add-symbolic",_("Generate new random puzzle"));
 
         setting_icon.set_data ("mode", GameState.SETTING);
         solving_icon.set_data ("mode", GameState.SOLVING);
         generating_icon.set_data ("mode", GameState.GENERATING);
-
-        setting_icon.get_style_context ().add_class ("linked");
-        solving_icon.get_style_context ().add_class ("linked");
-        generating_icon.get_style_context ().add_class ("linked");
-
-        setting_icon.tooltip_text = _("Draw pattern");
-        solving_icon.tooltip_text = _("Solve puzzle");
-        generating_icon.tooltip_text = _("Generate new random puzzle");
 
         mode_changed.connect (() => {
             if (selected == setting_index) {
@@ -90,6 +82,20 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
                     break;
             }
         });
+    }
+
+    private class ModeImage : Gtk.Image {
+        construct {
+            valign = Gtk.Align.CENTER;
+        }
+
+        public ModeImage (string icon_name, string tooltip) {
+            Object (
+                icon_name: icon_name,
+                tooltip_text: tooltip,
+                icon_size: Gtk.IconSize.LARGE_TOOLBAR
+            );
+        }
     }
 }
 }

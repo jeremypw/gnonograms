@@ -39,11 +39,12 @@ public class View : Gtk.ApplicationWindow {
     public signal void changed_cell (Cell cell, CellState previous_state);
 
     public Model model {private get; construct; }
+    public unowned Controller controller { get; construct; }
     public Dimensions dimensions { get; set; }
     public Difficulty generator_grade { get; set; }
     public GameState game_state { get; set; }
     public bool strikeout_complete { get; set; }
-    public string game_name { get; set; default = "";}
+    public string game_name { get { return controller.game_name; } }
     public bool readonly { get; set; default = false;}
     public Difficulty game_grade { get; set; default = Difficulty.UNDEFINED;}
     public double fontheight { get; set; }
@@ -53,7 +54,6 @@ public class View : Gtk.ApplicationWindow {
     public Cell current_cell { get; set; }
     public Cell previous_cell { get; set; }
 
-    /**PRIVATE**/
     private const uint PROGRESS_DELAY_MSEC = 500;
 
     private string brand_stylesheet = """
@@ -63,10 +63,23 @@ public class View : Gtk.ApplicationWindow {
         @define-color colorDarkBackground %s;
         @define-color colorPaleBackground %s;
 
-        .linked {
-            border-radius: 4px 4px 4px 4px;
+        .linked .toggle {
             background-color: @colorPaleBackground;
-            color: @colorDarkBackground;
+        }
+
+        .linked .toggle:checked {
+            border-color: #000;
+            background-color: %s;
+        }
+
+        .headerbutton {
+            border-radius: 12px 12px 12px 12px;
+            background-color: alpha (#FFF, 0.75);
+        }
+
+        .headerbar .title {
+            border-radius: 12px 12px 12px 12px;
+            background-color: alpha (#FFF, 0.75);
         }
 
         *.label:selected {
@@ -96,11 +109,13 @@ public class View : Gtk.ApplicationWindow {
             margin: 2px;
         }
 
-    """.printf (PALE_TEXT,
-                DARK_SHADOW,
-                DARK_BACKGROUND,
-                DARK_BACKGROUND,
-                PALE_BACKGROUND);
+    """
+    .printf (DARK_TEXT,
+            DARK_SHADOW,
+            PALE_BACKGROUND,
+            DARK_BACKGROUND,
+            PALE_BACKGROUND,
+            PALE_TEXT);
 
     private const GLib.ActionEntry [] VIEW_ACTION_ENTRIES = {
         {"undo", action_undo},
@@ -146,9 +161,10 @@ public class View : Gtk.ApplicationWindow {
     private bool is_solving {get {return game_state == GameState.SOLVING;}}
 
     /* ----------------------------------------- */
-    public View (Model _model) {
+    public View (Model _model, Controller controller) {
         Object (
-            model: _model
+            model: _model,
+            controller: controller
         );
     }
 
@@ -210,65 +226,47 @@ public class View : Gtk.ApplicationWindow {
 
         header_bar = new Gtk.HeaderBar ();
         header_bar.get_style_context ().add_class ("default-decoration");
-        header_bar.set_has_subtitle (true);
+        header_bar.get_style_context ().add_class ("headerbar");
+        header_bar.set_has_subtitle (false);
         header_bar.set_show_close_button (true);
 
         title = _("Gnonograms for elementary");
 
-        load_game_button = new Gtk.Button ();
-        var img = new Gtk.Image.from_icon_name ("document-open", Gtk.IconSize.LARGE_TOOLBAR);
-        load_game_button.image = img;
-        load_game_button.tooltip_text = _("Load a Game from File");
+        load_game_button = new HeaderButton ("document-open",
+                                             _("Load a Game from File"));
 
-        save_game_button = new Gtk.Button ();
-        img = new Gtk.Image.from_icon_name ("document-save", Gtk.IconSize.LARGE_TOOLBAR);
-        save_game_button.image = img;
-        save_game_button.tooltip_text = _("Save Game");
+        save_game_button = new HeaderButton ("document-save", _("Save Game"));
 
-        save_game_as_button = new Gtk.Button ();
-        img = new Gtk.Image.from_icon_name ("document-save-as", Gtk.IconSize.LARGE_TOOLBAR);
-        save_game_as_button.image = img;
-        save_game_as_button.tooltip_text = _("Save Game to Different File");
+        save_game_as_button = new HeaderButton ("document-save-as",
+                                                _("Save Game to Different File"));
 
-        undo_button = new Gtk.Button ();
-        img = new Gtk.Image.from_icon_name ("edit-undo", Gtk.IconSize.LARGE_TOOLBAR);
-        undo_button.image = img;
-        undo_button.tooltip_text = _("Undo Last Move");
+        undo_button = new HeaderButton ("edit-undo", _("Undo Last Move"));
         undo_button.sensitive = false;
 
-        redo_button = new Gtk.Button ();
-        img = new Gtk.Image.from_icon_name ("edit-redo", Gtk.IconSize.LARGE_TOOLBAR);
-        redo_button.image = img;
-        redo_button.tooltip_text = _("Redo Last Move");
+        redo_button = new HeaderButton ("edit-redo", _("Redo Last Move"));
         redo_button.sensitive = false;
 
-        check_correct_button = new Gtk.Button ();
-        img = new Gtk.Image.from_icon_name ("media-seek-backward", Gtk.IconSize.LARGE_TOOLBAR);
-        check_correct_button.image = img;
-        check_correct_button.tooltip_text = _("Go Back to Last Correct Position");
+        check_correct_button = new HeaderButton ("media-seek-backward",
+                                                 _("Go Back to Last Correct Position"));
         check_correct_button.sensitive = false;
 
-        restart_button = new RestartButton (); /* private class - see below */
-        img = new Gtk.Image.from_icon_name ("view-refresh-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
-        restart_button.image = img;
+        restart_button = new RestartButton ("view-refresh", ""); /* private class - see below */
 
-        hint_button = new Gtk.Button ();
-        img = new Gtk.Image.from_icon_name ("help-contents-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
-        hint_button.image = img;
-        hint_button.tooltip_text = _("Suggest next move");
+        hint_button = new HeaderButton ("help-contents-symbolic", _("Suggest next move"));
         hint_button.sensitive = false;
 
-        auto_solve_button = new Gtk.Button ();
-        img = new Gtk.Image.from_icon_name ("system-run", Gtk.IconSize.LARGE_TOOLBAR);
-        auto_solve_button.image = img;
-        auto_solve_button.tooltip_text = _("Solve by Computer");
+        auto_solve_button = new HeaderButton ("system-run", _("Solve by Computer"));
         auto_solve_button.sensitive = false;
 
-        app_menu = new AppMenu ();
+        app_menu = new AppMenu (controller);
         mode_switch = new ViewModeButton ();
-        progress_indicator = new ProgressIndicator ();
+        mode_switch.margin_top = 6;
+        mode_switch.margin_bottom = 6;
+        mode_switch.get_style_context ().add_class ("mode-switch");
 
+        progress_indicator = new ProgressIndicator ();
         progress_indicator.get_style_context ().add_class ("progress");
+
         header_bar.pack_start (load_game_button);
         header_bar.pack_start (save_game_button);
         header_bar.pack_start (save_game_as_button);
@@ -356,13 +354,8 @@ public class View : Gtk.ApplicationWindow {
         /* Monitor certain bound properties */
         notify["game-state"].connect (() => {
             if (game_state != GameState.UNDEFINED) {
-                update_header_bar ();
                 update_all_labels_completeness ();
             }
-        });
-
-        notify["game-grade"].connect (() => {
-            header_bar.subtitle = game_grade.to_string ();
         });
 
         notify["dimensions"].connect (() => {
@@ -374,12 +367,12 @@ public class View : Gtk.ApplicationWindow {
             mode_switch.grade = generator_grade;
         });
 
-        notify["game-name"].connect (() => {
-            update_header_bar ();
+        controller.notify["game-name"].connect (() => {
+            header_bar.title = game_name;
         });
 
         notify["readonly"].connect (() => {
-            update_header_bar ();
+            save_game_button.sensitive = readonly;
         });
 
         notify["can-go-back"].connect (() => {
@@ -515,15 +508,11 @@ public class View : Gtk.ApplicationWindow {
     private void update_header_bar () {
         switch (game_state) {
             case GameState.SETTING:
-                header_bar.title = _("Drawing %s").printf (game_name);
-                header_bar.subtitle = readonly ? _("Read Only - Save to a different file") : _("Save will Overwrite");
                 restart_button.tooltip_text = _("Clear canvas");
                 set_buttons_sensitive (true);
 
                 break;
             case GameState.SOLVING:
-                ///TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
-                header_bar.title = _("Solving %s").printf (game_name);
                 restart_button.tooltip_text = _("Restart solving");
                 set_buttons_sensitive (true);
 
@@ -773,7 +762,7 @@ public class View : Gtk.ApplicationWindow {
     }
 }
 
-private class RestartButton : Gtk.Button {
+private class RestartButton : HeaderButton {
     public bool restart_destructive { get; set; }
 
     construct {
@@ -791,6 +780,28 @@ private class RestartButton : Gtk.Button {
         });
 
         bind_property ("sensitive", this, "restart-destructive");
+    }
+
+    public RestartButton (string icon_name, string tooltip = "", bool sensitive = true) {
+        base (icon_name, tooltip, sensitive);
+    }
+}
+
+private class HeaderButton : Gtk.Button {
+    construct {
+        margin_top = 3;
+        margin_bottom = 3;
+        valign = Gtk.Align.CENTER;
+
+        get_style_context ().add_class ("headerbutton");
+    }
+
+    public HeaderButton (string icon_name, string tooltip = "", bool sensitive = true) {
+        Object (
+            image: new Gtk.Image.from_icon_name (icon_name, Gtk.IconSize.LARGE_TOOLBAR),
+            tooltip_text: tooltip,
+            sensitive: sensitive
+        );
     }
 }
 }

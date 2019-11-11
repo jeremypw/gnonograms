@@ -31,8 +31,12 @@ class AppMenu : Gtk.MenuButton {
 
     public Dimensions dimensions { get; set; }
     public Difficulty grade { get; set; }
-    public string title { get; set; }
+    public string title {
+        get { return controller.game_name; }
+        set { controller.game_name = value; }
+    }
     public bool strikeout_complete { get; set; }
+    public unowned Controller controller { get; construct; }
 
     construct {
         grid = new Gtk.Grid ();
@@ -88,10 +92,11 @@ class AppMenu : Gtk.MenuButton {
         });
     }
 
-    public AppMenu () {
+    public AppMenu (Controller controller) {
         Object (
             image: new Gtk.Image.from_icon_name ("open-menu", Gtk.IconSize.LARGE_TOOLBAR),
-            tooltip_text: _("Options")
+            tooltip_text: _("Options"),
+            controller: controller
         );
     }
 

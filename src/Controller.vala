@@ -54,7 +54,7 @@ public class Controller : GLib.Object {
     construct {
         game_name = _(UNTITLED_NAME);
         model = new Model ();
-        view = new View (model);
+        view = new View (model, this);
         history = new Gnonograms.History ();
 
         view.changed_cell.connect (on_changed_cell);
