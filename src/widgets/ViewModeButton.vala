@@ -46,10 +46,9 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
     }
 
     construct {
-        /* Icons used are provisional */
         setting_icon = new ModeImage ("edit-symbolic", _("Draw pattern"));
-        solving_icon = new ModeImage ("process-working-symbolic", _("Solve puzzle"));
-        generating_icon = new ModeImage ("list-add-symbolic",_("Generate new random puzzle"));
+        solving_icon = new ModeImage ("head-thinking", _("Solve puzzle"));
+        generating_icon = new ModeImage ("list-add-symbolic", _("Generate new random puzzle"));
 
         setting_icon.set_data ("mode", GameState.SETTING);
         solving_icon.set_data ("mode", GameState.SOLVING);

@@ -121,7 +121,6 @@ public class Controller : GLib.Object {
         bind_property ("generator-grade", view, "generator-grade", flags);
         bind_property ("game-state", model, "game-state");
         bind_property ("game-state", view, "game-state", flags);
-        bind_property ("game-name", view, "game-name", flags);
         bind_property ("is-readonly", view, "readonly", BindingFlags.SYNC_CREATE);
 
 

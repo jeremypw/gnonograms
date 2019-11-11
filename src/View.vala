@@ -56,6 +56,7 @@ public class View : Gtk.ApplicationWindow {
 
     private const uint PROGRESS_DELAY_MSEC = 500;
 
+
     private string brand_stylesheet = """
         @define-color textColorPrimary %s;
         @define-color textColorPrimaryShadow %s;
@@ -64,12 +65,17 @@ public class View : Gtk.ApplicationWindow {
         @define-color colorPaleBackground %s;
 
         .linked .toggle {
-            background-color: @colorPaleBackground;
+            background-color: shade (@textColorPrimary, 0.6);
+            border-radius: 6px 6px 6px 6px;
+            border-width: 1px;
+            border-color: #000;
         }
 
         .linked .toggle:checked {
-            border-color: #000;
-            background-color: %s;
+            border-color: #FFF;
+            border-width: 1px;
+            border-radius: 4px 4px 4px 4px;
+            background-color: @colorPaleBackground;
         }
 
         .headerbutton {
@@ -77,9 +83,10 @@ public class View : Gtk.ApplicationWindow {
             background-color: alpha (#FFF, 0.75);
         }
 
-        .headerbar .title {
+        .title {
             border-radius: 12px 12px 12px 12px;
             background-color: alpha (#FFF, 0.75);
+            color: @textColorPrimaryShadow;
         }
 
         *.label:selected {
@@ -110,12 +117,11 @@ public class View : Gtk.ApplicationWindow {
         }
 
     """
-    .printf (DARK_TEXT,
+    .printf (PALE_TEXT,
             DARK_SHADOW,
-            PALE_BACKGROUND,
-            DARK_BACKGROUND,
-            PALE_BACKGROUND,
-            PALE_TEXT);
+            GNONOGRAMS_DARK_PURPLE,
+            GNONOGRAMS_DARK_PURPLE,
+            GNONOGRAMS_PALE_PURPLE);
 
     private const GLib.ActionEntry [] VIEW_ACTION_ENTRIES = {
         {"undo", action_undo},
@@ -143,6 +149,8 @@ public class View : Gtk.ApplicationWindow {
     private Gtk.Grid main_grid;
     private Gtk.Overlay overlay;
     private ProgressIndicator progress_indicator;
+    private Gtk.Stack progress_stack;
+    private Gtk.Label title_label;
     private Granite.Widgets.Toast toast;
     private ViewModeButton mode_switch;
     private Gtk.Button load_game_button;
@@ -230,8 +238,6 @@ public class View : Gtk.ApplicationWindow {
         header_bar.set_has_subtitle (false);
         header_bar.set_show_close_button (true);
 
-        title = _("Gnonograms for elementary");
-
         load_game_button = new HeaderButton ("document-open",
                                              _("Load a Game from File"));
 
@@ -252,10 +258,10 @@ public class View : Gtk.ApplicationWindow {
 
         restart_button = new RestartButton ("view-refresh", ""); /* private class - see below */
 
-        hint_button = new HeaderButton ("help-contents-symbolic", _("Suggest next move"));
+        hint_button = new HeaderButton ("help-contents", _("Suggest next move"));
         hint_button.sensitive = false;
 
-        auto_solve_button = new HeaderButton ("system-run", _("Solve by Computer"));
+        auto_solve_button = new HeaderButton ("system", _("Solve by Computer"));
         auto_solve_button.sensitive = false;
 
         app_menu = new AppMenu (controller);
@@ -266,6 +272,17 @@ public class View : Gtk.ApplicationWindow {
 
         progress_indicator = new ProgressIndicator ();
         progress_indicator.get_style_context ().add_class ("progress");
+
+        title_label = new Gtk.Label ("Gnonograms");
+        title_label.get_style_context ().add_class (Granite.STYLE_CLASS_H3_LABEL);
+        title_label.get_style_context ().add_class ("title");
+        title_label.show ();
+
+        progress_stack = new Gtk.Stack();
+        progress_stack.add_named (progress_indicator, "Progress");
+        progress_stack.add_named (title_label, "Title");
+        progress_stack.set_visible_child_name ("Title");
+        progress_stack.set_size_request (150, -1);
 
         header_bar.pack_start (load_game_button);
         header_bar.pack_start (save_game_button);
@@ -282,6 +299,7 @@ public class View : Gtk.ApplicationWindow {
         header_bar.pack_end (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_end (auto_solve_button);
         header_bar.pack_end (hint_button);
+        header_bar.set_custom_title (progress_stack);
 
         set_titlebar (header_bar);
 
@@ -340,7 +358,7 @@ public class View : Gtk.ApplicationWindow {
         bind_property ("restart-destructive", restart_button, "restart-destructive", BindingFlags.SYNC_CREATE) ;
         bind_property ("dimensions", app_menu, "dimensions", flags);
         bind_property ("generator-grade", app_menu, "grade", flags);
-        bind_property ("game-name", app_menu, "title", flags);
+        controller.bind_property ("game-name", app_menu, "title", flags);
         bind_property ("strikeout-complete", app_menu, "strikeout-complete", flags);
         bind_property ("game-state", mode_switch, "mode", flags);
         bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
@@ -368,7 +386,7 @@ public class View : Gtk.ApplicationWindow {
         });
 
         controller.notify["game-name"].connect (() => {
-            header_bar.title = game_name;
+            title_label.label = game_name;
         });
 
         notify["readonly"].connect (() => {
@@ -451,7 +469,7 @@ public class View : Gtk.ApplicationWindow {
             Source.remove (progress_timeout_id);
             progress_timeout_id = 0;
         } else {
-            header_bar.set_custom_title (null);
+            progress_stack.set_visible_child_name ("Title");
         }
 
         update_all_labels_completeness ();
@@ -610,7 +628,7 @@ public class View : Gtk.ApplicationWindow {
     private void schedule_show_progress (Cancellable cancellable) {
         progress_timeout_id = Timeout.add_full (Priority.HIGH_IDLE, PROGRESS_DELAY_MSEC, () => {
             progress_indicator.cancellable = cancellable;
-            header_bar.set_custom_title (progress_indicator);
+            progress_stack.set_visible_child_name ("Progress");
             progress_timeout_id = 0;
             return false;
         });

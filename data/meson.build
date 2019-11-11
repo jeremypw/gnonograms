@@ -28,6 +28,11 @@ install_data (
 )
 
 install_data (
+    join_paths('icons', '32', 'head-thinking.svg'),
+    install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '32x32', 'actions')
+)
+
+install_data (
     join_paths (meson.current_source_dir (),'schemas', meson.project_name() + '.gschema.xml'),
     install_dir: join_paths(get_option('datadir'), 'glib-2.0', 'schemas')
 )
