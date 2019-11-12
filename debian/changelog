@@ -1,7 +1,7 @@
 com.github.jeremypw.gnonograms (1.4) bionic; urgency=low
 
   * Add French translation
-  * Redsign Headerbar
+  * Redesign Headerbar
   * Make core a shared library
   * Fix CI and testing
   * Commandline options: --help, --version
