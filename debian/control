@@ -15,6 +15,27 @@ Standards-Version: 4.1.1
 
 Package: com.github.jeremypw.gnonograms
 Architecture: any
+Depends: ${misc:Depends}, libgnonograms-core0 (= ${binary:Version})
+Description: Generate, draw and solve nonogram logic puzzles - debugging symbols.
+ This application allows you to design or generate and solve Japanese logic
+ puzzles of the nonogram type, also known as Tsunami or Griddler puzzles, on
+ grids up to 50 x 50.
+ .
+ Generated puzzles are random patterns. The difficulty of solving the generated
+ puzzles is adjustable.
+ .
+ The user can also design their own puzzles and allow the computer to check
+ they have a unique solution and to give an approximate measure of difficulty.
+ .
+ The state of the program is restored after closing and re-opening.
+ .
+ Puzzles can be saved to files which have their own mime-type and icon.
+
+Package: com.github.jeremypw.gnonograms-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends:com.github.jeremypw.gnonograms (= ${binary:Version}), ${misc:Depends}
 Description: Generate, draw and solve nonogram logic puzzles
  This application allows you to design or generate and solve Japanese logic
  puzzles of the nonogram type, also known as Tsunami or Griddler puzzles, on
@@ -29,6 +50,55 @@ Description: Generate, draw and solve nonogram logic puzzles
  The state of the program is restored after closing and re-opening.
  .
  Puzzles can be saved to files which have their own mime-type and icon.
-Depends: ${misc:Depends}, ${shlibs:Depends}
+ .
+ This package contains the debugging symbols for com.github.jeremypw.gnonograms.
+
+Package: libgnonograms-core0
+Architecture: any
+Section: libs
+Depends:${misc:Depends}
+Suggests: com.github.jeremypw.gnonograms
+Description: Generate, draw and solve nonogram logic puzzles (shared library)
+ This application allows you to design or generate and solve Japanese logic
+ puzzles of the nonogram type, also known as Tsunami or Griddler puzzles, on
+ grids up to 50 x 50.
+ .
+ Generated puzzles are random patterns. The difficulty of solving the generated
+ puzzles is adjustable.
+ .
+ The user can also design their own puzzles and allow the computer to check
+ they have a unique solution and to give an approximate measure of difficulty.
+ .
+ The state of the program is restored after closing and re-opening.
+ .
+ Puzzles can be saved to files which have their own mime-type and icon.
+ .
+ This package provides the shared library for com.github.jeremypw.gnonograms.
+ It provides the core widgets, services and utilities for the application and
+ allows embedding parts of gnonograms in other applications.
+
+Package: libgnonograms-core0-dev
+Architecture: any
+Section: libdevel
+Priority: extra
+Depends: libgnonograms-core0, ${misc:Depends}
+Suggests: com.github.jeremypw.gnonograms
+Description: Generate, draw and solve nonogram logic puzzles (shared library development files)
+ This application allows you to design or generate and solve Japanese logic
+ puzzles of the nonogram type, also known as Tsunami or Griddler puzzles, on
+ grids up to 50 x 50.
+ .
+ Generated puzzles are random patterns. The difficulty of solving the generated
+ puzzles is adjustable.
+ .
+ The user can also design their own puzzles and allow the computer to check
+ they have a unique solution and to give an approximate measure of difficulty.
+ .
+ The state of the program is restored after closing and re-opening.
+ .
+ Puzzles can be saved to files which have their own mime-type and icon.
+ .
+ This package provides the development files for embedding parts of gnonograms in other applications.
+
 
 
