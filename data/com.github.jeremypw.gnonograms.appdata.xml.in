@@ -52,7 +52,7 @@
         <category>LogicGame</category>
     </categories>
     <releases>
-        <release version="1.4" date="2019-11-12" urgency="low">
+        <release version="1.4.0" date="2019-11-20" urgency="low">
             <description>
                 <ul>
                     <li>French translations</li>
@@ -192,6 +192,7 @@
     </releases>
     <provides>
         <binary>com.github.jeremypw.gnonograms</binary>
+        <library>libgnonograms-core</library>
     </provides>
     <screenshots>
         <screenshot type="default">
