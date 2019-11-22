@@ -16,7 +16,7 @@ Standards-Version: 4.1.1
 Package: com.github.jeremypw.gnonograms
 Architecture: any
 Depends: ${misc:Depends}, libgnonograms-core0 (= ${binary:Version})
-Description: Generate, draw and solve nonogram logic puzzles - debugging symbols.
+Description: Generate, draw and solve nonogram logic puzzles.
  This application allows you to design or generate and solve Japanese logic
  puzzles of the nonogram type, also known as Tsunami or Griddler puzzles, on
  grids up to 50 x 50.
