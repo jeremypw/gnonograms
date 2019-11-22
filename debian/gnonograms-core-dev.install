@@ -1,0 +1,3 @@
+usr/lib/*/*core.so
+usr/lib/*/pkgconfig/*core.pc
+usr/include
