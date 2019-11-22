@@ -52,7 +52,7 @@
         <category>LogicGame</category>
     </categories>
     <releases>
-        <release version="1.4.0" date="2019-11-20" urgency="low">
+        <release version="1.4.2" date="2019-11-20" urgency="low">
             <description>
                 <ul>
                     <li>French translations</li>

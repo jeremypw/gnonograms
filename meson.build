@@ -5,7 +5,7 @@ schema_path = '/com/github/jeremypw/' + shortname + '/'
 
 vala_version_required = '0.34.0'
 
-libver = '1.4.0'
+libver = '1.4.2'
 libname = shortname + '-core'
 
 i18n = import ('i18n')
