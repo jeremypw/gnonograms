@@ -1,12 +1,9 @@
-project ('com.github.jeremypw.gnonograms', 'vala', 'c', meson_version: '>= 0.42.0')
+project ('com.github.jeremypw.gnonograms', 'vala', 'c', version: '1.4.3', meson_version: '>= 0.42.0')
 shortname = 'gnonograms'
 domain = 'com.github.jeremypw.'
 schema_path = '/com/github/jeremypw/' + shortname + '/'
 
 vala_version_required = '0.34.0'
-
-libver = '1.4.2'
-libname = shortname + '-core'
 
 i18n = import ('i18n')
 
@@ -19,8 +16,16 @@ GTK3 = dependency('gtk+-3.0', version: '>=3.22', required: true)
 GEE = dependency('gee-0.8', version: '>=0.20', required: true)
 GRANITE= dependency('granite', version: '>=5.2.0', required: true)
 
-lib = shared_library (
-    libname,
+executable (
+    meson.project_name (),
+    'src/Application.vala',
+    'src/Controller.vala',
+    'src/View.vala',
+    'src/RandomPatternGenerator.vala',
+    'src/SimpleRandomGameGenerator.vala',
+    'src/widgets/AppMenu.vala',
+    'src/widgets/ViewModeButton.vala',
+    'src/widgets/ProgressIndicator.vala',
     'libcore/widgets/AbstractAppSetting.vala',
     'libcore/widgets/GradeChooser.vala',
     'libcore/widgets/ScaleGrid.vala',
@@ -52,41 +57,7 @@ lib = shared_library (
         GRANITE
     ],
 
-    install: true,
-    install_dir: [true, true, true],
-    version: libver,
-    soversion: '0'
-)
-
-pkg = import ('pkgconfig')
-pkg.generate (
-    description: 'Core functions for gnonograms and gnonogram-tools',
-    filebase: 'gnonograms-core',
-    libraries: lib,
-    name: libname,
-    version: libver,
-    requires: ['gtk+-3.0', 'gee-0.8', 'granite']
-)
-
-executable (
-    meson.project_name (),
-    'src/Application.vala',
-    'src/Controller.vala',
-    'src/View.vala',
-    'src/RandomPatternGenerator.vala',
-    'src/SimpleRandomGameGenerator.vala',
-    'src/widgets/AppMenu.vala',
-    'src/widgets/ViewModeButton.vala',
-    'src/widgets/ProgressIndicator.vala',
-
-    dependencies : [
-        GTK3,
-        GEE,
-        GRANITE
-    ],
-
-    install: true,
-    link_with: lib
+    install: true
 )
 
 
@@ -98,10 +69,6 @@ uninstall_data.set('schema_path', schema_path)
 uninstall_data.set('icon_dir_path', join_paths(get_option('prefix'), get_option('datadir'), 'icons', 'hicolor'))
 uninstall_data.set('mime_dir_path', join_paths(get_option('prefix'), get_option('datadir'), 'mime', 'packages'))
 uninstall_data.set('desktop_dir_path', join_paths(get_option('prefix'), get_option('datadir'), 'applications'))
-uninstall_data.set('lib_dir_path', join_paths(get_option('prefix'), get_option('libdir')))
-uninstall_data.set('inc_dir_path', join_paths(get_option('prefix'), get_option('includedir')))
-uninstall_data.set('vapi_dir_path', join_paths(get_option('prefix'), get_option('datadir'), 'vala', 'vapi'))
-uninstall_data.set('lib_name', libname)
 
 configure_file (
     input: join_paths (meson.source_root (), 'data', 'post_uninstall.py.in'),

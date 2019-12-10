@@ -12,12 +12,6 @@ desktopdir = "@desktop_dir_path@"
 tmp_dir_path1 = '/.local/share/' + 'gnonograms' + '/'
 tmp_dir_path2 = '/.local/share/' + 'Gnonograms' + '/'
 
-libdir = "@lib_dir_path@"
-libname = "@lib_name@"
-
-incdir = "@inc_dir_path@"
-vapidir = "@vapi_dir_path@"
-
 print('Compiling gsettings schemas…' + schemadir)
 subprocess.call(['glib-compile-schemas', schemadir])
 print('Resetting dconf path …' + schemapath)
@@ -36,12 +30,3 @@ homedir = os.environ['HOME']
 subprocess.call(['rm', '-R', homedir + tmp_dir_path1]);
 subprocess.call(['rm', '-R', homedir + tmp_dir_path2]);
 print ('You must manually remove any games directories you created')
-
-print('Removing gnonograms-core library')
-subprocess.call(['rm', '-f', os.path.join (libdir, 'lib' + libname + ".*")]);
-
-print('Removing gnonograms-core header')
-subprocess.call(['rm', '-f', os.path.join (incdir, libname + ".h")]);
-
-print('Removing gnonograms-core vapi')
-subprocess.call(['rm', '-f', os.path.join (vapidir, libname + ".vapi")]);

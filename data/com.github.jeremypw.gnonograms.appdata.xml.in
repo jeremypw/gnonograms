@@ -52,12 +52,11 @@
         <category>LogicGame</category>
     </categories>
     <releases>
-        <release version="1.4.2" date="2019-11-20" urgency="low">
+        <release version="1.4.3" date="2019-12-10" urgency="low">
             <description>
                 <ul>
                     <li>French translations</li>
                     <li>Redesigned headerbar</li>
-                    <li>Use separate gnonograms library</li>
                     <li>Commandline options</li>
                     <li>Fix CI and testing</li>
                     <li>Minor bug fixes</li>
