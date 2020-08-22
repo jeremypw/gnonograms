@@ -32,7 +32,8 @@
                 {
                     "type": "git",
                     "url": "https://github.com/jeremypw/gnonograms.git",
-                    "branch": "use-filechoosernative"
+                    "branch": "add-flatpak-manifest",
+                    "commit": ""
                 }
             ]
         }
