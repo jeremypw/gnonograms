@@ -52,10 +52,18 @@
         <category>LogicGame</category>
     </categories>
     <releases>
+        <release version="1.4.4" date="2019-12-10" urgency="low">
+            <description>
+                <ul>
+                    <li>Dutch translation - thanks to Heimen Stoffels</li>
+                    <li>Portuguese translation - thanks to André Barata</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.4.3" date="2019-12-10" urgency="low">
             <description>
                 <ul>
-                    <li>French translations</li>
+                    <li>French translations - thanks to NathanBnm</li>
                     <li>Redesigned headerbar</li>
                     <li>Commandline options</li>
                     <li>Fix CI and testing</li>

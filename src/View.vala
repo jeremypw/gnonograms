@@ -278,7 +278,7 @@ public class View : Gtk.ApplicationWindow {
         title_label.get_style_context ().add_class ("title");
         title_label.show ();
 
-        progress_stack = new Gtk.Stack();
+        progress_stack = new Gtk.Stack ();
         progress_stack.add_named (progress_indicator, "Progress");
         progress_stack.add_named (title_label, "Title");
         progress_stack.set_visible_child_name ("Title");
