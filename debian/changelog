@@ -1,3 +1,10 @@
+com.github.jeremypw.gnonograms (1.4.4) bionic; urgency=low
+
+  * Add Portuguese translation
+  * Add Dutch translation
+
+ -- Jeremy Paul Wootten <jeremywootten@gmail.com>  Tue, 01 Sep 2020 17:00:00 +0000
+
 com.github.jeremypw.gnonograms (1.4.3) bionic; urgency=low
 
   * Add French translation
