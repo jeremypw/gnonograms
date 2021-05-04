@@ -1,9 +1,12 @@
-project ('com.github.jeremypw.gnonograms', 'vala', 'c', version: '1.4.3', meson_version: '>= 0.42.0')
+project ('com.github.jeremypw.gnonograms', 'vala', 'c', version: '1.5.0', meson_version: '>= 0.42.0')
 shortname = 'gnonograms'
 domain = 'com.github.jeremypw.'
 schema_path = '/com/github/jeremypw/' + shortname + '/'
 
-vala_version_required = '0.34.0'
+vala_version_required = '0.48.0'
+
+libver = '1.5.0'
+libname = shortname + '-core'
 
 i18n = import ('i18n')
 

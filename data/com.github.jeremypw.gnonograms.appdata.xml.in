@@ -52,7 +52,14 @@
         <category>LogicGame</category>
     </categories>
     <releases>
-        <release version="1.4.3" date="2019-12-10" urgency="low">
+        <release version="1.5.0" date="2019-11-22" urgency="low">
+            <description>
+                <ul>
+                    <li>Package as Flatpak</li>
+                </ul>
+            </description>
+        </release>
+        <release version="1.4.2" date="2019-11-22" urgency="low">
             <description>
                 <ul>
                     <li>French translations</li>
