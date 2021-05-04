@@ -12,7 +12,7 @@ finish-args:
   - '--socket=wayland'
   # needed for perfers-color-scheme
   - '--system-talk-name=org.freedesktop.Accounts'
-  - '--metadata=X-DConf=migrate-path='/io/github/jeremypw/gnonograms'
+  - '--metadata=X-DConf=migrate-path=/io/github/jeremypw/gnonograms'
 
 modules:
   - name: gnonograms

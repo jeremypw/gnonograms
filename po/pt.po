@@ -1,0 +1,366 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.jeremypw.gnonograms package.
+# André Barata <andretiagob@protonmail.com>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: com.github.jeremypw.gnonograms\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-04-22 17:49+0200\n"
+"PO-Revision-Date: 2020-08-25 17:52+0100\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.4.1\n"
+"Last-Translator: André Barata <andretiagob@protonmail.com>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: pt\n"
+
+#: libcore/widgets/GradeChooser.vala:41
+msgid "Difficulty"
+msgstr "Dificuldade"
+
+#: libcore/widgets/TitleEntry.vala:35
+msgid "Enter title of game here"
+msgstr "Insira o título do jogo aqui"
+
+#: libcore/widgets/TitleEntry.vala:36
+msgid "Title"
+msgstr "Título"
+
+#: libcore/widgets/Label.vala:263
+#, c-format
+msgid "Freedom = %u"
+msgstr "Liberdade= %u"
+
+#: libcore/utils.vala:347
+msgid "Open"
+msgstr "Abrir"
+
+#: libcore/utils.vala:353
+msgid "Save"
+msgstr "Gravar"
+
+#: libcore/utils.vala:358
+msgid "Apply"
+msgstr "Aplicar"
+
+#: libcore/utils.vala:369
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: libcore/utils.vala:396
+msgid "Save solution too"
+msgstr "Gravar também a solução"
+
+#: libcore/utils.vala:435
+#, c-format
+msgid "Overwrite %s"
+msgstr "Substituir %s"
+
+#: libcore/utils.vala:435
+msgid "This action will destroy contents of that file"
+msgstr "Esta ação vai destruir os conteúdos desse ficheiro"
+
+#: libcore/Filereader.vala:85 libcore/Filewriter.vala:188
+msgid "Gnonogram puzzles"
+msgstr "Puzzles Gnonogram"
+
+#: libcore/Filereader.vala:90
+msgid "Choose a puzzle"
+msgstr "Escolha um puzzle"
+
+#: libcore/Filereader.vala:252
+msgid "Missing clues"
+msgstr "Ausência de pistas"
+
+#: libcore/Filereader.vala:260
+msgid "Invalid clue"
+msgstr "Pista invalida"
+
+#: libcore/Filereader.vala:272
+msgid "Solution grid or working grid missing"
+msgstr "Grelha de solução ou grelha funcional em falta"
+
+#: libcore/Filereader.vala:279
+msgid "Wrong number of rows in solution or working grid"
+msgstr ""
+"Número de linhas é inválido para a grelha de solução ou grelha "
+"funcional"
+
+#: libcore/Filereader.vala:287
+msgid "Wrong number of columns in solution or working grid"
+msgstr ""
+"Número de colunas é inválido para a grelha de solução ou grelha "
+"funcional"
+
+#: libcore/Filereader.vala:294
+msgid "Invalid cell state"
+msgstr "Estado da célula invalido"
+
+#: libcore/Filewriter.vala:192
+msgid "Name and save this puzzle"
+msgstr "Dê nome e grave este puzzle"
+
+#: libcore/Filewriter.vala:202
+msgid "Confirm save without solution"
+msgstr "Confirmar gravar sem solução"
+
+#: libcore/Filewriter.vala:203
+msgid "Do not save computer insoluble clues without solution"
+msgstr "Não guarde pistas insolúveis de computador sem solução"
+
+#: libcore/Enums.vala:37
+msgid "Trivial"
+msgstr "Trivial"
+
+#: libcore/Enums.vala:39
+msgid "Very Easy"
+msgstr "Muito Fácil"
+
+#: libcore/Enums.vala:41
+msgid "Easy"
+msgstr "Fácil"
+
+#: libcore/Enums.vala:43
+msgid "Moderately difficult"
+msgstr "Dificuldade Moderada"
+
+#: libcore/Enums.vala:45
+msgid "Difficult"
+msgstr "Difícil"
+
+#: libcore/Enums.vala:47
+msgid "Very Difficult"
+msgstr "Muito Difícil"
+
+#: libcore/Enums.vala:49
+msgid "Advanced logic required"
+msgstr "Lógica avançada necessária"
+
+#: libcore/Enums.vala:51
+msgid "Possibly ambiguous"
+msgstr "Possivelmente ambíguo"
+
+#: libcore/Enums.vala:53
+msgid "Super human"
+msgstr "Super Homem"
+
+#: libcore/Enums.vala:55
+msgid "Undefined"
+msgstr "Indefinido"
+
+#: libcore/Constants.vala:40
+msgid "?"
+msgstr "?"
+
+#: libcore/Constants.vala:43
+msgid "Untitled"
+msgstr "Sem título"
+
+#: src/Controller.vala:216
+msgid "Random pattern"
+msgstr "Padrão aleatório"
+
+#: src/Controller.vala:218
+msgid "Generating"
+msgstr "A gerar"
+
+#: src/Controller.vala:236
+msgid "Game generation was cancelled"
+msgstr "A geração do jogo foi cancelada"
+
+#: src/Controller.vala:238
+msgid "Failed to generate game of required grade"
+msgstr "Falha ao gerar o jogo do grau pedido"
+
+#: src/Controller.vala:361
+#, c-format
+msgid "Unable to save %s"
+msgstr "Incapaz de gravar %s"
+
+#: src/Controller.vala:382
+msgid "game"
+msgstr "jogo"
+
+#: src/Controller.vala:390 src/Controller.vala:422
+#, c-format
+msgid "Unable to load game. %s"
+msgstr "Incapaz de carregar jogo. %s"
+
+#: src/Controller.vala:432
+msgid "Dimensions too large"
+msgstr "As dimensões são muito grandes"
+
+#: src/Controller.vala:435
+msgid "Dimensions too small"
+msgstr "As dimensões são muito pequenas"
+
+#: src/Controller.vala:441
+msgid "Dimensions missing"
+msgstr "As dimensões estão em falta"
+
+#: src/Controller.vala:455
+msgid "Clues missing"
+msgstr "Pistas em falta"
+
+#: src/Controller.vala:502
+#, c-format
+msgid "%u error found"
+msgstr "%u erro encontrado"
+
+#: src/Controller.vala:502
+#, c-format
+msgid "%u errors found"
+msgstr "%u erros encontrados"
+
+#. TRANSLATORS: "Correct" is used as an adjective, indicating that a correct (valid) solution has been found.
+#: src/Controller.vala:557
+msgid "Correct solution"
+msgstr "Solução correta"
+
+#: src/Controller.vala:559
+msgid "Alternative solution found"
+msgstr "Solução alternativa encontrada"
+
+#: src/Controller.vala:561
+msgid "There are errors"
+msgstr "Existem erros"
+
+#: src/Controller.vala:618
+#, c-format
+msgid "Saved to %s"
+msgstr "Gravado em %s"
+
+#: src/Controller.vala:638
+msgid ""
+"Failed to find a hint using simple logic - multi-line logic (trial and "
+"error) required"
+msgstr ""
+"Falhou a procura de pistas usando a lógica simples - lógica de "
+"múltiplas linhas (tentativa e erro) é necessária"
+
+#: src/Controller.vala:671
+msgid "Solving"
+msgstr "A resolver"
+
+#: src/Controller.vala:677
+msgid "Solving was cancelled"
+msgstr "A resolução foi cancelada"
+
+#. TRANSLATORS:  Do not translate '%s'. It is a placeholder for words indicating the difficulty of the solution.
+#: src/Controller.vala:680
+#, c-format
+msgid "Solution found. %s"
+msgstr "Solução encontrada. %s"
+
+#: src/Controller.vala:682
+msgid "No solution found"
+msgstr "Nenhuma solução encontrada"
+
+#: src/View.vala:204
+msgid "Gnonograms for elementary"
+msgstr "Gnonograms para o elementary"
+
+#: src/View.vala:209
+msgid "Load a Game from File"
+msgstr "Carregar um Jogo de um ficheiro"
+
+#: src/View.vala:214
+msgid "Save Game"
+msgstr "Gravar Jogo"
+
+#: src/View.vala:219
+msgid "Save Game to Different File"
+msgstr "Gravar Jogo num Ficheiro Diferente"
+
+#: src/View.vala:224
+msgid "Undo Last Move"
+msgstr "Desfazer Último Movimento"
+
+#: src/View.vala:230
+msgid "Redo Last Move"
+msgstr "Refazer Último Movimento"
+
+#: src/View.vala:236
+msgid "Go Back to Last Correct Position"
+msgstr "Ir Para Trás da Última Posição Correta"
+
+#: src/View.vala:246
+msgid "Suggest next move"
+msgstr "Sugerir o movimento seguinte"
+
+#: src/View.vala:252
+msgid "Solve by Computer"
+msgstr "Solucionar pelo Computador"
+
+#: src/View.vala:497
+#, c-format
+msgid "Drawing %s"
+msgstr "A desenhar %s"
+
+#: src/View.vala:498
+msgid "Read Only - Save to a different file"
+msgstr "Só Leitura - Grave num ficheiro diferente"
+
+#: src/View.vala:498
+msgid "Save will Overwrite"
+msgstr "O Gravar vai Substituir"
+
+#: src/View.vala:499
+msgid "Clear canvas"
+msgstr "Limpar o canvas"
+
+#. TRANSLATORS: '%s' is a placeholder for the title of the puzzle.  It can be moved, but not translated.
+#: src/View.vala:505
+#, c-format
+msgid "Solving %s"
+msgstr "A resolver %s"
+
+#: src/View.vala:506
+msgid "Restart solving"
+msgstr "Reiniciar a resolução"
+
+#: src/View.vala:710
+msgid "No errors"
+msgstr "Sem erros"
+
+#: src/widgets/AppMenu.vala:45
+msgid "Rows"
+msgstr "Linhas"
+
+#: src/widgets/AppMenu.vala:46
+msgid "Columns"
+msgstr "Colunas"
+
+#: src/widgets/AppMenu.vala:48
+msgid "Strike out complete blocks"
+msgstr "Excluir blocos completos"
+
+#: src/widgets/AppMenu.vala:94
+msgid "Options"
+msgstr "Opções"
+
+#. TRANSLATORS: '%s' is a placeholder for an adjective describing the difficulty of the puzze. It can be moved but not translated.
+#: src/widgets/ViewModeButton.vala:30
+#, c-format
+msgid "Generate %s puzzle"
+msgstr "Gerar puzzle %s"
+
+#: src/widgets/ViewModeButton.vala:62
+msgid "Draw pattern"
+msgstr "Padrão de desenho"
+
+#: src/widgets/ViewModeButton.vala:63
+msgid "Solve puzzle"
+msgstr "Resolver o puzzle"
+
+#: src/widgets/ViewModeButton.vala:64
+msgid "Generate new random puzzle"
+msgstr "Gerar um novo puzzle aleatoriamente"
+
+#: src/widgets/ProgressIndicator.vala:58
+msgid "Cancel solving"
+msgstr "Cancelar resolução"
