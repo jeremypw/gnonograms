@@ -6,8 +6,8 @@ foreach i : icon_sizes
         install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', i + 'x' + i, 'apps')
     )
     install_data (
-        join_paths('icons', i, 'application-x-gnonogram-puzzle' + '.svg'),
-        install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', i + 'x' + i, 'mimetypes')
+        join_paths('icons', i, meson.project_name () + '.svg'),
+        install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', i + 'x' + i + '@2', 'apps')
     )
 endforeach
 
@@ -18,18 +18,13 @@ install_data (
 )
 
 install_data (
-    join_paths('icons', 'application-x-gnonogram-puzzle.svg'),
-    install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', 'scalable', 'mimetypes')
-)
-
-install_data (
-    meson.project_name () + '.mimeinfo' + '.xml',
-    install_dir: join_paths(get_option('datadir'), 'mime', 'packages')
+    join_paths('icons', '32', 'head-thinking.svg'),
+    install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '32x32', 'actions')
 )
 
 install_data (
     join_paths('icons', '32', 'head-thinking.svg'),
-    install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '32x32', 'actions')
+    install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '32x32@2', 'actions')
 )
 
 install_data (
@@ -55,22 +50,4 @@ i18n.merge_file (
     install_dir: join_paths (get_option ('datadir'), 'metainfo'),
     po_dir: join_paths (meson.source_root (), 'po', 'extra'),
     type: 'xml'
-)
-
-test (
-    'Validate desktop file',
-    find_program ('desktop-file-validate'),
-    args: join_paths (meson.current_build_dir (),  meson.project_name () + '.desktop')
-)
-
-test (
-    'Validate appdata file',
-    find_program ('appstreamcli'),
-    args: ['validate', '--pedantic', join_paths (meson.current_build_dir (), meson.project_name () + '.appdata.xml')]
-)
-
-test (
-    'Validate gschema file',
-    find_program ('glib-compile-schemas'),
-    args: ['--dry-run', '--strict', join_paths (meson.current_source_dir (), 'schemas')]
 )

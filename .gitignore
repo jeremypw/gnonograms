@@ -33,7 +33,8 @@
 *.su
 
 # Build files
-*build/*
+*build*/*
+*flatpak-builder/*
 
 # Packaging files (now in orphan branch)
 debian/*

@@ -30,10 +30,3 @@ sudo ninja install
 com.github.jeremypw.gnonograms
 ```
 
-### Uninstalling
-```
-In original build directory:
-
-sudo ninja uninstall
-sudo ./post_uninstall.py
-```
