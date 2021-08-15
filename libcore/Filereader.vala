@@ -1,5 +1,5 @@
 /* Game file reader class for gnonograms
- * Copyright (C) 2010-2017  Jeremy Wootten
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -82,15 +82,12 @@ public class Filereader : Object {
     /** PRIVATE **/
     private File? get_load_game_file (Gtk.Window? parent, string? load_dir_path) {
 
-        FilterInfo info = {_("Gnonogram puzzles"), {"*" + Gnonograms.GAMEFILEEXTENSION}};
-        FilterInfo [] filters = {info};
-        string? path = Utils.get_file_path (
+        string? path = Utils.get_open_save_path (
                             parent,
-                            Gnonograms.FileChooserAction.OPEN,
                             _("Choose a puzzle"),
-                            filters,
+                            false,
                             load_dir_path,
-                            null
+                            ""
                         );
 
         if (path == null || path == "") {

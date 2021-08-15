@@ -1,5 +1,5 @@
 /* Controller class for gnonograms - creates model and view, handles user input and settings.
- * Copyright (C) 2010-2017  Jeremy Wootten
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@ public class Controller : GLib.Object {
     private GLib.Settings? saved_state;
     private Gnonograms.History history;
     private string current_game_path;
+    private string saved_games_folder;
     private string? temporary_game_path = null;
 
     private bool is_solving {get {return game_state == GameState.SOLVING;}}
@@ -93,7 +94,7 @@ public class Controller : GLib.Object {
         }
 
         string data_home_folder_current = Path.build_path (Path.DIR_SEPARATOR_S,
-                                                           Environment.get_user_data_dir (),
+                                                           Environment.get_user_config_dir (),
                                                            "unsaved"
                                                            );
         File file;
@@ -106,11 +107,24 @@ public class Controller : GLib.Object {
             }
         }
 
+        saved_games_folder = Path.build_path (Path.DIR_SEPARATOR_S,
+                                              Environment.get_user_data_dir (),
+                                              _("Saved Games")
+                                             );
+        try {
+            file = File.new_for_path (saved_games_folder);
+            file.make_directory_with_parents (null);
+        } catch (GLib.Error e) {
+            if (!(e is IOError.EXISTS)) {
+                warning ("Could not make %s - %s", file.get_uri (), e.message);
+            }
+        }
+
         current_game_path = null;
         temporary_game_path = Path.build_path (Path.DIR_SEPARATOR_S, data_home_folder_current,
                                                Gnonograms.UNSAVED_FILENAME);
 
-        restore_settings (); /* May change Environment.get_user_data_dir () and Environment.get_user_data_dir () */
+        restore_settings ();
 
         var flags = BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL;
         bind_property ("dimensions", model, "dimensions");
@@ -180,7 +194,6 @@ public class Controller : GLib.Object {
             generator.cancel ();
         }
 
-        // save_settings ();
         quit_app ();
     }
 
@@ -272,28 +285,8 @@ public class Controller : GLib.Object {
         }
     }
 
-    // private void save_settings () {
-    //     if (settings == null) {
-    //         return;
-    //     }
-
-    //     settings.set_string ("save-game-dir", Environment.get_user_data_dir () ?? "");
-    //     settings.set_string ("load-game-dir", Environment.get_user_data_dir () ?? "");
-    // }
-
     private void restore_settings () {
         if (settings != null) {
-            // var dir = settings.get_string ("load-game-dir");
-            // if (dir.length > 0) {
-            //     Environment.get_user_data_dir () = dir;
-            // }
-
-            // dir = settings.get_string ("save-game-dir");
-
-            // if (dir.length > 0) {
-            //     Environment.get_user_data_dir () = dir;
-            // }
-
             int x, y;
             x = saved_state.get_int ("window-x");
             y = saved_state.get_int ("window-y");
@@ -345,9 +338,9 @@ public class Controller : GLib.Object {
             file_writer.is_readonly = is_readonly;
 
             if (save_state) {
-                file_writer.write_position_file (Environment.get_user_data_dir (), path, game_name);
+                file_writer.write_position_file (saved_games_folder, path, game_name);
             } else {
-                file_writer.write_game_file (Environment.get_user_data_dir (), path, game_name);
+                file_writer.write_game_file (saved_games_folder, path, game_name);
             }
 
         } catch (IOError e) {
@@ -364,7 +357,6 @@ public class Controller : GLib.Object {
         return file_writer.game_path;
     }
 
-    // private async bool load_game (File? game, bool update_load_dir) {
     private async bool load_game (File? game) {
         Filereader? reader = null;
         var gs = game_state;
@@ -393,11 +385,6 @@ public class Controller : GLib.Object {
         }
 
         if (reader.valid && (yield load_common (reader))) {
-            // if (update_load_dir) {
-            //     /* At this point, we can assume game_file exists and has parent */
-            //     Environment.get_user_data_dir () = reader.game_file.get_parent ().get_uri ();
-            // }
-
             if (reader.state != GameState.UNDEFINED) {
                 game_state = reader.state;
             } else {
@@ -409,11 +396,6 @@ public class Controller : GLib.Object {
             if (history.can_go_back) {
                 make_move (history.get_current_move ());
             }
-
-            // if (update_load_dir) {
-            //     /* At this point, we can assume game_file exists and has parent */
-            //     Environment.get_user_data_dir () = reader.game_file.get_parent ().get_uri ();
-            // }
         } else {
             view.send_notification (_("Unable to load game. %s").printf (reader.err_msg));
             return false;

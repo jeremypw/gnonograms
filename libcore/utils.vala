@@ -1,5 +1,5 @@
 /* Utility functions for gnonograms
- * Copyright (C) 2010-2017  Jeremy Wootten
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,8 +14,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  Author:
- *  Jeremy Wootten <jeremywootten@gmail.com>
+ *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 namespace Gnonograms {
 namespace Utils {
@@ -319,7 +318,6 @@ namespace Utils {
 
     public static bool show_confirm_dialog (string primary_text, string? secondary_text = null,
                                             Gtk.Window? parent = null) {
-
         var response = show_dlg (primary_text, Gtk.MessageType.QUESTION, secondary_text, parent);
         return response == Gtk.ResponseType.YES;
     }
@@ -327,117 +325,36 @@ namespace Utils {
     /** The @action parameter also indicates the default setting for saving the solution.
       * The user selected option is returned in @save_solution.
      **/
-    public static string? get_file_path (Gtk.Window? parent,
-                                          Gnonograms.FileChooserAction action,
-                                          string dialogname,
-                                          FilterInfo [] filters,
-                                          string? start_path,
-                                          out bool save_solution) {
-
+    public static string? get_open_save_path (Gtk.Window? parent,
+                                             string dialogname,
+                                             bool save,
+                                             string start_path,
+                                             string basename) {
         string? file_path = null;
+        string button_label = save ? _("Save") : _("Open");
+        var gtk_action = save ? Gtk.FileChooserAction.SAVE : Gtk.FileChooserAction.OPEN;
 
-        save_solution = (action == Gnonograms.FileChooserAction.SAVE_WITH_SOLUTION);
-
-        string button_label = "Error";
-        var gtk_action = Gtk.FileChooserAction.SAVE;
-
-        switch (action) {
-            case Gnonograms.FileChooserAction.OPEN:
-                gtk_action = Gtk.FileChooserAction.OPEN;
-                button_label = _("Open");
-                break;
-
-            case Gnonograms.FileChooserAction.SAVE_WITH_SOLUTION:
-            case Gnonograms.FileChooserAction.SAVE_NO_SOLUTION:
-                gtk_action = Gtk.FileChooserAction.SAVE;
-                button_label = _("Save");
-                break;
-
-            case Gnonograms.FileChooserAction.SELECT_FOLDER:
-                gtk_action = Gtk.FileChooserAction.SELECT_FOLDER;
-                button_label = _("Apply");
-                break;
-
-            default :
-                break;
-        }
-
-        var dialog = new Gtk.FileChooserDialog (
+        var dialog = new Gtk.FileChooserNative (
                         dialogname,
                         parent,
                         gtk_action,
-                        _("Cancel"), Gtk.ResponseType.CANCEL,
-                        button_label, Gtk.ResponseType.ACCEPT,
-                        null
+                        button_label,
+                        _("Cancel")
                     );
 
-            foreach (var info in filters) {
-                var fc = new Gtk.FileFilter ();
-                fc.set_filter_name (info.name);
-                foreach (var pattern in info.patterns) {
-                    fc.add_pattern (pattern);
-                }
-                dialog.add_filter (fc);
-            }
-
-        dialog.local_only = false;
-        Gtk.Switch? save_solution_switch = null;
-
-        //only need access to built-in puzzle directory if loading a .gno puzzle
-        if (action != Gnonograms.FileChooserAction.OPEN) {
-            var grid = new Gtk.Grid ();
-            grid.orientation = Gtk.Orientation.HORIZONTAL;
-            grid.column_spacing = 6;
-
-            if (action == Gnonograms.FileChooserAction.SAVE_WITH_SOLUTION) {
-                save_solution_switch = new Gtk.Switch ();
-                save_solution_switch.state = save_solution;
-
-                var save_solution_label = new Gtk.Label (_("Save solution too"));
-
-                grid.add (save_solution_label);
-                grid.add (save_solution_switch);
-            }
-
-            ((Gtk.Container)(dialog.get_action_area ())).add (grid);
-
-            grid.show_all ();
+        dialog.set_modal (true);
+        dialog.set_filename (Path.build_path (Path.DIR_SEPARATOR_S, start_path, basename));
+        if (save) {
+            dialog.set_current_name (basename);
         }
-
-        if (start_path == null) {
-            start_path = Environment.get_home_dir ();
-        }
-
-        dialog.set_current_folder ("/home/jeremy/Templates");
 
         var response = dialog.run ();
 
         if (response == Gtk.ResponseType.ACCEPT) {
-            if (gtk_action == Gtk.FileChooserAction.SAVE) {
-                file_path = Path.build_path (Path.DIR_SEPARATOR_S,
-                                             dialog.get_current_folder (),
-                                             dialog.get_current_name ()
-                            );
-            } else {
-                file_path = dialog.get_filename ();
-            }
-
-            if (save_solution_switch != null) {
-                save_solution = save_solution_switch.state;
-            }
+            file_path = dialog.get_filename ();
         }
 
         dialog.destroy ();
-
-        if (gtk_action == Gtk.FileChooserAction.SAVE && file_path != null) {
-            var file = File.new_for_commandline_arg (file_path);
-            if (file.query_exists () &&
-                !show_confirm_dialog (_("Overwrite %s").printf (file_path),
-                                      _("This action will destroy contents of that file"))) {
-
-                file_path = null;
-            }
-        }
 
         return file_path;
     }
