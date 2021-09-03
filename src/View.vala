@@ -18,11 +18,10 @@
  *  Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-namespace Gnonograms {
 /*** The View class manages the header, clue label widgets and the drawing widget under instruction
    * from the controller. It signals user interaction to the controller.
 ***/
-public class View : Gtk.ApplicationWindow {
+public class Gnonograms.View : Hdy.ApplicationWindow {
 
 /**PUBLIC**/
     public signal void random_game_request ();
@@ -56,73 +55,6 @@ public class View : Gtk.ApplicationWindow {
 
     private const uint PROGRESS_DELAY_MSEC = 500;
 
-
-    private string brand_stylesheet = """
-        @define-color textColorPrimary %s;
-        @define-color textColorPrimaryShadow %s;
-        @define-color colorPrimary %s;
-        @define-color colorDarkBackground %s;
-        @define-color colorPaleBackground %s;
-
-        .linked .toggle {
-            background-color: shade (@textColorPrimary, 0.6);
-            border-radius: 6px 6px 6px 6px;
-            border-width: 1px;
-            border-color: #000;
-        }
-
-        .linked .toggle:checked {
-            border-color: #FFF;
-            border-width: 1px;
-            border-radius: 4px 4px 4px 4px;
-            background-color: @colorPaleBackground;
-        }
-
-        .headerbutton {
-            border-radius: 12px 12px 12px 12px;
-            background-color: alpha (#FFF, 0.75);
-        }
-
-        .title {
-            border-radius: 12px 12px 12px 12px;
-            background-color: alpha (#FFF, 0.75);
-            color: @textColorPrimaryShadow;
-        }
-
-        *.label:selected {
-            background-color: @colorPaleBackground;
-        }
-
-        *.dim {
-            color: shade (@textColorPrimary, 0.6);
-        }
-
-        .tooltip {
-            background-color: @colorPrimary;
-            border-radius: 4px 4px 4px 4px;
-        }
-
-        .progress  {
-            opacity: 1.0;
-            color: @textColorPrimary;
-            font-weight: bold
-        }
-
-        .warn {
-          color:  @error_color;
-        }
-
-        separator.vertical {
-            margin: 2px;
-        }
-
-    """
-    .printf (PALE_TEXT,
-            DARK_SHADOW,
-            GNONOGRAMS_DARK_PURPLE,
-            GNONOGRAMS_DARK_PURPLE,
-            GNONOGRAMS_PALE_PURPLE);
-
     private const GLib.ActionEntry [] VIEW_ACTION_ENTRIES = {
         {"undo", action_undo},
         {"redo", action_redo},
@@ -144,7 +76,7 @@ public class View : Gtk.ApplicationWindow {
     private LabelBox row_clue_box;
     private LabelBox column_clue_box;
     private CellGrid cell_grid;
-    private Gtk.HeaderBar header_bar;
+    private Hdy.HeaderBar header_bar;
     private AppMenu app_menu;
     private Gtk.Grid main_grid;
     private Gtk.Overlay overlay;
@@ -174,6 +106,10 @@ public class View : Gtk.ApplicationWindow {
             model: _model,
             controller: controller
         );
+    }
+
+    static construct {
+        Hdy.init ();
     }
 
     construct {
@@ -221,20 +157,10 @@ public class View : Gtk.ApplicationWindow {
         resizable = true;
         drawing_with_state = CellState.UNDEFINED;
 
-        var provider = new Gtk.CssProvider ();
-        try {
-            provider.load_from_data (brand_stylesheet, -1);
-            Gtk.StyleContext.add_provider_for_screen (get_screen (), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-        } catch (Error e) {
-            warning ("Could not create CSS Provider: %s", e.message);
-        }
-
         weak Gtk.IconTheme default_theme = Gtk.IconTheme.get_default ();
         default_theme.add_resource_path ("/com/gnonograms/icons");
 
-        header_bar = new Gtk.HeaderBar ();
-        header_bar.get_style_context ().add_class ("default-decoration");
-        header_bar.get_style_context ().add_class ("headerbar");
+        header_bar = new Hdy.HeaderBar ();
         header_bar.set_has_subtitle (false);
         header_bar.set_show_close_button (true);
 
@@ -301,9 +227,10 @@ public class View : Gtk.ApplicationWindow {
         header_bar.pack_end (hint_button);
         header_bar.set_custom_title (progress_stack);
 
-        set_titlebar (header_bar);
+        overlay = new Gtk.Overlay () {
+            expand = true
+        };
 
-        overlay = new Gtk.Overlay ();
         toast = new Granite.Widgets.Toast ("");
 
         toast.set_default_action (null);
@@ -334,7 +261,15 @@ public class View : Gtk.ApplicationWindow {
         sw.add (ev);
 
         overlay.add (sw);
-        add (overlay);
+
+        var grid = new Gtk.Grid () {
+            orientation = Gtk.Orientation.VERTICAL
+        };
+
+        grid.add (header_bar);
+        grid.add (overlay);
+
+        add (grid);
 
         /* Connect signal handlers */
         cell_grid.leave_notify_event.connect (on_grid_leave);
@@ -490,11 +425,11 @@ public class View : Gtk.ApplicationWindow {
          * These equations are related to the inverse of those used in labelbox to calculate its dimensions
          */
 
-        double max_h = (monitor_area.height * USABLE_MONITOR_HEIGHT - HEADER_HEIGHT - 2 * GRID_BORDER) /
-                       (rows * (1.0 + TYPICAL_MAX_BLOCKS_RATIO * FONT_ASPECT_RATIO) * 2.0);
+        double max_h = (monitor_area.height * USABLE_MONITOR_HEIGHT - header_bar.get_allocated_height () -
+                       2 * GRID_BORDER) / (rows * (1.0 + TYPICAL_MAX_BLOCKS_RATIO * FONT_ASPECT_RATIO) * 2.0);
 
-        double max_w = (monitor_area.width * USABLE_MONITOR_WIDTH - 2 * GRID_BORDER - GRID_COLUMN_SPACING) /
-                       (cols * (1.0 + TYPICAL_MAX_BLOCKS_RATIO / FONT_ASPECT_RATIO) * 2.0);
+        double max_w = (monitor_area.width * USABLE_MONITOR_WIDTH - 2 * GRID_BORDER -
+                       GRID_COLUMN_SPACING) / (cols * (1.0 + TYPICAL_MAX_BLOCKS_RATIO / FONT_ASPECT_RATIO) * 2.0);
 
         return double.min (max_h, max_w);
     }
@@ -512,8 +447,10 @@ public class View : Gtk.ApplicationWindow {
                          row_clue_box.min_width + column_clue_box.min_width + 2 * GRID_BORDER + GRID_COLUMN_SPACING);
 
         var usable_height = (int)(monitor_area.height * USABLE_MONITOR_HEIGHT);
+
         var h = int.min (usable_height,
-                         row_clue_box.min_height + column_clue_box.min_height + 2 * GRID_BORDER + HEADER_HEIGHT);
+                         row_clue_box.min_height + column_clue_box.min_height +
+                         2 * GRID_BORDER + header_bar.get_allocated_height ());
 
         var hints = Gdk.Geometry ();
         hints.min_width = w;
@@ -821,5 +758,4 @@ private class HeaderButton : Gtk.Button {
             sensitive: sensitive
         );
     }
-}
 }

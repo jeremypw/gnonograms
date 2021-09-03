@@ -12,9 +12,10 @@ add_global_arguments (
     language:'c'
 )
 
-GTK3 = dependency('gtk+-3.0', version: '>=3.22', required: true)
-GEE = dependency('gee-0.8', version: '>=0.20', required: true)
-GRANITE = dependency('granite', version: '>=5.2.0', required: true)
+GTK3 = dependency('gtk+-3.0', version: '>=3.22')
+GEE = dependency('gee-0.8', version: '>=0.20')
+GRANITE = dependency('granite', version: '>=5.2.0')
+HDY = dependency('libhandy-1', version: '>=0.91.0')
 
 executable (
     meson.project_name (),
@@ -54,7 +55,8 @@ executable (
     dependencies : [
         GTK3,
         GEE,
-        GRANITE
+        GRANITE,
+        HDY
     ],
 
     install: true

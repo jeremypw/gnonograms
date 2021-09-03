@@ -30,7 +30,6 @@ namespace Gnonograms {
     public const Difficulty MIN_GRADE = Difficulty.EASY; /* TRIVIAL and VERY EASY GRADES not worth supporting */
 
     public const double FONT_ASPECT_RATIO = 1.2;
-    public const int HEADER_HEIGHT = Gtk.IconSize.LARGE_TOOLBAR;
     public const int GRID_BORDER = 6;
     public const int GRID_COLUMN_SPACING = 6;
     public const double TYPICAL_MAX_BLOCKS_RATIO = 0.3;
