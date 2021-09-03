@@ -1,0 +1,16 @@
+app-id: com.github.jeremypw.gnonograms
+runtime: io.elementary.Platform
+runtime-version: '6'
+sdk: io.elementary.Sdk
+command: com.github.jeremypw.gnonograms
+finish-args:
+  - '--share=ipc'
+  - '--socket=wayland'
+  - '--socket=fallback-x11'
+  - '--metadata=X-DConf=migrate-path=/com/github/jeremypw/gnonograms/'
+modules:
+  - name: gnonograms
+    buildsystem: meson
+    sources:
+      - type: dir
+        path: .
