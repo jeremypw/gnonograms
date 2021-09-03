@@ -197,18 +197,17 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         mode_switch.get_style_context ().add_class ("mode-switch");
 
         progress_indicator = new ProgressIndicator ();
-        progress_indicator.get_style_context ().add_class ("progress");
+        // progress_indicator.get_style_context ().add_class ("progress");
 
         title_label = new Gtk.Label ("Gnonograms");
         title_label.get_style_context ().add_class (Granite.STYLE_CLASS_H3_LABEL);
-        title_label.get_style_context ().add_class ("title");
         title_label.show ();
 
         progress_stack = new Gtk.Stack ();
         progress_stack.add_named (progress_indicator, "Progress");
         progress_stack.add_named (title_label, "Title");
         progress_stack.set_visible_child_name ("Title");
-        progress_stack.set_size_request (150, -1);
+        // progress_stack.set_size_request (150, -1);
 
         header_bar.pack_start (load_game_button);
         header_bar.pack_start (save_game_button);
@@ -747,8 +746,6 @@ private class HeaderButton : Gtk.Button {
         margin_top = 3;
         margin_bottom = 3;
         valign = Gtk.Align.CENTER;
-
-        get_style_context ().add_class ("headerbutton");
     }
 
     public HeaderButton (string icon_name, string tooltip = "", bool sensitive = true) {

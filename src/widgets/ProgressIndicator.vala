@@ -21,7 +21,6 @@
 namespace Gnonograms {
 /** Widget to show working when generating or solving and allow cancel **/
 public class ProgressIndicator : Gtk.Grid {
-
     private Gtk.Spinner spinner;
     private Gtk.Button cancel_button;
     private Gtk.Label label;
@@ -38,16 +37,16 @@ public class ProgressIndicator : Gtk.Grid {
         Object (
             orientation: Gtk.Orientation.HORIZONTAL,
             column_homogeneous: false,
-            column_spacing: 6
+            column_spacing: 6,
+            valign: Gtk.Align.CENTER
         );
     }
 
     construct {
         spinner = new Gtk.Spinner ();
-        spinner.get_style_context ().add_class ("progress");
-
+        // spinner.get_style_context ().add_class ("progress");
         label = new Gtk.Label (null);
-        label.get_style_context ().add_class ("progress");
+        // label.get_style_context ().add_class ("progress");
         label.get_style_context ().add_class (Granite.STYLE_CLASS_H3_LABEL);
 
         add (label);

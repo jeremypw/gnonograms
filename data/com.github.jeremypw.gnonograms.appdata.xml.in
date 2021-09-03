@@ -53,6 +53,8 @@
       <ul>
         <li>Convert to Flatpak</li>
         <li>Discontinue ninja uninstall and custom mimetype</li>
+        <li>Less custom styling</li>
+        <li>Use libhandy</li>
         <li>Dutch translation - thanks to Heimen Stoffels</li>
         <li>Portuguese translation - thanks to André Barata</li>
       </ul>
