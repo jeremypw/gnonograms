@@ -1,5 +1,5 @@
 /* View class for gnonograms - displays user interface
- * Copyright (C) 2010-2017  Jeremy Wootten
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,16 +14,13 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  Author:
- *  Jeremy Wootten <jeremywootten@gmail.com>
+ *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
 /*** The View class manages the header, clue label widgets and the drawing widget under instruction
    * from the controller. It signals user interaction to the controller.
 ***/
 public class Gnonograms.View : Hdy.ApplicationWindow {
-
-/**PUBLIC**/
     public signal void random_game_request ();
     public signal uint rewind_request ();
     public signal bool next_move_request ();
@@ -100,7 +97,6 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     private uint cols {get {return dimensions.cols ();}}
     private bool is_solving {get {return game_state == GameState.SOLVING;}}
 
-    /* ----------------------------------------- */
     public View (Model _model, Controller controller) {
         Object (
             model: _model,
@@ -164,40 +160,33 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         header_bar.set_has_subtitle (false);
         header_bar.set_show_close_button (true);
 
-        load_game_button = new HeaderButton ("document-open",
-                                             _("Load a Game from File"));
-
+        load_game_button = new HeaderButton ("document-open", _("Load a Game from File"));
         save_game_button = new HeaderButton ("document-save", _("Save Game"));
-
-        save_game_as_button = new HeaderButton ("document-save-as",
-                                                _("Save Game to Different File"));
-
-        undo_button = new HeaderButton ("edit-undo", _("Undo Last Move"));
-        undo_button.sensitive = false;
-
-        redo_button = new HeaderButton ("edit-redo", _("Redo Last Move"));
-        redo_button.sensitive = false;
-
-        check_correct_button = new HeaderButton ("media-seek-backward",
-                                                 _("Go Back to Last Correct Position"));
-        check_correct_button.sensitive = false;
-
+        save_game_as_button = new HeaderButton ("document-save-as", _("Save Game to Different File"));
+        undo_button = new HeaderButton ("edit-undo", _("Undo Last Move")) {
+            sensitive = false
+        };
+        redo_button = new HeaderButton ("edit-redo", _("Redo Last Move")) { 
+            sensitive = false
+        };
+        check_correct_button = new HeaderButton ("media-seek-backward", _("Go Back to Last Correct Position")) {
+            sensitive = false
+        };
         restart_button = new RestartButton ("view-refresh", ""); /* private class - see below */
-
-        hint_button = new HeaderButton ("help-contents", _("Suggest next move"));
-        hint_button.sensitive = false;
-
-        auto_solve_button = new HeaderButton ("system", _("Solve by Computer"));
-        auto_solve_button.sensitive = false;
+        hint_button = new HeaderButton ("help-contents", _("Suggest next move")) {
+            sensitive = false
+        };
+        auto_solve_button = new HeaderButton ("system", _("Solve by Computer")) {
+            sensitive = false
+        };
 
         app_menu = new AppMenu (controller);
-        mode_switch = new ViewModeButton ();
-        mode_switch.margin_top = 6;
-        mode_switch.margin_bottom = 6;
-        mode_switch.get_style_context ().add_class ("mode-switch");
+        mode_switch = new ViewModeButton () {
+            margin_top = 6,
+            margin_bottom = 6
+        };
 
         progress_indicator = new ProgressIndicator ();
-        // progress_indicator.get_style_context ().add_class ("progress");
 
         title_label = new Gtk.Label ("Gnonograms");
         title_label.get_style_context ().add_class (Granite.STYLE_CLASS_H3_LABEL);
@@ -207,7 +196,6 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         progress_stack.add_named (progress_indicator, "Progress");
         progress_stack.add_named (title_label, "Title");
         progress_stack.set_visible_child_name ("Title");
-        // progress_stack.set_size_request (150, -1);
 
         header_bar.pack_start (load_game_button);
         header_bar.pack_start (save_game_button);
@@ -270,13 +258,11 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
 
         add (grid);
 
-        /* Connect signal handlers */
         cell_grid.leave_notify_event.connect (on_grid_leave);
         cell_grid.button_press_event.connect (on_grid_button_press);
         cell_grid.button_release_event.connect (stop_painting);
         key_release_event.connect (on_key_release_event);
 
-        /* Set actions */
         undo_button.set_action_name ("view.undo");
         redo_button.set_action_name ("view.redo");
         load_game_button.set_action_name ("view.open");
@@ -287,7 +273,6 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         hint_button.set_action_name ("view.hint");
         auto_solve_button.set_action_name ("view.solve");
 
-        /* Bind some properties */
         var flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
         bind_property ("restart-destructive", restart_button, "restart-destructive", BindingFlags.SYNC_CREATE) ;
         bind_property ("dimensions", app_menu, "dimensions", flags);
@@ -302,8 +287,6 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         bind_property ("dimensions", row_clue_box, "dimensions");
         bind_property ("dimensions", column_clue_box, "dimensions");
 
-
-        /* Monitor certain bound properties */
         notify["game-state"].connect (() => {
             if (game_state != GameState.UNDEFINED) {
                 update_all_labels_completeness ();
@@ -714,45 +697,45 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
 
         make_move_at_cell ();
     }
-}
 
-private class RestartButton : HeaderButton {
-    public bool restart_destructive { get; set; }
+    private class RestartButton : HeaderButton {
+        public bool restart_destructive { get; set; }
 
-    construct {
-        restart_destructive = false;
+        construct {
+            restart_destructive = false;
 
-        notify["restart-destructive"].connect (() => {
-            if (restart_destructive) {
-                image.get_style_context ().add_class ("warn");
-                image.get_style_context ().remove_class ("dim");
-            } else {
-                image.get_style_context ().remove_class ("warn");
-                image.get_style_context ().add_class ("dim");
+            notify["restart-destructive"].connect (() => {
+                if (restart_destructive) {
+                    image.get_style_context ().add_class ("warn");
+                    image.get_style_context ().remove_class ("dim");
+                } else {
+                    image.get_style_context ().remove_class ("warn");
+                    image.get_style_context ().add_class ("dim");
 
-            }
-        });
+                }
+            });
 
-        bind_property ("sensitive", this, "restart-destructive");
+            bind_property ("sensitive", this, "restart-destructive");
+        }
+
+        public RestartButton (string icon_name, string tooltip = "", bool sensitive = true) {
+            base (icon_name, tooltip, sensitive);
+        }
     }
 
-    public RestartButton (string icon_name, string tooltip = "", bool sensitive = true) {
-        base (icon_name, tooltip, sensitive);
-    }
-}
+    private class HeaderButton : Gtk.Button {
+        construct {
+            margin_top = 3;
+            margin_bottom = 3;
+            valign = Gtk.Align.CENTER;
+        }
 
-private class HeaderButton : Gtk.Button {
-    construct {
-        margin_top = 3;
-        margin_bottom = 3;
-        valign = Gtk.Align.CENTER;
-    }
-
-    public HeaderButton (string icon_name, string tooltip = "", bool sensitive = true) {
-        Object (
-            image: new Gtk.Image.from_icon_name (icon_name, Gtk.IconSize.LARGE_TOOLBAR),
-            tooltip_text: tooltip,
-            sensitive: sensitive
-        );
+        public HeaderButton (string icon_name, string tooltip = "", bool sensitive = true) {
+            Object (
+                image: new Gtk.Image.from_icon_name (icon_name, Gtk.IconSize.LARGE_TOOLBAR),
+                tooltip_text: tooltip,
+                sensitive: sensitive
+            );
+        }
     }
 }

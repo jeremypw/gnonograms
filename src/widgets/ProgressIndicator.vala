@@ -1,5 +1,5 @@
 /* Holds all row or column clues for gnonograms
- * Copyright (C) 2010 - 2017  Jeremy Wootten
+ * Copyright (C) 2010 - 2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,13 +14,11 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  Author:
- *  Jeremy Wootten <jeremywootten@gmail.com>
+ *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-namespace Gnonograms {
 /** Widget to show working when generating or solving and allow cancel **/
-public class ProgressIndicator : Gtk.Grid {
+public class Gnonograms.ProgressIndicator : Gtk.Grid {
     private Gtk.Spinner spinner;
     private Gtk.Button cancel_button;
     private Gtk.Label label;
@@ -44,9 +42,7 @@ public class ProgressIndicator : Gtk.Grid {
 
     construct {
         spinner = new Gtk.Spinner ();
-        // spinner.get_style_context ().add_class ("progress");
         label = new Gtk.Label (null);
-        // label.get_style_context ().add_class ("progress");
         label.get_style_context ().add_class (Granite.STYLE_CLASS_H3_LABEL);
 
         add (label);
@@ -87,5 +83,4 @@ public class ProgressIndicator : Gtk.Grid {
             spinner.stop ();
         });
     }
-}
 }
