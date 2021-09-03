@@ -58,20 +58,15 @@ class Clue : Gtk.Label {
         }
     }
 
-    construct {
-        clue = "0";
-        has_tooltip = true;
-        use_markup = true;
-    }
-
     public Clue (bool _vertical_text) {
         Object (
-                vertical_text: _vertical_text,
-                xalign: _vertical_text ? (float)0.5 : (float)1.0,
-                yalign: _vertical_text ? (float)1.0 : (float)0.5
-                );
-
-
+            vertical_text: _vertical_text,
+            xalign: _vertical_text ? (float)0.5 : (float)1.0,
+            yalign: _vertical_text ? (float)1.0 : (float)0.5,
+            clue: "0",
+            has_tooltip: true,
+            use_markup: true
+        );
 
         size_allocate.connect_after (() => {
             update_markup ();
@@ -84,9 +79,9 @@ class Clue : Gtk.Label {
 
     public void highlight (bool is_highlight) {
         if (is_highlight) {
-            set_state_flags (Gtk.StateFlags.SELECTED, true);
+            get_style_context ().add_class (Granite.STYLE_CLASS_ACCENT);
         } else {
-            set_state_flags (Gtk.StateFlags.NORMAL, true);
+            get_style_context ().remove_class (Granite.STYLE_CLASS_ACCENT);
         }
     }
 
