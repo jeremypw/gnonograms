@@ -63,11 +63,14 @@ test (
     args: join_paths (meson.current_build_dir (),  meson.project_name () + '.desktop')
 )
 
-test (
-    'Validate appdata file',
-    find_program ('appstreamcli'),
-    args: ['validate', '--pedantic', join_paths (meson.current_build_dir (), meson.project_name () + '.appdata.xml')]
-)
+appstreamcli = find_program ('appstreamcli', required: false)
+if appstreamcli.found()
+    test (
+        'Validate appdata file',
+        find_program ('appstreamcli'),
+        args: ['validate', '--pedantic', join_paths (meson.current_build_dir (), meson.project_name () + '.appdata.xml')]
+    )
+endif
 
 test (
     'Validate gschema file',
