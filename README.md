@@ -30,3 +30,19 @@ sudo ninja install
 com.github.jeremypw.gnonograms
 ```
 
+### Building and installing as Flatpak
+To build the latest code with the latest Platform and Sdk:
+```
+sudo apt install flatpak
+
+flatpak remote-add --if-not-exists --system appcenter https://flatpak.elementary.io/repo.flatpakrepo
+
+flatpak install io.elementary.Platform io.elementary.Sdk (choose 'daily' versions)
+
+sudo apt install flatpak-builder
+
+flatpak-builder --force-clean --install --user <path-to-a-build-directory> com.github.jeremypw.gnonograms.yml
+
+```
+
+The elementary applications menu will now contain Gnonograms or it can be run from the terminal with `flatpak run com.github.jeremypw.gnonograms.yml`
