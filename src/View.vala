@@ -159,6 +159,26 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         header_bar = new Hdy.HeaderBar ();
         header_bar.set_has_subtitle (false);
         header_bar.set_show_close_button (true);
+        var css_provider = new Gtk.CssProvider ();
+
+        try {
+            css_provider.load_from_data ("""
+                @define-color GNONOGRAMS_DARK_PURPLE #180297;
+                @define-color GNONOGRAMS_PALE_PURPLE #cdc9e0;
+                .gnonograms-header {
+                    border: solid;
+                    border-top-width: 1px;
+                    border-color: @GNONOGRAMS_DARK_PURPLE;
+                    background-image: linear-gradient(to left, alpha(@GNONOGRAMS_DARK_PURPLE, 1.0), alpha(@GNONOGRAMS_PALE_PURPLE, 0));
+
+                }"""
+            );
+        } catch (Error e) {
+            warning ("Error adding css provider: %s", e.message);
+        }
+
+        header_bar.get_style_context ().add_provider (css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+        header_bar.get_style_context ().add_class ("gnonograms-header");
 
         load_game_button = new HeaderButton ("document-open", _("Load a Game from File"));
         save_game_button = new HeaderButton ("document-save", _("Save Game"));
@@ -166,7 +186,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         undo_button = new HeaderButton ("edit-undo", _("Undo Last Move")) {
             sensitive = false
         };
-        redo_button = new HeaderButton ("edit-redo", _("Redo Last Move")) { 
+        redo_button = new HeaderButton ("edit-redo", _("Redo Last Move")) {
             sensitive = false
         };
         check_correct_button = new HeaderButton ("media-seek-backward", _("Go Back to Last Correct Position")) {
