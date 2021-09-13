@@ -82,6 +82,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     private Gtk.Label title_label;
     private Granite.Widgets.Toast toast;
     private ViewModeButton mode_switch;
+    private Gtk.Button generate_button;
     private Gtk.Button load_game_button;
     private Gtk.Button save_game_button;
     private Gtk.Button save_game_as_button;
@@ -201,6 +202,10 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
             sensitive = false
         };
 
+        generate_button = new HeaderButton ("list-add", _("Generate New Puzzle"));
+        generate_button.clicked.connect (() => {
+            game_state = GameState.GENERATING;
+        });
         app_menu = new AppMenu (controller);
         mode_switch = new ViewModeButton () {
             margin_top = 6,
@@ -229,6 +234,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
 
         header_bar.pack_end (app_menu);
         header_bar.pack_end (new Gtk.Separator (Gtk.Orientation.VERTICAL));
+        header_bar.pack_end (generate_button);
         header_bar.pack_end (mode_switch);
         header_bar.pack_end (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_end (auto_solve_button);
@@ -312,6 +318,8 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
             if (game_state != GameState.UNDEFINED) {
                 update_all_labels_completeness ();
             }
+
+            generate_button.sensitive = game_state != GameState.GENERATING;
         });
 
         notify["dimensions"].connect (() => {
@@ -320,7 +328,8 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         });
 
         notify["generator-grade"].connect (() => {
-            mode_switch.grade = generator_grade;
+            ///TRANSLATORS: '%s' is a placeholder for an adjective describing the difficulty of the puzze. It can be moved but not translated.
+            generate_button.tooltip_text = _("Generate %s puzzle").printf (generator_grade.to_string ());
         });
 
         controller.notify["game-name"].connect (() => {

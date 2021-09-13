@@ -18,13 +18,13 @@ install_data (
 )
 
 install_data (
-    join_paths('icons', '32', 'head-thinking.svg'),
-    install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '32x32', 'actions')
+    join_paths('icons', '24', 'head-thinking.svg'),
+    install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '24x24', 'actions')
 )
 
 install_data (
-    join_paths('icons', '32', 'head-thinking.svg'),
-    install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '32x32@2', 'actions')
+    join_paths('icons', '24', 'head-thinking.svg'),
+    install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '24x24@2', 'actions')
 )
 
 install_data (

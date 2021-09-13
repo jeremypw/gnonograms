@@ -24,43 +24,29 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
     /** PUBLIC **/
     public GameState mode {get; set;}
 
-    public Difficulty grade {
-        set {
-            ///TRANSLATORS: '%s' is a placeholder for an adjective describing the difficulty of the puzze. It can be moved but not translated.
-            generating_icon.tooltip_text = _("Generate %s puzzle").printf (value.to_string ());
-        }
-    }
-
     private int setting_index;
     private int solving_index;
-    private int generating_index;
     private Gtk.Image setting_icon;
     private Gtk.Image solving_icon;
-    private Gtk.Image generating_icon;
 
     public ViewModeButton () {
         /* Cannot do this in construct */
         setting_index = append (setting_icon);
         solving_index = append (solving_icon);
-        generating_index = append (generating_icon);
     }
 
     construct {
         setting_icon = new ModeImage ("edit-symbolic", _("Draw pattern"));
         solving_icon = new ModeImage ("head-thinking", _("Solve puzzle"));
-        generating_icon = new ModeImage ("list-add-symbolic", _("Generate new random puzzle"));
 
         setting_icon.set_data ("mode", GameState.SETTING);
         solving_icon.set_data ("mode", GameState.SOLVING);
-        generating_icon.set_data ("mode", GameState.GENERATING);
 
         mode_changed.connect (() => {
             if (selected == setting_index) {
                 mode = GameState.SETTING;
             } else if (selected == solving_index) {
                 mode = GameState.SOLVING;
-            } else if (selected == generating_index) {
-                mode = GameState.GENERATING;
             } else {
                 mode = GameState.UNDEFINED;
             }
@@ -73,9 +59,6 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
                     break;
                 case GameState.SOLVING:
                     set_active (solving_index);
-                    break;
-                case GameState.GENERATING:
-                    set_active (generating_index);
                     break;
                 default:
                     break;
@@ -92,7 +75,7 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
             Object (
                 icon_name: icon_name,
                 tooltip_text: tooltip,
-                icon_size: Gtk.IconSize.LARGE_TOOLBAR
+                icon_size: Gtk.IconSize.BUTTON
             );
         }
     }
