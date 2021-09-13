@@ -169,7 +169,8 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
                     border: solid;
                     border-top-width: 1px;
                     border-color: @GNONOGRAMS_DARK_PURPLE;
-                    background-image: linear-gradient(to left, alpha(@GNONOGRAMS_DARK_PURPLE, 1.0), alpha(@GNONOGRAMS_PALE_PURPLE, 0));
+                    background-image: linear-gradient(to left,
+                    alpha(@GNONOGRAMS_DARK_PURPLE, 1.0), alpha(@GNONOGRAMS_PALE_PURPLE, 0));
 
                 }"""
             );
