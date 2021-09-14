@@ -3,7 +3,7 @@ shortname = 'gnonograms'
 domain = 'com.github.jeremypw.'
 schema_path = '/com/github/jeremypw/' + shortname + '/'
 
-vala_version_required = '>=0.34.0'
+vala_version_required = '>=0.48.0'
 
 i18n = import ('i18n')
 
