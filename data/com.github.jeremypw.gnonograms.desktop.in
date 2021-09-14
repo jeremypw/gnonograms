@@ -2,7 +2,7 @@
 Type=Application
 Name=Gnonograms
 Comment=Create and solve nonogram puzzles.
-Keywords=game;puzzle;logic;nonograms;Tsunami;Picross;Griddlers;Japanese Crossword;
+Keywords=game;puzzle;logic;nonograms;
 GenericName=Logic Game
 
 Exec=com.github.jeremypw.gnonograms %f
