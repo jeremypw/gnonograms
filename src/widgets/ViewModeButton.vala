@@ -36,8 +36,15 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
     }
 
     construct {
-        setting_icon = new ModeImage ("edit-symbolic", _("Draw pattern"));
-        solving_icon = new ModeImage ("head-thinking", _("Solve puzzle"));
+        Gtk.IconTheme.get_default ().add_resource_path ("/com/github/jeremypw/gnonograms");
+
+        setting_icon = new Gtk.Image.from_icon_name ("edit-symbolic", Gtk.IconSize.LARGE_TOOLBAR) {
+            tooltip_text = _("Draw pattern")
+        };
+
+        solving_icon = new Gtk.Image.from_icon_name ("head-thinking", Gtk.IconSize.LARGE_TOOLBAR) {
+            tooltip_text =  _("Solve puzzle")
+        };
 
         setting_icon.set_data ("mode", GameState.SETTING);
         solving_icon.set_data ("mode", GameState.SOLVING);
@@ -64,20 +71,6 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
                     break;
             }
         });
-    }
-
-    private class ModeImage : Gtk.Image {
-        construct {
-            valign = Gtk.Align.CENTER;
-        }
-
-        public ModeImage (string icon_name, string tooltip) {
-            Object (
-                icon_name: icon_name,
-                tooltip_text: tooltip,
-                icon_size: Gtk.IconSize.BUTTON
-            );
-        }
     }
 }
 }

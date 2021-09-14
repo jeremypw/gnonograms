@@ -1,4 +1,4 @@
-project ('com.github.jeremypw.gnonograms', 'vala', 'c', version: '1.4.3', meson_version: '>= 0.42.0')
+project ('com.github.jeremypw.gnonograms', 'vala', 'c', version: '1.4.3', meson_version: '>= 0.49.0')
 shortname = 'gnonograms'
 domain = 'com.github.jeremypw.'
 schema_path = '/com/github/jeremypw/' + shortname + '/'
@@ -17,8 +17,16 @@ GEE = dependency('gee-0.8', version: '>=0.20')
 GRANITE = dependency('granite', version: '>=5.2.0')
 HDY = dependency('libhandy-1', version: '>=0.91.0')
 
+gnome = import('gnome')
+gresource = gnome.compile_resources(
+    'gresource',
+    'data/gresource.xml',
+    source_dir: 'data'
+)
+
 executable (
     meson.project_name (),
+    gresource,
     'src/Application.vala',
     'src/Controller.vala',
     'src/View.vala',

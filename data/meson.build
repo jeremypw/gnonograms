@@ -12,16 +12,6 @@ foreach i : icon_sizes
 endforeach
 
 install_data (
-    join_paths('icons', '24', 'head-thinking.svg'),
-    install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '24x24', 'actions')
-)
-
-install_data (
-    join_paths('icons', '24', 'head-thinking.svg'),
-    install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '24x24@2', 'actions')
-)
-
-install_data (
     join_paths (meson.current_source_dir (),'schemas', meson.project_name() + '.gschema.xml'),
     install_dir: join_paths(get_option('datadir'), 'glib-2.0', 'schemas')
 )
