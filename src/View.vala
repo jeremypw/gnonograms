@@ -202,7 +202,10 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
             sensitive = false
         };
 
-        generate_button = new HeaderButton ("list-add", _("Generate New Puzzle"));
+        generate_button = new HeaderButton ("list-add", _("Generate New Puzzle")) {
+            margin_start = 24
+        };
+
         generate_button.clicked.connect (() => {
             game_state = GameState.GENERATING;
         });
