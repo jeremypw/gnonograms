@@ -217,7 +217,9 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
 
         progress_indicator = new ProgressIndicator ();
 
-        title_label = new Gtk.Label ("Gnonograms");
+        title_label = new Gtk.Label ("Gnonograms") {
+            use_markup = true
+        };
         title_label.get_style_context ().add_class (Granite.STYLE_CLASS_H3_LABEL);
         title_label.show ();
 
@@ -336,7 +338,11 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         });
 
         controller.notify["game-name"].connect (() => {
-            title_label.label = game_name;
+            update_title ();
+        });
+
+        notify["game-grade"].connect (() => {
+            update_title ();
         });
 
         notify["readonly"].connect (() => {
@@ -496,6 +502,10 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         }
     }
 
+    private void update_title () {
+        title_label.label = "%s\n%s".printf (game_name, Granite.TOOLTIP_SECONDARY_TEXT_MARKUP.printf (game_grade.to_string ()));
+    }
+
     private void set_buttons_sensitive (bool sensitive) {
         mode_switch.sensitive = sensitive;
         load_game_button.sensitive = sensitive;
@@ -643,6 +653,9 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     /** Action callbacks **/
     private void action_restart () {
         restart_request ();
+        if (game_state == GameState.SETTING) {
+            game_grade = Difficulty.UNDEFINED;
+        }
     }
 
     private void action_solve () {

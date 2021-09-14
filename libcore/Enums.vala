@@ -52,7 +52,7 @@ public enum Difficulty {
             case Difficulty.COMPUTER:
                 return _("Super human");
             case Difficulty.UNDEFINED:
-                return _("Undefined");
+                return "";
             default:
                 critical ("grade to string - unexpected grade");
                 assert_not_reached ();
