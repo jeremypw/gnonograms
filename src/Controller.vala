@@ -696,4 +696,3 @@ public class Gnonograms.Controller : GLib.Object {
         view.end_working ();
     }
 }
-

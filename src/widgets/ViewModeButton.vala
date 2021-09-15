@@ -43,7 +43,7 @@ public class ViewModeButton : Granite.Widgets.ModeButton {
         };
 
         solving_icon = new Gtk.Image.from_icon_name ("head-thinking", Gtk.IconSize.LARGE_TOOLBAR) {
-            tooltip_text =  _("Solve puzzle")
+            tooltip_text = _("Solve puzzle")
         };
 
         setting_icon.set_data ("mode", GameState.SETTING);
