@@ -1,5 +1,5 @@
 /* Entry point for gnonograms  - initializes application and launches game
- * Copyright (C) 2010-2017  Jeremy Wootten
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,14 +18,17 @@
  *  Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-namespace Gnonograms {
-public class App : Gtk.Application {
-    public Controller controller;
+public class Gnonograms.App : Gtk.Application {
+    private Controller controller;
+
+    public App () {
+        Object (
+            application_id: "com.github.jeremypw.gnonograms",
+            flags: ApplicationFlags.HANDLES_OPEN
+        );
+    }
 
     construct {
-        application_id = Gnonograms.APP_ID;
-        flags = ApplicationFlags.HANDLES_OPEN;
-
         SimpleAction quit_action = new SimpleAction ("quit", null);
         quit_action.activate.connect (() => {
             if (controller != null) {
@@ -35,44 +38,35 @@ public class App : Gtk.Application {
 
         add_action (quit_action);
         set_accels_for_action ("app.quit", {"<Ctrl>q"});
-    }
 
-    public override void startup () {
-        base.startup ();
+        var granite_settings = Granite.Settings.get_default ();
+        var gtk_settings = Gtk.Settings.get_default ();
+
+        gtk_settings.gtk_application_prefer_dark_theme = granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
+
+        granite_settings.notify["prefers-color-scheme"].connect (() => {
+            gtk_settings.gtk_application_prefer_dark_theme = granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
+        });
     }
 
     public override void open (File[] files, string hint) {
         /* Only one game can be played at a time */
         var file = files[0];
-
-        if (file == null) {
-            return;
+        activate ();
+        if (file != null && file.get_basename ().has_suffix (".gno")) {
+            controller.load_game (file);
         }
-
-        var fname = file.get_basename ();
-
-        if (fname.has_suffix (".gno")) {
-            open_file (file);
-        } else {
-            activate ();
-        }
-    }
-
-    public void open_file (File? game) {
-        controller = new Controller (game);
-        this.add_window (controller.window);
-
-        controller.quit_app.connect (quit);
     }
 
     public override void activate () {
-        open_file (null);
+        if (controller == null) {
+            controller = new Controller ();
+            controller.quit_app.connect (quit);
+            add_window (controller.window);
+        } else {
+            controller.window.present ();
+        }
     }
-}
-
-public static App get_app () {
-    return Application.get_default () as App;
-}
 }
 
 private static bool version = false;

@@ -115,7 +115,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         view_actions.add_action_entries (VIEW_ACTION_ENTRIES, this);
         insert_action_group ("view", view_actions);
 
-        var application = get_app ();
+        var application = (Gtk.Application)(Application.get_default ());
         application.set_accels_for_action ("view.undo", {"<Ctrl>Z"});
         application.set_accels_for_action ("view.redo", {"<Ctrl><Shift>Z"});
         application.set_accels_for_action ("view.move-cursor((-1, 0))", {"Up"});

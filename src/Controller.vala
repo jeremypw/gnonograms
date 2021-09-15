@@ -17,11 +17,10 @@
  *  Author:
  *  Jeremy Wootten <jeremywootten@gmail.com>
  */
-namespace Gnonograms {
 /*** Controller class is created by the Application class. It coordinates all other classes and
    * provides business logic. Most of its properties and functions are private.
 ***/
-public class Controller : GLib.Object {
+public class Gnonograms.Controller : GLib.Object {
 /** PUBLIC SIGNALS, PROPERTIES, FUNCTIONS AND CONSTRUCTOR **/
     public signal void quit_app ();
 
@@ -49,6 +48,20 @@ public class Controller : GLib.Object {
     private bool is_solving {get {return game_state == GameState.SOLVING;}}
     private uint rows {get {return dimensions.rows ();}}
     private uint cols {get {return dimensions.cols ();}}
+
+    public Controller () {
+        restore_game.begin ((obj, res) => {
+            if (!restore_game.end (res)) {
+                /* Error normally thrown if running without installing */
+                debug ("Restore game failed");
+                restore_dimensions ();
+                new_game ();
+            }
+        });
+
+        view.show_all ();
+        view.present ();
+    }
 
     construct {
         game_name = _(UNTITLED_NAME);
@@ -148,30 +161,6 @@ public class Controller : GLib.Object {
             saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
             view.fontheight = fh; /* Ensure restored fontheight applied */
         }
-    }
-
-    public Controller (File? game = null) {
-        if (game != null) {
-            load_game.begin (game, (obj, res) => {
-                if (!load_game.end (res)) {
-                    warning ("Load game failed");
-                    restore_dimensions ();
-                    new_or_random_game ();
-                }
-            });
-        } else {
-            restore_game.begin ((obj, res) => {
-                if (!restore_game.end (res)) {
-                    /* Error normally thrown if running without installing */
-                    debug ("Restore game failed");
-                    restore_dimensions ();
-                    new_game ();
-                }
-            });
-        }
-
-        view.show_all ();
-        view.present ();
     }
 
     private void new_or_random_game () {
@@ -312,7 +301,7 @@ public class Controller : GLib.Object {
     private async bool restore_game () {
         if (temporary_game_path != null) {
             var current_game_path = File.new_for_path (temporary_game_path);
-            return yield load_game (current_game_path);
+            return yield load_game_async (current_game_path);
         } else {
             return false;
         }
@@ -357,25 +346,36 @@ public class Controller : GLib.Object {
         return file_writer.game_path;
     }
 
-    private async bool load_game (File? game) {
+    public void load_game (File? game) {
+        load_game_async.begin (game, (obj, res) => {
+            if (!load_game_async.end (res)) {
+                warning ("Load game failed");
+                restore_dimensions ();
+                new_or_random_game ();
+            }
+        });
+    }
+
+    private async bool load_game_async (File? game) {
         Filereader? reader = null;
         var gs = game_state;
         game_state = GameState.UNDEFINED;
         clear_history ();
-
         try {
             reader = new Filereader (window, Environment.get_user_data_dir (), game);
         } catch (GLib.IOError e) {
             if (!(e is IOError.CANCELLED)) {
                 var basename = game != null ? game.get_basename () : _("game");
+                string? game_path = null;
 
                 if (reader != null && reader.game_file != null) {
                     basename = reader.game_file.get_basename ();
+                    game_path = reader.game_file.get_uri ();
                 }
 
                 /* Avoid error dialog on first run */
                 if (basename != Gnonograms.UNSAVED_FILENAME) {
-                    view.send_notification (_("Unable to load game. %s").printf (e.message));
+                    view.send_notification (_("Unable to load game %s. %s").printf (game_path != null ? game_path : basename, e.message));
                 }
             }
 
@@ -451,13 +451,6 @@ public class Controller : GLib.Object {
         } else {
             current_game_path = reader.game_file.get_path ();
         }
-
-#if 0 //To be implemented (maybe)
-        view.set_source (reader.author);
-        view.set_date (reader.date);
-        view.set_license (reader.license);
-        view.set_score (reader.score);
-#endif
 
         return true;
     }
@@ -597,7 +590,7 @@ public class Controller : GLib.Object {
     }
 
     private void on_open_game_request () {
-        load_game.begin (null); /* Filereader will request load location */
+        load_game_async.begin (null); /* Filereader will request load location */
     }
 
     private void on_solve_this_request () {
@@ -703,4 +696,4 @@ public class Controller : GLib.Object {
         view.end_working ();
     }
 }
-}
+
