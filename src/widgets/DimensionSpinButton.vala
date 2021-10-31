@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2017  Jeremy Wootten
+/* Copyright (C) 2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,32 +17,18 @@
  *  Jeremy Wootten <jeremyw@elementaryos.org>
  */
 
-public class Gnonograms.SettingSwitch : Gnonograms.AppSetting {
-    public Gtk.Switch @switch { get; construct; }
-    public Gtk.Label label { get; construct; }
-    public override bool state {
-        get {
-            return @switch.state;
-        }
-
-        set {
-            @switch.state = value;
-        }
-    }
-
-    construct {
-        @switch = new Gtk.Switch ();
-        @switch.halign = Gtk.Align.START;
-        @switch.hexpand = false;
-        @switch.state = false;
-    }
-
-    public SettingSwitch (string heading) {
+public class Gnonograms.DimensionSpinButton : Gtk.SpinButton {
+    public DimensionSpinButton () {
         Object (
-            label: new Gtk.Label (heading)
+            adjustment: new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),
+            climb_rate: 5.0,
+            digits: 0,
+            snap_to_ticks: true,
+            orientation: Gtk.Orientation.HORIZONTAL,
+            margin_top: 3,
+            margin_bottom: 3,
+            width_chars: 3,
+            can_focus: false
         );
     }
-
-    public override Gtk.Label get_heading () {return label;}
-    public override Gtk.Widget get_chooser () {return @switch;}
 }

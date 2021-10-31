@@ -307,10 +307,6 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
 
         var flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
         bind_property ("restart-destructive", restart_button, "restart-destructive", BindingFlags.SYNC_CREATE) ;
-        bind_property ("dimensions", app_menu, "dimensions", flags);
-        bind_property ("generator-grade", app_menu, "grade", flags);
-        controller.bind_property ("game-name", app_menu, "title", flags);
-        bind_property ("strikeout-complete", app_menu, "strikeout-complete", flags);
         bind_property ("game-state", mode_switch, "mode", flags);
         bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
         bind_property ("previous-cell", cell_grid, "previous-cell", BindingFlags.BIDIRECTIONAL);

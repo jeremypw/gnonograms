@@ -17,25 +17,24 @@
  *  Jeremy Wootten <jeremyw@elementaryos.org>
  */
 
-protected class Gnonograms.TitleEntry : Gnonograms.AppSetting {
-    Gtk.Entry entry;
-    Gtk.Label heading;
-    public override string text {
+public class Gnonograms.GradeChooser : Gtk.ComboBoxText {
+    public Difficulty grade {
         get {
-            return entry.text;
+            return (Difficulty)(int.parse (active_id));
         }
 
         set {
-            entry.text = value;
+            active_id = ((uint)value).clamp (MIN_GRADE, Difficulty.MAXIMUM).to_string ();
         }
     }
 
-    construct {
-        entry = new Gtk.Entry ();
-        entry.placeholder_text = _("Enter title of game here");
-        heading = new Gtk.Label (_("Title"));
-    }
+    public GradeChooser () {
+        Object (
+            expand: false
+        );
 
-    public override Gtk.Label get_heading () {return heading;}
-    public override Gtk.Widget get_chooser () {return entry;}
+        foreach (Difficulty d in Difficulty.all_human ()) {
+            append (((uint)d).to_string (), d.to_string ());
+        }
+    }
 }

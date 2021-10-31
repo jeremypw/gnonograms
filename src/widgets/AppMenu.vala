@@ -21,76 +21,7 @@
 namespace Gnonograms {
 
 class AppMenu : Gtk.MenuButton {
-    private AppPopover app_popover;
-    private AppSetting grade_setting;
-    private AppSetting rows_setting;
-    private AppSetting columns_setting;
-    private AppSetting title_setting;
-    private AppSetting strikeout_setting;
-    private Gtk.Grid grid;
-
-    public Dimensions dimensions { get; set; }
-    public Difficulty grade { get; set; }
-    public string title {
-        get { return controller.game_name; }
-        set { controller.game_name = value; }
-    }
-    public bool strikeout_complete { get; set; }
     public unowned Controller controller { get; construct; }
-
-    construct {
-        grid = new Gtk.Grid ();
-        grid.margin = 12;
-        grid.row_spacing = 6;
-        grid.column_spacing = 6;
-        grid.column_homogeneous = false;
-
-        grade_setting = new GradeChooser ();
-        rows_setting = new ScaleGrid (_("Rows"));
-        columns_setting = new ScaleGrid (_("Columns"));
-        title_setting = new TitleEntry ();
-        strikeout_setting = new SettingSwitch (_("Strike out complete blocks"));
-
-        int pos = 0;
-        add_setting (ref pos, grade_setting);
-        add_setting (ref pos, rows_setting);
-        add_setting (ref pos, columns_setting);
-        add_setting (ref pos, title_setting);
-        add_setting (ref pos, strikeout_setting);
-
-        app_popover = new AppPopover ();
-        app_popover.add (grid);
-        set_popover (app_popover);
-        app_popover.apply_settings.connect (() => {
-            update_properties ();
-        });
-
-        notify["dimensions"].connect (() => {
-            update_dimension_settings ();
-        });
-
-        notify["grade"].connect (() => {
-            update_grade_setting ();
-        });
-
-        notify["title"].connect (() => {
-            update_title_setting ();
-        });
-
-        notify["strikeout-complete"].connect (() => {
-            update_strikeout_setting ();
-        });
-
-        toggled.connect (() => { /* Allow parent to set values first */
-            if (active) {
-                update_dimension_settings ();
-                update_grade_setting ();
-                update_title_setting ();
-                update_strikeout_setting ();
-                popover.show_all ();
-            }
-        });
-    }
 
     public AppMenu (Controller controller) {
         Object (
@@ -100,38 +31,49 @@ class AppMenu : Gtk.MenuButton {
         );
     }
 
-    private void update_dimension_settings () {
-        rows_setting.@value = dimensions.rows ();
-        columns_setting.@value = dimensions.cols ();
-    }
+    construct {
+        var grid = new Gtk.Grid () {
+            margin = 6,
+            margin_top = 12,
+            row_spacing = 6,
+            column_homogeneous = false
+        };
 
-    private void update_grade_setting () {
-        grade_setting.@value = (uint)grade;
-    }
+        var grade_setting = new GradeChooser ();
+        var row_setting = new DimensionSpinButton ();
+        var column_setting = new DimensionSpinButton ();
+        var title_setting = new Gtk.Entry () {
+            placeholder_text = _("Enter title of game here")
+        };
 
-    private void update_title_setting () {
-        title_setting.text = title;
-    }
+        grid.attach (new SettingLabel (_("Name:")), 0, 0, 1);
+        grid.attach (title_setting, 1, 0, 3);
+        grid.attach (new SettingLabel (_("Difficulty:")), 0, 1, 1);
+        grid.attach (grade_setting, 1, 1, 3);
+        grid.attach (new SettingLabel (_("Rows:")), 0, 2, 1);
+        grid.attach (row_setting, 1, 2, 1);
+        grid.attach (new SettingLabel (_("Columns:")), 0, 3, 1);
+        grid.attach (column_setting, 1, 3, 1);
 
-    private void update_strikeout_setting () {
-        strikeout_setting.state = strikeout_complete;
-    }
+        var app_popover = new AppPopover ();
+        app_popover.add (grid);
+        set_popover (app_popover);
 
-    private void update_properties () {
-        var rows = rows_setting.@value;
-        var cols = columns_setting.@value;
-        dimensions = {cols, rows};
-        grade = (Difficulty)(grade_setting.@value);
-        title = title_setting.text;
-        strikeout_complete = strikeout_setting.state;
-    }
+        app_popover.apply_settings.connect (() => {
+            controller.generator_grade = grade_setting.grade;
+            controller.dimensions = {(uint)column_setting.@value, (uint)row_setting.@value};
+            controller.game_name = title_setting.text;
+        });
 
-    private void add_setting (ref int pos, AppSetting setting) {
-        var label = setting.get_heading ();
-        label.xalign = 1;
-        grid.attach (label, 0, pos, 1, 1);
-        grid.attach (setting.get_chooser (), 1, pos, 1, 1);
-        pos++;
+        toggled.connect (() => { /* Allow parent to set values first */
+            if (active) {
+                grade_setting.grade = controller.generator_grade;
+                row_setting.value =  (double)(controller.dimensions.height);
+                column_setting.value =  (double)(controller.dimensions.width);
+                title_setting.text = controller.game_name;
+                popover.show_all ();
+            }
+        });
     }
 
     /** Popover that can be cancelled with Escape and closed by Enter **/
@@ -158,6 +100,15 @@ class AppMenu : Gtk.MenuButton {
                     hide ();
                 }
             });
+        }
+    }
+
+    private class SettingLabel : Gtk.Label {
+        public SettingLabel (string text) {
+            Object (
+                label: text,
+                xalign: 1.0f
+            );
         }
     }
 }
