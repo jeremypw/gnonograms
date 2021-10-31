@@ -6,32 +6,9 @@ Nonogram puzzle game written in Vala/Gtk and intended primarily for elementaryos
 
 ![Screenshot](data/screenshots/Solving.png)
 
-### Dependencies
-These dependencies must be present before building
- - `valac`
- - `meson`
- - `gtk+-3.0`
- - `granite`
-
- You can install these on a Ubuntu-based system by executing this command:
-
- `sudo apt install valac meson libgranite-dev`
-
-### Building
-```
-meson build --prefix=/usr  --buildtype=release
-cd build
-ninja
-```
-
-### Installing & executing
-```
-sudo ninja install
-com.github.jeremypw.gnonograms
-```
-
-### Building and installing as Flatpak
-To build the latest code with the latest Platform and Sdk:
+### Building and installing as Flatpak (recommended)
+To build the latest code with the latest Platform and Sdk, open a terminal and navigate 
+to the root folder of the source code. Then run these commands:
 ```
 sudo apt install flatpak
 
@@ -41,8 +18,21 @@ flatpak install io.elementary.Platform io.elementary.Sdk (choose 'daily' version
 
 sudo apt install flatpak-builder
 
-flatpak-builder --force-clean --install --user <path-to-a-build-directory> com.github.jeremypw.gnonograms.yml
+mkdir ./build
+
+flatpak-builder --force-clean --install --user build com.github.jeremypw.gnonograms.yml
 
 ```
 
-The elementary applications menu will now contain Gnonograms or it can be run from the terminal with `flatpak run com.github.jeremypw.gnonograms.yml`
+Gnonograms can be run from the terminal with
+```
+flatpak run com.github.jeremypw.gnonograms`
+```
+
+On Elementary, Gnonograms will appear in the Applications Menu.
+
+### Uninstalling Gnonograms Flatpak
+```
+flatpak uninstall com.github.jeremypw.gnonograms
+```
+
