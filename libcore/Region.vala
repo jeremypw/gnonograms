@@ -1,5 +1,5 @@
 /* Represents a linear region of cells for gnonograms -elementary
- * Copyright (C) 2010 -2017  Jeremy Wootten
+ * Copyright (C) 2010 -2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
  *  Author:
  *  Jeremy Wootten  <jeremywootten@gmail.com>
  */
-namespace Gnonograms {
 
 /** A region consists of a one dimensional array of cells, corresponding
  *  to a row or column of the puzzle. Associated with this are:
@@ -41,8 +40,7 @@ namespace Gnonograms {
 
 **/
 
-public class Region { /* Not a GObject, to reduce weight */
-    /** PUBLIC **/
+public class Gnonograms.Region { /* Not a GObject, to reduce weight */
     public bool is_column { get; private set; }
     public bool in_error { get; private set; default = false; }
     public bool is_completed { get; private set; default = false; }
@@ -2270,5 +2268,4 @@ public class Region { /* Not a GObject, to reduce weight */
         message = "%s Region %u Record error in %s : %s \n"
                   .printf (is_column ? "COL" : "ROW", index, method, errmessage);
     }
-}
 }
