@@ -19,8 +19,7 @@
  *  Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-namespace Gnonograms {
-public class Block {
+public class Gnonograms.Block {
     public int length;
     public bool is_complete;
     public bool is_error;
@@ -42,7 +41,7 @@ public class Block {
     }
 }
 
-public struct Cell {
+public struct Gnonograms.Cell {
     public uint row;
     public uint col;
     public CellState state;
@@ -87,7 +86,7 @@ public struct Cell {
     }
 }
 
-public struct Dimensions {
+public struct Gnonograms.Dimensions {
     uint width;
     uint height;
 
@@ -112,8 +111,18 @@ public struct Dimensions {
     }
 }
 
-public struct FilterInfo {
+public struct Gnonograms.FilterInfo {
     string name;
     string[] patterns;
 }
+
+public struct Gnonograms.Range { //can use for filled subregions or ranges of filled and unknown cells
+    public int start;
+    public int end;
+    public int filled;
+    public int unknown;
+
+    public int length () {
+        return end - start + 1;
+    }
 }

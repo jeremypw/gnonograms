@@ -1304,7 +1304,12 @@ public class Region { /* Not a GObject, to reduce weight */
             }
 
             end = idx - 1; //last filled cell
-            available_subregions[region_count - 1] = new Range (start, end, -1, -1);
+            available_subregions[region_count - 1] = Range () {
+                start = start,
+                end = end,
+                filled = -1,
+                unknown = -1
+            };
         }
 
         if (region_count < 2 || region_count > n_blocks) {

@@ -43,7 +43,6 @@ executable (
     'libcore/utils.vala',
     'libcore/Model.vala',
     'libcore/My2DCellArray.vala',
-    'libcore/Range.vala',
     'libcore/Region.vala',
     'libcore/Solver.vala',
     'libcore/Filereader.vala',
