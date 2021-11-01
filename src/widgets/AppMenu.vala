@@ -68,8 +68,8 @@ class AppMenu : Gtk.MenuButton {
         toggled.connect (() => { /* Allow parent to set values first */
             if (active) {
                 grade_setting.grade = controller.generator_grade;
-                row_setting.value =  (double)(controller.dimensions.height);
-                column_setting.value =  (double)(controller.dimensions.width);
+                row_setting.value = (double)(controller.dimensions.height);
+                column_setting.value = (double)(controller.dimensions.width);
                 title_setting.text = controller.game_name;
                 popover.show_all ();
             }

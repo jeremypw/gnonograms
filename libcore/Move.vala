@@ -1,6 +1,6 @@
 
 /*
- * Copyright (C) 2010-2017  Jeremy Wootten
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,28 +19,23 @@
  *  Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-namespace Gnonograms {
-
-/* Move class records the current cell coordinates, its state and previous state */
-public class Move {
+public class Gnonograms.Move {
     public static Move null_move = new Move (NULL_CELL, CellState.UNDEFINED);
     public Cell cell;
     public CellState previous_state;
 
-    public Move (Cell cell, CellState previous_state) {
-        this.cell.row = cell.row;
-        this.cell.col = cell.col;
-        this.cell.state = cell.state;
-        this.previous_state = previous_state;
+    public Move (Cell _cell, CellState _previous_state) {
+        cell = Cell () {
+            row =_cell.row,
+            col =_cell.col,
+            state = _cell.state
+        };
+
+        previous_state = _previous_state;
     }
 
     public bool equal (Move m) {
-        return m.cell == this.cell && m.previous_state == this.previous_state;
-    }
-
-    public void copy (Move m) {
-        this.cell.copy (m.cell);
-        this.previous_state = m.previous_state;
+        return m.cell.equal (cell) && m.previous_state == previous_state;
     }
 
     public Move clone () {
@@ -61,7 +56,6 @@ public class Move {
         }
 
         var parts = s.split (",");
-
         if (parts == null || parts.length != 4) {
             return Move.null_move;
         }
@@ -82,5 +76,4 @@ public class Move {
         Cell c = {row, col, state};
         return new Move (c, previous_state);
     }
-}
 }

@@ -19,8 +19,7 @@
  *  Jeremy Wootten  < jeremwootten@gmail.com >
  */
 
-namespace Gnonograms {
-public class Filereader : Object {
+public class Gnonograms.Filereader : Object {
     /** PUBLIC **/
     public string err_msg = "";
 
@@ -83,12 +82,12 @@ public class Filereader : Object {
     private File? get_load_game_file (Gtk.Window? parent, string? load_dir_path) {
 
         string? path = Utils.get_open_save_path (
-                            parent,
-                            _("Choose a puzzle"),
-                            false,
-                            load_dir_path,
-                            ""
-                        );
+            parent,
+            _("Choose a puzzle"),
+            false,
+            load_dir_path,
+            ""
+        );
 
         if (path == null || path == "") {
             return null;
@@ -425,5 +424,4 @@ public class Filereader : Object {
 
         return sb.str;
     }
-}
 }

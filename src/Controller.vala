@@ -420,7 +420,7 @@ public class Gnonograms.Controller : GLib.Object {
             view.update_labels_from_string_array (reader.row_clues, false);
             view.update_labels_from_string_array (reader.col_clues, true);
             // Set difficulty in header bar; copy any solution found to solution grid.
-            yield start_solving (false, true); 
+            yield start_solving (false, true);
         } else {
             reader.err_msg = (_("Clues missing"));
             return false;

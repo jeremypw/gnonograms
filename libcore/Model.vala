@@ -1,5 +1,5 @@
 /* Handles working and solution data for gnonograms
- * Copyright (C) 2010-2017  Jeremy Wootten
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,27 +17,23 @@
  *  Author:
  *  Jeremy Wootten <jeremywootten@gmail.com>
  */
-namespace Gnonograms {
-public class Model : GLib.Object {
-    /** PUBLIC **/
+public class Gnonograms.Model : GLib.Object {
     public signal void changed ();
-
-    public GameState game_state { get; set; default = GameState.UNDEFINED; }
-    public Dimensions dimensions { get; set; }
-    public uint rows { get {return dimensions.height;} }
-    public uint cols { get {return dimensions.width;} }
 
     public My2DCellArray display_data {
         get {
             return game_state == GameState.SETTING ? solution_data : working_data;
         }
     }
-
     public bool is_finished {
         get {
             return count_state (GameState.SOLVING, CellState.UNKNOWN) == 0;
         }
     }
+    public GameState game_state { get; set; default = GameState.UNDEFINED; }
+    public Dimensions dimensions { get; set; }
+    public uint rows { get {return dimensions.height;} }
+    public uint cols { get {return dimensions.width;} }
 
     private My2DCellArray solution_data { get; set; }
     private My2DCellArray working_data { get; set; }
@@ -57,11 +53,9 @@ public class Model : GLib.Object {
     public int count_errors () {
         CellState cs;
         int count = 0;
-
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols;c++) {
                 cs = working_data.get_data_from_rc (r, c);
-
                 if (cs != CellState.UNKNOWN && cs != solution_data.get_data_from_rc (r, c)) {
                     count++;
                 }
@@ -75,11 +69,9 @@ public class Model : GLib.Object {
         int count=0;
         CellState cs;
         My2DCellArray arr = game_state == GameState.SOLVING ? working_data : solution_data;
-
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
                 cs = arr.get_data_from_rc (r, c);
-
                 if (cs == cell_state) {
                     count++;
                 }
@@ -145,7 +137,6 @@ public class Model : GLib.Object {
     private string[] get_clues (bool is_column) {
         var dim = is_column ? cols : rows;
         var texts = new string [dim];
-
         for (uint index = 0; index < dim; index++) {
             texts[index] = get_label_text_from_solution (index, is_column);
         }
@@ -172,7 +163,6 @@ public class Model : GLib.Object {
     public bool get_complete (uint idx, bool is_column) {
         var csa = new CellState[is_column ? rows : cols];
         working_data.get_array (idx, is_column, ref csa);
-
         foreach (CellState cs in csa) {
             if (cs == CellState.UNKNOWN) {
                 return false;
@@ -196,6 +186,7 @@ public class Model : GLib.Object {
         solution_data.copy (array);
         changed ();
     }
+
     public void set_working_from_array (My2DCellArray array) {
         working_data.copy (array);
         changed ();
@@ -249,5 +240,4 @@ public class Model : GLib.Object {
         grid.copy (solution_data);
         return grid;
     }
-}
 }

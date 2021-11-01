@@ -1,5 +1,5 @@
 /* Two dimensional array of cell states allowing access and updating by row and column regions.
- * Copyright (C) 2010-2017  Jeremy Wootten
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,11 +18,7 @@
  *  Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-namespace Gnonograms {
-/*** NOTE:  This class does not range check coordinates passed as parameters - that is the responsibility
-   *        of the calling function.
-***/
-public class My2DCellArray : GLib.Object {
+public class Gnonograms.My2DCellArray : GLib.Object {
     public Dimensions dimensions { get; construct; }
 
     public uint rows {
@@ -45,16 +41,16 @@ public class My2DCellArray : GLib.Object {
 
     private CellState[,] data;
 
-    construct {
-        data = new CellState[rows, cols];
-    }
-
     public My2DCellArray (Dimensions _dimensions, CellState init = CellState.EMPTY) {
         Object (
             dimensions: _dimensions
         );
 
         set_all (init);
+    }
+
+    construct {
+        data = new CellState[rows, cols];
     }
 
     public void set_data_from_cell (Cell c) {
@@ -138,7 +134,6 @@ public class My2DCellArray : GLib.Object {
     public string to_string () {
         StringBuilder sb = new StringBuilder ();
         CellState[] arr = new CellState[cols];
-
         for (int r = 0; r < rows; r++) {
             get_row (r, ref arr);
             sb.append (Utils.string_from_cellstate_array (arr));
@@ -153,15 +148,14 @@ public class My2DCellArray : GLib.Object {
     }
 
     public class Iterator {
-        private uint row_limit { get; set; }
-        private uint col_limit { get; set; }
-        private CellState [ , ] data { get; set; }
-
+        private CellState [ , ] data;
+        private uint row_limit;
+        private uint col_limit;
         private uint row_index = 0;
         private uint col_index = 0;
 
-        public Iterator (CellState [,] data, Dimensions dimensions) {
-            this.data = data;
+        public Iterator (CellState [,] _data, Dimensions dimensions) {
+            data = _data;
             row_limit = dimensions.height - 1;
             col_limit = dimensions.width - 1;
         }
@@ -173,7 +167,6 @@ public class My2DCellArray : GLib.Object {
         public Cell get () {
             Cell cell = {row_index, col_index, data[row_index, col_index]};
             row_index++;
-
             if (row_index > row_limit) {
                 row_index = 0;
                 col_index++;
@@ -182,5 +175,4 @@ public class My2DCellArray : GLib.Object {
             return cell;
         }
     }
-}
 }
