@@ -129,8 +129,7 @@ public class Gnonograms.Controller : GLib.Object {
         );
 
         restore_settings ();
-
-        bind_property ("dimensions", model, "dimensions");
+        bind_property ("dimensions", model, "dimensions", BindingFlags.SYNC_CREATE);
         bind_property ("dimensions", view, "dimensions", BindingFlags.BIDIRECTIONAL);
         bind_property ("generator-grade", view, "generator-grade", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         bind_property ("game-state", model, "game-state");
@@ -235,17 +234,15 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     private void save_game_state () {
-        if (saved_state == null) {
-            return;
-        }
+        if (saved_state != null) {
+            int x, y;
+            window.get_position (out x, out y);
+            saved_state.set_int ("window-x", x);
+            saved_state.set_int ("window-y", y);
 
-        int x, y;
-        window.get_position (out x, out y);
-        saved_state.set_int ("window-x", x);
-        saved_state.set_int ("window-y", y);
-
-        if (current_game_path != null) {
-            saved_state.set_string ("current-game-path", current_game_path);
+            if (current_game_path != null) {
+                saved_state.set_string ("current-game-path", current_game_path);
+            }
         }
 
         if (temporary_game_path != null) {
@@ -256,9 +253,12 @@ public class Gnonograms.Controller : GLib.Object {
                 /* Error normally thrown on first run */
                 debug ("Error deleting temporary game file %s - %s", temporary_game_path, e.message);
             } finally {
+            warning ("writing unsaved game to %s", temporary_game_path);
                 /* Save solution and current state */
                 write_game (temporary_game_path, true);
             }
+        } else {
+            warning ("No temporary game path");
         }
     }
 
@@ -273,9 +273,12 @@ public class Gnonograms.Controller : GLib.Object {
             /* Error normally thrown running uninstalled */
             debug ("Unable to restore settings - using defaults"); /* Maybe running uninstalled */
             /* Default puzzle parameters */
-            game_state = GameState.SETTING;
+            current_game_path = temporary_game_path;
+            game_state = GameState.SOLVING;
             generator_grade = Difficulty.MODERATE;
         }
+
+        restore_dimensions ();
     }
 
     private void restore_dimensions () {
@@ -291,8 +294,8 @@ public class Gnonograms.Controller : GLib.Object {
 
     private async bool restore_game () {
         if (temporary_game_path != null) {
-            var current_game_path = File.new_for_path (temporary_game_path);
-            return yield load_game_async (current_game_path);
+            var current_game_file = File.new_for_path (temporary_game_path);
+            return yield load_game_async (current_game_file);
         } else {
             return false;
         }
@@ -355,7 +358,7 @@ public class Gnonograms.Controller : GLib.Object {
         clear_history ();
         try {
             reader = new Filereader (window, Environment.get_user_data_dir (), game);
-        } catch (GLib.IOError e) {
+        } catch (GLib.Error e) {
             if (!(e is IOError.CANCELLED)) {
                 var basename = game != null ? game.get_basename () : _("game");
                 string? game_path = null;
@@ -412,29 +415,31 @@ public class Gnonograms.Controller : GLib.Object {
             return false;
         }
 
-        model.blank_working (); // Do not reveal solution on load
         if (reader.has_solution) {
             view.game_grade = reader.difficulty;
-            model.set_solution_data_from_string_array (reader.solution[0 : rows]);
         } else if (reader.has_row_clues && reader.has_col_clues) {
             view.update_labels_from_string_array (reader.row_clues, false);
             view.update_labels_from_string_array (reader.col_clues, true);
-            // Set difficulty in header bar; copy any solution found to solution grid.
-            yield start_solving (false, true);
         } else {
             reader.err_msg = (_("Clues missing"));
             return false;
         }
+            
+        Idle.add (() => { // Need time for model to update dimensions through notify signal
+            model.blank_working (); // Do not reveal solution on load
+            model.set_solution_data_from_string_array (reader.solution[0 : rows]);
 
-        if (reader.name.length > 1 && reader.name != "") {
-            game_name = reader.name;
-        }
+            if (reader.name.length > 1 && reader.name != "") {
+                game_name = reader.name;
+            }
 
-        if (reader.has_working) {
-            model.set_working_data_from_string_array (reader.working[0 : rows]);
-        }
+            if (reader.has_working) {
+                model.set_working_data_from_string_array (reader.working[0 : rows]);
+            }
 
-        view.update_labels_from_solution (); /* Ensure completeness correctly set */
+            view.update_labels_from_solution (); /* Ensure completeness correctly set */
+            return Source.REMOVE;
+        });
 
         is_readonly = reader.is_readonly;
         if (reader.original_path != null && reader.original_path != "") {
