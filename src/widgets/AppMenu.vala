@@ -62,7 +62,7 @@ class AppMenu : Gtk.MenuButton {
         app_popover.apply_settings.connect (() => {
             controller.generator_grade = grade_setting.grade;
             controller.dimensions = {(uint)column_setting.@value, (uint)row_setting.@value};
-            controller.game_name = title_setting.text;
+            controller.game_name = title_setting.text; // Must come after changing dimensions
         });
 
         toggled.connect (() => { /* Allow parent to set values first */

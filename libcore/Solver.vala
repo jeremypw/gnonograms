@@ -1,6 +1,6 @@
 /* Solver class for gnonograms
  * Finds solution for a set of clues.
- * Copyright (C) 2010-2017  Jeremy Wootten
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,21 +19,50 @@
  *  Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-namespace Gnonograms {
- public class Solver : AbstractSolver {
-    /** Initiate solving, specifying whether or not to use the advanced
-      * procedures. Also specify whether in debugging mode and whether to solve one step
-      * at a time (used for hinting if implemented).
-    **/
+ public class Gnonograms.Solver : Object {
+    public SolverState state { get; set; }
+    public My2DCellArray grid { get; protected set; } // Shared with Regions which can update the contents
+    public My2DCellArray solution { get; protected set; }
+    public Cancellable? cancellable { get; set; }
+    public bool cancelled {
+        get {
+            return cancellable != null ? cancellable.is_cancelled () : false;
+        }
+    }
 
-    /* Cells solved per pass factors for different grades. The lower the factor, the more time consuming
-     * it is to generate or solve a puzzle of that grade.
-     */
+    private Dimensions _dimensions;
+    public Dimensions dimensions {
+        get {
+            return _dimensions;
+        }
+
+        set {
+            _dimensions = value;
+            grid = new My2DCellArray (_dimensions);
+            solution = new My2DCellArray (_dimensions);
+            regions = new Region[n_regions];
+
+            for (int i = 0; i < n_regions; i++) {
+                regions[i] = new Region (grid);
+            }
+        }
+    }
+
+    public bool unique_only { get; set; default = true;} /* Do not allow ambiguus solutions */
+    public bool use_advanced { get; set; default = false;} /* Use advanced logic (trial and error) */
+    public bool advanced_only { get; set; default = false;} /* Must need advanced logic */
+    public bool human_only { get; set; default = true;} /* Limit solutions to those humanly achievable */
+    public uint rows { get { return dimensions.height; }}
+    public uint cols { get { return dimensions.width; }}
+
     private const double MODERATE_CPP = 5.0f;
     private const double HARD_CPP = 3.0f;
     private const double CHALLENGING_CPP = 1.5f;
+    private const uint MAX_PASSES = 200;
 
-    /* Corresponding pass numbers for different grade (depends on dimensions) */
+    private Region[] regions;
+    private uint n_regions { get { return dimensions.length (); }}
+    private bool should_check_solution;
     private uint moderate_threshold;
     private uint hard_threshold;
     private uint challenging_threshold;
@@ -50,12 +79,108 @@ namespace Gnonograms {
         challenging_threshold = (uint)((length / CHALLENGING_CPP - 0.5)); /* Round down */
     }
 
-    public override void configure_from_grade (Difficulty grade) {
+    /** Set up solver for a particular puzzle. In addition to the clues, a starting point
+      * and/or the correct solution may be provided (useful for debugging).
+    **/
+    private bool initialize (string[] row_clues,
+                             string[] col_clues,
+                             My2DCellArray? start_grid = null,
+                             My2DCellArray? solution_grid = null) {
+
+        assert (row_clues.length == rows && col_clues.length == cols);
+        should_check_solution = solution_grid != null;
+
+        if (should_check_solution) {
+            solution.copy (solution_grid);
+        }
+
+        if (start_grid != null) {
+            grid.copy (start_grid);
+        } else {
+            grid.set_all (CellState.UNKNOWN);
+        }
+
+        int index = 0;
+        for (int r = 0; r < rows; r++) {
+            regions[index++].initialize (r, false, cols, row_clues[r]);
+        }
+
+        for (int c = 0; c < cols; c++) {
+            regions[index++].initialize (c, true, rows, col_clues[c]);
+        }
+
+        state = SolverState.UNDEFINED;
+
+        return valid ();
+    }
+
+    /** Initiate solving, specifying whether or not to use the advanced
+      * procedures. Also specify whether in debugging mode and whether to solve one step
+      * at a time (used for hinting if implemented).
+    **/
+    public async Difficulty solve_clues (string[] row_clues,
+                                         string[] col_clues,
+                                         My2DCellArray? start_grid = null,
+                                         My2DCellArray? solution_grid = null) {
+
+        if (initialize (row_clues, col_clues, start_grid, solution_grid)) {
+            return yield solve_it ();
+        } else {
+            state = SolverState.ERROR;
+            return Difficulty.UNDEFINED;
+        }
+    }
+
+    public void cancel () {
+        cancellable.cancel ();
+    }
+
+    private void reinitialize_regions () {
+        int index = 0;
+        for (int r = 0; r < rows; r++) {
+            regions[index++].set_to_initial_state ();
+        }
+
+        for (int c = 0; c < cols; c++) {
+            regions[index++].set_to_initial_state ();
+        }
+    }
+
+    private bool valid () {
+        foreach (Region r in regions) {
+            if (r.in_error) {
+                return false;
+            }
+        }
+
+        int row_total = 0;
+        int col_total = 0;
+        for (int r = 0; r < rows; r++) {
+            row_total += regions[r].block_total;
+        }
+
+        for (int c = 0; c < cols; c++) {
+            col_total += regions[rows + c].block_total;
+        }
+
+        return row_total == col_total;
+    }
+
+    public bool solved () {
+        foreach (Region r in regions) {
+            if (!r.is_completed) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public void configure_from_grade (Difficulty grade) {
         use_advanced = false;
         unique_only = true;
         advanced_only = false;
         human_only = true;
-
         switch (grade) {
             case Difficulty.EASY:
             case Difficulty.MODERATE:
@@ -63,20 +188,17 @@ namespace Gnonograms {
             case Difficulty.CHALLENGING:
 
                 break;
-
             case Difficulty.ADVANCED:
                 use_advanced = true;
                 advanced_only = true;
 
                 break;
-
             case Difficulty.MAXIMUM:
                 use_advanced = true;
                 unique_only = false;
                 advanced_only = true;
 
                 break;
-
             case Difficulty.COMPUTER:
                 use_advanced = true;
                 unique_only = false;
@@ -89,30 +211,31 @@ namespace Gnonograms {
         }
     }
 
-    protected override Difficulty solve_it () {
+    private async Difficulty solve_it () {
+        int result = -1;
         for (int i = 0; i < n_regions; i++) {
             regions[i].set_to_initial_state ();
         }
 
-        int result = simple_solver ();
+        result = yield simple_solver ();
 
         if (state == SolverState.SIMPLE && advanced_only) {
             result = 0;
         } else if (state != SolverState.SIMPLE && use_advanced) {
-            result = advanced_solver (); // Sets state if solution found
+            result = yield advanced_solver (); // Sets state if solution found
         }
 
         return passes_to_grade (result);
     }
 
-    public override Gee.ArrayQueue<Move> debug (uint idx, bool is_column, string[] row_clues,
-                                                string[] col_clues, My2DCellArray working) {
+    public Gee.ArrayQueue<Move> debug (uint idx, bool is_column, string[] row_clues,
+                                       string[] col_clues, My2DCellArray working) {
+
+        initialize (row_clues, col_clues, working, null);
 
         var moves = new Gee.ArrayQueue<Move> ();
-        initialize (row_clues, col_clues, working, null);
         var r= regions[idx + (is_column ? rows : 0)];
         var changed = r.debug ();
-
         if (r.in_error) {
             state = SolverState.ERROR;
             critical ("Debugged Region in error");
@@ -137,7 +260,7 @@ namespace Gnonograms {
         return moves;
     }
 
-    public override Gee.ArrayQueue<Move> hint (string[] row_clues, string[] col_clues, My2DCellArray working) {
+    public Gee.ArrayQueue<Move> hint (string[] row_clues, string[] col_clues, My2DCellArray working) {
         assert (working.dimensions.equal (grid.dimensions));
         assert (working.dimensions.rows () == row_clues.length);
         assert (working.dimensions.cols () == col_clues.length);
@@ -146,9 +269,7 @@ namespace Gnonograms {
 
         bool changed = false;
         uint count = 0;
-
         var moves = new Gee.ArrayQueue<Move> ();
-
         /* Initialize may have changed state of some cells during initial fix */
         foreach (Region r in regions) {
             var size = r.is_column ? rows : cols;
@@ -156,7 +277,6 @@ namespace Gnonograms {
             working.get_array (r.index, r.is_column, ref csa);
             for (int i = 0; i < size; i++) {
                 var r_state = r.get_cell_state (i);
-
                 if (r_state != CellState.UNKNOWN && csa[i] != r_state) {
                     var row = r.is_column ? i : r.index;
                     var col = r.is_column ? r.index : i;
@@ -167,17 +287,17 @@ namespace Gnonograms {
             }
         }
 
-        while (!changed && count < 2 && state != SolverState.ERROR) { /* May require two passes before a state changes */
+        while (!changed && count < 2 &&
+               state != SolverState.ERROR) { /* May require two passes before a state changes */
+
             changed = false;
             count++;
-
             foreach (Region r in regions) {
                 if (r.is_completed) {
                     continue;
                 }
 
                 changed = r.solve ();
-
                 if (r.in_error) {
                     state = SolverState.ERROR;
                     break;
@@ -206,43 +326,42 @@ namespace Gnonograms {
         return moves;
     }
 
-    /** PRIVATE **/
-
     /** Returns -1 to indicate an error **/
-    private int simple_solver () {
+    private async int simple_solver () {
         bool changed = true;
         int pass = 1;
         reinitialize_regions ();
-
         state = SolverState.UNDEFINED;
+        Idle.add (() => {
+            while (changed && pass >= 0 && pass < MAX_PASSES) {
+                //keep cycling through regions while at least one of them is changing
+                changed = false;
+                foreach (Region r in regions) {
+                    if (r.is_completed) {
+                        continue;
+                    }
 
-        while (changed && pass >= 0 && pass < MAX_PASSES) {
-            //keep cycling through regions while at least one of them is changing
-            changed = false;
-
-            foreach (Region r in regions) {
-                if (r.is_completed) {
-                    continue;
+                    changed |= r.solve ();
+                    if (r.in_error) {
+                        state = SolverState.ERROR;
+                        break;
+                    }
                 }
 
-                changed |= r.solve ();
-
-                if (r.in_error) {
-                    state = SolverState.ERROR;
+                pass++;
+                if (cancellable.is_cancelled () ) {
+                    state = SolverState.CANCELLED;
                     break;
                 }
             }
 
-            pass++;
+            simple_solver.callback ();
+            return Source.REMOVE;
+        });
 
-            if (cancellable.is_cancelled () ) {
-                state = SolverState.CANCELLED;
-                break;
-            }
-        }
+        yield;
 
         solution.copy (grid);
-
         if (!(state in (SolverState.ERROR | SolverState.CANCELLED))) {
             if (solved ()) {
                 state = SolverState.SIMPLE;
@@ -261,7 +380,7 @@ namespace Gnonograms {
         continue simple solve and if still no solution, continue with another guess.
         If first guess does not lead to solution leave unknown and choose another cell
     **/
-    private int advanced_solver () {
+    private async int advanced_solver () {
         /* Simple solver must have already been run */
         int result = 0;
         int changed_count = 0;
@@ -273,6 +392,7 @@ namespace Gnonograms {
         int contra = 0;
 
         state = SolverState.UNDEFINED;
+
         while (state == SolverState.UNDEFINED) {
             changed_count++;
 
@@ -281,7 +401,7 @@ namespace Gnonograms {
                 break;
             }
 
-            result = simple_solver ();
+            result = yield simple_solver ();
             initial_state = state;
 
             /* Reject too difficult solution path */
@@ -295,7 +415,7 @@ namespace Gnonograms {
 
             /* Try opposite to check whether ambiguous or unique */
             guesser.invert_previous_guess ();
-            result = simple_solver () ;
+            result = yield simple_solver ();
             inverse_state = state;
 
             if (initial_state == SolverState.ERROR && inverse_state == SolverState.ERROR) {
@@ -315,7 +435,7 @@ namespace Gnonograms {
                     contra = result;
                     /* Regenerate original result */
                     guesser.invert_previous_guess ();
-                    result = simple_solver ();
+                    result = yield simple_solver ();
 
                     if (initial_state == SolverState.SIMPLE) {
                         state = SolverState.ADVANCED;
@@ -329,7 +449,6 @@ namespace Gnonograms {
                     }
 
                     break;
-
                 case SolverState.NO_SOLUTION:
                     if (initial_state == SolverState.SIMPLE) {
                         if (unique_only) { /* reject ambiguous solution */
@@ -337,7 +456,7 @@ namespace Gnonograms {
                         } else {
                             // regenerate original solution
                             guesser.invert_previous_guess ();
-                            result = simple_solver ();
+                            result = yield simple_solver ();
                             state = SolverState.AMBIGUOUS;
                         }
                     } else if (initial_state == SolverState.ERROR) { // already checked for too may passes to contradiction.
@@ -354,7 +473,6 @@ namespace Gnonograms {
                     }
 
                     break;
-
                 case SolverState.SIMPLE:
                     // INVERSE guess yielded a solution.
                     if (initial_state == SolverState.ERROR) {
@@ -368,10 +486,8 @@ namespace Gnonograms {
                     }
 
                     break;
-
                 case SolverState.CANCELLED:
                     break;
-
                 default:
                     critical ("unexpected state %s", inverse_state.to_string ());
                     assert_not_reached ();
@@ -381,7 +497,6 @@ namespace Gnonograms {
                 state = SolverState.CANCELLED;
                 break;
             }
-
         }
 
         //return vague measure of difficulty
@@ -399,7 +514,6 @@ namespace Gnonograms {
                 assert_not_reached ();
         }
     }
-
 
     /** Only call if simple solver used **/
     private Difficulty passes_to_grade (uint passes) {
@@ -565,5 +679,4 @@ namespace Gnonograms {
             return true;
         }
     }
-}
 }

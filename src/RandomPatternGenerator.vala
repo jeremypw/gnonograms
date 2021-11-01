@@ -1,5 +1,5 @@
 /* Handles working and solution data for gnonograms
- * Copyright (C) 2010-2017  Jeremy Wootten
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,26 +17,61 @@
  *  Author:
  *  Jeremy Wootten <jeremywootten@gmail.com>
  */
-namespace Gnonograms {
-public class RandomPatternGenerator : AbstractPatternGenerator {
+public class Gnonograms.RandomPatternGenerator : Object {
+    private Dimensions _dimensions = Dimensions () { width = 0, height = 0 };
+    public Dimensions dimensions {
+        get {
+            return _dimensions;
+        }
 
-    public int threshold = 40;
-    public int min_freedom = 0;
-    public int edge_bias = 0; /* Extra freedom for edge ranges */
+        set {
+            _dimensions = value;
+            set_parameters ();
+        }
+    }
+
+    private Difficulty _grade = Difficulty.EASY;
+    public Difficulty grade {
+        get {
+            return _grade;
+        }
+
+        set {
+            _grade = value;
+            set_parameters ();
+        }
+    }
+
+    public int threshold { get; set; default = 40;}
+    public int min_freedom { get; set; default = 0;}
+    public int edge_bias { get; set; default = 0;} /* Extra freedom for edge ranges */
+
+    private uint rows {
+        get { return dimensions.height; }
+    }
+
+    private uint cols {
+        get { return dimensions.width; }
+    }
+
+    private Rand rand_gen;
 
     public RandomPatternGenerator (Dimensions dim) {
         Object (dimensions: dim);
     }
 
-    public override My2DCellArray generate () {
-        var grid = new My2DCellArray (dimensions, CellState.EMPTY);
+    construct {
+        rand_gen = new Rand ();
+    }
 
+    public My2DCellArray generate () {
+        var grid = new My2DCellArray (dimensions, CellState.EMPTY);
         new_pattern (grid);
 
         return grid;
     }
 
-    public override void easier () {
+    public void easier () {
         if (min_freedom > 1) {
             min_freedom--;
         } else if (threshold > 50) {
@@ -44,12 +79,13 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
         }
     }
 
+    public void harder () {}
 
     /* Approximately suitable parameters to generate puzzles of the required grade.
      * These factors do not affect the difficulty of the puzzles but may impact on the
      * length of time to generate a pattern with the correct grade.
      */
-    protected override void set_parameters () {
+    protected void set_parameters () {
         edge_bias = 0;
 
         switch (grade) {
@@ -226,5 +262,4 @@ public class RandomPatternGenerator : AbstractPatternGenerator {
         var ptr = rand_gen.int_range (1, lim);
         sa[ptr] = CellState.FILLED;
     }
-}
 }
