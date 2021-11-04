@@ -1,4 +1,4 @@
-/* View class for gnonograms - displays user interface
+/* View.vala
  * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
@@ -17,9 +17,6 @@
  *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-/*** The View class manages the header, clue label widgets and the drawing widget under instruction
-   * from the controller. It signals user interaction to the controller.
-***/
 public class Gnonograms.View : Hdy.ApplicationWindow {
     public signal void random_game_request ();
     public signal uint rewind_request ();

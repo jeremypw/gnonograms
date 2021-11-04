@@ -1,5 +1,5 @@
-/* Displays clues for gnonograms
- * Copyright (C) 2010-2017  Jeremy Wootten
+/* AppMenu.vala
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,13 +14,10 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  Author:
- *  Jeremy Wootten <jeremyw@elementaryos.org>
+ *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-namespace Gnonograms {
-
-class AppMenu : Gtk.MenuButton {
+class Gnonograms.AppMenu : Gtk.MenuButton {
     public unowned Controller controller { get; construct; }
 
     public AppMenu (Controller controller) {
@@ -111,5 +108,4 @@ class AppMenu : Gtk.MenuButton {
             );
         }
     }
-}
 }

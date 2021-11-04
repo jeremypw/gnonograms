@@ -1,4 +1,4 @@
-/* Represents a linear region of cells for gnonograms -elementary
+/* Region.vala
  * Copyright (C) 2010 -2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
@@ -14,33 +14,31 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see  < http://www.gnu.org/licenses/>.
  *
- *  Author:
- *  Jeremy Wootten  <jeremywootten@gmail.com>
+ *  Author: Jeremy Wootten  <jeremywootten@gmail.com>
  */
 
-/** A region consists of a one dimensional array of cells, corresponding
- *  to a row or column of the puzzle. Associated with this are:
- *
+/* A region consists of a one dimensional array of cells, corresponding
+   to a row or column of the puzzle. Associated with this are:
+
   1) A list of block lengths (clues)
-  2) A 'tag' bool array for each cell with
-    *   a flag for each block indicating whether that block is still a possible owner
-    *   two extra flags  - ' is completed' and ' can be empty'
-  3) A 'completed blocks' bool array with
-    *   a flag for each block indicating whether it is completed.
-  4) A status array, one per cell indicating the status of that cell as either
-    * UNKNOWN,
-    * FILLED (but not necessarily assigned to a completed block),
-    * EMPTY, or
-    * COMPLETED (assigned to a completed block).
-    *
-  5) Can save and restore its state  - used to implement (one level)
-     back tracking during trial and error solution ('advanced solver').
+  2) A boolean array for each cell with
+     - a flag for each block indicating whether that block is still a possible owner
+     - two extra flags: ' is completed' and ' can be empty'
+  3) A boolean array with
+    - a flag for each block indicating whether it is completed.
+  4) A status array, indicating the status of each cell as either
+    - UNKNOWN,
+    - FILLED (but not necessarily assigned to a completed block),
+    - EMPTY, or
+    - COMPLETED (assigned to a completed block).
+
+  5) Can save and restore its state - used to implement  back tracking (one level)
+     during trial and error solution ('advanced solver').
 
   6) Re-used if grid dimensions do not change.
+*/
 
-**/
-
-public class Gnonograms.Region { /* Not a GObject, to reduce weight */
+public class Gnonograms.Region {
     public bool is_column { get; private set; }
     public bool in_error { get; private set; default = false; }
     public bool is_completed { get; private set; default = false; }

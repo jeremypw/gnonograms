@@ -1,4 +1,5 @@
-/* Copyright (C) 2021  Jeremy Wootten
+/*  DimensionSpinButton.vala
+ *  Copyright (C) 2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -13,8 +14,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  Author:
- *  Jeremy Wootten <jeremyw@elementaryos.org>
+ *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
 public class Gnonograms.DimensionSpinButton : Gtk.SpinButton {

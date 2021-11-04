@@ -1,4 +1,4 @@
-/* Controller class for gnonograms - creates model and view, handles user input and settings.
+/* Controller.vala
  * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
@@ -14,14 +14,10 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  Author:
- *  Jeremy Wootten <jeremywootten@gmail.com>
+ *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
-/*** Controller class is created by the Application class. It coordinates all other classes and
-   * provides business logic. Most of its properties and functions are private.
-***/
+
 public class Gnonograms.Controller : GLib.Object {
-/** PUBLIC SIGNALS, PROPERTIES, FUNCTIONS AND CONSTRUCTOR **/
     public signal void quit_app ();
 
     public Gtk.Window window { get { return (Gtk.Window)view;}}

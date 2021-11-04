@@ -1,5 +1,4 @@
-/* Solver class for gnonograms
- * Finds solution for a set of clues.
+/* Solver.vala
  * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
@@ -15,8 +14,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  Author:
- *  Jeremy Wootten <jeremywootten@gmail.com>
+ *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
  public class Gnonograms.Solver : Object {

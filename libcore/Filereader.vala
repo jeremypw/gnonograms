@@ -1,4 +1,4 @@
-/* Game file reader class for gnonograms
+/* Filereader.vala
  * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software; you can redistribute it and/or modify
@@ -15,8 +15,7 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *  Author:
- *  Jeremy Wootten  < jeremwootten@gmail.com >
+ *  Author: Jeremy Wootten  < jeremwootten@gmail.com >
  */
 
 public class Gnonograms.Filereader : Object {
