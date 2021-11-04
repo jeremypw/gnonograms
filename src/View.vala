@@ -192,13 +192,12 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
             sensitive = false
         };
         generate_button = new HeaderButton ("list-add", _("Generate New Puzzle")) {
-            margin_start = 24
+            margin_start = 6
         };
         app_menu = new AppMenu (controller);
 
-        mode_switch = new Granite.ModeSwitch.from_icon_name ("edit-symbolic", "head-thinking") {
-            margin_top = 6,
-            margin_bottom = 6
+        mode_switch = new Granite.ModeSwitch.from_icon_name ("edit-symbolic", "head-thinking-symbolic") {
+            valign = Gtk.Align.CENTER
         };
 
         progress_indicator = new ProgressIndicator ();
@@ -225,11 +224,11 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
 
         header_bar.pack_end (app_menu);
         header_bar.pack_end (new Gtk.Separator (Gtk.Orientation.VERTICAL));
-        header_bar.pack_end (generate_button);
-        header_bar.pack_end (mode_switch);
-        header_bar.pack_end (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_end (auto_solve_button);
         header_bar.pack_end (hint_button);
+        header_bar.pack_end (new Gtk.Separator (Gtk.Orientation.VERTICAL));
+        header_bar.pack_end (generate_button);
+        header_bar.pack_end (mode_switch);
         header_bar.set_custom_title (progress_stack);
 
         overlay = new Gtk.Overlay () {
