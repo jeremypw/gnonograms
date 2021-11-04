@@ -66,7 +66,8 @@ public class Gnonograms.Controller : GLib.Object {
         view.solve_this_request.connect (on_solve_this_request);
         view.restart_request.connect (on_restart_request);
         view.hint_request.connect (on_hint_request);
-#if 0
+
+#if WITH_DEBUGGING
         view.debug_request.connect (on_debug_request);
 #endif
         notify["game-state"].connect (() => {
@@ -588,7 +589,7 @@ public class Gnonograms.Controller : GLib.Object {
         }
     }
 
-#if 0
+#if WITH_DEBUGGING
     private void on_debug_request (uint idx, bool is_column) {
         if (game_state != GameState.SOLVING) {
             return;

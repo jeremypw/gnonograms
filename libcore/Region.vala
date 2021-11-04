@@ -94,7 +94,7 @@ public class Gnonograms.Region { /* Not a GObject, to reduce weight */
     private int[,] ranges;
     private int[,] ranges_backup;
     private string clue;
-#if 0
+#if WITH_DEBUGGING
     private bool debugging = false;
 #endif
 
@@ -193,7 +193,7 @@ public class Gnonograms.Region { /* Not a GObject, to reduce weight */
         put_status ();
     }
 
-#if 0
+#if WITH_DEBUGGING
     public bool debug () {
         debugging = true;
         set_to_initial_state ();
@@ -329,7 +329,7 @@ public class Gnonograms.Region { /* Not a GObject, to reduce weight */
         return status[index] == CellState.COMPLETED ? CellState.FILLED : status[index];
     }
 
-#if 0
+#if WITH_DEBUGGING
     /* For debugging and testing */
     public string to_string () {
         var sb = new StringBuilder ("");

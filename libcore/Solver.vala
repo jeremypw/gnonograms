@@ -228,7 +228,7 @@
         return passes_to_grade (result);
     }
 
-#if 0
+#if WITH_DEBUGGING
     public Gee.ArrayQueue<Move> debug (uint idx, bool is_column, string[] row_clues,
                                        string[] col_clues, My2DCellArray working) {
 
