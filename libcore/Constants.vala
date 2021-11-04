@@ -1,6 +1,6 @@
 
 /* Entry point for gnonograms  - initializes application and launches game
- * Copyright (C) 2010-2017  Jeremy Wootten
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -60,5 +60,4 @@ namespace Gnonograms {
     public const string PALE_BACKGROUND = "#8cd5ff"; /* Elementary Blueberry 100 */
     public const string DARK_SHADOW = "#1a1a1a"; /* Elementary Black 700 */
     public const string PALE_SHADOW = "#fafafa"; /* Elementary Silver 100 */
-
 }

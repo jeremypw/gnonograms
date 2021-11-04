@@ -31,7 +31,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     public signal void solve_this_request ();
     public signal void restart_request ();
     public signal void hint_request ();
-    public signal void debug_request (uint idx, bool is_column);
+    // public signal void debug_request (uint idx, bool is_column);
     public signal void changed_cell (Cell cell, CellState previous_state);
 
     public Model model {private get; construct; }
@@ -65,9 +65,9 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         {"check-errors", action_check_errors},
         {"restart", action_restart},
         {"solve", action_solve},
-        {"hint", action_hint},
-        {"debug-row", action_debug_row},
-        {"debug-col", action_debug_col}
+        {"hint", action_hint}
+        // {"debug-row", action_debug_row},
+        // {"debug-col", action_debug_col}
     };
 
     private LabelBox row_clue_box;
@@ -148,8 +148,8 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         application.set_accels_for_action ("view.check-errors", {"F7", "less", "comma"});
         application.set_accels_for_action ("view.restart", {"F5", "<Ctrl>R"});
         application.set_accels_for_action ("view.hint", {"F9", "<Ctrl>H"});
-        application.set_accels_for_action ("view.debug-row", {"<Alt>R"});
-        application.set_accels_for_action ("view.debug-col", {"<Alt>C"});
+        // application.set_accels_for_action ("view.debug-row", {"<Alt>R"});
+        // application.set_accels_for_action ("view.debug-col", {"<Alt>C"});
 
         resizable = true;
         drawing_with_state = CellState.UNDEFINED;
@@ -662,13 +662,13 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         hint_request ();
     }
 
-    private void action_debug_row () {
-        debug_request (current_cell.row, false);
-    }
+    // private void action_debug_row () {
+    //     debug_request (current_cell.row, false);
+    // }
 
-    private void action_debug_col () {
-        debug_request (current_cell.col, true);
-    }
+    // private void action_debug_col () {
+    //     debug_request (current_cell.col, true);
+    // }
 
     private void action_undo () {
         previous_move_request ();

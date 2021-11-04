@@ -228,6 +228,7 @@
         return passes_to_grade (result);
     }
 
+#if 0
     public Gee.ArrayQueue<Move> debug (uint idx, bool is_column, string[] row_clues,
                                        string[] col_clues, My2DCellArray working) {
 
@@ -259,6 +260,7 @@
 
         return moves;
     }
+#endif
 
     public Gee.ArrayQueue<Move> hint (string[] row_clues, string[] col_clues, My2DCellArray working) {
         assert (working.dimensions.equal (grid.dimensions));

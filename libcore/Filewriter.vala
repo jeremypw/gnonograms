@@ -103,7 +103,6 @@ public class Gnonograms.Filewriter : Object {
         }
 
         stream = FileStream.open (game_path, "w"); /* This requires local path, not a uri */
-
         if (stream == null) {
             throw new IOError.FAILED ("Could not open filestream to %s".printf (game_path));
         }

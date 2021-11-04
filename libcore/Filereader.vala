@@ -20,7 +20,6 @@
  */
 
 public class Gnonograms.Filereader : Object {
-    /** PUBLIC **/
     public string err_msg = "";
 
     public File? game_file { get; set; default = null;}
@@ -78,9 +77,7 @@ public class Gnonograms.Filereader : Object {
 
     }
 
-    /** PRIVATE **/
     private File? get_load_game_file (Gtk.Window? parent, string? load_dir_path) {
-
         string? path = Utils.get_open_save_path (
             parent,
             _("Choose a puzzle"),
@@ -115,7 +112,6 @@ public class Gnonograms.Filereader : Object {
                     break;
                 }
             }
-
         } catch (GLib.Error e) {
             /* Ignore read error caused by end of file */
         }
@@ -221,7 +217,6 @@ public class Gnonograms.Filereader : Object {
         }
 
         string[] s = Utils.remove_blank_lines (body.split ("\n"));
-
         if (s.length != 2) {
             err_msg = "Wrong number of dimensions";
             return false;
@@ -236,14 +231,12 @@ public class Gnonograms.Filereader : Object {
 
     private string[] get_gnonogram_clues (string? body, int max_block) {
         string [] clues = {};
-
         if (body == null) {
             err_msg = "No clues given";
             return {};
         }
 
         string[] clue_strings = Utils.remove_blank_lines (body.split ("\n"));
-
         if (clue_strings == null || clue_strings.length < 1) {
             err_msg = _("Missing clues");
             return {};
@@ -251,7 +244,6 @@ public class Gnonograms.Filereader : Object {
 
         foreach (var clue_string in clue_strings) {
             string? clue = parse_gnonogram_clue (clue_string, max_block);
-
             if (clue == null) {
                 err_msg = _("Invalid clue");
                 return {};
@@ -270,7 +262,6 @@ public class Gnonograms.Filereader : Object {
         }
 
         string[] row_strings = Utils.remove_blank_lines (body.split ("\n"));
-
         if (row_strings == null || row_strings.length != rows) {
             err_msg = _("Wrong number of rows in solution or working grid");
             return false;
@@ -278,7 +269,6 @@ public class Gnonograms.Filereader : Object {
 
         foreach (var row in row_strings) {
             CellState[] states = Utils.cellstate_array_from_string (row);
-
             if (states.length != cols) {
                 err_msg = _("Wrong number of columns in solution or working grid");
                 return false;
@@ -308,13 +298,10 @@ public class Gnonograms.Filereader : Object {
     private bool get_gnonogram_state (string? body) {
         /* Default to SOLVING state to avoid inadvertently showing solution */
         state = GameState.SOLVING;
-
         if (body != null) {
             string[] s = Utils.remove_blank_lines (body.split ("\n"));
-
             if (s != null && s.length == 1) {
                 var state_string = s[0];
-
                 if (state_string.up ().contains ("SETTING")) {
                     state = GameState.SETTING;
                 }
@@ -333,7 +320,6 @@ public class Gnonograms.Filereader : Object {
         }
 
         string[] s = Utils.remove_blank_lines (body.split ("\n"));
-
         if (s.length >= 1) {
             name = Uri.unescape_string (s[0]);
         }
@@ -360,7 +346,6 @@ public class Gnonograms.Filereader : Object {
         }
 
         string[] s = Utils.remove_blank_lines (body.split ("\n"));
-
         bool result = true;
         if (s.length >= 1) {
             bool.try_parse (s[0].down (), out result);
@@ -373,10 +358,8 @@ public class Gnonograms.Filereader : Object {
 
     private bool get_original_game_path (string? body) {
         string result = "";
-
         if (body != null) {
             string[] s = Utils.remove_blank_lines (body.split ("\n"));
-
             if (s.length >= 1) {
                 result = s[0];
             }
@@ -389,7 +372,6 @@ public class Gnonograms.Filereader : Object {
 
     private string? parse_gnonogram_clue (string line, int maxblock) {
         string[] blocks = Utils.remove_blank_lines (line.split_set (", "));
-
         if (blocks == null) {
             return null;
         }
@@ -397,10 +379,8 @@ public class Gnonograms.Filereader : Object {
         int b, zero_count = 0;
         int remaining_space = maxblock;
         StringBuilder sb = new StringBuilder ();
-
         foreach (var block in blocks) {
             b = int.parse (block);
-
             if (b == 0 && zero_count > 0) {
                 continue;
             } else {

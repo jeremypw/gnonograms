@@ -1,5 +1,5 @@
 /* Entry point for gnonograms  - initializes application and launches game
- * Copyright (C) 2010-2017  Jeremy Wootten
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,106 +19,88 @@
  */
 
 namespace Gnonograms {
-public enum Difficulty {
-    TRIVIAL = 0,
-    VERY_EASY = 1,
-    EASY = 2,
-    MODERATE = 3,
-    HARD =4 ,
-    CHALLENGING = 5,
-    ADVANCED = 6,
-    MAXIMUM = 7, /* Max grade for generated puzzles (possibly ambiguous)*/
-    COMPUTER = 8, /* Grade for requested computer solving */
-    UNDEFINED = 99;
+    public enum Difficulty {
+        TRIVIAL = 0,
+        VERY_EASY = 1,
+        EASY = 2,
+        MODERATE = 3,
+        HARD =4 ,
+        CHALLENGING = 5,
+        ADVANCED = 6,
+        MAXIMUM = 7, /* Max grade for generated puzzles (possibly ambiguous)*/
+        COMPUTER = 8, /* Grade for requested computer solving */
+        UNDEFINED = 99;
 
-    public string to_string () {
-        switch (this) {
-            case Difficulty.TRIVIAL:
-                return _("Trivial");
-            case Difficulty.VERY_EASY:
-                return _("Very Easy");
-            case Difficulty.EASY:
-                return _("Easy");
-            case Difficulty.MODERATE:
-                return _("Moderately difficult");
-            case Difficulty.HARD:
-                return _("Difficult");
-            case Difficulty.CHALLENGING:
-                return _("Very Difficult");
-            case Difficulty.ADVANCED:
-                return _("Advanced logic required");
-            case Difficulty.MAXIMUM:
-                return _("Possibly ambiguous");
-            case Difficulty.COMPUTER:
-                return _("Super human");
-            case Difficulty.UNDEFINED:
-                return "";
-            default:
-                critical ("grade to string - unexpected grade");
-                assert_not_reached ();
+        public string to_string () {
+            switch (this) {
+                case Difficulty.TRIVIAL:
+                    return _("Trivial");
+                case Difficulty.VERY_EASY:
+                    return _("Very Easy");
+                case Difficulty.EASY:
+                    return _("Easy");
+                case Difficulty.MODERATE:
+                    return _("Moderately difficult");
+                case Difficulty.HARD:
+                    return _("Difficult");
+                case Difficulty.CHALLENGING:
+                    return _("Very Difficult");
+                case Difficulty.ADVANCED:
+                    return _("Advanced logic required");
+                case Difficulty.MAXIMUM:
+                    return _("Possibly ambiguous");
+                case Difficulty.COMPUTER:
+                    return _("Super human");
+                case Difficulty.UNDEFINED:
+                    return "";
+                default:
+                    critical ("grade to string - unexpected grade");
+                    assert_not_reached ();
+            }
+        }
+
+        public static Difficulty[] all_human () {
+            return { EASY, MODERATE, HARD, CHALLENGING, ADVANCED, MAXIMUM };
         }
     }
 
-    public static Difficulty[] all_human () {
-        return { EASY, MODERATE, HARD, CHALLENGING, ADVANCED, MAXIMUM };
+    public enum GameState {
+        SETTING,
+        SOLVING,
+        GENERATING,
+        UNDEFINED = 99;
     }
-}
 
-public enum GameState {
-    SETTING,
-    SOLVING,
-    GENERATING,
-    UNDEFINED = 99;
-}
-
-public enum CellState {
-    UNKNOWN,
-    EMPTY,
-    FILLED,
-    COMPLETED,
-    UNDEFINED;
-}
-
-public enum SolverState {
-    ERROR = 0,
-    CANCELLED = 1,
-    NO_SOLUTION = 1 << 1,
-    SIMPLE = 1 << 2,
-    ADVANCED = 1 << 3,
-    AMBIGUOUS = 1 << 4,
-    UNDEFINED = 1 << 5;
-
-    public bool solved () {
-        return this == SIMPLE || this == ADVANCED || this == AMBIGUOUS;
+    public enum CellState {
+        UNKNOWN,
+        EMPTY,
+        FILLED,
+        COMPLETED,
+        UNDEFINED;
     }
-}
 
-public enum CellPatternType {
-    CELL,
-    HIGHLIGHT,
-    UNDEFINED
-}
+    public enum SolverState {
+        ERROR = 0,
+        CANCELLED = 1,
+        NO_SOLUTION = 1 << 1,
+        SIMPLE = 1 << 2,
+        ADVANCED = 1 << 3,
+        AMBIGUOUS = 1 << 4,
+        UNDEFINED = 1 << 5;
 
-public enum GamePatternType {
-    SIMPLE_RANDOM,
-    UNDEFINED
-}
+        public bool solved () {
+            return this == SIMPLE || this == ADVANCED || this == AMBIGUOUS;
+        }
+    }
 
-public enum ButtonPress {
-    LEFT_SINGLE,
-    LEFT_DOUBLE,
-    MIDDLE_SINGLE,
-    MIDDLE_DOUBLE,
-    RIGHT_SINGLE,
-    RIGHT_DOUBLE,
-    UNDEFINED
-}
+    public enum CellPatternType {
+        CELL,
+        HIGHLIGHT,
+        UNDEFINED
+    }
 
-public enum FileChooserAction {
-    OPEN,
-    SAVE_NO_SOLUTION,
-    SAVE_WITH_SOLUTION,
-    SELECT_FOLDER,
-    UNDEFINED
-}
+    public enum GamePatternType {
+        SIMPLE_RANDOM,
+        UNDEFINED
+    }
 }

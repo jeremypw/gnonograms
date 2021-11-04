@@ -1,5 +1,5 @@
 /* Holds all row or column clues for gnonograms
- * Copyright (C) 2010 - 2017  Jeremy Wootten
+ * Copyright (C) 2010 - 2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,9 +18,7 @@
  *  Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-namespace Gnonograms {
-/** Widget to hold variable number of clues, with either vertical or horizontal orientation **/
-public class LabelBox : Gtk.Grid {
+public class Gnonograms.LabelBox : Gtk.Grid {
     public Gtk.PositionType attach_position {
         get {
             if (orientation == Gtk.Orientation.HORIZONTAL) {
@@ -42,13 +40,17 @@ public class LabelBox : Gtk.Grid {
     public int min_height { get; private set; }
     public double fontheight { get; set; }
 
+    private Clue[] labels;
+    private int size;
+    private int other_size; /* Size of other label box */
+
     public LabelBox (Gtk.Orientation _orientation) {
         Object (column_homogeneous: true,
                 row_homogeneous: true,
                 column_spacing: 0,
                 row_spacing: 0,
                 orientation: _orientation
-                );
+        );
     }
 
     construct {
@@ -119,7 +121,6 @@ public class LabelBox : Gtk.Grid {
 
     public void clear_formatting (uint index) {
         Clue? label = labels[index];
-
         if (label != null) {
             label.clear_formatting ();
         }
@@ -127,16 +128,12 @@ public class LabelBox : Gtk.Grid {
 
     public void update_label_complete (uint index, Gee.List<Block> grid_blocks) {
         Clue? label = labels[index];
-
         if (label != null) {
             label.update_complete (grid_blocks);
         }
     }
 
-/** PRIVATE **/
-    private Clue[] labels;
-    private int size;
-    private int other_size; /* Size of other label box */
+
 
     private Clue new_label (bool vertical) {
         var label = new Clue (vertical);
@@ -153,7 +150,6 @@ public class LabelBox : Gtk.Grid {
 
         var new_size = (int)(vertical_labels ? dimensions.width : dimensions.height);
         var new_other_size = (int)(vertical_labels ? dimensions.height : dimensions.width);
-
         while (size < new_size) {
             var label = new_label (vertical_labels);
             if (size > 0) {
@@ -179,7 +175,6 @@ public class LabelBox : Gtk.Grid {
 
         size = new_size;
         other_size = new_other_size;
-
         for (uint index = 0; index < size; index++) {
             labels[index].size = other_size;
         }
@@ -198,5 +193,4 @@ public class LabelBox : Gtk.Grid {
         _min_height = min_height;
         _nat_height = min_height;
     }
-}
 }

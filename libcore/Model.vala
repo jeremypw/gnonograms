@@ -25,11 +25,13 @@ public class Gnonograms.Model : GLib.Object {
             return game_state == GameState.SETTING ? solution_data : working_data;
         }
     }
+
     public bool is_finished {
         get {
             return count_state (GameState.SOLVING, CellState.UNKNOWN) == 0;
         }
     }
+
     public GameState game_state { get; set; default = GameState.UNDEFINED; }
     public Dimensions dimensions { get; set; }
     public uint rows { get {return dimensions.height;} }

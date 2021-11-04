@@ -66,8 +66,9 @@ public class Gnonograms.Controller : GLib.Object {
         view.solve_this_request.connect (on_solve_this_request);
         view.restart_request.connect (on_restart_request);
         view.hint_request.connect (on_hint_request);
+#if 0
         view.debug_request.connect (on_debug_request);
-
+#endif
         notify["game-state"].connect (() => {
             if (game_state != GameState.UNDEFINED) { /* Do not clear on save */
                 clear_history ();
@@ -424,7 +425,7 @@ public class Gnonograms.Controller : GLib.Object {
             reader.err_msg = (_("Clues missing"));
             return false;
         }
-            
+
         Idle.add (() => { // Need time for model to update dimensions through notify signal
             model.blank_working (); // Do not reveal solution on load
             model.set_solution_data_from_string_array (reader.solution[0 : rows]);
@@ -587,6 +588,7 @@ public class Gnonograms.Controller : GLib.Object {
         }
     }
 
+#if 0
     private void on_debug_request (uint idx, bool is_column) {
         if (game_state != GameState.SOLVING) {
             return;
@@ -605,6 +607,7 @@ public class Gnonograms.Controller : GLib.Object {
             history.record_move (mv.cell, mv.previous_state);
         }
     }
+#endif
 
     private async SolverState start_solving (bool copy_to_working = false, bool copy_to_solution = false) {
         /* Try as hard as possible to find solution, regardless of grade setting */

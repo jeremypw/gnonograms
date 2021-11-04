@@ -21,6 +21,7 @@
 
 public class Gnonograms.Move {
     public static Move null_move = new Move (NULL_CELL, CellState.UNDEFINED);
+
     public Cell cell;
     public CellState previous_state;
 

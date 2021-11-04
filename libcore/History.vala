@@ -20,11 +20,11 @@
  */
 
 public class Gnonograms.History : GLib.Object {
-    public bool can_go_back { get; private set; }
-    public bool can_go_forward { get; private set; }
-
     private HistoryStack back_stack;
     private HistoryStack forward_stack;
+
+    public bool can_go_back { get; private set; }
+    public bool can_go_forward { get; private set; }
 
     construct {
         back_stack = new HistoryStack ();
@@ -61,7 +61,6 @@ public class Gnonograms.History : GLib.Object {
     public Move pop_next_move () {
         Move mv = forward_stack.pop_move ();
         back_stack.push_move (mv);
-
         return mv;
     }
 
@@ -120,8 +119,9 @@ public class Gnonograms.History : GLib.Object {
     }
 
     private class HistoryStack : Object {
-        private Gee.Deque<Move> stack;
         public bool empty { get; private set; }
+
+        private Gee.Deque<Move> stack;
 
         construct {
             stack = new Gee.LinkedList<Move> ();

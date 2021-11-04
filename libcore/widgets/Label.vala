@@ -1,5 +1,5 @@
 /* Displays clues for gnonograms
- * Copyright (C) 2010-2017  Jeremy Wootten
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,16 +18,11 @@
  *  Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-namespace Gnonograms {
+class Gnonograms.Clue : Gtk.Label {
+    private const string ATTR_TEMPLATE = "<span size='%i' weight='%s' strikethrough='%s'>";
+    private const string TIP_TEMPLATE = "<span size='%i'>";
 
-class Clue : Gtk.Label {
-
-/** PUBLIC **/
-    public bool vertical_text { get; construct; }
-
-    /* total number of cells in the row/column to which this label is attached
-       Used to calculate freedom */
-
+    private uint _size;
     public uint size {
         set {
             _size = value;
@@ -46,6 +41,7 @@ class Clue : Gtk.Label {
         }
     }
 
+    private string _clue; /* text of clue in horizontal form */
     public string clue {
         get {
             return _clue;
@@ -58,6 +54,12 @@ class Clue : Gtk.Label {
         }
     }
 
+    public bool vertical_text { get; construct; }
+
+    private Gee.List<Block> clue_blocks;
+    private Gee.List<Block> grid_blocks;
+    private double fontsize;
+
     public Clue (bool _vertical_text) {
         Object (
             vertical_text: _vertical_text,
@@ -67,7 +69,9 @@ class Clue : Gtk.Label {
             has_tooltip: true,
             use_markup: true
         );
+    }
 
+    construct {
         size_allocate.connect_after (() => {
             update_markup ();
         });
@@ -222,15 +226,6 @@ class Clue : Gtk.Label {
         update_markup ();
     }
 
-/** PRIVATE **/
-    private Gee.List<Block> clue_blocks;
-    private Gee.List<Block> grid_blocks;
-    private const string ATTR_TEMPLATE = "<span size='%i' weight='%s' strikethrough='%s'>";
-    private const string TIP_TEMPLATE = "<span size='%i'>";
-    private double fontsize;
-    private string _clue; /* text of clue in horizontal form */
-    private uint _size;
-
     private void update_markup (double fs = fontsize) {
         var alloc = vertical_text ? get_allocated_height () : get_allocated_width ();
         if (!get_realized () || alloc < 10 || fontsize < 1000) {
@@ -254,9 +249,11 @@ class Clue : Gtk.Label {
     }
 
     private void update_tooltip () {
-        set_tooltip_markup (TIP_TEMPLATE.printf ((int)fontsize / 2) +
-                            _("Freedom = %u").printf (size - Utils.blockextent_from_clue (_clue)) +
-                            "</span>");
+        set_tooltip_markup (
+            TIP_TEMPLATE.printf ((int)fontsize / 2) +
+            _("Freedom = %u").printf (size - Utils.blockextent_from_clue (_clue)) +
+            "</span>"
+        );
     }
 
     private string get_markup () {
@@ -296,5 +293,4 @@ class Clue : Gtk.Label {
 
         return sb.str;
     }
-}
 }
