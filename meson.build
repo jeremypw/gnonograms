@@ -33,7 +33,6 @@ executable (
     'src/RandomPatternGenerator.vala',
     'src/SimpleRandomGameGenerator.vala',
     'src/widgets/AppMenu.vala',
-    'src/widgets/ViewModeButton.vala',
     'src/widgets/ProgressIndicator.vala',
     'src/widgets/DimensionSpinButton.vala',
     'src/widgets/GradeChooser.vala',

@@ -81,7 +81,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     private Gtk.Stack progress_stack;
     private Gtk.Label title_label;
     private Granite.Widgets.Toast toast;
-    private ViewModeButton mode_switch;
+    private Granite.ModeSwitch mode_switch;
     private Gtk.Button generate_button;
     private Gtk.Button load_game_button;
     private Gtk.Button save_game_button;
@@ -148,14 +148,15 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         application.set_accels_for_action ("view.check-errors", {"F7", "less", "comma"});
         application.set_accels_for_action ("view.restart", {"F5", "<Ctrl>R"});
         application.set_accels_for_action ("view.hint", {"F9", "<Ctrl>H"});
-        // application.set_accels_for_action ("view.debug-row", {"<Alt>R"});
-        // application.set_accels_for_action ("view.debug-col", {"<Alt>C"});
-
+#if WITH_DEBUGGING
+        application.set_accels_for_action ("view.debug-row", {"<Alt>R"});
+        application.set_accels_for_action ("view.debug-col", {"<Alt>C"});
+#endif
         resizable = true;
         drawing_with_state = CellState.UNDEFINED;
 
         weak Gtk.IconTheme default_theme = Gtk.IconTheme.get_default ();
-        default_theme.add_resource_path ("/com/gnonograms/icons");
+        default_theme.add_resource_path ("/com/github/jeremypw/gnonograms");
 
         header_bar = new Hdy.HeaderBar ();
         header_bar.set_has_subtitle (false);
@@ -194,7 +195,8 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
             margin_start = 24
         };
         app_menu = new AppMenu (controller);
-        mode_switch = new ViewModeButton () {
+
+        mode_switch = new Granite.ModeSwitch.from_icon_name ("edit-symbolic", "head-thinking") {
             margin_top = 6,
             margin_bottom = 6
         };
@@ -294,7 +296,13 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
 
         var flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
         bind_property ("restart-destructive", restart_button, "restart-destructive", BindingFlags.SYNC_CREATE) ;
-        bind_property ("game-state", mode_switch, "mode", flags);
+        bind_property ("game-state", mode_switch, "active", flags,
+        (binding, src_val, ref tgt_val) => {
+            tgt_val.set_boolean (src_val.get_enum () > GameState.SETTING);
+        },
+        (binding, src_val, ref tgt_val) => {
+            tgt_val.set_enum (src_val.get_boolean () ? GameState.SOLVING : GameState.SETTING);
+        });
         bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
         bind_property ("previous-cell", cell_grid, "previous-cell", BindingFlags.BIDIRECTIONAL);
         bind_property ("fontheight", row_clue_box, "fontheight");
@@ -649,13 +657,15 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         hint_request ();
     }
 
-    // private void action_debug_row () {
-    //     debug_request (current_cell.row, false);
-    // }
+#if WITH_DEBUGGING
+    private void action_debug_row () {
+        debug_request (current_cell.row, false);
+    }
 
-    // private void action_debug_col () {
-    //     debug_request (current_cell.col, true);
-    // }
+    private void action_debug_col () {
+        debug_request (current_cell.col, true);
+    }
+#endif
 
     private void action_undo () {
         previous_move_request ();
