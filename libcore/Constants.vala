@@ -20,7 +20,7 @@
  */
 
 namespace Gnonograms {
-    public const string VERSION = "1.4.5";
+    public const string VERSION = "2.0.0";
     public const Cell NULL_CELL = { uint.MAX, uint.MAX, CellState.UNDEFINED };
     public const uint MAXSIZE = 50; // max number rows or columns
     public const uint MINSIZE = 5; // Change to 1 when debugging
@@ -51,13 +51,4 @@ namespace Gnonograms {
     public const string SOLVING_EMPTY_COLOR = "#ffff00"; /* Pure Yellow */
     public const string UNKNOWN_COLOR = "#d4d4d4"; /* Elementary Silver 300 */
     public const string GRID_COLOR = "#000000"; /* Elementary Black 900 */
-
-    public const string DARK_TEXT = "#000000"; /* Elementary Black 900 */
-    public const string PALE_TEXT = "#fafafa"; /* Elementary Silver 100 */
-    public const string GNONOGRAMS_DARK_PURPLE = "#180297"; /* Gnonograms Dark Purple */
-    public const string GNONOGRAMS_PALE_PURPLE = "#cdc9e0"; /* Gnonograms Pale Purple */
-    public const string DARK_BACKGROUND = "#3689e6"; /* Elementary Blueberry 500 */
-    public const string PALE_BACKGROUND = "#8cd5ff"; /* Elementary Blueberry 100 */
-    public const string DARK_SHADOW = "#1a1a1a"; /* Elementary Black 700 */
-    public const string PALE_SHADOW = "#fafafa"; /* Elementary Silver 100 */
 }

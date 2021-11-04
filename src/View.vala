@@ -163,18 +163,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         var css_provider = new Gtk.CssProvider ();
 
         try {
-            css_provider.load_from_data ("""
-                @define-color GNONOGRAMS_DARK_PURPLE #180297;
-                @define-color GNONOGRAMS_PALE_PURPLE #cdc9e0;
-                .gnonograms-header {
-                    border: solid;
-                    border-top-width: 1px;
-                    border-color: @GNONOGRAMS_DARK_PURPLE;
-                    background-image: linear-gradient(to left,
-                    alpha(@GNONOGRAMS_DARK_PURPLE, 1.0), alpha(@GNONOGRAMS_PALE_PURPLE, 0));
-
-                }"""
-            );
+            css_provider.load_from_resource ("com/github/jeremypw/gnonograms/Application.css");
         } catch (Error e) {
             warning ("Error adding css provider: %s", e.message);
         }
@@ -201,14 +190,9 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         auto_solve_button = new HeaderButton ("system", _("Solve by Computer")) {
             sensitive = false
         };
-
         generate_button = new HeaderButton ("list-add", _("Generate New Puzzle")) {
             margin_start = 24
         };
-
-        generate_button.clicked.connect (() => {
-            game_state = GameState.GENERATING;
-        });
         app_menu = new AppMenu (controller);
         mode_switch = new ViewModeButton () {
             margin_top = 6,
@@ -287,8 +271,11 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
 
         grid.add (header_bar);
         grid.add (overlay);
-
         add (grid);
+
+        generate_button.clicked.connect (() => {
+            game_state = GameState.GENERATING;
+        });
 
         cell_grid.leave_notify_event.connect (on_grid_leave);
         cell_grid.button_press_event.connect (on_grid_button_press);

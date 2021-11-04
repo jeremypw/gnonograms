@@ -52,9 +52,11 @@
     <description>
       <ul>
         <li>Convert to Flatpak</li>
+        <li>Add WITH_DEBUGGING build option</li>
         <li>Discontinue ninja uninstall and custom mimetype</li>
-        <li>Less custom styling</li>
         <li>Use libhandy</li>
+        <li>Restyled headerbar</li>
+        <li>Responds to users prefers-dark setting</li>
         <li>Dutch translation - thanks to Heimen Stoffels</li>
         <li>Portuguese translation - thanks to André Barata</li>
       </ul>
