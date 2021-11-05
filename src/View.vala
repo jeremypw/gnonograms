@@ -77,6 +77,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     private ProgressIndicator progress_indicator;
     private Gtk.Stack progress_stack;
     private Gtk.Label title_label;
+    private Gtk.Label grade_label;
     private Granite.Widgets.Toast toast;
     private Granite.ModeSwitch mode_switch;
     private Gtk.Button generate_button;
@@ -200,14 +201,27 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         progress_indicator = new ProgressIndicator ();
 
         title_label = new Gtk.Label ("Gnonograms") {
-            use_markup = true
+            use_markup = true,
+            xalign = 0.5f
         };
         title_label.get_style_context ().add_class (Granite.STYLE_CLASS_H3_LABEL);
         title_label.show ();
+        grade_label = new Gtk.Label ("Easy") {
+            use_markup = true,
+            xalign = 0.5f
+        };
+        grade_label.get_style_context ().add_class (Granite.STYLE_CLASS_H4_LABEL);
+
+        var title_grid = new Gtk.Grid () {
+            orientation = Gtk.Orientation.VERTICAL
+        };
+        title_grid.add (title_label);
+        title_grid.add (grade_label);
+        title_grid.show_all ();
 
         progress_stack = new Gtk.Stack ();
         progress_stack.add_named (progress_indicator, "Progress");
-        progress_stack.add_named (title_label, "Title");
+        progress_stack.add_named (title_grid, "Title");
         progress_stack.set_visible_child_name ("Title");
 
         header_bar.pack_start (load_game_button);
@@ -220,7 +234,6 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         header_bar.pack_start (check_correct_button);
 
         header_bar.pack_end (app_menu);
-        header_bar.pack_end (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_end (auto_solve_button);
         header_bar.pack_end (hint_button);
         header_bar.pack_end (new Gtk.Separator (Gtk.Orientation.VERTICAL));
@@ -490,7 +503,8 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     }
 
     private void update_title () {
-        title_label.label = "%s\n%s".printf (game_name, Granite.TOOLTIP_SECONDARY_TEXT_MARKUP.printf (game_grade.to_string ()));
+        title_label.label = game_name;
+        grade_label.label = game_grade.to_string ();
     }
 
     private void set_buttons_sensitive (bool sensitive) {
