@@ -355,7 +355,7 @@ public class Gnonograms.Controller : GLib.Object {
         game_state = GameState.UNDEFINED;
         clear_history ();
         try {
-            reader = new Filereader (window, Environment.get_user_data_dir (), game);
+            reader = new Filereader (window, Environment.get_user_special_dir (UserDirectory.DOCUMENTS), game);
         } catch (GLib.Error e) {
             if (!(e is IOError.CANCELLED)) {
                 var basename = game != null ? game.get_basename () : _("game");

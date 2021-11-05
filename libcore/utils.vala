@@ -314,7 +314,6 @@ namespace Gnonograms.Utils {
                                              bool save,
                                              string start_path,
                                              string basename) {
-
         string? file_path = null;
         string button_label = save ? _("Save") : _("Open");
         var gtk_action = save ? Gtk.FileChooserAction.SAVE : Gtk.FileChooserAction.OPEN;
@@ -330,6 +329,12 @@ namespace Gnonograms.Utils {
         dialog.set_filename (Path.build_path (Path.DIR_SEPARATOR_S, start_path, basename));
         if (save) {
             dialog.set_current_name (basename);
+        } else {
+            try {
+                dialog.set_current_folder_file (File.new_for_path (start_path));
+            } catch (Error e) {
+                warning ("Error setting current folder: %s", e.message);
+            }
         }
 
         var response = dialog.run ();
