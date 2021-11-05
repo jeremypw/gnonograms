@@ -335,19 +335,30 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         return false;
     }
 
-    private class CellPattern: GLib.Object {
+    private class CellPattern {
         public Cairo.Pattern pattern;
         public double size { get; private set; }
-
+        private double red;
+        private double green;
+        private double blue;
         private double x0 = 0;
         private double y0 = 0;
         private Cairo.Matrix matrix;
 
         public CellPattern.cell (Gdk.RGBA color) {
-            double red = color.red;
-            double green = color.green;
-            double blue = color.blue;
-            pattern = new Cairo.Pattern.rgba (red, green, blue, 1.0);
+            red = color.red;
+            green = color.green;
+            blue = color.blue;
+            matrix = Cairo.Matrix.identity ();
+
+            var granite_settings = Granite.Settings.get_default ();
+            set_pattern (granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK);
+
+            granite_settings.notify["prefers-color-scheme"].connect (() => {
+                set_pattern (granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK);
+            });
+
+
         }
 
         public CellPattern.highlight (double wd, double ht) {
@@ -366,12 +377,8 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
 
             pattern = new Cairo.Pattern.for_surface (surface);
             pattern.set_extend (Cairo.Extend.NONE);
-            pattern.set_matrix (matrix);
-
-        }
-
-        construct {
             matrix = Cairo.Matrix.identity ();
+            pattern.set_matrix (matrix);
         }
 
         public void move_to (double x, double y) {
@@ -381,6 +388,15 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             pattern.set_matrix (matrix);
             x0 = x;
             y0 = y;
+        }
+
+        private void set_pattern (bool is_dark) {
+            pattern = new Cairo.Pattern.rgba (
+                is_dark ? red / 2 : red,
+                is_dark ? green / 2 : green,
+                is_dark ? blue / 2 : blue,
+                1.0
+            );
         }
     }
 }
