@@ -26,7 +26,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     public bool frozen { get; set; }
     public bool draw_only { get; set; default = false;}
 
-    /* Could have more options for cell pattern - only plain implemented for elementaryos*/
+    /* Could have more options for cell pattern*/
     private CellPatternType _cell_pattern_type;
     public CellPatternType cell_pattern_type {
         get {

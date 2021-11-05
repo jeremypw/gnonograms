@@ -1,5 +1,5 @@
 # ![icon](data/icons/48/com.github.jeremypw.gnonograms.svg) Gnonograms
-Nonogram puzzle game written in Vala/Gtk and intended primarily for elementaryos.
+Nonogram puzzle game written in Vala/Gtk.
 
 [![Get it on AppCenter](https://appcenter.elementary.io/badge.svg)](https://appcenter.elementary.io/com.github.jeremypw.gnonograms)﻿
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
@@ -29,7 +29,7 @@ Gnonograms can be run from the terminal with
 flatpak run com.github.jeremypw.gnonograms`
 ```
 
-On Elementary, Gnonograms will appear in the Applications Menu.
+Gnonograms will also appear in the Applications Menu.
 
 ### Uninstalling Gnonograms Flatpak
 ```
