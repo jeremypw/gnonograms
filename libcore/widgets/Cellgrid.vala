@@ -25,6 +25,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     public Cell previous_cell { get; set; }
     public bool frozen { get; set; }
     public bool draw_only { get; set; default = false;}
+    public int cell_size { get; set; }
 
     /* Could have more options for cell pattern*/
     private CellPatternType _cell_pattern_type;
@@ -66,16 +67,16 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     private const double MINOR_GRID_LINE_WIDTH = 1.0;
     private Gdk.RGBA[, ] colors;
 
-    private uint rows {
+    private int rows {
         get {
             assert (model != null);
-            return model != null ? model.rows : 0;
+            return model != null ? (int)model.rows : 0;
         }
     }
 
-    private uint cols {
+    private int cols {
         get {
-            return model != null ? model.cols : 0;
+            return model != null ? (int)model.cols : 0;
         }
     }
 
@@ -130,13 +131,13 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
 
         motion_notify_event.connect (on_pointer_moved);
         draw.connect (on_draw_event);
-        size_allocate.connect (on_size_allocate);
         leave_notify_event.connect (on_leave_notify);
 
         notify["current-cell"].connect (() => {
             queue_draw ();
         });
 
+        notify["cell-size"].connect (dimensions_updated);
         model.notify["dimensions"].connect (dimensions_updated);
         model.bind_property ("game-state", this, "game-state");
 
@@ -160,19 +161,14 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         colors[solving, (int)CellState.FILLED].parse (Gnonograms.SOLVING_FILLED_COLOR);
     }
 
-    private void on_size_allocate (Gtk.Allocation rect) {
-        alloc_width = (double)(rect.width);
-        alloc_height = (double)(rect.height);
-        dimensions_updated ();
-    }
-
     private void dimensions_updated () {
-        cell_width = (alloc_width) / (double)cols;
-        cell_height = (alloc_height) / (double)rows;
-        cell_body_width = cell_width;
-        cell_body_height = cell_height;
+        cell_width = cell_size;
+        cell_height = cell_size;
+        cell_body_width = cell_width - 1;
+        cell_body_height = cell_height - 1;
         /* Cause refresh of existing pattern */
         highlight_pattern = new CellPattern.highlight (cell_width, cell_height);
+        set_size_request (cols * cell_size + (int)MINOR_GRID_LINE_WIDTH, rows * cell_size + (int)MINOR_GRID_LINE_WIDTH);
     }
 
     private bool on_draw_event (Cairo.Context cr) {
@@ -218,70 +214,69 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         Gdk.cairo_set_source_rgba (cr, grid_color);
         cr.set_antialias (Cairo.Antialias.NONE);
         cr.set_line_width (MINOR_GRID_LINE_WIDTH);
-        double y1 = 0.0;
-        double x1 = 0.0;
-        double x2 = alloc_width;
-        double y2 = alloc_height;
-        while (y1 < alloc_height) {
+        // Draw minor grid lines
+        double y1 = MINOR_GRID_LINE_WIDTH;
+        double x1 = MINOR_GRID_LINE_WIDTH;
+        double x2 = x1 + cols * cell_size;
+        double y2 = y1 + rows * cell_size;
+        while (y1 < y2) {
             cr.move_to (x1, y1);
             cr.line_to (x2, y1);
             cr.stroke ();
-            y1 += cell_height;
+            y1 += cell_size;
         }
 
-        x1 = 0.0;
-        y1 = 0.0;
-        while (x1 < alloc_width) {
+        y1 = MINOR_GRID_LINE_WIDTH;
+        // x1 = MINOR_GRID_LINE_WIDTH;
+        while (x1 < x2) {
             cr.move_to (x1, y1);
             cr.line_to (x1, y2);
             cr.stroke ();
-            x1 += cell_width;
+            x1 += cell_size;
         }
 
+        // Draw inner major grid lines
         cr.set_line_width (MAJOR_GRID_LINE_WIDTH);
-
-        y1 = 0;
-        x1 = 0;
-        x2 = alloc_width;
-        y2 = alloc_height;
-        while (y1 < alloc_height) {
-            y1 += 5.0 * cell_height;
+        x1 = MINOR_GRID_LINE_WIDTH;
+        // x2 = alloc_width;
+        // y2 = alloc_height;
+        while (y1 < y2) {
+            y1 += 5.0 * cell_size;
             cr.move_to (x1, y1);
             cr.line_to (x2, y1);
             cr.stroke ();
         }
 
-        x1 = 0;
-        y1 = 0;
-        while (x1 < alloc_width) {
-            x1 += 5.0 * cell_width;
+        y1 = MINOR_GRID_LINE_WIDTH;
+        while (x1 < x2) {
+            x1 += 5.0 * cell_size;
             cr.move_to (x1, y1);
             cr.line_to (x1, y2);
             cr.stroke ();
         }
 
-        cr.set_line_width (MAJOR_GRID_LINE_WIDTH);
-
-        y1 = MAJOR_GRID_LINE_WIDTH / 2;
-        x1 = 0; x2 = alloc_width;
+        // Draw frame
+        cr.set_line_width (MINOR_GRID_LINE_WIDTH);
+        y1 = 0;
+        x1 = 0;
         cr.move_to (x1, y1);
         cr.line_to (x2, y1);
         cr.stroke ();
 
-        y1 = alloc_height - MAJOR_GRID_LINE_WIDTH / 2;
-        cr.move_to (x1, y1);
-        cr.line_to (x2, y1);
+        // y1 = 0;
+        // cr.move_to (x1, y1);
+        cr.line_to (x2, y2);
         cr.stroke ();
 
-        x1 = MAJOR_GRID_LINE_WIDTH / 2;
-        y1 = 0; y2 = alloc_height;
-        cr.move_to (x1, y1);
+        // x1 = MAJOR_GRID_LINE_WIDTH / 2;
+        // y1 = 0;
+        // cr.move_to (x1, y1);
         cr.line_to (x1, y2);
         cr.stroke ();
 
-        x1 = alloc_width - MAJOR_GRID_LINE_WIDTH / 2;
-        cr.move_to (x1, y1);
-        cr.line_to (x1, y2);
+        // x1 = x2 - MAJOR_GRID_LINE_WIDTH / 2;
+        // cr.move_to (x1, y1);
+        cr.line_to (x1, y1);
         cr.stroke ();
 
     }

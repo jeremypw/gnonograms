@@ -28,12 +28,15 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     public signal void solve_this_request ();
     public signal void restart_request ();
     public signal void hint_request ();
-    // public signal void debug_request (uint idx, bool is_column);
+#if WITH_DEBUGGING
+    public signal void debug_request (uint idx, bool is_column);
+#endif
     public signal void changed_cell (Cell cell, CellState previous_state);
 
     public Model model {private get; construct; }
     public unowned Controller controller { get; construct; }
     public Dimensions dimensions { get; set; }
+    public int cell_size { get; set; default = 32; }
     public Difficulty generator_grade { get; set; }
     public GameState game_state { get; set; }
     public bool strikeout_complete { get; set; }
@@ -62,9 +65,11 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         {"check-errors", action_check_errors},
         {"restart", action_restart},
         {"solve", action_solve},
+#if WITH_DEBUGGING
+        {"debug-row", action_debug_row},
+        {"debug-col", action_debug_col},
+#endif
         {"hint", action_hint}
-        // {"debug-row", action_debug_row},
-        // {"debug-col", action_debug_col}
     };
 
     private LabelBox row_clue_box;
@@ -99,7 +104,8 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     public View (Model _model, Controller controller) {
         Object (
             model: _model,
-            controller: controller
+            controller: controller,
+            resizable: false
         );
     }
 
@@ -271,10 +277,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         ev.scroll_event.connect (on_grid_scroll_event);
 
         ev.add (main_grid);
-        var sw = new Gtk.ScrolledWindow (null, null);
-        sw.add (ev);
-
-        overlay.add (sw);
+        overlay.add (ev);
 
         var grid = new Gtk.Grid () {
             orientation = Gtk.Orientation.VERTICAL
@@ -314,8 +317,9 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         });
         bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
         bind_property ("previous-cell", cell_grid, "previous-cell", BindingFlags.BIDIRECTIONAL);
-        bind_property ("fontheight", row_clue_box, "fontheight");
-        bind_property ("fontheight", column_clue_box, "fontheight");
+        bind_property ("cell-size", cell_grid, "cell-size", BindingFlags.SYNC_CREATE);
+        bind_property ("cell-size", row_clue_box, "cell-size", BindingFlags.SYNC_CREATE);
+        bind_property ("cell-size", column_clue_box, "cell-size", BindingFlags.SYNC_CREATE);
         bind_property ("dimensions", row_clue_box, "dimensions");
         bind_property ("dimensions", column_clue_box, "dimensions");
 
@@ -325,11 +329,6 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
             }
 
             generate_button.sensitive = game_state != GameState.GENERATING;
-        });
-
-        notify["dimensions"].connect (() => {
-            fontheight = get_default_fontheight_from_dimensions ();
-            set_window_size ();
         });
 
         notify["generator-grade"].connect (() => {
@@ -372,12 +371,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
             update_all_labels_completeness ();
         });
 
-        notify["fontheight"].connect (() => {
-            fontheight = fontheight.clamp (MINFONTSIZE, MAXFONTSIZE);
-            set_window_size ();
-        });
-
-        realize.connect (set_window_size);
+        show_all ();
     }
 
     public void update_labels_from_string_array (string[] clues, bool is_column) {
@@ -430,55 +424,6 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
 
         update_all_labels_completeness ();
         update_header_bar ();
-    }
-
-    /*** PRIVATE ***/
-    private double get_default_fontheight_from_dimensions () {
-        var monitor_area = Gdk.Rectangle () {width = 1024, height = 768};
-
-        Gdk.Window? window = get_window ();
-        if (window != null) {
-            monitor_area = Utils.get_monitor_area (screen, window);
-        }
-
-         /* Cell dimensions approx 2.0 * font height
-         * Make allowance for unusable monitor height - approx 10%;
-         * These equations are related to the inverse of those used in labelbox to calculate its dimensions
-         */
-
-        double max_h = (monitor_area.height * USABLE_MONITOR_HEIGHT - header_bar.get_allocated_height () -
-                       2 * GRID_BORDER) / (rows * (1.0 + TYPICAL_MAX_BLOCKS_RATIO * FONT_ASPECT_RATIO) * 2.0);
-
-        double max_w = (monitor_area.width * USABLE_MONITOR_WIDTH - 2 * GRID_BORDER -
-                       GRID_COLUMN_SPACING) / (cols * (1.0 + TYPICAL_MAX_BLOCKS_RATIO / FONT_ASPECT_RATIO) * 2.0);
-
-        return double.min (max_h, max_w);
-    }
-
-    private void set_window_size () {
-        Gdk.Window? window = get_window ();
-
-        if (window == null) {
-            return;
-        }
-
-        var monitor_area = Utils.get_monitor_area (screen, window);
-        var usable_width = (int)(monitor_area.width * USABLE_MONITOR_WIDTH);
-        var w = int.min (usable_width,
-                         row_clue_box.min_width + column_clue_box.min_width + 2 * GRID_BORDER + GRID_COLUMN_SPACING);
-
-        var usable_height = (int)(monitor_area.height * USABLE_MONITOR_HEIGHT);
-
-        var h = int.min (usable_height,
-                         row_clue_box.min_height + column_clue_box.min_height +
-                         2 * GRID_BORDER + header_bar.get_allocated_height ());
-
-        var hints = Gdk.Geometry ();
-        hints.min_width = w;
-        hints.min_height = h;
-
-        set_geometry_hints (overlay, hints, Gdk.WindowHints.MIN_SIZE);
-        resize (w, h);
     }
 
     private void update_header_bar () {
@@ -634,11 +579,11 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         if (Gdk.ModifierType.CONTROL_MASK in event.state) {
             switch (event.direction) {
                 case Gdk.ScrollDirection.UP:
-                    fontheight -= 1.0;
+                    cell_size -= 6;
                     break;
 
                 case Gdk.ScrollDirection.DOWN:
-                    fontheight += 1.0;
+                    cell_size += 6;
                     break;
 
                 default:
@@ -698,7 +643,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     }
 
     private void action_zoom (SimpleAction action, Variant? param) {
-        fontheight += param.get_int32 ();
+        cell_size += param.get_int32 ();
     }
 
     private void action_check_errors () {

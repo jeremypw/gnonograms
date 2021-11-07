@@ -18,24 +18,28 @@
  */
 
 class Gnonograms.Clue : Gtk.Label {
-    private const string ATTR_TEMPLATE = "<span size='%i' weight='%s' strikethrough='%s'>";
-    private const string TIP_TEMPLATE = "<span size='%i'>";
-
-    private uint _size;
-    public uint size {
+    // private const string ATTR_TEMPLATE = "<span size='%i' weight='%s' strikethrough='%s'>";
+    private uint _n_cells;
+    public uint n_cells {
         set {
-            _size = value;
+            _n_cells = value;
             update_tooltip ();
         }
 
         private get {
-            return _size;
+            return _n_cells;
         }
     }
 
-    public double fontheight {
+    private int _fontsize;
+    private int _cell_size;
+    public int cell_size {
+        get {
+            return _cell_size;
+        }
         set {
-            fontsize = (int)(1024 * (value));
+            _cell_size = value;
+            _fontsize = (int)(value * 384);
             update_markup ();
         }
     }
@@ -57,7 +61,6 @@ class Gnonograms.Clue : Gtk.Label {
 
     private Gee.List<Block> clue_blocks;
     private Gee.List<Block> grid_blocks;
-    private double fontsize;
 
     public Clue (bool _vertical_text) {
         Object (
@@ -66,15 +69,12 @@ class Gnonograms.Clue : Gtk.Label {
             yalign: _vertical_text ? (float)1.0 : (float)0.5,
             clue: "0",
             has_tooltip: true,
-            use_markup: true
+            use_markup: true,
+            margin: 0
         );
     }
 
     construct {
-        size_allocate.connect_after (() => {
-            update_markup ();
-        });
-
         realize.connect_after (() => {
             update_markup ();
         });
@@ -225,32 +225,16 @@ class Gnonograms.Clue : Gtk.Label {
         update_markup ();
     }
 
-    private void update_markup (double fs = fontsize) {
-        var alloc = vertical_text ? get_allocated_height () : get_allocated_width ();
-        if (!get_realized () || alloc < 10 || fontsize < 1000) {
-            return;
-        }
-
-        string markup = "<span size='%i'>".printf ((int)fs) + get_markup () + "</span>";
+private void update_markup () {
+        string markup = "<span size='%i'>".printf (_fontsize) + get_markup () + "</span>";
         set_markup (markup);
-
-        var layout = get_layout ();
-        int w, h;
-        layout.get_size (out w, out h);
-        var size = (int)((vertical_text ? h : w) / 1024);
-
-        if (size - alloc > 6) {
-            update_markup (fs * 0.9);
-        } else {
-
-            update_tooltip ();
-        }
+        update_tooltip ();
     }
 
     private void update_tooltip () {
         set_tooltip_markup (
-            TIP_TEMPLATE.printf ((int)fontsize / 2) +
-            _("Freedom = %u").printf (size - Utils.blockextent_from_clue (_clue)) +
+            "<span size='%i'>".printf (_fontsize / 2) +
+            _("Freedom = %u").printf (n_cells - Utils.blockextent_from_clue (_clue)) +
             "</span>"
         );
     }

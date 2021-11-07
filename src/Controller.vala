@@ -23,6 +23,7 @@ public class Gnonograms.Controller : GLib.Object {
     public Gtk.Window window { get { return (Gtk.Window)view;}}
     public GameState game_state { get; set; }
     public Dimensions dimensions { get; set; }
+
     public Difficulty generator_grade { get; set; }
     public string game_name { get; set; }
 
@@ -77,6 +78,7 @@ public class Gnonograms.Controller : GLib.Object {
         });
 
         notify["dimensions"].connect (() => {
+
             solver = new Solver (dimensions);
             game_name = _(UNTITLED_NAME);
         });

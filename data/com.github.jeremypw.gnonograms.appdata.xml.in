@@ -205,8 +205,12 @@
   </provides>
   <screenshots>
     <screenshot type="default">
-      <caption>Manually solving a puzzle</caption>
-      <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/Solving16-9.png</image>
+      <caption>Solving a puzzle</caption>
+      <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/Solving.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Solving a puzzle - dark style</caption>
+      <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/Solving-dark.png</image>
     </screenshot>
   </screenshots>
 
