@@ -18,6 +18,13 @@
  */
 
 public class Gnonograms.View : Hdy.ApplicationWindow {
+    private const double USABLE_MONITOR_HEIGHT = 0.85;
+    private const double USABLE_MONITOR_WIDTH = 0.95;
+    private const int GRID_BORDER = 6;
+    private const int GRID_COLUMN_SPACING = 6;
+    private const double TYPICAL_MAX_BLOCKS_RATIO = 0.3;
+    private const double ZOOM_RATIO = 0.05;
+
     public signal void random_game_request ();
     public signal uint rewind_request ();
     public signal bool next_move_request ();
@@ -97,8 +104,8 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     private Gtk.Button restart_button;
     private CellState drawing_with_state;
     private uint drawing_with_key;
-    private uint rows {get {return dimensions.rows ();}}
-    private uint cols {get {return dimensions.cols ();}}
+    private int rows {get {return (int)dimensions.rows ();}}
+    private int cols {get {return (int)dimensions.cols ();}}
     private bool is_solving {get {return game_state == GameState.SOLVING;}}
 
     public View (Model _model, Controller controller) {
@@ -156,7 +163,6 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         application.set_accels_for_action ("view.debug-row", {"<Alt>R"});
         application.set_accels_for_action ("view.debug-col", {"<Alt>C"});
 #endif
-        resizable = true;
         drawing_with_state = CellState.UNDEFINED;
 
         weak Gtk.IconTheme default_theme = Gtk.IconTheme.get_default ();
@@ -247,36 +253,39 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         header_bar.pack_end (mode_switch);
         header_bar.set_custom_title (progress_stack);
 
-        overlay = new Gtk.Overlay () {
-            expand = true
+
+
+        toast = new Granite.Widgets.Toast ("") {
+            halign = Gtk.Align.START,
+            valign = Gtk.Align.START
         };
-
-        toast = new Granite.Widgets.Toast ("");
-
         toast.set_default_action (null);
-        toast.halign = Gtk.Align.START;
-        toast.valign = Gtk.Align.START;
-        overlay.add_overlay (toast);
+
 
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL);
-
         cell_grid = new CellGrid (model);
 
-        main_grid = new Gtk.Grid ();
-        main_grid.attach (cell_grid, 1, 1, 1, 1);
+        main_grid = new Gtk.Grid () {
+            row_spacing = 0,
+            column_spacing = GRID_COLUMN_SPACING,
+            border_width = GRID_BORDER,
+            expand = true
+        };
 
-        main_grid.row_spacing = 0;
-        main_grid.column_spacing = GRID_COLUMN_SPACING;
-        main_grid.border_width = GRID_BORDER;
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for rows */
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
+        main_grid.attach (cell_grid, 1, 1, 1, 1);
 
-        var ev = new Gtk.EventBox ();
+        var ev = new Gtk.EventBox () {expand = true};
         ev.add_events (Gdk.EventMask.SCROLL_MASK);
         ev.scroll_event.connect (on_grid_scroll_event);
-
         ev.add (main_grid);
+
+        overlay = new Gtk.Overlay () {
+            expand = true
+        };
+        overlay.add_overlay (toast);
         overlay.add (ev);
 
         var grid = new Gtk.Grid () {
@@ -371,9 +380,28 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
             update_all_labels_completeness ();
         });
 
+        notify["dimensions"].connect (() => {
+            var monitor_area = Gdk.Rectangle () {
+                width = 1024,
+                height = 768
+            };
+
+            Gdk.Window? window = get_window ();
+            if (window != null) {
+                monitor_area = Utils.get_monitor_area (screen, window);
+            }
+
+            var available_grid_width = (int)(get_allocated_width () - 2 * GRID_BORDER - GRID_COLUMN_SPACING);
+            var available_cell_width = available_grid_width / (cols * 1.2);
+            var available_screen_height = monitor_area.height * 0.85 - header_bar.get_allocated_height () - 2 * GRID_BORDER;
+
+            var available_cell_height = available_screen_height / (rows * 1.2);
+            cell_size = (int)(double.min (available_cell_width, available_cell_height));
+        });
+
         show_all ();
     }
-
+    public const double FONT_ASPECT_RATIO = 1.2;
     public void update_labels_from_string_array (string[] clues, bool is_column) {
         var clue_box = is_column ? column_clue_box : row_clue_box;
         var lim = is_column ? cols : rows;
@@ -579,11 +607,11 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         if (Gdk.ModifierType.CONTROL_MASK in event.state) {
             switch (event.direction) {
                 case Gdk.ScrollDirection.UP:
-                    cell_size -= 6;
+                    change_cell_size (false);
                     break;
 
                 case Gdk.ScrollDirection.DOWN:
-                    cell_size += 6;
+                    change_cell_size (true);
                     break;
 
                 default:
@@ -643,9 +671,17 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     }
 
     private void action_zoom (SimpleAction action, Variant? param) {
-        cell_size += param.get_int32 ();
+        change_cell_size (param.get_int32 () > 0);
     }
 
+    private void change_cell_size (bool increase) {
+        var delta = double.max (ZOOM_RATIO * cell_size, 1.0);
+        if (increase) {
+            cell_size += (int)delta;
+        } else {
+            cell_size -= (int)delta;
+        }
+    }
     private void action_check_errors () {
         if (rewind_request () == 0) {
             send_notification (_("No errors"));

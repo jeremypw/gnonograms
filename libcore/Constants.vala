@@ -24,16 +24,13 @@ namespace Gnonograms {
     public const uint MAXSIZE = 50; // max number rows or columns
     public const uint MINSIZE = 5; // Change to 1 when debugging
     public const uint SIZESTEP = 5; // Change to 1 when debugging
-    public const double MINFONTSIZE = 8.0;
-    public const double MAXFONTSIZE = 36.0;
+    // public const double MINFONTSIZE = 8.0;
+    // public const double MAXFONTSIZE = 36.0;
     public const Difficulty MIN_GRADE = Difficulty.EASY; /* TRIVIAL and VERY EASY GRADES not worth supporting */
 
-    public const double FONT_ASPECT_RATIO = 1.2;
-    public const int GRID_BORDER = 6;
-    public const int GRID_COLUMN_SPACING = 6;
-    public const double TYPICAL_MAX_BLOCKS_RATIO = 0.3;
-    public const double USABLE_MONITOR_HEIGHT = 0.85;
-    public const double USABLE_MONITOR_WIDTH = 0.95;
+
+
+
 
     public const string BLOCKSEPARATOR = ", ";
     public const string BLANKLABELTEXT = N_("?");

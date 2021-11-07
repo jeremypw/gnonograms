@@ -44,8 +44,8 @@ public class Gnonograms.LabelBox : Gtk.Grid {
         column_spacing = 0;
 
         notify["cell-size"].connect (() => {
-            var width = orientation == Gtk.Orientation.HORIZONTAL ? (int)n_labels * cell_size : -1;
-            var height = orientation == Gtk.Orientation.HORIZONTAL ? -1 : (int)n_labels * cell_size;
+            int width = (int)(orientation == Gtk.Orientation.HORIZONTAL ? n_labels * cell_size : n_cells * cell_size * 0.33);
+            int height = (int)(orientation == Gtk.Orientation.HORIZONTAL ? n_cells * cell_size * 0.33 : n_labels * cell_size);
             get_children ().foreach ((w) => {
                 ((Gnonograms.Clue)w).cell_size = cell_size;
             });

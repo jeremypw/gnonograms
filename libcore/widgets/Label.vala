@@ -18,7 +18,6 @@
  */
 
 class Gnonograms.Clue : Gtk.Label {
-    // private const string ATTR_TEMPLATE = "<span size='%i' weight='%s' strikethrough='%s'>";
     private uint _n_cells;
     public uint n_cells {
         set {
@@ -70,7 +69,8 @@ class Gnonograms.Clue : Gtk.Label {
             clue: "0",
             has_tooltip: true,
             use_markup: true,
-            margin: 0
+            margin: 0,
+            expand: true
         );
     }
 
