@@ -1,7 +1,4 @@
 project ('com.github.jeremypw.gnonograms', 'vala', 'c', version: '1.4.3', meson_version: '>= 0.49.0')
-shortname = 'gnonograms'
-domain = 'com.github.jeremypw.'
-schema_path = '/com/github/jeremypw/' + shortname + '/'
 
 vala_version_required = '>=0.48.0'
 
@@ -61,7 +58,6 @@ executable (
 
     install: true
 )
-
 
 meson.add_install_script('meson/post_install.py')
 

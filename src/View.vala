@@ -50,7 +50,6 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     public string game_name { get { return controller.game_name; } }
     public bool readonly { get; set; default = false;}
     public Difficulty game_grade { get; set; default = Difficulty.UNDEFINED;}
-    public double fontheight { get; set; }
     public bool can_go_back { get; set; }
     public bool can_go_forward { get; set; }
     public bool restart_destructive { get; set; default = false;}
@@ -72,10 +71,8 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         {"check-errors", action_check_errors},
         {"restart", action_restart},
         {"solve", action_solve},
-#if WITH_DEBUGGING
         {"debug-row", action_debug_row},
         {"debug-col", action_debug_col},
-#endif
         {"hint", action_hint}
     };
 
@@ -112,7 +109,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         Object (
             model: _model,
             controller: controller,
-            resizable: false
+            resizable: true
         );
     }
 
@@ -253,14 +250,11 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         header_bar.pack_end (mode_switch);
         header_bar.set_custom_title (progress_stack);
 
-
-
         toast = new Granite.Widgets.Toast ("") {
             halign = Gtk.Align.START,
             valign = Gtk.Align.START
         };
         toast.set_default_action (null);
-
 
         row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL);
         column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL);
@@ -401,7 +395,8 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
 
         show_all ();
     }
-    public const double FONT_ASPECT_RATIO = 1.2;
+
+    // public const double FONT_ASPECT_RATIO = 1.2;
     public void update_labels_from_string_array (string[] clues, bool is_column) {
         var clue_box = is_column ? column_clue_box : row_clue_box;
         var lim = is_column ? cols : rows;

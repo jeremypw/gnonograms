@@ -35,8 +35,8 @@ public class Gnonograms.Controller : GLib.Object {
     private Model model;
     private Solver? solver;
     private SimpleRandomGameGenerator? generator;
-    private GLib.Settings? settings;
-    private GLib.Settings? saved_state;
+    private GLib.Settings? settings = null;
+    private GLib.Settings? saved_state = null;
     private Gnonograms.History history;
     private string current_game_path;
     private string saved_games_folder;
@@ -67,6 +67,8 @@ public class Gnonograms.Controller : GLib.Object {
 #if WITH_DEBUGGING
         view.debug_request.connect (on_debug_request);
 #endif
+        view.configure_event.connect (on_view_configure);
+
         notify["game-state"].connect (() => {
             if (game_state != GameState.UNDEFINED) { /* Do not clear on save */
                 clear_history ();
@@ -83,14 +85,8 @@ public class Gnonograms.Controller : GLib.Object {
             game_name = _(UNTITLED_NAME);
         });
 
-        var schema_source = GLib.SettingsSchemaSource.get_default ();
-        if (schema_source != null &&
-            schema_source.lookup ("com.github.jeremypw.gnonograms.settings", true) != null &&
-            schema_source.lookup ("com.github.jeremypw.gnonograms.saved-state", true) != null) {
-
-            settings = new Settings ("com.github.jeremypw.gnonograms.settings");
-            saved_state = new Settings ("com.github.jeremypw.gnonograms.saved-state");
-        }
+        settings = new Settings ("com.github.jeremypw.gnonograms.settings");
+        saved_state = new Settings ("com.github.jeremypw.gnonograms.saved-state");
 
         var data_home_folder_current = Path.build_path (
             Path.DIR_SEPARATOR_S,
@@ -139,17 +135,6 @@ public class Gnonograms.Controller : GLib.Object {
         history.bind_property ("can-go-back", view, "can-go-back", BindingFlags.SYNC_CREATE);
         history.bind_property ("can-go-forward", view, "can-go-forward", BindingFlags.SYNC_CREATE);
 
-        if (saved_state != null && settings != null) {
-            saved_state.bind ("mode", this, "game_state", SettingsBindFlags.DEFAULT);
-            /* Delay binding font-height so can be applied after loading game */
-            settings.bind ("grade", this, "generator_grade", SettingsBindFlags.DEFAULT);
-            settings.bind ("clue-help", view, "strikeout-complete", SettingsBindFlags.DEFAULT);
-
-            var fh = saved_state.get_double ("font-height");
-            saved_state.bind ("font-height", view, "fontheight", SettingsBindFlags.DEFAULT);
-            view.fontheight = fh; /* Ensure restored fontheight applied */
-        }
-
         restore_game.begin ((obj, res) => {
             if (!restore_game.end (res)) {
                 /* Error normally thrown if running without installing */
@@ -158,6 +143,12 @@ public class Gnonograms.Controller : GLib.Object {
                 new_game ();
             }
         });
+
+        if (saved_state != null && settings != null) {
+            saved_state.bind ("mode", this, "game_state", SettingsBindFlags.DEFAULT);
+            settings.bind ("grade", this, "generator_grade", SettingsBindFlags.DEFAULT);
+            settings.bind ("clue-help", view, "strikeout-complete", SettingsBindFlags.DEFAULT);
+        }
 
         view.show_all ();
         view.present ();
@@ -234,17 +225,6 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     private void save_game_state () {
-        if (saved_state != null) {
-            int x, y;
-            window.get_position (out x, out y);
-            saved_state.set_int ("window-x", x);
-            saved_state.set_int ("window-y", y);
-
-            if (current_game_path != null) {
-                saved_state.set_string ("current-game-path", current_game_path);
-            }
-        }
-
         if (temporary_game_path != null) {
             try {
                 var current_game_path = File.new_for_path (temporary_game_path);
@@ -263,15 +243,16 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     private void restore_settings () {
-        if (settings != null) {
-            int x, y;
-            x = saved_state.get_int ("window-x");
-            y = saved_state.get_int ("window-y");
+        if (saved_state != null) {
+            int x, y, w, h;
+            saved_state.get ("window-size", "(ii)", out w, out h);
+            saved_state.get ("window-position", "(ii)", out x, out y);
             current_game_path = saved_state.get_string ("current-game-path");
+            window.set_default_size (w, h);
             window.move (x, y);
         } else {
             /* Error normally thrown running uninstalled */
-            debug ("Unable to restore settings - using defaults"); /* Maybe running uninstalled */
+            critical ("Unable to restore settings - using defaults"); /* Maybe running uninstalled */
             /* Default puzzle parameters */
             current_game_path = temporary_game_path;
             game_state = GameState.SOLVING;
@@ -288,7 +269,7 @@ public class Gnonograms.Controller : GLib.Object {
                 settings.get_uint ("rows").clamp (10, 50)
             };
         } else {
-            dimensions = {15, 10}; /* Fallback dimensions */
+            dimensions = { 15, 10 }; /* Fallback dimensions */
         }
     }
 
@@ -536,6 +517,32 @@ public class Gnonograms.Controller : GLib.Object {
 
     private bool on_view_deleted () {
         quit ();
+        return false;
+    }
+
+    private uint configure_id = 0;
+    private bool on_view_configure () {
+        if (saved_state == null) {
+            return false;
+        }
+
+        if (configure_id != 0) {
+            GLib.Source.remove (configure_id);
+        }
+
+        configure_id = Timeout.add (100, () => {
+            configure_id = 0;
+
+            int x_pos, y_pos;
+            view.get_position (out x_pos, out y_pos);
+            saved_state.set ("window-position", "(ii)", x_pos, y_pos);
+            int width, height;
+            view.get_size (out width, out height);
+            saved_state.set ("window-size", "(ii)", x_pos, y_pos);
+
+            return false;
+        });
+
         return false;
     }
 

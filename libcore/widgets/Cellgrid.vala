@@ -81,8 +81,6 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     }
 
     private bool dirty = false; /* Whether a redraw is needed */
-    private double alloc_width; /* Width of drawing area less frame*/
-    private double alloc_height; /* Height of drawing area less frame */
     private double cell_body_width; /* Width of cell excluding frame */
     private double cell_body_height; /* height of cell excluding frame */
     private double cell_width; /* Width of cell including frame */
