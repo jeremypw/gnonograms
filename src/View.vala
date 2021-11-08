@@ -63,13 +63,21 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     public const string ACTION_PREFIX = ACTION_GROUP + ".";
     public const string ACTION_UNDO = "action-undo";
     public const string ACTION_REDO = "action-redo";
-    public const string ACTION_ZOOM = "action-zoom";
-    public const string ACTION_MOVE_CURSOR = "action-move-cursor";
-    public const string ACTION_SET_MODE = "action-set-mode";
+    public const string ACTION_ZOOM_IN = "action-zoom-in";
+    public const string ACTION_ZOOM_OUT = "action-zoom-out";
+    public const string ACTION_CURSOR_UP = "action-cursor_up";
+    public const string ACTION_CURSOR_DOWN = "action-cursor_down";
+    public const string ACTION_CURSOR_LEFT = "action-cursor_left";
+    public const string ACTION_CURSOR_RIGHT = "action-cursor_right";
+    public const string ACTION_SETTING_MODE = "action-setting-mode";
+    public const string ACTION_SOLVING_MODE = "action-solving-mode";
+    public const string ACTION_GENERATING_MODE = "action-generating-mode";
     public const string ACTION_OPEN = "action-open";
     public const string ACTION_SAVE = "action-save";
     public const string ACTION_SAVE_AS = "action-save-as";
-    public const string ACTION_PAINT_CELL = "action-paint-cell";
+    public const string ACTION_PAINT_FILLED = "action-paint-filled";
+    public const string ACTION_PAINT_EMPTY = "action-paint-empty";
+    public const string ACTION_PAINT_UNKNOWN = "action-paint-unknown";
     public const string ACTION_CHECK_ERRORS = "action-check-errors";
     public const string ACTION_RESTART = "action-restart";
     public const string ACTION_SOLVE = "action-solve";
@@ -81,13 +89,21 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     private static GLib.ActionEntry [] VIEW_ACTION_ENTRIES = {
         {ACTION_UNDO, action_undo},
         {ACTION_REDO, action_redo},
-        {ACTION_ZOOM, action_zoom, "i"},
-        {ACTION_MOVE_CURSOR, action_move_cursor, "(ii)"},
-        {ACTION_SET_MODE, action_set_mode, "u"},
+        {ACTION_ZOOM_IN, action_zoom_in},
+        {ACTION_ZOOM_OUT, action_zoom_out},
+        {ACTION_CURSOR_UP, action_cursor_up},
+        {ACTION_CURSOR_DOWN, action_cursor_down},
+        {ACTION_CURSOR_LEFT, action_cursor_left},
+        {ACTION_CURSOR_RIGHT, action_cursor_right},
+        {ACTION_SETTING_MODE, action_setting_mode},
+        {ACTION_SOLVING_MODE, action_solving_mode},
+        {ACTION_GENERATING_MODE, action_generating_mode},
         {ACTION_OPEN, action_open},
         {ACTION_SAVE, action_save},
         {ACTION_SAVE_AS, action_save_as},
-        {ACTION_PAINT_CELL, action_paint_cell, "u"},
+        {ACTION_PAINT_FILLED, action_paint_filled},
+        {ACTION_PAINT_EMPTY, action_paint_empty},
+        {ACTION_PAINT_UNKNOWN, action_paint_unknown},
         {ACTION_CHECK_ERRORS, action_check_errors},
         {ACTION_RESTART, action_restart},
         {ACTION_SOLVE, action_solve},
@@ -140,25 +156,25 @@ warning ("WITH DEBUGGING");
 #endif
         action_accelerators.set (ACTION_UNDO, "<Ctrl>Z");
         action_accelerators.set (ACTION_REDO, "<Ctrl><Shift>Z");
-        action_accelerators.set (ACTION_MOVE_CURSOR + "((-1, 0))", "Up");
-        action_accelerators.set (ACTION_MOVE_CURSOR + "((1, 0))", "Down");
-        action_accelerators.set (ACTION_MOVE_CURSOR + "((0, -1))", "Left");
-        action_accelerators.set (ACTION_MOVE_CURSOR + "((0, 1))", "Right");
-        action_accelerators.set (ACTION_ZOOM + "(int32 1)", "<Ctrl>plus");
-        action_accelerators.set (ACTION_ZOOM + "(int32 1)", "<Ctrl>equal");
-        action_accelerators.set (ACTION_ZOOM + "(int32 1)", "<Ctrl>KP_Add");
-        action_accelerators.set (ACTION_ZOOM + "(int32 -1)", "<Ctrl>minus");
-        action_accelerators.set (ACTION_ZOOM + "(int32 -1)", "<Ctrl>KP_Subtract");
-        action_accelerators.set (ACTION_SET_MODE + "(uint32 %u)".printf (GameState.SETTING), "<Ctrl>1");
-        action_accelerators.set (ACTION_SET_MODE + "(uint32 %u)".printf (GameState.SOLVING), "<Ctrl>2");
-        action_accelerators.set (ACTION_SET_MODE + "(uint32 %u)".printf (GameState.GENERATING), "<Ctrl>3");
-        action_accelerators.set (ACTION_SET_MODE + "(uint32 %u)".printf (GameState.GENERATING), "<Ctrl>N");
+        action_accelerators.set (ACTION_CURSOR_UP, "Up");
+        action_accelerators.set (ACTION_CURSOR_DOWN, "Down");
+        action_accelerators.set (ACTION_CURSOR_LEFT, "Left");
+        action_accelerators.set (ACTION_CURSOR_RIGHT, "Right");
+        action_accelerators.set (ACTION_ZOOM_IN, "<Ctrl>plus");
+        action_accelerators.set (ACTION_ZOOM_IN, "<Ctrl>equal");
+        action_accelerators.set (ACTION_ZOOM_IN, "<Ctrl>KP_Add");
+        action_accelerators.set (ACTION_ZOOM_OUT, "<Ctrl>minus");
+        action_accelerators.set (ACTION_ZOOM_OUT, "<Ctrl>KP_Subtract");
+        action_accelerators.set (ACTION_SETTING_MODE, "<Ctrl>1");
+        action_accelerators.set (ACTION_SOLVING_MODE, "<Ctrl>2");
+        action_accelerators.set (ACTION_GENERATING_MODE, "<Ctrl>3");
+        action_accelerators.set (ACTION_GENERATING_MODE, "<Ctrl>N");
         action_accelerators.set (ACTION_OPEN, "<Ctrl>O");
         action_accelerators.set (ACTION_SAVE, "<Ctrl>S");
         action_accelerators.set (ACTION_SAVE_AS, "<Ctrl><Shift>S");
-        action_accelerators.set (ACTION_PAINT_CELL + "(uint32 %u)".printf (CellState.FILLED), "F");
-        action_accelerators.set (ACTION_PAINT_CELL + "(uint32 %u)".printf (CellState.EMPTY), "E");
-        action_accelerators.set (ACTION_PAINT_CELL + "(uint32 %u)".printf (CellState.UNKNOWN), "X");
+        action_accelerators.set (ACTION_PAINT_FILLED, "F");
+        action_accelerators.set (ACTION_PAINT_EMPTY, "E");
+        action_accelerators.set (ACTION_PAINT_UNKNOWN, "X");
         action_accelerators.set (ACTION_CHECK_ERRORS, "F7");
         action_accelerators.set (ACTION_CHECK_ERRORS, "less");
         action_accelerators.set (ACTION_CHECK_ERRORS, "comma");
@@ -209,23 +225,29 @@ warning ("WITH DEBUGGING");
         save_game_button = new HeaderButton ("document-save", _("Save Game"));
         save_game_as_button = new HeaderButton ("document-save-as", _("Save Game to Different File"));
         undo_button = new HeaderButton ("edit-undo", _("Undo Last Move")) {
-            sensitive = false
+            sensitive = false,
+            action_name = ACTION_PREFIX + ACTION_UNDO
         };
         redo_button = new HeaderButton ("edit-redo", _("Redo Last Move")) {
-            sensitive = false
+            sensitive = false,
+            action_name = ACTION_PREFIX + ACTION_REDO
         };
         check_correct_button = new HeaderButton ("media-seek-backward", _("Go Back to Last Correct Position")) {
-            sensitive = false
+            sensitive = false,
+            action_name = ACTION_PREFIX + ACTION_CHECK_ERRORS
         };
         restart_button = new RestartButton ("view-refresh", ""); /* private class - see below */
         hint_button = new HeaderButton ("help-contents", _("Suggest next move")) {
-            sensitive = false
+            sensitive = false,
+            action_name = ACTION_PREFIX + ACTION_HINT
         };
         auto_solve_button = new HeaderButton ("system", _("Solve by Computer")) {
-            sensitive = false
+            sensitive = false,
+            action_name = ACTION_PREFIX + ACTION_SOLVE
         };
         generate_button = new HeaderButton ("list-add", _("Generate New Puzzle")) {
-            margin_start = 6
+            margin_start = 6,
+            action_name = ACTION_PREFIX + ACTION_GENERATING_MODE
         };
         app_menu = new AppMenu (controller);
 
@@ -316,24 +338,10 @@ warning ("WITH DEBUGGING");
         grid.add (overlay);
         add (grid);
 
-        generate_button.clicked.connect (() => {
-            game_state = GameState.GENERATING;
-        });
-
         cell_grid.leave_notify_event.connect (on_grid_leave);
         cell_grid.button_press_event.connect (on_grid_button_press);
         cell_grid.button_release_event.connect (stop_painting);
         key_release_event.connect (on_key_release_event);
-
-        undo_button.set_action_name ("view.undo");
-        redo_button.set_action_name ("view.redo");
-        load_game_button.set_action_name ("view.open");
-        save_game_button.set_action_name ("view.save");
-        save_game_as_button.set_action_name ("view.save-as");
-        check_correct_button.set_action_name ("view.check-errors");
-        restart_button.set_action_name ("view.restart");
-        hint_button.set_action_name ("view.hint");
-        auto_solve_button.set_action_name ("view.solve");
 
         var flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
         bind_property ("restart-destructive", restart_button, "restart-destructive", BindingFlags.SYNC_CREATE) ;
@@ -691,8 +699,11 @@ warning ("WITH DEBUGGING");
         save_game_as_request ();
     }
 
-    private void action_zoom (SimpleAction action, Variant? param) {
-        change_cell_size (param.get_int32 () > 0);
+    private void action_zoom_in () {
+        change_cell_size (true);
+    }
+    private void action_zoom_out () {
+        change_cell_size (false);
     }
 
     private void change_cell_size (bool increase) {
@@ -709,17 +720,25 @@ warning ("WITH DEBUGGING");
         }
     }
 
-    private void action_move_cursor (SimpleAction action, Variant? param) {
-        int dr, dc;
-        param.get_child (0, "i", out dr);
-        param.get_child (1, "i", out dc);
-
+    private void action_cursor_up () {
+        move_cursor (-1, 0);
+    }
+    private void action_cursor_down () {
+        move_cursor (1, 0);
+    }
+    private void action_cursor_left () {
+        move_cursor (0, -1);
+    }
+    private void action_cursor_right () {
+        move_cursor (0, 1);
+    }
+    private void move_cursor (int row_delta, int col_delta) {
         if (current_cell == NULL_CELL) {
             return;
         }
 
-        Cell target = {current_cell.row + dr,
-                       current_cell.col + dc,
+        Cell target = {current_cell.row + row_delta,
+                       current_cell.col + col_delta,
                        CellState.UNDEFINED
                       };
 
@@ -730,12 +749,26 @@ warning ("WITH DEBUGGING");
         update_current_cell (target);
     }
 
-    private void action_set_mode (SimpleAction action, Variant? param) {
-        game_state = (GameState)(param.get_uint32 ());
+    private void action_setting_mode () {
+        game_state = GameState.SETTING;
+    }
+    private void action_solving_mode () {
+        game_state = GameState.SOLVING;
+    }
+    private void action_generating_mode () {
+        game_state = GameState.GENERATING;
     }
 
-    private void action_paint_cell (SimpleAction action, Variant? param) {
-        var cs = (CellState)(param.get_uint32 ());
+    private void action_paint_filled () {
+        paint_cell_state (CellState.FILLED);
+    }
+    private void action_paint_empty () {
+        paint_cell_state (CellState.EMPTY);
+    }
+    private void action_paint_unknown () {
+        paint_cell_state (CellState.UNKNOWN);
+    }
+    private void paint_cell_state (CellState cs) {
         if (cs == CellState.UNKNOWN && !is_solving) {
             return;
         }

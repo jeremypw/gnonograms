@@ -20,6 +20,9 @@
 public class Gnonograms.Controller : GLib.Object {
     public signal void quit_app ();
 
+    private const string SETTINGS_SCHEMA_ID = "com.github.jeremypw.gnonograms.settings";
+    private const string SAVED_STATE_SCHEMA_ID = "com.github.jeremypw.gnonograms.saved-state";
+
     public Gtk.Window window { get { return (Gtk.Window)view;}}
     public GameState game_state { get; set; }
     public Dimensions dimensions { get; set; }
@@ -85,8 +88,12 @@ public class Gnonograms.Controller : GLib.Object {
             game_name = _(UNTITLED_NAME);
         });
 
-        settings = new Settings ("com.github.jeremypw.gnonograms.settings");
-        saved_state = new Settings ("com.github.jeremypw.gnonograms.saved-state");
+        if (SettingsSchemaSource.get_default ().lookup (SETTINGS_SCHEMA_ID, true) != null &&
+            SettingsSchemaSource.get_default ().lookup (SAVED_STATE_SCHEMA_ID, true) != null) {
+
+            settings = new Settings (SETTINGS_SCHEMA_ID);
+            saved_state = new Settings (SAVED_STATE_SCHEMA_ID);
+        }
 
         var data_home_folder_current = Path.build_path (
             Path.DIR_SEPARATOR_S,
