@@ -24,6 +24,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     private const int GRID_COLUMN_SPACING = 6;
     private const double TYPICAL_MAX_BLOCKS_RATIO = 0.3;
     private const double ZOOM_RATIO = 0.05;
+    private const uint PROGRESS_DELAY_MSEC = 500;
 
     public signal void random_game_request ();
     public signal uint rewind_request ();
@@ -41,54 +42,73 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     public signal void changed_cell (Cell cell, CellState previous_state);
 
     public Model model {private get; construct; }
-    public unowned Controller controller { get; construct; }
+    public Controller controller { get; construct; }
     public Dimensions dimensions { get; set; }
-    public int cell_size { get; set; default = 32; }
+    public Cell current_cell { get; set; }
+    public Cell previous_cell { get; set; }
     public Difficulty generator_grade { get; set; }
-    public GameState game_state { get; set; }
-    public bool strikeout_complete { get; set; }
-    public string game_name { get { return controller.game_name; } }
-    public bool readonly { get; set; default = false;}
     public Difficulty game_grade { get; set; default = Difficulty.UNDEFINED;}
+    public GameState game_state { get; set; }
+    public int cell_size { get; set; default = 32; }
+    public string game_name { get { return controller.game_name; } }
+    public bool strikeout_complete { get; set; }
+    public bool readonly { get; set; default = false;}
     public bool can_go_back { get; set; }
     public bool can_go_forward { get; set; }
     public bool restart_destructive { get; set; default = false;}
-    public Cell current_cell { get; set; }
-    public Cell previous_cell { get; set; }
 
-    private const uint PROGRESS_DELAY_MSEC = 500;
-
-    private const GLib.ActionEntry [] VIEW_ACTION_ENTRIES = {
-        {"undo", action_undo},
-        {"redo", action_redo},
-        {"zoom", action_zoom, "i"},
-        {"move-cursor", action_move_cursor, "(ii)"},
-        {"set-mode", action_set_mode, "u"},
-        {"open", action_open},
-        {"save", action_save},
-        {"save-as", action_save_as},
-        {"paint-cell", action_paint_cell, "u"},
-        {"check-errors", action_check_errors},
-        {"restart", action_restart},
-        {"solve", action_solve},
-        {"debug-row", action_debug_row},
-        {"debug-col", action_debug_col},
-        {"hint", action_hint}
+    public SimpleActionGroup view_actions { get; construct; }
+    public static Gee.MultiMap<string, string> action_accelerators = new Gee.HashMultiMap<string, string> ();
+    public const string ACTION_GROUP = "win";
+    public const string ACTION_PREFIX = ACTION_GROUP + ".";
+    public const string ACTION_UNDO = "action-undo";
+    public const string ACTION_REDO = "action-redo";
+    public const string ACTION_ZOOM = "action-zoom";
+    public const string ACTION_MOVE_CURSOR = "action-move-cursor";
+    public const string ACTION_SET_MODE = "action-set-mode";
+    public const string ACTION_OPEN = "action-open";
+    public const string ACTION_SAVE = "action-save";
+    public const string ACTION_SAVE_AS = "action-save-as";
+    public const string ACTION_PAINT_CELL = "action-paint-cell";
+    public const string ACTION_CHECK_ERRORS = "action-check-errors";
+    public const string ACTION_RESTART = "action-restart";
+    public const string ACTION_SOLVE = "action-solve";
+    public const string ACTION_HINT = "action-hint";
+#if WITH_DEBUGGING
+    public const string ACTION_DEBUG_ROW = "action-debug-row";
+    public const string ACTION_DEBUG_COL = "action-debug-col";
+#endif
+    private static GLib.ActionEntry [] VIEW_ACTION_ENTRIES = {
+        {ACTION_UNDO, action_undo},
+        {ACTION_REDO, action_redo},
+        {ACTION_ZOOM, action_zoom, "i"},
+        {ACTION_MOVE_CURSOR, action_move_cursor, "(ii)"},
+        {ACTION_SET_MODE, action_set_mode, "u"},
+        {ACTION_OPEN, action_open},
+        {ACTION_SAVE, action_save},
+        {ACTION_SAVE_AS, action_save_as},
+        {ACTION_PAINT_CELL, action_paint_cell, "u"},
+        {ACTION_CHECK_ERRORS, action_check_errors},
+        {ACTION_RESTART, action_restart},
+        {ACTION_SOLVE, action_solve},
+        {ACTION_HINT, action_hint}
     };
+
 
     private LabelBox row_clue_box;
     private LabelBox column_clue_box;
     private CellGrid cell_grid;
-    private Hdy.HeaderBar header_bar;
+    private ProgressIndicator progress_indicator;
     private AppMenu app_menu;
+    private CellState drawing_with_state = CellState.UNDEFINED;
+    private Hdy.HeaderBar header_bar;
+    private Granite.Widgets.Toast toast;
+    private Granite.ModeSwitch mode_switch;
     private Gtk.Grid main_grid;
     private Gtk.Overlay overlay;
-    private ProgressIndicator progress_indicator;
     private Gtk.Stack progress_stack;
     private Gtk.Label title_label;
     private Gtk.Label grade_label;
-    private Granite.Widgets.Toast toast;
-    private Granite.ModeSwitch mode_switch;
     private Gtk.Button generate_button;
     private Gtk.Button load_game_button;
     private Gtk.Button save_game_button;
@@ -99,11 +119,10 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     private Gtk.Button hint_button;
     private Gtk.Button auto_solve_button;
     private Gtk.Button restart_button;
-    private CellState drawing_with_state;
     private uint drawing_with_key;
-    private int rows {get {return (int)dimensions.rows ();}}
-    private int cols {get {return (int)dimensions.cols ();}}
-    private bool is_solving {get {return game_state == GameState.SOLVING;}}
+    private int rows { get { return (int) dimensions.rows (); }}
+    private int cols { get { return (int) dimensions.cols (); }}
+    private bool is_solving { get { return game_state == GameState.SOLVING; }}
 
     public View (Model _model, Controller controller) {
         Object (
@@ -114,69 +133,74 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     }
 
     static construct {
-        Hdy.init ();
-    }
-
-    construct {
-        var view_actions = new GLib.SimpleActionGroup ();
-        view_actions.add_action_entries (VIEW_ACTION_ENTRIES, this);
-        view_actions.add_action_entries (VIEW_ACTION_ENTRIES, this);
-        insert_action_group ("view", view_actions);
-
-        var application = (Gtk.Application)(Application.get_default ());
-        application.set_accels_for_action ("view.undo", {"<Ctrl>Z"});
-        application.set_accels_for_action ("view.redo", {"<Ctrl><Shift>Z"});
-        application.set_accels_for_action ("view.move-cursor((-1, 0))", {"Up"});
-        application.set_accels_for_action ("view.move-cursor((1, 0))", {"Down"});
-        application.set_accels_for_action ("view.move-cursor((0, -1))", {"Left"});
-        application.set_accels_for_action ("view.move-cursor((0, 1))", {"Right"});
-        application.set_accels_for_action ("view.zoom(int32 1)", {"<Ctrl>plus", "<Ctrl>equal", "<Ctrl>KP_Add"});
-        application.set_accels_for_action ("view.zoom(int32 -1)", {"<Ctrl>minus", "<Ctrl>KP_Subtract"});
-        application.set_accels_for_action ("view.set-mode(uint32 %u)"
-                                           .printf (GameState.SETTING), {"<Ctrl>1"});
-
-        application.set_accels_for_action ("view.set-mode(uint32 %u)"
-                                           .printf (GameState.SOLVING), {"<Ctrl>2"});
-
-        application.set_accels_for_action ("view.set-mode(uint32 %u)"
-                                           .printf (GameState.GENERATING), {"<Ctrl>3", "<Ctrl>N"});
-
-        application.set_accels_for_action ("view.open", {"<Ctrl>O"});
-        application.set_accels_for_action ("view.save", {"<Ctrl>S"});
-        application.set_accels_for_action ("view.save-as", {"<Ctrl><Shift>S"});
-        application.set_accels_for_action ("view.paint-cell(uint32 %u)"
-                                           .printf (CellState.FILLED), {"F"});
-
-        application.set_accels_for_action ("view.paint-cell(uint32 %u)"
-                                           .printf (CellState.EMPTY), {"E"});
-
-        application.set_accels_for_action ("view.paint-cell(uint32 %u)"
-                                           .printf (CellState.UNKNOWN), {"X"});
-
-        application.set_accels_for_action ("view.check-errors", {"F7", "less", "comma"});
-        application.set_accels_for_action ("view.restart", {"F5", "<Ctrl>R"});
-        application.set_accels_for_action ("view.hint", {"F9", "<Ctrl>H"});
 #if WITH_DEBUGGING
-        application.set_accels_for_action ("view.debug-row", {"<Alt>R"});
-        application.set_accels_for_action ("view.debug-col", {"<Alt>C"});
+warning ("WITH DEBUGGING");
+        VIEW_ACTION_ENTRIES += ActionEntry () { name = ACTION_DEBUG_ROW, activate = action_debug_row };
+        VIEW_ACTION_ENTRIES += ActionEntry () { name = ACTION_DEBUG_COL, activate = action_debug_col };
 #endif
-        drawing_with_state = CellState.UNDEFINED;
-
-        weak Gtk.IconTheme default_theme = Gtk.IconTheme.get_default ();
-        default_theme.add_resource_path ("/com/github/jeremypw/gnonograms");
-
-        header_bar = new Hdy.HeaderBar ();
-        header_bar.set_has_subtitle (false);
-        header_bar.set_show_close_button (true);
-        var css_provider = new Gtk.CssProvider ();
+        action_accelerators.set (ACTION_UNDO, "<Ctrl>Z");
+        action_accelerators.set (ACTION_REDO, "<Ctrl><Shift>Z");
+        action_accelerators.set (ACTION_MOVE_CURSOR + "((-1, 0))", "Up");
+        action_accelerators.set (ACTION_MOVE_CURSOR + "((1, 0))", "Down");
+        action_accelerators.set (ACTION_MOVE_CURSOR + "((0, -1))", "Left");
+        action_accelerators.set (ACTION_MOVE_CURSOR + "((0, 1))", "Right");
+        action_accelerators.set (ACTION_ZOOM + "(int32 1)", "<Ctrl>plus");
+        action_accelerators.set (ACTION_ZOOM + "(int32 1)", "<Ctrl>equal");
+        action_accelerators.set (ACTION_ZOOM + "(int32 1)", "<Ctrl>KP_Add");
+        action_accelerators.set (ACTION_ZOOM + "(int32 -1)", "<Ctrl>minus");
+        action_accelerators.set (ACTION_ZOOM + "(int32 -1)", "<Ctrl>KP_Subtract");
+        action_accelerators.set (ACTION_SET_MODE + "(uint32 %u)".printf (GameState.SETTING), "<Ctrl>1");
+        action_accelerators.set (ACTION_SET_MODE + "(uint32 %u)".printf (GameState.SOLVING), "<Ctrl>2");
+        action_accelerators.set (ACTION_SET_MODE + "(uint32 %u)".printf (GameState.GENERATING), "<Ctrl>3");
+        action_accelerators.set (ACTION_SET_MODE + "(uint32 %u)".printf (GameState.GENERATING), "<Ctrl>N");
+        action_accelerators.set (ACTION_OPEN, "<Ctrl>O");
+        action_accelerators.set (ACTION_SAVE, "<Ctrl>S");
+        action_accelerators.set (ACTION_SAVE_AS, "<Ctrl><Shift>S");
+        action_accelerators.set (ACTION_PAINT_CELL + "(uint32 %u)".printf (CellState.FILLED), "F");
+        action_accelerators.set (ACTION_PAINT_CELL + "(uint32 %u)".printf (CellState.EMPTY), "E");
+        action_accelerators.set (ACTION_PAINT_CELL + "(uint32 %u)".printf (CellState.UNKNOWN), "X");
+        action_accelerators.set (ACTION_CHECK_ERRORS, "F7");
+        action_accelerators.set (ACTION_CHECK_ERRORS, "less");
+        action_accelerators.set (ACTION_CHECK_ERRORS, "comma");
+        action_accelerators.set (ACTION_RESTART, "F5");
+        action_accelerators.set (ACTION_RESTART, "<Ctrl>R");
+        action_accelerators.set (ACTION_HINT, "F9");
+        action_accelerators.set (ACTION_HINT, "<Ctrl>H");
+        action_accelerators.set (ACTION_DEBUG_ROW, "<Alt>R");
+        action_accelerators.set (ACTION_DEBUG_COL, "<Alt>C");
 
         try {
+            var css_provider = new Gtk.CssProvider ();
             css_provider.load_from_resource ("com/github/jeremypw/gnonograms/Application.css");
+            Gtk.StyleContext.add_provider_for_screen (
+                Gdk.Screen.get_default (), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+            );
         } catch (Error e) {
             warning ("Error adding css provider: %s", e.message);
         }
 
-        header_bar.get_style_context ().add_provider (css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+        Hdy.init ();
+    }
+
+    construct {
+        weak Gtk.IconTheme default_theme = Gtk.IconTheme.get_default ();
+        default_theme.add_resource_path ("/com/github/jeremypw/gnonograms");
+
+        var view_actions = new GLib.SimpleActionGroup ();
+        view_actions.add_action_entries (VIEW_ACTION_ENTRIES, this);
+        insert_action_group (ACTION_GROUP, view_actions);
+
+        var application = (Gtk.Application)(Application.get_default ());
+        foreach (var action in action_accelerators.get_keys ()) {
+            var accels_array = action_accelerators[action].to_array ();
+            accels_array += null;
+
+            application.set_accels_for_action (ACTION_PREFIX + action, accels_array);
+        }
+
+        header_bar = new Hdy.HeaderBar ();
+        header_bar.set_has_subtitle (false);
+        header_bar.set_show_close_button (true);
         header_bar.get_style_context ().add_class ("gnonograms-header");
 
         load_game_button = new HeaderButton ("document-open", _("Load a Game from File"));

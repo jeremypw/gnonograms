@@ -1,0 +1,1 @@
+option('with_debugging', type : 'boolean', value : 'false', description : 'Include code used for debugging the solver')

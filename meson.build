@@ -1,4 +1,4 @@
-project ('com.github.jeremypw.gnonograms', 'vala', 'c', version: '1.4.3', meson_version: '>= 0.49.0')
+project ('com.github.jeremypw.gnonograms', 'vala', 'c', version: '2.0.0', meson_version: '>= 0.49.0')
 
 vala_version_required = '>=0.48.0'
 
@@ -8,6 +8,10 @@ add_global_arguments (
     '-DGETTEXT_PACKAGE="' + meson.project_name () + '"',
     language:'c'
 )
+
+if get_option('with_debugging')
+    add_project_arguments('--define=WITH_DEBUGGING', language: 'vala')
+endif
 
 GTK3 = dependency('gtk+-3.0', version: '>=3.22')
 GEE = dependency('gee-0.8', version: '>=0.20')
