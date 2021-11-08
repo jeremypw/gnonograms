@@ -144,7 +144,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         Object (
             model: _model,
             controller: controller,
-            resizable: true
+            resizable: false
         );
     }
 
@@ -221,34 +221,37 @@ warning ("WITH DEBUGGING");
         header_bar.set_show_close_button (true);
         header_bar.get_style_context ().add_class ("gnonograms-header");
 
-        load_game_button = new HeaderButton ("document-open", _("Load a Game from File"));
-        save_game_button = new HeaderButton ("document-save", _("Save Game"));
-        save_game_as_button = new HeaderButton ("document-save-as", _("Save Game to Different File"));
+        load_game_button = new HeaderButton ("document-open", _("Load a Game from File")) {
+            action_name = ACTION_PREFIX + ACTION_OPEN
+        };
+        save_game_button = new HeaderButton ("document-save", _("Save Game")) {
+            action_name = ACTION_PREFIX + ACTION_SAVE
+        };
+        save_game_as_button = new HeaderButton ("document-save-as", _("Save Game to Different File")) {
+            action_name = ACTION_PREFIX + ACTION_SAVE_AS
+        };
         undo_button = new HeaderButton ("edit-undo", _("Undo Last Move")) {
-            sensitive = false,
             action_name = ACTION_PREFIX + ACTION_UNDO
         };
         redo_button = new HeaderButton ("edit-redo", _("Redo Last Move")) {
-            sensitive = false,
             action_name = ACTION_PREFIX + ACTION_REDO
         };
         check_correct_button = new HeaderButton ("media-seek-backward", _("Go Back to Last Correct Position")) {
-            sensitive = false,
             action_name = ACTION_PREFIX + ACTION_CHECK_ERRORS
         };
-        restart_button = new RestartButton ("view-refresh", ""); /* private class - see below */
+        restart_button = new RestartButton ("view-refresh", "") {
+            action_name = ACTION_PREFIX + ACTION_RESTART
+        };
         hint_button = new HeaderButton ("help-contents", _("Suggest next move")) {
-            sensitive = false,
             action_name = ACTION_PREFIX + ACTION_HINT
         };
         auto_solve_button = new HeaderButton ("system", _("Solve by Computer")) {
-            sensitive = false,
             action_name = ACTION_PREFIX + ACTION_SOLVE
         };
         generate_button = new HeaderButton ("list-add", _("Generate New Puzzle")) {
-            margin_start = 6,
             action_name = ACTION_PREFIX + ACTION_GENERATING_MODE
         };
+
         app_menu = new AppMenu (controller);
 
         mode_switch = new Granite.ModeSwitch.from_icon_name ("edit-symbolic", "head-thinking-symbolic") {
@@ -263,6 +266,7 @@ warning ("WITH DEBUGGING");
         };
         title_label.get_style_context ().add_class (Granite.STYLE_CLASS_H3_LABEL);
         title_label.show ();
+
         grade_label = new Gtk.Label ("Easy") {
             use_markup = true,
             xalign = 0.5f
@@ -365,7 +369,7 @@ warning ("WITH DEBUGGING");
                 update_all_labels_completeness ();
             }
 
-            generate_button.sensitive = game_state != GameState.GENERATING;
+            update_header_bar ();
         });
 
         notify["generator-grade"].connect (() => {
@@ -510,6 +514,7 @@ warning ("WITH DEBUGGING");
     }
 
     private void set_buttons_sensitive (bool sensitive) {
+        generate_button.sensitive = game_state != GameState.GENERATING;
         mode_switch.sensitive = sensitive;
         load_game_button.sensitive = sensitive;
         save_game_button.sensitive = sensitive;
