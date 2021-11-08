@@ -166,8 +166,10 @@ warning ("WITH DEBUGGING");
         action_accelerators.set (ACTION_RESTART, "<Ctrl>R");
         action_accelerators.set (ACTION_HINT, "F9");
         action_accelerators.set (ACTION_HINT, "<Ctrl>H");
+#if WITH_DEBUGGING
         action_accelerators.set (ACTION_DEBUG_ROW, "<Alt>R");
         action_accelerators.set (ACTION_DEBUG_COL, "<Alt>C");
+#endif
 
         try {
             var css_provider = new Gtk.CssProvider ();

@@ -212,6 +212,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         Gdk.cairo_set_source_rgba (cr, grid_color);
         cr.set_antialias (Cairo.Antialias.NONE);
         cr.set_line_width (MINOR_GRID_LINE_WIDTH);
+
         // Draw minor grid lines
         double y1 = MINOR_GRID_LINE_WIDTH;
         double x1 = MINOR_GRID_LINE_WIDTH;
@@ -236,8 +237,6 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         // Draw inner major grid lines
         cr.set_line_width (MAJOR_GRID_LINE_WIDTH);
         x1 = MINOR_GRID_LINE_WIDTH;
-        // x2 = alloc_width;
-        // y2 = alloc_height;
         while (y1 < y2) {
             y1 += 5.0 * cell_size;
             cr.move_to (x1, y1);
@@ -261,22 +260,14 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         cr.line_to (x2, y1);
         cr.stroke ();
 
-        // y1 = 0;
-        // cr.move_to (x1, y1);
         cr.line_to (x2, y2);
         cr.stroke ();
 
-        // x1 = MAJOR_GRID_LINE_WIDTH / 2;
-        // y1 = 0;
-        // cr.move_to (x1, y1);
         cr.line_to (x1, y2);
         cr.stroke ();
 
-        // x1 = x2 - MAJOR_GRID_LINE_WIDTH / 2;
-        // cr.move_to (x1, y1);
         cr.line_to (x1, y1);
         cr.stroke ();
-
     }
 
     private void draw_cell (Cairo.Context cr, Cell cell, bool highlight = false, bool mark = false) {

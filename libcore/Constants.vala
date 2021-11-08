@@ -24,23 +24,14 @@ namespace Gnonograms {
     public const uint MAXSIZE = 50; // max number rows or columns
     public const uint MINSIZE = 5; // Change to 1 when debugging
     public const uint SIZESTEP = 5; // Change to 1 when debugging
-    // public const double MINFONTSIZE = 8.0;
-    // public const double MAXFONTSIZE = 36.0;
     public const Difficulty MIN_GRADE = Difficulty.EASY; /* TRIVIAL and VERY EASY GRADES not worth supporting */
-
-
-
-
-
     public const string BLOCKSEPARATOR = ", ";
     public const string BLANKLABELTEXT = N_("?");
     public const string GAMEFILEEXTENSION = ".gno";
     public const string UNSAVED_FILENAME = "Unsaved Game" + GAMEFILEEXTENSION;
     public const string UNTITLED_NAME = N_("Untitled");
-
     public const string APP_ID = "com.github.jeremypw.gnonograms";
     public const string APP_NAME = "Gnonograms";
-
     public const string SETTING_FILLED_COLOR = "#000000"; /* Elementary Black 900 */
     public const string SETTING_EMPTY_COLOR = "#fafafa"; /* Elementary Silver 100 */
     public const string SOLVING_FILLED_COLOR = "#180297"; /* Gnonograms Dark Purple */

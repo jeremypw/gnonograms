@@ -23,7 +23,7 @@ namespace Gnonograms {
         VERY_EASY = 1,
         EASY = 2,
         MODERATE = 3,
-        HARD =4 ,
+        HARD = 4 ,
         CHALLENGING = 5,
         ADVANCED = 6,
         MAXIMUM = 7, /* Max grade for generated puzzles (possibly ambiguous)*/
