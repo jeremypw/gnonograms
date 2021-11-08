@@ -71,6 +71,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     public const string ACTION_RESTART = "action-restart";
     public const string ACTION_SOLVE = "action-solve";
     public const string ACTION_HINT = "action-hint";
+    public const string ACTION_OPTIONS = "action-options";
 #if WITH_DEBUGGING
     public const string ACTION_DEBUG_ROW = "action-debug-row";
     public const string ACTION_DEBUG_COL = "action-debug-col";
@@ -96,10 +97,11 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         {ACTION_CHECK_ERRORS, action_check_errors},
         {ACTION_RESTART, action_restart},
         {ACTION_SOLVE, action_solve},
-        {ACTION_HINT, action_hint}
+        {ACTION_HINT, action_hint},
+        {ACTION_OPTIONS, action_options}
     };
 
-
+    public static Gtk.Application app;
     private LabelBox row_clue_box;
     private LabelBox column_clue_box;
     private CellGrid cell_grid;
@@ -138,6 +140,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     }
 
     static construct {
+        app = (Gtk.Application)(Application.get_default ());
 #if WITH_DEBUGGING
 warning ("WITH DEBUGGING");
         VIEW_ACTION_ENTRIES += ActionEntry () { name = ACTION_DEBUG_ROW, activate = action_debug_row };
@@ -165,12 +168,13 @@ warning ("WITH DEBUGGING");
         action_accelerators.set (ACTION_PAINT_EMPTY, "E");
         action_accelerators.set (ACTION_PAINT_UNKNOWN, "X");
         action_accelerators.set (ACTION_CHECK_ERRORS, "F7");
-        action_accelerators.set (ACTION_CHECK_ERRORS, "less");
-        action_accelerators.set (ACTION_CHECK_ERRORS, "comma");
         action_accelerators.set (ACTION_RESTART, "F5");
         action_accelerators.set (ACTION_RESTART, "<Ctrl>R");
         action_accelerators.set (ACTION_HINT, "F9");
         action_accelerators.set (ACTION_HINT, "<Ctrl>H");
+        action_accelerators.set (ACTION_SOLVE, "<Alt>S");
+        action_accelerators.set (ACTION_OPTIONS, "F10");
+        action_accelerators.set (ACTION_OPTIONS, "Menu");
 #if WITH_DEBUGGING
         action_accelerators.set (ACTION_DEBUG_ROW, "<Alt>R");
         action_accelerators.set (ACTION_DEBUG_COL, "<Alt>C");
@@ -197,49 +201,34 @@ warning ("WITH DEBUGGING");
         view_actions.add_action_entries (VIEW_ACTION_ENTRIES, this);
         insert_action_group (ACTION_GROUP, view_actions);
 
-        var application = (Gtk.Application)(Application.get_default ());
+
         foreach (var action in action_accelerators.get_keys ()) {
             var accels_array = action_accelerators[action].to_array ();
             accels_array += null;
 
-            application.set_accels_for_action (ACTION_PREFIX + action, accels_array);
+            app.set_accels_for_action (ACTION_PREFIX + action, accels_array);
         }
 
-        load_game_button = new HeaderButton ("document-open", _("Load a Game from File")) {
-            action_name = ACTION_PREFIX + ACTION_OPEN
-        };
-        save_game_button = new HeaderButton ("document-save", _("Save Game")) {
-            action_name = ACTION_PREFIX + ACTION_SAVE
-        };
-        save_game_as_button = new HeaderButton ("document-save-as", _("Save Game to Different File")) {
-            action_name = ACTION_PREFIX + ACTION_SAVE_AS
-        };
-        undo_button = new HeaderButton ("edit-undo", _("Undo Last Move")) {
-            action_name = ACTION_PREFIX + ACTION_UNDO
-        };
-        redo_button = new HeaderButton ("edit-redo", _("Redo Last Move")) {
-            action_name = ACTION_PREFIX + ACTION_REDO
-        };
-        check_correct_button = new HeaderButton ("media-seek-backward", _("Go Back to Last Correct Position")) {
-            action_name = ACTION_PREFIX + ACTION_CHECK_ERRORS
-        };
-        restart_button = new RestartButton ("view-refresh", "") {
-            action_name = ACTION_PREFIX + ACTION_RESTART
-        };
-        hint_button = new HeaderButton ("help-contents", _("Suggest next move")) {
-            action_name = ACTION_PREFIX + ACTION_HINT
-        };
-        auto_solve_button = new HeaderButton ("system", _("Solve by Computer")) {
-            action_name = ACTION_PREFIX + ACTION_SOLVE
-        };
-        generate_button = new HeaderButton ("list-add", _("Generate New Puzzle")) {
-            action_name = ACTION_PREFIX + ACTION_GENERATING_MODE
+        load_game_button = new HeaderButton ("document-open", ACTION_PREFIX + ACTION_OPEN, _("Load Game"));
+        save_game_button = new HeaderButton ("document-save", ACTION_PREFIX + ACTION_SAVE, _("Save Game"));
+        save_game_as_button = new HeaderButton ("document-save-as", ACTION_PREFIX + ACTION_SAVE_AS, _("Save Game to Different File"));
+        undo_button = new HeaderButton ("edit-undo", ACTION_PREFIX + ACTION_UNDO, _("Undo Last Move"));
+        redo_button = new HeaderButton ("edit-redo", ACTION_PREFIX + ACTION_REDO, _("Redo Last Move"));
+        check_correct_button = new HeaderButton ("media-seek-backward", ACTION_PREFIX + ACTION_CHECK_ERRORS, _("Check for Errors"));
+        restart_button = new RestartButton ("view-refresh", ACTION_PREFIX + ACTION_RESTART, _("Start again"));
+        hint_button = new HeaderButton ("help-contents", ACTION_PREFIX + ACTION_HINT, _("Suggest next move"));
+        auto_solve_button = new HeaderButton ("system", ACTION_PREFIX + ACTION_SOLVE, _("Solve by Computer"));
+        generate_button = new HeaderButton ("list-add", ACTION_PREFIX + ACTION_GENERATING_MODE, _("Generate New Puzzle"));
+
+        app_menu = new AppMenu (controller) {
+            tooltip_markup = Granite.markup_accel_tooltip (app.get_accels_for_action (ACTION_PREFIX + ACTION_OPTIONS), _("Options"))
         };
 
-        app_menu = new AppMenu (controller);
-
+        // Unable to set markup on Granite.ModeSwitch so fake a Granite acellerator tooltip for now.
         mode_switch = new Granite.ModeSwitch.from_icon_name ("edit-symbolic", "head-thinking-symbolic") {
-            valign = Gtk.Align.CENTER
+            valign = Gtk.Align.CENTER,
+            primary_icon_tooltip_text =  "%s\n%s".printf (_("Edit a Game"), "Ctrl + 1"),
+            secondary_icon_tooltip_text = "%s\n%s".printf (_("Manually Solve"), "Ctrl + 2")
         };
 
         progress_indicator = new ProgressIndicator ();
@@ -354,11 +343,6 @@ warning ("WITH DEBUGGING");
             update_header_bar ();
         });
 
-        notify["generator-grade"].connect (() => {
-            ///TRANSLATORS: '%s' is a placeholder for an adjective describing the difficulty of the puzzle
-            generate_button.tooltip_text = _("Generate %s puzzle").printf (generator_grade.to_string ());
-        });
-
         controller.notify["game-name"].connect (() => {
             update_title ();
         });
@@ -443,7 +427,6 @@ warning ("WITH DEBUGGING");
         show_all ();
     }
 
-    // public const double FONT_ASPECT_RATIO = 1.2;
     public void update_labels_from_string_array (string[] clues, bool is_column) {
         var clue_box = is_column ? column_clue_box : row_clue_box;
         var lim = is_column ? cols : rows;
@@ -499,12 +482,10 @@ warning ("WITH DEBUGGING");
     private void update_header_bar () {
         switch (game_state) {
             case GameState.SETTING:
-                restart_button.tooltip_text = _("Clear canvas");
                 set_buttons_sensitive (true);
 
                 break;
             case GameState.SOLVING:
-                restart_button.tooltip_text = _("Restart solving");
                 set_buttons_sensitive (true);
 
                 break;
@@ -643,7 +624,6 @@ warning ("WITH DEBUGGING");
 
     /** Action callbacks **/
     private void action_restart () {
-        // restart_request ();
         controller.restart ();
         if (game_state == GameState.SETTING) {
             game_grade = Difficulty.UNDEFINED;
@@ -656,6 +636,10 @@ warning ("WITH DEBUGGING");
 
     private void action_hint () {
         controller.hint ();
+    }
+
+    private void action_options () {
+        app_menu.activate ();
     }
 
 #if WITH_DEBUGGING
@@ -791,23 +775,22 @@ warning ("WITH DEBUGGING");
             bind_property ("sensitive", this, "restart-destructive");
         }
 
-        public RestartButton (string icon_name, string tooltip = "", bool sensitive = true) {
-            base (icon_name, tooltip, sensitive);
+        public RestartButton (string icon_name, string action_name, string text) {
+            base (icon_name, action_name, text);
         }
     }
 
     private class HeaderButton : Gtk.Button {
         construct {
-            margin_top = 3;
-            margin_bottom = 3;
             valign = Gtk.Align.CENTER;
         }
 
-        public HeaderButton (string icon_name, string tooltip = "", bool sensitive = true) {
+        public HeaderButton (string icon_name, string action_name, string text) {
             Object (
-                image: new Gtk.Image.from_icon_name (icon_name, Gtk.IconSize.LARGE_TOOLBAR),
-                tooltip_text: tooltip,
-                sensitive: sensitive
+                action_name: action_name,
+                tooltip_markup: Granite.markup_accel_tooltip (
+                    View.app.get_accels_for_action (action_name), text),
+                image: new Gtk.Image.from_icon_name (icon_name, Gtk.IconSize.LARGE_TOOLBAR)
             );
         }
     }

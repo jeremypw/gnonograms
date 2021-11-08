@@ -28,7 +28,7 @@ public class Gnonograms.DimensionSpinButton : Gtk.SpinButton {
             margin_top: 3,
             margin_bottom: 3,
             width_chars: 3,
-            can_focus: false
+            can_focus: true
         );
     }
 }
