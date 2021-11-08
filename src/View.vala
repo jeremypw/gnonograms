@@ -26,20 +26,9 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     private const double ZOOM_RATIO = 0.05;
     private const uint PROGRESS_DELAY_MSEC = 500;
 
-    public signal void random_game_request ();
-    public signal uint rewind_request ();
-    public signal bool next_move_request ();
-    public signal bool previous_move_request ();
-    public signal void save_game_request ();
-    public signal void save_game_as_request ();
-    public signal void open_game_request ();
-    public signal void solve_this_request ();
-    public signal void restart_request ();
-    public signal void hint_request ();
 #if WITH_DEBUGGING
     public signal void debug_request (uint idx, bool is_column);
 #endif
-    public signal void changed_cell (Cell cell, CellState previous_state);
 
     public Model model {private get; construct; }
     public Controller controller { get; construct; }
@@ -216,11 +205,6 @@ warning ("WITH DEBUGGING");
             application.set_accels_for_action (ACTION_PREFIX + action, accels_array);
         }
 
-        header_bar = new Hdy.HeaderBar ();
-        header_bar.set_has_subtitle (false);
-        header_bar.set_show_close_button (true);
-        header_bar.get_style_context ().add_class ("gnonograms-header");
-
         load_game_button = new HeaderButton ("document-open", _("Load a Game from File")) {
             action_name = ACTION_PREFIX + ACTION_OPEN
         };
@@ -285,6 +269,12 @@ warning ("WITH DEBUGGING");
         progress_stack.add_named (title_grid, "Title");
         progress_stack.set_visible_child_name ("Title");
 
+        header_bar = new Hdy.HeaderBar () {
+            has_subtitle = false,
+            show_close_button = true,
+            custom_title = progress_stack
+        };
+        header_bar.get_style_context ().add_class ("gnonograms-header");
         header_bar.pack_start (load_game_button);
         header_bar.pack_start (save_game_button);
         header_bar.pack_start (save_game_as_button);
@@ -293,14 +283,12 @@ warning ("WITH DEBUGGING");
         header_bar.pack_start (undo_button);
         header_bar.pack_start (redo_button);
         header_bar.pack_start (check_correct_button);
-
         header_bar.pack_end (app_menu);
         header_bar.pack_end (auto_solve_button);
         header_bar.pack_end (hint_button);
         header_bar.pack_end (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_end (generate_button);
         header_bar.pack_end (mode_switch);
-        header_bar.set_custom_title (progress_stack);
 
         toast = new Granite.Widgets.Toast ("") {
             halign = Gtk.Align.START,
@@ -318,7 +306,6 @@ warning ("WITH DEBUGGING");
             border_width = GRID_BORDER,
             expand = true
         };
-
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for rows */
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
         main_grid.attach (cell_grid, 1, 1, 1, 1);
@@ -337,25 +324,20 @@ warning ("WITH DEBUGGING");
         var grid = new Gtk.Grid () {
             orientation = Gtk.Orientation.VERTICAL
         };
-
         grid.add (header_bar);
         grid.add (overlay);
         add (grid);
 
-        cell_grid.leave_notify_event.connect (on_grid_leave);
-        cell_grid.button_press_event.connect (on_grid_button_press);
-        cell_grid.button_release_event.connect (stop_painting);
-        key_release_event.connect (on_key_release_event);
-
         var flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
         bind_property ("restart-destructive", restart_button, "restart-destructive", BindingFlags.SYNC_CREATE) ;
         bind_property ("game-state", mode_switch, "active", flags,
-        (binding, src_val, ref tgt_val) => {
-            tgt_val.set_boolean (src_val.get_enum () > GameState.SETTING);
-        },
-        (binding, src_val, ref tgt_val) => {
-            tgt_val.set_enum (src_val.get_boolean () ? GameState.SOLVING : GameState.SETTING);
-        });
+            (binding, src_val, ref tgt_val) => {
+                tgt_val.set_boolean (src_val.get_enum () > GameState.SETTING);
+            },
+            (binding, src_val, ref tgt_val) => {
+                tgt_val.set_enum (src_val.get_boolean () ? GameState.SOLVING : GameState.SETTING);
+            }
+        );
         bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
         bind_property ("previous-cell", cell_grid, "previous-cell", BindingFlags.BIDIRECTIONAL);
         bind_property ("cell-size", cell_grid, "cell-size", BindingFlags.SYNC_CREATE);
@@ -373,7 +355,7 @@ warning ("WITH DEBUGGING");
         });
 
         notify["generator-grade"].connect (() => {
-            ///TRANSLATORS: '%s' is a placeholder for an adjective describing the difficulty of the puzze. It can be moved but not translated.
+            ///TRANSLATORS: '%s' is a placeholder for an adjective describing the difficulty of the puzzle
             generate_button.tooltip_text = _("Generate %s puzzle").printf (generator_grade.to_string ());
         });
 
@@ -430,6 +412,33 @@ warning ("WITH DEBUGGING");
             var available_cell_height = available_screen_height / (rows * 1.2);
             cell_size = (int)(double.min (available_cell_width, available_cell_height));
         });
+
+       cell_grid.leave_notify_event.connect (() => {
+            row_clue_box.unhighlight_all ();
+            column_clue_box.unhighlight_all ();
+            return false;
+        });
+
+        cell_grid.button_press_event.connect ((event) => {
+            if (event.type == Gdk.EventType.@2BUTTON_PRESS || event.button == Gdk.BUTTON_MIDDLE) {
+                drawing_with_state = is_solving ? CellState.UNKNOWN : CellState.EMPTY;
+            } else {
+                drawing_with_state = event.button == Gdk.BUTTON_PRIMARY ? CellState.FILLED : CellState.EMPTY;
+            }
+
+            make_move_at_cell ();
+            return true;
+        });
+
+        key_release_event.connect ((event) => {
+            if (event.keyval == drawing_with_key) {
+                stop_painting ();
+            }
+
+            return false;
+        });
+
+        cell_grid.button_release_event.connect (stop_painting);
 
         show_all ();
     }
@@ -564,7 +573,7 @@ warning ("WITH DEBUGGING");
         var cell = update_current_and_model (state, target);
 
         if (prev_state != state) {
-            changed_cell (cell, prev_state);
+            controller.after_cell_changed (cell, prev_state);
         }
     }
 
@@ -604,32 +613,6 @@ warning ("WITH DEBUGGING");
         });
     }
 
-    /*** Signal handlers ***/
-    private bool on_grid_leave () {
-        row_clue_box.unhighlight_all ();
-        column_clue_box.unhighlight_all ();
-        return false;
-    }
-
-    private bool on_grid_button_press (Gdk.EventButton event) {
-        if (event.type == Gdk.EventType.@2BUTTON_PRESS || event.button == Gdk.BUTTON_MIDDLE) {
-            drawing_with_state = is_solving ? CellState.UNKNOWN : CellState.EMPTY;
-        } else {
-            drawing_with_state = event.button == Gdk.BUTTON_PRIMARY ? CellState.FILLED : CellState.EMPTY;
-        }
-
-        make_move_at_cell ();
-        return true;
-    }
-
-    private bool on_key_release_event (Gdk.EventKey event) {
-        if (event.keyval == drawing_with_key) {
-            stop_painting ();
-        }
-
-        return false;
-    }
-
     private bool stop_painting () {
         drawing_with_state = CellState.UNDEFINED;
         drawing_with_key = 0;
@@ -660,18 +643,19 @@ warning ("WITH DEBUGGING");
 
     /** Action callbacks **/
     private void action_restart () {
-        restart_request ();
+        // restart_request ();
+        controller.restart ();
         if (game_state == GameState.SETTING) {
             game_grade = Difficulty.UNDEFINED;
         }
     }
 
     private void action_solve () {
-        solve_this_request ();
+        controller.solve ();
     }
 
     private void action_hint () {
-        hint_request ();
+        controller.hint ();
     }
 
 #if WITH_DEBUGGING
@@ -685,23 +669,23 @@ warning ("WITH DEBUGGING");
 #endif
 
     private void action_undo () {
-        previous_move_request ();
+        controller.previous_move ();
     }
 
     private void action_redo () {
-        next_move_request ();
+        controller.next_move ();
     }
 
     private void action_open () {
-        open_game_request ();
+        controller.open_game ();
     }
 
     private void action_save () {
-        save_game_request ();
+        controller.save_game ();
     }
 
     private void action_save_as () {
-        save_game_as_request ();
+        controller.save_game_as ();
     }
 
     private void action_zoom_in () {
@@ -720,7 +704,7 @@ warning ("WITH DEBUGGING");
         }
     }
     private void action_check_errors () {
-        if (rewind_request () == 0) {
+        if (controller.rewind_until_correct () == 0) {
             send_notification (_("No errors"));
         }
     }

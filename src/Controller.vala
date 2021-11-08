@@ -55,23 +55,11 @@ public class Gnonograms.Controller : GLib.Object {
         view = new View (model, this);
         history = new Gnonograms.History ();
 
-        view.changed_cell.connect (on_changed_cell);
-        view.next_move_request.connect (on_next_move_request);
-        view.previous_move_request.connect (on_previous_move_request);
-        view.rewind_request.connect (rewind_until_correct);
         view.delete_event.connect (on_view_deleted);
-        view.save_game_request.connect (on_save_game_request);
-        view.save_game_as_request.connect (on_save_game_as_request);
-        view.open_game_request.connect (on_open_game_request);
-        view.solve_this_request.connect (on_solve_this_request);
-        view.restart_request.connect (on_restart_request);
-        view.hint_request.connect (on_hint_request);
-
+        view.configure_event.connect (on_view_configure);
 #if WITH_DEBUGGING
         view.debug_request.connect (on_debug_request);
 #endif
-        view.configure_event.connect (on_view_configure);
-
         notify["game-state"].connect (() => {
             if (game_state != GameState.UNDEFINED) { /* Do not clear on save */
                 clear_history ();
@@ -439,10 +427,10 @@ public class Gnonograms.Controller : GLib.Object {
         return true;
     }
 
-    private uint rewind_until_correct () {
+    public uint rewind_until_correct () {
         var errors = model.count_errors ();
 
-        while (model.count_errors () > 0 && on_previous_move_request ()) {
+        while (model.count_errors () > 0 && previous_move ()) {
             continue;
         }
 
@@ -485,7 +473,7 @@ public class Gnonograms.Controller : GLib.Object {
         return moves.size > 0;
     }
 
-    private void on_changed_cell (Cell cell, CellState previous_state) {
+    public void after_cell_changed (Cell cell, CellState previous_state) {
         history.record_move (cell, previous_state);
         /* Check if puzzle finished */
         if (is_solving && model.is_finished) {
@@ -504,7 +492,7 @@ public class Gnonograms.Controller : GLib.Object {
         }
     }
 
-    private bool on_next_move_request () {
+    public bool next_move () {
         if (history.can_go_forward) {
             make_move (history.pop_next_move ());
             return true;
@@ -513,7 +501,7 @@ public class Gnonograms.Controller : GLib.Object {
         }
     }
 
-    private bool on_previous_move_request () {
+    public bool previous_move () {
         if (history.can_go_back) {
             make_move (history.pop_previous_move ());
             return true;
@@ -553,9 +541,9 @@ public class Gnonograms.Controller : GLib.Object {
         return false;
     }
 
-    private void on_save_game_request () {
+    public void save_game () {
         if (is_readonly || current_game_path == temporary_game_path) {
-            on_save_game_as_request ();
+            save_game_as ();
         } else {
             var path = write_game (current_game_path, false);
             if (path != null && path != "") {
@@ -565,7 +553,7 @@ public class Gnonograms.Controller : GLib.Object {
         }
     }
 
-    private void on_save_game_as_request () {
+    public void save_game_as () {
         /* Filewriter will request save location, no solution saved as default */
         var path = write_game (null, false);
         if (path != null) {
@@ -579,16 +567,16 @@ public class Gnonograms.Controller : GLib.Object {
         view.send_notification (_("Saved to %s").printf (path));
     }
 
-    private void on_open_game_request () {
+    public void open_game () {
         load_game_async.begin (null); /* Filereader will request load location */
     }
 
-    private void on_solve_this_request () {
+    public void solve () {
         game_state = GameState.SOLVING;
         start_solving.begin (true);
     }
 
-    private void on_hint_request () {
+    public void hint () {
         if (game_state != GameState.SOLVING) {
             return;
         }
@@ -663,7 +651,7 @@ public class Gnonograms.Controller : GLib.Object {
         return state;
     }
 
-    private void on_restart_request () {
+    public void restart () {
         if (game_state == GameState.SETTING) {
             new_game ();
         } else {
