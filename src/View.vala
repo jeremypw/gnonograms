@@ -74,7 +74,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     public const string ACTION_DEBUG_ROW = "action-debug-row";
     public const string ACTION_DEBUG_COL = "action-debug-col";
 #endif
-    private static GLib.ActionEntry [] VIEW_ACTION_ENTRIES = {
+    private static GLib.ActionEntry [] view_action_entries = {
         {ACTION_UNDO, action_undo},
         {ACTION_REDO, action_redo},
         {ACTION_ZOOM_IN, action_zoom_in},
@@ -138,8 +138,8 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         app = (Gtk.Application)(Application.get_default ());
 #if WITH_DEBUGGING
 warning ("WITH DEBUGGING");
-        VIEW_ACTION_ENTRIES += ActionEntry () { name = ACTION_DEBUG_ROW, activate = action_debug_row };
-        VIEW_ACTION_ENTRIES += ActionEntry () { name = ACTION_DEBUG_COL, activate = action_debug_col };
+        view_action_entries += ActionEntry () { name = ACTION_DEBUG_ROW, activate = action_debug_row };
+        view_action_entries += ActionEntry () { name = ACTION_DEBUG_COL, activate = action_debug_col };
 #endif
         action_accelerators.set (ACTION_UNDO, "<Ctrl>Z");
         action_accelerators.set (ACTION_REDO, "<Ctrl><Shift>Z");
@@ -193,7 +193,7 @@ warning ("WITH DEBUGGING");
         default_theme.add_resource_path ("/com/github/jeremypw/gnonograms");
 
         var view_actions = new GLib.SimpleActionGroup ();
-        view_actions.add_action_entries (VIEW_ACTION_ENTRIES, this);
+        view_actions.add_action_entries (view_action_entries, this);
         insert_action_group (ACTION_GROUP, view_actions);
 
 
@@ -222,7 +222,7 @@ warning ("WITH DEBUGGING");
         // Unable to set markup on Granite.ModeSwitch so fake a Granite acellerator tooltip for now.
         mode_switch = new Granite.ModeSwitch.from_icon_name ("edit-symbolic", "head-thinking-symbolic") {
             valign = Gtk.Align.CENTER,
-            primary_icon_tooltip_text =  "%s\n%s".printf (_("Edit a Game"), "Ctrl + 1"),
+            primary_icon_tooltip_text = "%s\n%s".printf (_("Edit a Game"), "Ctrl + 1"),
             secondary_icon_tooltip_text = "%s\n%s".printf (_("Manually Solve"), "Ctrl + 2")
         };
 
@@ -383,7 +383,7 @@ warning ("WITH DEBUGGING");
             var available_cell_width = available_grid_width / (controller.dimensions.width * 1.2);
             var available_screen_height = monitor_area.height * 0.85 - header_bar.get_allocated_height () - 2 * GRID_BORDER;
 
-            var available_cell_height = available_screen_height / (controller.dimensions.height* 1.2);
+            var available_cell_height = available_screen_height / (controller.dimensions.height * 1.2);
             cell_size = (int)(double.min (available_cell_width, available_cell_height));
         });
 
@@ -706,7 +706,7 @@ warning ("WITH DEBUGGING");
                        CellState.UNDEFINED
                       };
 
-        if (target.row >= controller.dimensions.height|| target.col >= controller.dimensions.width) {
+        if (target.row >= controller.dimensions.height || target.col >= controller.dimensions.width) {
             return;
         }
 

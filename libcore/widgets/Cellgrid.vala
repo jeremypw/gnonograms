@@ -20,7 +20,6 @@
 public class Gnonograms.CellGrid : Gtk.DrawingArea {
     public signal void cursor_moved (Cell from, Cell to);
 
-    public Model model { get; construct; }
     public View view { get; construct; }
     public Cell current_cell { get; set; }
     public Cell previous_cell { get; set; }
@@ -78,17 +77,12 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
 
     private My2DCellArray? array {
         get {
-            if (model != null) {
-                return model.display_data;
-            } else {
-                return null;
-            }
+            return view.model.display_data;
         }
     }
 
     public CellGrid (View view) {
         Object (
-            model: view.model,
             view: view
         );
     }
@@ -99,6 +93,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         grid_color.parse (Gnonograms.GRID_COLOR);
         cell_pattern_type = CellPatternType.CELL;
         set_colors ();
+
 
         this.add_events (
             Gdk.EventMask.BUTTON_PRESS_MASK |
@@ -133,6 +128,8 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
                 queue_draw ();
             }
         });
+
+        dimensions_updated ();
     }
 
     private void set_colors () {

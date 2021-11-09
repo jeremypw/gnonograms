@@ -261,10 +261,6 @@
 #endif
 
     public Gee.ArrayQueue<Move> hint (string[] row_clues, string[] col_clues, My2DCellArray working) {
-        assert (working.dimensions.equal (grid.dimensions));
-        assert (working.dimensions.height == row_clues.length);
-        assert (working.dimensions.width == col_clues.length);
-
         initialize (row_clues, col_clues, working, null);
 
         bool changed = false;

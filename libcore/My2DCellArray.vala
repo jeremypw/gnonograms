@@ -17,32 +17,18 @@
  *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-public class Gnonograms.My2DCellArray : GLib.Object {
-    public Dimensions dimensions { get; construct; }
-
-    public uint rows {
-        get {
-            return dimensions.height;
-        }
-    }
-
-    public uint cols {
-        get {
-            return dimensions.width;
-        }
-    }
-
-    public uint area {
-        get {
-            return dimensions.area ();
-        }
-    }
+public class Gnonograms.My2DCellArray : Object {
+    public uint rows { get; construct; }
+    public uint cols { get; construct; }
+    public uint area { get; construct; }
 
     private CellState[,] data;
 
     public My2DCellArray (Dimensions _dimensions, CellState init = CellState.EMPTY) {
         Object (
-            dimensions: _dimensions
+            rows: _dimensions.height,
+            cols: _dimensions.width,
+            area: _dimensions.area ()
         );
 
         set_all (init);
@@ -143,7 +129,7 @@ public class Gnonograms.My2DCellArray : GLib.Object {
     }
 
     public Iterator iterator () {
-        return new Iterator (data, dimensions);
+        return new Iterator (data, rows, cols);
     }
 
     public class Iterator {
@@ -153,10 +139,10 @@ public class Gnonograms.My2DCellArray : GLib.Object {
         private uint row_index = 0;
         private uint col_index = 0;
 
-        public Iterator (CellState [,] _data, Dimensions dimensions) {
-            data = _data;
-            row_limit = dimensions.height - 1;
-            col_limit = dimensions.width - 1;
+        public Iterator (CellState [,] _data, uint rows, uint cols) {
+            this.data = _data;
+            row_limit = rows - 1;
+            col_limit = cols - 1;
         }
 
         public bool next () {

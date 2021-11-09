@@ -35,8 +35,8 @@ public class Gnonograms.Model : GLib.Object {
     private My2DCellArray solution_data { get; set; }
     private My2DCellArray working_data { get; set; }
 
-    private uint rows  = 0;
-    private uint cols  = 0;
+    private uint rows = 0;
+    private uint cols = 0;
 
     public Model (Controller controller) {
         Object (
@@ -47,7 +47,7 @@ public class Gnonograms.Model : GLib.Object {
     construct {
         controller.notify["dimensions"].connect (() => {
             rows = controller.dimensions.height;
-            cols = controller.dimensions.height;
+            cols = controller.dimensions.width;
             solution_data = new My2DCellArray (controller.dimensions, CellState.EMPTY);
             working_data = new My2DCellArray (controller.dimensions, CellState.UNKNOWN);
             changed ();
