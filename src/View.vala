@@ -504,7 +504,7 @@ warning ("WITH DEBUGGING");
         undo_button.sensitive = sensitive && can_go_back;
         redo_button.sensitive = sensitive && can_go_forward;
         check_correct_button.sensitive = sensitive && controller.game_state == GameState.SOLVING && can_go_back;
-        hint_button.sensitive = sensitive && controller.game_state != GameState.SOLVING;
+        hint_button.sensitive = sensitive && controller.game_state == GameState.SOLVING;
         auto_solve_button.sensitive = sensitive;
     }
 
