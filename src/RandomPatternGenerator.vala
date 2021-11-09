@@ -17,17 +17,7 @@
  *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 public class Gnonograms.RandomPatternGenerator : Object {
-    private Dimensions _dimensions = Dimensions () { width = 0, height = 0 };
-    public Dimensions dimensions {
-        get {
-            return _dimensions;
-        }
-
-        set {
-            _dimensions = value;
-            set_parameters ();
-        }
-    }
+    public Dimensions dimensions { get; construct; }
 
     private Difficulty _grade = Difficulty.EASY;
     public Difficulty grade {
@@ -44,19 +34,19 @@ public class Gnonograms.RandomPatternGenerator : Object {
     public int threshold { get; set; default = 40;}
     public int min_freedom { get; set; default = 0;}
     public int edge_bias { get; set; default = 0;} /* Extra freedom for edge ranges */
-
-    private uint rows {
-        get { return dimensions.height; }
-    }
-
-    private uint cols {
-        get { return dimensions.width; }
-    }
+    private int rows = 0;
+    private int cols = 0;
 
     private Rand rand_gen;
 
     public RandomPatternGenerator (Dimensions dim) {
-        Object (dimensions: dim);
+        Object (
+            dimensions: dim
+        );
+
+        rows = (int)dim.height;
+        cols = (int)dim.width;
+        set_parameters ();
     }
 
     construct {

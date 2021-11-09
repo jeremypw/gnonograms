@@ -17,6 +17,11 @@
  *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 public class Gnonograms.SimpleRandomGameGenerator : Object {
+    public RandomPatternGenerator pattern_gen { get; construct; }
+    public Solver solver { get; construct; }
+
+    public Difficulty solution_grade { get; set; default = Difficulty.UNDEFINED; }
+
     public bool cancelled {
         get {
             return solver.cancelled;
@@ -30,14 +35,11 @@ public class Gnonograms.SimpleRandomGameGenerator : Object {
         }
     }
 
-    public Difficulty solution_grade { get; set; default = Difficulty.UNDEFINED; }
-
-    private RandomPatternGenerator pattern_gen;
-    private Solver solver;
-
     public SimpleRandomGameGenerator (Dimensions _dimensions, Solver _solver) {
-        pattern_gen = new RandomPatternGenerator (_dimensions);
-        solver = _solver;
+        Object (
+            pattern_gen: new RandomPatternGenerator (_dimensions),
+            solver: _solver
+        );
     }
 
     public async bool generate () {
