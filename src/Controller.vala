@@ -41,7 +41,7 @@ public class Gnonograms.Controller : GLib.Object {
     private GLib.Settings? settings = null;
     private GLib.Settings? saved_state = null;
     private Gnonograms.History history;
-    private string current_game_path;
+    public string current_game_path { get; private set; default = ""; }
     private string saved_games_folder;
     private string? temporary_game_path = null;
 
@@ -71,9 +71,12 @@ public class Gnonograms.Controller : GLib.Object {
         });
 
         notify["dimensions"].connect (() => {
-
             solver = new Solver (dimensions);
             game_name = _(UNTITLED_NAME);
+        });
+
+        notify["current_game_path"].connect (() => {
+            view.update_title ();
         });
 
         if (SettingsSchemaSource.get_default ().lookup (SETTINGS_SCHEMA_ID, true) != null &&
@@ -112,7 +115,7 @@ public class Gnonograms.Controller : GLib.Object {
             }
         }
 
-        current_game_path = null;
+        current_game_path = "";
         temporary_game_path = Path.build_path (
             Path.DIR_SEPARATOR_S,
             data_home_folder_current,
@@ -222,8 +225,8 @@ public class Gnonograms.Controller : GLib.Object {
     private void save_game_state () {
         if (temporary_game_path != null) {
             try {
-                var current_game_path = File.new_for_path (temporary_game_path);
-                current_game_path.@delete ();
+                var current_game_file = File.new_for_path (temporary_game_path);
+                current_game_file.@delete ();
             } catch (GLib.Error e) {
                 /* Error normally thrown on first run */
                 debug ("Error deleting temporary game file %s - %s", temporary_game_path, e.message);
@@ -320,6 +323,7 @@ public class Gnonograms.Controller : GLib.Object {
         load_game_async.begin (game, (obj, res) => {
             if (!load_game_async.end (res)) {
                 warning ("Load game failed");
+                current_game_path = "";
                 restore_dimensions ();
                 new_or_random_game ();
             }
@@ -337,7 +341,7 @@ public class Gnonograms.Controller : GLib.Object {
         } catch (GLib.Error e) {
             if (!(e is IOError.CANCELLED)) {
                 var basename = game != null ? game.get_basename () : _("game");
-                string? game_path = null;
+                var game_path = "";
                 if (reader != null && reader.game_file != null) {
                     basename = reader.game_file.get_basename ();
                     game_path = reader.game_file.get_uri ();

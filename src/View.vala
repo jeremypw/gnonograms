@@ -498,8 +498,9 @@ warning ("WITH DEBUGGING");
         }
     }
 
-    private void update_title () {
+    public void update_title () {
         title_label.label = game_name;
+        title_label.tooltip_text = controller.current_game_path;
         grade_label.label = game_grade.to_string ();
     }
 
