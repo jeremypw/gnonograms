@@ -48,12 +48,6 @@ public struct Gnonograms.Cell {
         return (this.row == c.row && this.col == c.col);
     }
 
-    public void copy (Cell b) {
-        this.row = b.row;
-        this.col = b.col;
-        this.state = b.state;
-    }
-
     public bool equal (Cell b) {
         return (
             this.row == b.row &&
@@ -76,7 +70,7 @@ public struct Gnonograms.Cell {
     }
 
     public Cell clone () {
-        return {row, col, state};
+        return { row, col, state };
     }
 
     public string to_string () {

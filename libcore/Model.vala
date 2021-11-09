@@ -74,19 +74,8 @@ public class Gnonograms.Model : GLib.Object {
     }
 
     private int count_state (GameState game_state, CellState cell_state) {
-        int count=0;
-        CellState cs;
         My2DCellArray arr = game_state == GameState.SOLVING ? working_data : solution_data;
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
-                cs = arr.get_data_from_rc (r, c);
-                if (cs == cell_state) {
-                    count++;
-                }
-            }
-        }
-
-        return count;
+        return arr.count_state (cell_state);
     }
 
     public void clear () {

@@ -622,7 +622,7 @@ warning ("WITH DEBUGGING");
     }
 
     private void action_solve () {
-        controller.solve ();
+        controller.computer_solve ();
     }
 
     private void action_hint () {

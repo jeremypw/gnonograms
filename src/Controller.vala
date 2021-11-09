@@ -567,7 +567,7 @@ public class Gnonograms.Controller : GLib.Object {
         load_game_async.begin (null); /* Filereader will request load location */
     }
 
-    public void solve () {
+    public void computer_solve () {
         game_state = GameState.SOLVING;
         start_solving.begin (true);
     }
@@ -618,6 +618,7 @@ public class Gnonograms.Controller : GLib.Object {
         view.show_working (cancellable, (_("Solving")));
         solver.configure_from_grade (Difficulty.COMPUTER);
         diff = yield solver.solve_clues (model.get_row_clues (), model.get_col_clues ());
+
         if (cancellable != null && cancellable.is_cancelled ()) {
             msg = _("Solving was cancelled");
         } else if (solver.state.solved ()) {

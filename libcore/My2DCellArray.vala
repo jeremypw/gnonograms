@@ -102,6 +102,21 @@ public class Gnonograms.My2DCellArray : Object {
         }
     }
 
+    public int count_state (CellState cell_state) {
+        CellState cs;
+        int count = 0;
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                cs = get_data_from_rc (r, c);
+                if (cs == cell_state) {
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
     public string data2text (uint idx, uint length, bool iscolumn) {
         CellState[] arr = new CellState[length];
         this.get_array (idx, iscolumn, ref arr);

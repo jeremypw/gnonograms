@@ -218,12 +218,12 @@
         result = yield simple_solver ();
         if (state == SolverState.ERROR) {
             return Difficulty.UNDEFINED;
-        }
-
-        if (state == SolverState.SIMPLE && advanced_only) {
-            result = 0;
-        } else if (state != SolverState.SIMPLE && use_advanced) {
-            result = yield advanced_solver (); // Sets state if solution found
+        } else {
+            if (state == SolverState.SIMPLE && advanced_only) {
+                result = 0;
+            } else if (state != SolverState.SIMPLE && use_advanced) {
+                result = yield advanced_solver (); // Sets state if solution found
+            }
         }
 
         return passes_to_grade (result);
@@ -330,7 +330,7 @@
         bool changed = true;
         int pass = 1;
         reinitialize_regions ();
-        state = SolverState.UNDEFINED;
+        state = SolverState.NO_SOLUTION;
         Idle.add (() => {
             while (changed && pass >= 0 && pass < MAX_PASSES) {
                 //keep cycling through regions while at least one of them is changing
@@ -361,13 +361,8 @@
         yield;
 
         solution.copy (grid);
-        if (!(state in (SolverState.ERROR | SolverState.CANCELLED))) {
-            if (solved ()) {
-                state = SolverState.SIMPLE;
-            } else {
-                state = SolverState.NO_SOLUTION;
-                pass = 0; // not solved and not in error
-            }
+        if (solved ()) {
+            state = SolverState.SIMPLE;
         }
 
         return pass;
@@ -381,15 +376,16 @@
     **/
     private async int advanced_solver () {
         /* Simple solver must have already been run */
-        int result = 0;
-        int changed_count = 0;
-        int min_to_contradiction = human_only ? 5 : (int)MAX_PASSES; // Humans cannot 'see' deep contradictions
         var guesser = new Guesser (grid, human_only);
-
         var initial_state = SolverState.UNDEFINED;
         var inverse_state = SolverState.UNDEFINED;
+        int result = 0;
+        int min_to_contradiction = human_only ? 5 : (int)MAX_PASSES; // Humans cannot 'see' deep contradictions
         int contra = 0;
-
+        int empty = 0;
+        int min_empty_cells = int.MAX;
+        int changed_count = 0;
+        Cell best_guess = NULL_CELL;
         state = SolverState.UNDEFINED;
 
         while (state == SolverState.UNDEFINED) {
@@ -397,11 +393,30 @@
 
             if (!guesser.next_guess ()) {
                 state = SolverState.NO_SOLUTION;
-                break;
+                if (best_guess.equal (NULL_CELL)) { // No improvement from last round
+                    break;
+                } else {
+                    grid.set_data_from_cell (best_guess);
+                    guesser = new Guesser (grid, false);
+                    best_guess = NULL_CELL;
+                    changed_count = 0;
+                    if (!guesser.next_guess ()) {
+                        warning ("No next guess");
+                        break;
+                    }
+                }
             }
 
             result = yield simple_solver ();
             initial_state = state;
+
+            if (initial_state == SolverState.NO_SOLUTION) {
+                empty = solution.count_state (CellState.EMPTY);
+                if (empty < min_empty_cells){
+                    min_empty_cells = empty;
+                    best_guess = guesser.get_trial_cell_copy ();
+                }
+            }
 
             /* Reject too difficult solution path */
             if (state == SolverState.ERROR && result > min_to_contradiction) {
@@ -416,6 +431,13 @@
             guesser.invert_previous_guess ();
             result = yield simple_solver ();
             inverse_state = state;
+            if (inverse_state == SolverState.NO_SOLUTION) {
+                empty = grid.count_state (CellState.EMPTY);
+                if (empty < min_empty_cells){
+                    min_empty_cells = empty;
+                    best_guess = guesser.get_trial_cell_copy ();
+                }
+            }
 
             if (initial_state == SolverState.ERROR && inverse_state == SolverState.ERROR) {
                 state = SolverState.NO_SOLUTION;
@@ -425,7 +447,7 @@
 
             switch (inverse_state) {
                 case SolverState.ERROR:
-                    if (initial_state == SolverState.ERROR || result > min_to_contradiction) {
+                    if (result > min_to_contradiction) {
                         guesser.cancel_previous_guess (); //
                         state = SolverState.UNDEFINED; // Continue (may be easier contradiction later)
                         break;
@@ -443,7 +465,7 @@
                         guesser.initialize ();
                         state = SolverState.UNDEFINED;
                     } else {
-                        critical ("unexpected sinitial tate %s", initial_state.to_string ());
+                        critical ("unexpected initial tate %s", initial_state.to_string ());
                         assert_not_reached ();
                     }
 
@@ -547,7 +569,6 @@
         private uint max_turns;
         private uint initial_max_turns = 3;
         private CellState initial_cell_state = CellState.EMPTY;
-        private const uint MAX_GUESSES = 9999;
         private bool human_only;
 
     /** Store the grid in linearised form **/
@@ -585,7 +606,7 @@
                 max_turns = uint.min (rows, cols) / 2;
             }
 
-            trial_cell = { 0, uint.MAX, initial_cell_state };
+            trial_cell = { 0, -1, initial_cell_state };
         }
 
         public bool next_guess () {
@@ -597,12 +618,10 @@
         public void invert_previous_guess () {
             load_position ();
             trial_cell = trial_cell.inverse ();
-
             grid.set_data_from_cell (trial_cell);
         }
 
         public void cancel_previous_guess () {
-
             load_position ();
             trial_cell = trial_cell.inverse ();
             grid.set_data_from_rc (trial_cell.row, trial_cell.col, CellState.UNKNOWN);
@@ -676,6 +695,10 @@
             }
 
             return true;
+        }
+
+        public Cell get_trial_cell_copy () {
+            return trial_cell.clone ();
         }
     }
 }

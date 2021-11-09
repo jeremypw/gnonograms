@@ -328,8 +328,6 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             granite_settings.notify["prefers-color-scheme"].connect (() => {
                 set_pattern (granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK);
             });
-
-
         }
 
         public CellPattern.highlight (double wd, double ht) {
