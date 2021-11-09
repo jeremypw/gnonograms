@@ -22,7 +22,7 @@
 namespace Gnonograms {
     public const string VERSION = "1.4.5";
     public const Cell NULL_CELL = { uint.MAX, uint.MAX, CellState.UNDEFINED };
-    public const uint MAXSIZE = 50; // max number rows or columns
+    public const uint MAXSIZE = 54; // max number rows or columns
     public const uint MINSIZE = 5; // Change to 1 when debugging
     public const uint SIZESTEP = 5; // Change to 1 when debugging
     public const double MINFONTSIZE = 8.0;

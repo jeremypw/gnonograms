@@ -95,6 +95,9 @@ namespace Gnonograms {
         }
 
         int result = simple_solver ();
+        if (state == SolverState.ERROR) {
+            return Difficulty.UNDEFINED;
+        }
 
         if (state == SolverState.SIMPLE && advanced_only) {
             result = 0;
@@ -233,6 +236,9 @@ namespace Gnonograms {
                 }
             }
 
+            if (state == SolverState.ERROR) {
+                return -1;
+            }
             pass++;
 
             if (cancellable.is_cancelled () ) {
