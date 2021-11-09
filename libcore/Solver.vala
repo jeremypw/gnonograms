@@ -216,6 +216,9 @@
         }
 
         result = yield simple_solver ();
+        if (state == SolverState.ERROR) {
+            return Difficulty.UNDEFINED;
+        }
 
         if (state == SolverState.SIMPLE && advanced_only) {
             result = 0;
