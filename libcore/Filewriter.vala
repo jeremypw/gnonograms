@@ -48,8 +48,8 @@ public class Gnonograms.Filewriter : Object {
         Object (
             name: _(UNTITLED_NAME),
             parent: parent,
-            rows: dimensions.rows (),
-            cols: dimensions.cols (),
+            rows: dimensions.height,
+            cols: dimensions.width,
             row_clues: row_clues,
             col_clues: col_clues,
             history: history

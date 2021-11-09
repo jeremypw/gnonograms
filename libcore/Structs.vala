@@ -88,14 +88,6 @@ public struct Gnonograms.Dimensions {
     uint width;
     uint height;
 
-    public uint rows () {
-        return height;
-    }
-
-    public uint cols () {
-        return width;
-    }
-
     public uint area () {
         return width * height;
     }

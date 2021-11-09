@@ -19,8 +19,8 @@
 
 public class Gnonograms.LabelBox : Gtk.Grid {
     public Dimensions dimensions { set {
-        n_labels = orientation == Gtk.Orientation.HORIZONTAL ? value.cols () : value.rows ();
-        n_cells = orientation == Gtk.Orientation.HORIZONTAL ? value.rows () : value.cols ();
+        n_labels = orientation == Gtk.Orientation.HORIZONTAL ? value.width : value.height;
+        n_cells = orientation == Gtk.Orientation.HORIZONTAL ? value.height : value.width;
         resize ();
     } }
 

@@ -46,8 +46,8 @@ public class Gnonograms.Controller : GLib.Object {
     private string? temporary_game_path = null;
 
     private bool is_solving { get { return game_state == GameState.SOLVING;}}
-    private uint rows {get { return dimensions.rows ();}}
-    private uint cols {get { return dimensions.cols ();}}
+    private uint rows {get { return dimensions.height;}}
+    private uint cols {get { return dimensions.width;}}
 
     construct {
         game_name = _(UNTITLED_NAME);
