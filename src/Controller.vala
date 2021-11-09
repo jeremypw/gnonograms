@@ -45,13 +45,9 @@ public class Gnonograms.Controller : GLib.Object {
     private string saved_games_folder;
     private string? temporary_game_path = null;
 
-    private bool is_solving { get { return game_state == GameState.SOLVING;}}
-    private uint rows {get { return dimensions.height;}}
-    private uint cols {get { return dimensions.width;}}
-
     construct {
         game_name = _(UNTITLED_NAME);
-        model = new Model ();
+        model = new Model (this);
         view = new View (model, this);
         history = new Gnonograms.History ();
 
@@ -123,11 +119,7 @@ public class Gnonograms.Controller : GLib.Object {
         );
 
         restore_settings ();
-        bind_property ("dimensions", model, "dimensions", BindingFlags.SYNC_CREATE);
-        bind_property ("dimensions", view, "dimensions", BindingFlags.BIDIRECTIONAL);
         bind_property ("generator-grade", view, "generator-grade", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
-        bind_property ("game-state", model, "game-state");
-        bind_property ("game-state", view, "game-state", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         bind_property ("is-readonly", view, "readonly", BindingFlags.SYNC_CREATE);
 
         history.bind_property ("can-go-back", view, "can-go-back", BindingFlags.SYNC_CREATE);
@@ -153,7 +145,7 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     private void new_or_random_game () {
-        if (is_solving && game_name == null) {
+        if (game_state == GameState.SOLVING && game_name == null) {
             on_new_random_request ();
         } else {
             new_game ();
@@ -407,14 +399,14 @@ public class Gnonograms.Controller : GLib.Object {
 
         Idle.add (() => { // Need time for model to update dimensions through notify signal
             model.blank_working (); // Do not reveal solution on load
-            model.set_solution_data_from_string_array (reader.solution[0 : rows]);
+            model.set_solution_data_from_string_array (reader.solution[0 : dimensions.height]);
 
             if (reader.name.length > 1 && reader.name != "") {
                 game_name = reader.name;
             }
 
             if (reader.has_working) {
-                model.set_working_data_from_string_array (reader.working[0 : rows]);
+                model.set_working_data_from_string_array (reader.working[0 : dimensions.height]);
             }
 
             view.update_labels_from_solution (); /* Ensure completeness correctly set */
@@ -480,7 +472,7 @@ public class Gnonograms.Controller : GLib.Object {
     public void after_cell_changed (Cell cell, CellState previous_state) {
         history.record_move (cell, previous_state);
         /* Check if puzzle finished */
-        if (is_solving && model.is_finished) {
+        if (game_state == GameState.SOLVING && model.is_finished) {
             if (model.count_errors () == 0) {
                 ///TRANSLATORS: "Correct" is used as an adjective, indicating that a correct (valid) solution has been found.
                 view.send_notification (_("Correct solution"));
@@ -491,7 +483,7 @@ public class Gnonograms.Controller : GLib.Object {
             }
 
             view.end_working ();
-        } else if (!is_solving) {
+        } else if (game_state != GameState.SOLVING) {
             solver.state = SolverState.UNDEFINED;
         }
     }

@@ -18,19 +18,14 @@
  */
 
 public class Gnonograms.LabelBox : Gtk.Grid {
-    public Dimensions dimensions { set {
-        n_labels = orientation == Gtk.Orientation.HORIZONTAL ? value.width : value.height;
-        n_cells = orientation == Gtk.Orientation.HORIZONTAL ? value.height : value.width;
-        resize ();
-    } }
-
-    public int cell_size { get; set; }
+    public View view { get; construct; }
 
     private uint n_labels = 0;
     private uint n_cells = 0;
 
-    public LabelBox (Gtk.Orientation _orientation) {
-        Object (column_homogeneous: true,
+    public LabelBox (Gtk.Orientation _orientation, View view) {
+        Object (view: view,
+                column_homogeneous: true,
                 row_homogeneous: true,
                 column_spacing: 0,
                 row_spacing: 0,
@@ -40,16 +35,19 @@ public class Gnonograms.LabelBox : Gtk.Grid {
     }
 
     construct {
-        row_spacing = 0;
-        column_spacing = 0;
-
-        notify["cell-size"].connect (() => {
-            int width = (int)(orientation == Gtk.Orientation.HORIZONTAL ? n_labels * cell_size : n_cells * cell_size * 0.33);
-            int height = (int)(orientation == Gtk.Orientation.HORIZONTAL ? n_cells * cell_size * 0.33 : n_labels * cell_size);
+        view.notify["cell-size"].connect (() => {
+            int width = (int)(orientation == Gtk.Orientation.HORIZONTAL ? n_labels * view.cell_size : n_cells * view.cell_size * 0.33);
+            int height = (int)(orientation == Gtk.Orientation.HORIZONTAL ? n_cells * view.cell_size * 0.33 : n_labels * view.cell_size);
             get_children ().foreach ((w) => {
-                ((Gnonograms.Clue)w).cell_size = cell_size;
+                ((Gnonograms.Clue)w).cell_size = view.cell_size;
             });
             set_size_request (width, height);
+        });
+
+        view.controller.notify ["dimensions"].connect (() => {
+            n_labels = orientation == Gtk.Orientation.HORIZONTAL ? view.controller.dimensions.width : view.controller.dimensions.height;
+            n_cells = orientation == Gtk.Orientation.HORIZONTAL ? view.controller.dimensions.height : view.controller.dimensions.width;
+            resize ();
         });
 
         show_all ();
@@ -106,7 +104,7 @@ public class Gnonograms.LabelBox : Gtk.Grid {
         for (var i = 0; i < n_labels; i++) {
             var label = new Clue (orientation == Gtk.Orientation.HORIZONTAL) {
                 n_cells = this.n_cells,
-                cell_size = this.cell_size
+                cell_size = view.cell_size
             };
 
             add (label);

@@ -21,7 +21,7 @@ public class Gnonograms.Model : GLib.Object {
 
     public My2DCellArray display_data {
         get {
-            return game_state == GameState.SETTING ? solution_data : working_data;
+            return controller.game_state == GameState.SETTING ? solution_data : working_data;
         }
     }
 
@@ -31,22 +31,29 @@ public class Gnonograms.Model : GLib.Object {
         }
     }
 
-    public GameState game_state { get; set; default = GameState.UNDEFINED; }
-    public Dimensions dimensions { get; set; }
-    public uint rows { get {return dimensions.height;} }
-    public uint cols { get {return dimensions.width;} }
-
+    public Controller controller { get; construct; }
     private My2DCellArray solution_data { get; set; }
     private My2DCellArray working_data { get; set; }
 
+    private uint rows  = 0;
+    private uint cols  = 0;
+
+    public Model (Controller controller) {
+        Object (
+            controller: controller
+        );
+    }
+
     construct {
-        notify["dimensions"].connect (() => {
-            solution_data = new My2DCellArray (dimensions, CellState.EMPTY);
-            working_data = new My2DCellArray (dimensions, CellState.UNKNOWN);
+        controller.notify["dimensions"].connect (() => {
+            rows = controller.dimensions.height;
+            cols = controller.dimensions.height;
+            solution_data = new My2DCellArray (controller.dimensions, CellState.EMPTY);
+            working_data = new My2DCellArray (controller.dimensions, CellState.UNKNOWN);
             changed ();
         });
 
-        notify["game-state"].connect (() => {
+        controller.notify["game-state"].connect (() => {
             changed ();
         });
     }
@@ -55,7 +62,7 @@ public class Gnonograms.Model : GLib.Object {
         CellState cs;
         int count = 0;
         for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols;c++) {
+            for (int c = 0; c < cols; c++) {
                 cs = working_data.get_data_from_rc (r, c);
                 if (cs != CellState.UNKNOWN && cs != solution_data.get_data_from_rc (r, c)) {
                     count++;
@@ -231,13 +238,13 @@ public class Gnonograms.Model : GLib.Object {
     }
 
     public My2DCellArray copy_working_data () {
-        var grid = new My2DCellArray (dimensions, CellState.UNKNOWN);
+        var grid = new My2DCellArray (controller.dimensions, CellState.UNKNOWN);
         grid.copy (working_data);
         return grid;
     }
 
     public My2DCellArray copy_solution_data () {
-        var grid = new My2DCellArray (dimensions, CellState.UNKNOWN);
+        var grid = new My2DCellArray (controller.dimensions, CellState.UNKNOWN);
         grid.copy (solution_data);
         return grid;
     }

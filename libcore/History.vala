@@ -18,11 +18,11 @@
  */
 
 public class Gnonograms.History : GLib.Object {
-    private HistoryStack back_stack;
-    private HistoryStack forward_stack;
-
     public bool can_go_back { get; private set; }
     public bool can_go_forward { get; private set; }
+
+    private HistoryStack back_stack;
+    private HistoryStack forward_stack;
 
     construct {
         back_stack = new HistoryStack ();

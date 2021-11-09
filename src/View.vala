@@ -30,9 +30,8 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     public signal void debug_request (uint idx, bool is_column);
 #endif
 
-    public Model model {private get; construct; }
+    public Model model { get; construct; }
     public Controller controller { get; construct; }
-    public Dimensions dimensions { get; set; }
     public Cell current_cell { get; set; }
     public Cell previous_cell { get; set; }
     public Difficulty generator_grade { get; set; }
@@ -281,9 +280,9 @@ warning ("WITH DEBUGGING");
         };
         toast.set_default_action (null);
 
-        row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL);
-        column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL);
-        cell_grid = new CellGrid (model);
+        row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL, this);
+        column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL, this);
+        cell_grid = new CellGrid (this);
 
         main_grid = new Gtk.Grid () {
             row_spacing = 0,
@@ -315,7 +314,7 @@ warning ("WITH DEBUGGING");
 
         var flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
         bind_property ("restart-destructive", restart_button, "restart-destructive", BindingFlags.SYNC_CREATE) ;
-        bind_property ("game-state", mode_switch, "active", flags,
+        controller.bind_property ("game-state", mode_switch, "active", flags,
             (binding, src_val, ref tgt_val) => {
                 tgt_val.set_boolean (src_val.get_enum () > GameState.SETTING);
             },
@@ -325,13 +324,8 @@ warning ("WITH DEBUGGING");
         );
         bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
         bind_property ("previous-cell", cell_grid, "previous-cell", BindingFlags.BIDIRECTIONAL);
-        bind_property ("cell-size", cell_grid, "cell-size", BindingFlags.SYNC_CREATE);
-        bind_property ("cell-size", row_clue_box, "cell-size", BindingFlags.SYNC_CREATE);
-        bind_property ("cell-size", column_clue_box, "cell-size", BindingFlags.SYNC_CREATE);
-        bind_property ("dimensions", row_clue_box, "dimensions");
-        bind_property ("dimensions", column_clue_box, "dimensions");
 
-        notify["game-state"].connect (() => {
+        controller.notify["game-state"].connect (() => {
             if (controller.game_state != GameState.UNDEFINED) {
                 update_all_labels_completeness ();
             }
@@ -374,7 +368,7 @@ warning ("WITH DEBUGGING");
             update_all_labels_completeness ();
         });
 
-        notify["dimensions"].connect (() => {
+        controller.notify["dimensions"].connect (() => {
             var monitor_area = Gdk.Rectangle () {
                 width = 1024,
                 height = 768
@@ -386,10 +380,10 @@ warning ("WITH DEBUGGING");
             }
 
             var available_grid_width = (int)(get_allocated_width () - 2 * GRID_BORDER - GRID_COLUMN_SPACING);
-            var available_cell_width = available_grid_width / (dimensions.width * 1.2);
+            var available_cell_width = available_grid_width / (controller.dimensions.width * 1.2);
             var available_screen_height = monitor_area.height * 0.85 - header_bar.get_allocated_height () - 2 * GRID_BORDER;
 
-            var available_cell_height = available_screen_height / (dimensions.height* 1.2);
+            var available_cell_height = available_screen_height / (controller.dimensions.height* 1.2);
             cell_size = (int)(double.min (available_cell_width, available_cell_height));
         });
 
@@ -425,7 +419,7 @@ warning ("WITH DEBUGGING");
 
     public void update_labels_from_string_array (string[] clues, bool is_column) {
         var clue_box = is_column ? column_clue_box : row_clue_box;
-        var lim = is_column ? dimensions.width : dimensions.height;
+        var lim = is_column ? controller.dimensions.width : controller.dimensions.height;
 
         for (int i = 0; i < lim; i++) {
             clue_box.update_label_text (i, clues[i]);
@@ -433,11 +427,11 @@ warning ("WITH DEBUGGING");
     }
 
     public void update_labels_from_solution () {
-        for (int r = 0; r < dimensions.height; r++) {
+        for (int r = 0; r < controller.dimensions.height; r++) {
             row_clue_box.update_label_text (r, model.get_label_text_from_solution (r, false));
         }
 
-        for (int c = 0; c < dimensions.width; c++) {
+        for (int c = 0; c < controller.dimensions.width; c++) {
             column_clue_box.update_label_text (c, model.get_label_text_from_solution (c, true));
         }
 
@@ -521,11 +515,11 @@ warning ("WITH DEBUGGING");
     }
 
     private void update_all_labels_completeness () {
-        for (int r = 0; r < dimensions.height; r++) {
+        for (int r = 0; r < controller.dimensions.height; r++) {
             update_label_complete (r, false);
         }
 
-        for (int c = 0; c < dimensions.width; c++) {
+        for (int c = 0; c < controller.dimensions.width; c++) {
             update_label_complete (c, true);
         }
     }
@@ -712,7 +706,7 @@ warning ("WITH DEBUGGING");
                        CellState.UNDEFINED
                       };
 
-        if (target.row >=dimensions.height|| target.col >= dimensions.width) {
+        if (target.row >= controller.dimensions.height|| target.col >= controller.dimensions.width) {
             return;
         }
 
