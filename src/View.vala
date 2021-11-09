@@ -37,7 +37,6 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     public Cell previous_cell { get; set; }
     public Difficulty generator_grade { get; set; }
     public Difficulty game_grade { get; set; default = Difficulty.UNDEFINED;}
-    public GameState game_state { get; set; }
     public int cell_size { get; set; default = 32; }
     public string game_name { get { return controller.game_name; } }
     public bool strikeout_complete { get; set; }
@@ -127,9 +126,6 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     private Gtk.Button auto_solve_button;
     private Gtk.Button restart_button;
     private uint drawing_with_key;
-    private int rows { get { return (int) dimensions.rows (); }}
-    private int cols { get { return (int) dimensions.cols (); }}
-    private bool is_solving { get { return game_state == GameState.SOLVING; }}
 
     public View (Model _model, Controller controller) {
         Object (
@@ -295,7 +291,7 @@ warning ("WITH DEBUGGING");
             border_width = GRID_BORDER,
             expand = true
         };
-        main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for rows */
+        main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues fordimensions.height*/
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
         main_grid.attach (cell_grid, 1, 1, 1, 1);
 
@@ -336,7 +332,7 @@ warning ("WITH DEBUGGING");
         bind_property ("dimensions", column_clue_box, "dimensions");
 
         notify["game-state"].connect (() => {
-            if (game_state != GameState.UNDEFINED) {
+            if (controller.game_state != GameState.UNDEFINED) {
                 update_all_labels_completeness ();
             }
 
@@ -356,7 +352,7 @@ warning ("WITH DEBUGGING");
         });
 
         notify["can-go-back"].connect (() => {
-            check_correct_button.sensitive = can_go_back && is_solving;
+            check_correct_button.sensitive = can_go_back && controller.game_state == GameState.SOLVING;
             undo_button.sensitive = can_go_back;
             restart_destructive |= can_go_back; /* May be destructive even if no history (e.g. after automatic solve) */
         });
@@ -390,10 +386,10 @@ warning ("WITH DEBUGGING");
             }
 
             var available_grid_width = (int)(get_allocated_width () - 2 * GRID_BORDER - GRID_COLUMN_SPACING);
-            var available_cell_width = available_grid_width / (cols * 1.2);
+            var available_cell_width = available_grid_width / (dimensions.width * 1.2);
             var available_screen_height = monitor_area.height * 0.85 - header_bar.get_allocated_height () - 2 * GRID_BORDER;
 
-            var available_cell_height = available_screen_height / (rows * 1.2);
+            var available_cell_height = available_screen_height / (dimensions.height* 1.2);
             cell_size = (int)(double.min (available_cell_width, available_cell_height));
         });
 
@@ -405,7 +401,7 @@ warning ("WITH DEBUGGING");
 
         cell_grid.button_press_event.connect ((event) => {
             if (event.type == Gdk.EventType.@2BUTTON_PRESS || event.button == Gdk.BUTTON_MIDDLE) {
-                drawing_with_state = is_solving ? CellState.UNKNOWN : CellState.EMPTY;
+                drawing_with_state = controller.game_state == GameState.SOLVING ? CellState.UNKNOWN : CellState.EMPTY;
             } else {
                 drawing_with_state = event.button == Gdk.BUTTON_PRIMARY ? CellState.FILLED : CellState.EMPTY;
             }
@@ -429,7 +425,7 @@ warning ("WITH DEBUGGING");
 
     public void update_labels_from_string_array (string[] clues, bool is_column) {
         var clue_box = is_column ? column_clue_box : row_clue_box;
-        var lim = is_column ? cols : rows;
+        var lim = is_column ? dimensions.width : dimensions.height;
 
         for (int i = 0; i < lim; i++) {
             clue_box.update_label_text (i, clues[i]);
@@ -437,11 +433,11 @@ warning ("WITH DEBUGGING");
     }
 
     public void update_labels_from_solution () {
-        for (int r = 0; r < rows; r++) {
+        for (int r = 0; r < dimensions.height; r++) {
             row_clue_box.update_label_text (r, model.get_label_text_from_solution (r, false));
         }
 
-        for (int c = 0; c < cols; c++) {
+        for (int c = 0; c < dimensions.width; c++) {
             column_clue_box.update_label_text (c, model.get_label_text_from_solution (c, true));
         }
 
@@ -480,7 +476,7 @@ warning ("WITH DEBUGGING");
     }
 
     private void update_header_bar () {
-        switch (game_state) {
+        switch (controller.game_state) {
             case GameState.SETTING:
                 set_buttons_sensitive (true);
 
@@ -505,16 +501,16 @@ warning ("WITH DEBUGGING");
     }
 
     private void set_buttons_sensitive (bool sensitive) {
-        generate_button.sensitive = game_state != GameState.GENERATING;
+        generate_button.sensitive = controller.game_state != GameState.GENERATING;
         mode_switch.sensitive = sensitive;
         load_game_button.sensitive = sensitive;
         save_game_button.sensitive = sensitive;
         save_game_as_button.sensitive = sensitive;
-        restart_destructive = sensitive && !model.is_blank (game_state);
+        restart_destructive = sensitive && !model.is_blank (controller.game_state);
         undo_button.sensitive = sensitive && can_go_back;
         redo_button.sensitive = sensitive && can_go_forward;
-        check_correct_button.sensitive = sensitive && is_solving && can_go_back;
-        hint_button.sensitive = sensitive && game_state == GameState.SOLVING;
+        check_correct_button.sensitive = sensitive && controller.game_state == GameState.SOLVING && can_go_back;
+        hint_button.sensitive = sensitive && controller.game_state != GameState.SOLVING;
         auto_solve_button.sensitive = sensitive;
     }
 
@@ -525,11 +521,11 @@ warning ("WITH DEBUGGING");
     }
 
     private void update_all_labels_completeness () {
-        for (int r = 0; r < rows; r++) {
+        for (int r = 0; r < dimensions.height; r++) {
             update_label_complete (r, false);
         }
 
-        for (int c = 0; c < cols; c++) {
+        for (int c = 0; c < dimensions.width; c++) {
             update_label_complete (c, true);
         }
     }
@@ -537,7 +533,7 @@ warning ("WITH DEBUGGING");
     private void update_label_complete (uint idx, bool is_col) {
         var lbox = is_col ? column_clue_box : row_clue_box;
 
-        if (game_state == GameState.SOLVING && strikeout_complete) {
+        if (controller.game_state == GameState.SOLVING && strikeout_complete) {
             var blocks = Gee.List.empty<Block> ();
             blocks = model.get_complete_blocks_from_working (idx, is_col);
             lbox.update_label_complete (idx, blocks);
@@ -569,7 +565,7 @@ warning ("WITH DEBUGGING");
         var row = current_cell.row;
         var col = current_cell.col;
 
-        if (game_state == GameState.SETTING) {
+        if (controller.game_state == GameState.SETTING) {
             row_clue_box.update_label_text (row, model.get_label_text_from_solution (row, false));
             column_clue_box.update_label_text (col, model.get_label_text_from_solution (col, true));
         } else {
@@ -626,7 +622,7 @@ warning ("WITH DEBUGGING");
     /** Action callbacks **/
     private void action_restart () {
         controller.restart ();
-        if (game_state == GameState.SETTING) {
+        if (controller.game_state == GameState.SETTING) {
             game_grade = Difficulty.UNDEFINED;
         }
     }
@@ -716,7 +712,7 @@ warning ("WITH DEBUGGING");
                        CellState.UNDEFINED
                       };
 
-        if (target.row >= rows || target.col >= cols) {
+        if (target.row >=dimensions.height|| target.col >= dimensions.width) {
             return;
         }
 
@@ -724,13 +720,13 @@ warning ("WITH DEBUGGING");
     }
 
     private void action_setting_mode () {
-        game_state = GameState.SETTING;
+        controller.game_state = GameState.SETTING;
     }
     private void action_solving_mode () {
-        game_state = GameState.SOLVING;
+        controller.game_state = GameState.SOLVING;
     }
     private void action_generating_mode () {
-        game_state = GameState.GENERATING;
+        controller.game_state = GameState.GENERATING;
     }
 
     private void action_paint_filled () {
@@ -743,7 +739,7 @@ warning ("WITH DEBUGGING");
         paint_cell_state (CellState.UNKNOWN);
     }
     private void paint_cell_state (CellState cs) {
-        if (cs == CellState.UNKNOWN && !is_solving) {
+        if (cs == CellState.UNKNOWN && controller.game_state != GameState.SOLVING) {
             return;
         }
 
