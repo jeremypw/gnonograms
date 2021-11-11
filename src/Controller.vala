@@ -118,6 +118,15 @@ public class Gnonograms.Controller : GLib.Object {
             Gnonograms.UNSAVED_FILENAME
         );
 
+        if (saved_state != null && settings != null) {
+            saved_state.bind ("mode", this, "game_state", SettingsBindFlags.DEFAULT);
+            settings.bind ("grade", this, "generator_grade", SettingsBindFlags.DEFAULT);
+            settings.bind ("clue-help", view, "strikeout-complete", SettingsBindFlags.DEFAULT);
+        }
+
+        view.show_all ();
+        view.present ();
+
         restore_settings ();
         bind_property ("generator-grade", view, "generator-grade", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         bind_property ("is-readonly", view, "readonly", BindingFlags.SYNC_CREATE);
@@ -133,15 +142,6 @@ public class Gnonograms.Controller : GLib.Object {
                 new_game ();
             }
         });
-
-        if (saved_state != null && settings != null) {
-            saved_state.bind ("mode", this, "game_state", SettingsBindFlags.DEFAULT);
-            settings.bind ("grade", this, "generator_grade", SettingsBindFlags.DEFAULT);
-            settings.bind ("clue-help", view, "strikeout-complete", SettingsBindFlags.DEFAULT);
-        }
-
-        view.show_all ();
-        view.present ();
     }
 
     private void new_or_random_game () {

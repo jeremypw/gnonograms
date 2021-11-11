@@ -313,13 +313,14 @@ warning ("WITH DEBUGGING");
         add (grid);
 
         var flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
-        bind_property ("restart-destructive", restart_button, "restart-destructive", BindingFlags.SYNC_CREATE) ;
+        bind_property ("restart-destructive", restart_button, "restart-destructive", BindingFlags.SYNC_CREATE);
+        //Have to set properties directly in transform functions - setting target values does not work inside Flatpak
         controller.bind_property ("game-state", mode_switch, "active", flags,
             (binding, src_val, ref tgt_val) => {
-                tgt_val.set_boolean (src_val.get_enum () > GameState.SETTING);
+                mode_switch.active = (src_val.get_enum () > GameState.SETTING);
             },
             (binding, src_val, ref tgt_val) => {
-                tgt_val.set_enum (src_val.get_boolean () ? GameState.SOLVING : GameState.SETTING);
+                controller.game_state = (src_val.get_boolean () ? GameState.SOLVING : GameState.SETTING);
             }
         );
         bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
