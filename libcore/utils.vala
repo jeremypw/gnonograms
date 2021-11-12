@@ -306,9 +306,6 @@ namespace Gnonograms.Utils {
         return response == Gtk.ResponseType.YES;
     }
 
-    /** The @action parameter also indicates the default setting for saving the solution.
-      * The user selected option is returned in @save_solution.
-     **/
     public static string? get_open_save_path (Gtk.Window? parent,
                                              string dialogname,
                                              bool save,

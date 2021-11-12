@@ -280,15 +280,19 @@ public class Gnonograms.Controller : GLib.Object {
         try {
             file_writer = new Filewriter (window,
                                           dimensions,
-                                          model.get_row_clues (),
-                                          model.get_col_clues (),
-                                          history
+                                          view.get_clues (false),
+                                          view.get_clues (true),
+                                          history,
+                                          !model.solution_is_blank ()
                                         );
 
             file_writer.difficulty = view.game_grade;
             file_writer.game_state = gs;
             file_writer.working = model.copy_working_data ();
-            file_writer.solution = model.copy_solution_data ();
+            if (file_writer.save_solution) {
+                file_writer.solution = model.copy_solution_data ();
+            }
+
             file_writer.is_readonly = is_readonly;
 
             if (save_state) {
@@ -387,19 +391,24 @@ public class Gnonograms.Controller : GLib.Object {
             return false;
         }
 
-        if (reader.has_solution) {
-            view.game_grade = reader.difficulty;
-        } else if (reader.has_row_clues && reader.has_col_clues) {
-            view.update_labels_from_string_array (reader.row_clues, false);
-            view.update_labels_from_string_array (reader.col_clues, true);
-        } else {
-            reader.err_msg = (_("Clues missing"));
-            return false;
-        }
 
         Idle.add (() => { // Need time for model to update dimensions through notify signal
             model.blank_working (); // Do not reveal solution on load
-            model.set_solution_data_from_string_array (reader.solution[0 : dimensions.height]);
+
+            if (reader.has_solution) {
+                view.game_grade = reader.difficulty;
+            } else if (reader.has_row_clues && reader.has_col_clues) {
+                view.update_labels_from_string_array (reader.row_clues, false);
+                view.update_labels_from_string_array (reader.col_clues, true);
+            } else {
+                reader.err_msg = (_("Clues missing"));
+                return false;
+            }
+
+            if (reader.has_solution) {
+                model.set_solution_data_from_string_array (reader.solution[0 : dimensions.height]);
+                view.update_labels_from_solution (); /* Ensure completeness correctly set */
+            }
 
             if (reader.name.length > 1 && reader.name != "") {
                 game_name = reader.name;
@@ -409,7 +418,6 @@ public class Gnonograms.Controller : GLib.Object {
                 model.set_working_data_from_string_array (reader.working[0 : dimensions.height]);
             }
 
-            view.update_labels_from_solution (); /* Ensure completeness correctly set */
             return Source.REMOVE;
         });
 
@@ -423,7 +431,12 @@ public class Gnonograms.Controller : GLib.Object {
         return true;
     }
 
-    public uint rewind_until_correct () {
+    public int rewind_until_correct () {
+        if (model.solution_is_blank ()) {
+            view.send_notification (_("Cannot check for errors.  Solution unknown"));
+            return -1;
+        }
+
         var errors = model.count_errors ();
 
         while (model.count_errors () > 0 && previous_move ()) {
@@ -455,9 +468,8 @@ public class Gnonograms.Controller : GLib.Object {
     private bool computer_hint () {
         string[] row_clues;
         string[] col_clues;
-        row_clues = model.get_row_clues ();
-        col_clues = model.get_col_clues ();
-
+        row_clues = view.get_clues (false);
+        col_clues = view.get_clues (true);
         solver.configure_from_grade (Difficulty.CHALLENGING);
 
         var moves = solver.hint (row_clues, col_clues, model.copy_working_data ());
@@ -472,7 +484,7 @@ public class Gnonograms.Controller : GLib.Object {
     public void after_cell_changed (Cell cell, CellState previous_state) {
         history.record_move (cell, previous_state);
         /* Check if puzzle finished */
-        if (game_state == GameState.SOLVING && model.is_finished) {
+        if (game_state == GameState.SOLVING && !model.solution_is_blank () && model.is_finished) {
             if (model.count_errors () == 0) {
                 ///TRANSLATORS: "Correct" is used as an adjective, indicating that a correct (valid) solution has been found.
                 view.send_notification (_("Correct solution"));
@@ -577,7 +589,7 @@ public class Gnonograms.Controller : GLib.Object {
             return;
         }
 
-        if (model.count_errors () > 0) {
+        if (!model.solution_is_blank () && model.count_errors () > 0) {
             rewind_until_correct ();
         } else if (!computer_hint () && !solver.solved ()) {
             view.send_notification (
@@ -587,7 +599,7 @@ public class Gnonograms.Controller : GLib.Object {
 
 #if WITH_DEBUGGING
     private void on_debug_request (uint idx, bool is_column) {
-        if (game_state != GameState.SOLVING) {
+        if (game_state != GameState.SOLVING || model.solution_is_blank ()) {
             return;
         }
 
@@ -617,7 +629,7 @@ public class Gnonograms.Controller : GLib.Object {
         solver.cancellable = cancellable;
         view.show_working (cancellable, (_("Solving")));
         solver.configure_from_grade (Difficulty.COMPUTER);
-        diff = yield solver.solve_clues (model.get_row_clues (), model.get_col_clues ());
+        diff = yield solver.solve_clues (view.get_clues (false), view.get_clues (true));
 
         if (cancellable != null && cancellable.is_cancelled ()) {
             msg = _("Solving was cancelled");

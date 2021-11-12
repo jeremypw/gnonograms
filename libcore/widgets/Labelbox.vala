@@ -54,9 +54,13 @@ public class Gnonograms.LabelBox : Gtk.Grid {
         });
 
         view.controller.notify ["dimensions"].connect (() => {
-            n_labels = orientation == Gtk.Orientation.HORIZONTAL ? view.controller.dimensions.width : view.controller.dimensions.height;
-            n_cells = orientation == Gtk.Orientation.HORIZONTAL ? view.controller.dimensions.height : view.controller.dimensions.width;
-            resize ();
+            var new_n_labels = orientation == Gtk.Orientation.HORIZONTAL ? view.controller.dimensions.width : view.controller.dimensions.height;
+            var new_n_cells = orientation == Gtk.Orientation.HORIZONTAL ? view.controller.dimensions.height : view.controller.dimensions.width;
+            if (new_n_labels != n_labels || new_n_cells != n_cells) {
+                n_labels = new_n_labels;
+                n_cells = new_n_cells;
+                resize ();
+            }
         });
 
         show_all ();
@@ -69,6 +73,17 @@ public class Gnonograms.LabelBox : Gtk.Grid {
         } else {
             return (Gnonograms.Clue)(get_children ().nth_data (n_children - index - 1));
         }
+    }
+
+    public string[] get_clues () {
+        string[] clues = new string [n_labels];
+        var index = n_labels;
+        foreach (var widget in get_children ()) { // Delivers widgets in reverse order they were added
+            index--;
+            clues[index] = ((Clue)widget).clue;
+        }
+
+        return clues;
     }
 
     public void highlight (uint index, bool is_highlight) {

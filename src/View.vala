@@ -687,6 +687,11 @@ warning ("WITH DEBUGGING");
         show_all ();
     }
 
+    public string[] get_clues (bool is_column) {
+        var label_box = is_column ? column_clue_box : row_clue_box;
+        return label_box.get_clues ();
+    }
+
     public void update_labels_from_string_array (string[] clues, bool is_column) {
         var clue_box = is_column ? column_clue_box : row_clue_box;
         var lim = is_column ? controller.dimensions.width : controller.dimensions.height;

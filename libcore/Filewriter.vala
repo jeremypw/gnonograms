@@ -31,19 +31,21 @@ public class Gnonograms.Filewriter : Object {
     public string name { get; set; }
     public string[] row_clues { get; construct; }
     public string[] col_clues { get; construct; }
+    public bool save_solution { get; construct; }
     public string? game_path { get; private set; }
     public string author { get; set; default = "";}
     public string license { get; set; default = "";}
     public bool is_readonly { get; set; default = true;}
 
-    private bool save_solution = true;
+
     private FileStream? stream;
 
     public Filewriter (Gtk.Window? parent,
                        Dimensions dimensions,
                        string[] row_clues,
                        string[] col_clues,
-                       History? history) throws IOError {
+                       History? history,
+                       bool save_solution) throws IOError {
 
         Object (
             name: _(UNTITLED_NAME),
@@ -52,7 +54,8 @@ public class Gnonograms.Filewriter : Object {
             cols: dimensions.width,
             row_clues: row_clues,
             col_clues: col_clues,
-            history: history
+            history: history,
+            save_solution: save_solution
         );
     }
 

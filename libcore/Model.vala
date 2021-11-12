@@ -83,6 +83,10 @@ public class Gnonograms.Model : GLib.Object {
         blank_working ();
     }
 
+    public bool solution_is_blank () {
+        return count_state (GameState.SETTING, CellState.FILLED) == 0;
+    }
+
     public void blank_solution () {
         solution_data.set_all (CellState.EMPTY);
         changed ();

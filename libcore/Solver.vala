@@ -412,7 +412,7 @@
 
             if (initial_state == SolverState.NO_SOLUTION) {
                 empty = solution.count_state (CellState.EMPTY);
-                if (empty < min_empty_cells){
+                if (empty < min_empty_cells) {
                     min_empty_cells = empty;
                     best_guess = guesser.get_trial_cell_copy ();
                 }
@@ -433,7 +433,7 @@
             inverse_state = state;
             if (inverse_state == SolverState.NO_SOLUTION) {
                 empty = grid.count_state (CellState.EMPTY);
-                if (empty < min_empty_cells){
+                if (empty < min_empty_cells) {
                     min_empty_cells = empty;
                     best_guess = guesser.get_trial_cell_copy ();
                 }
