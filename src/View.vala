@@ -129,8 +129,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     public View (Model _model, Controller controller) {
         Object (
             model: _model,
-            controller: controller,
-            resizable: false
+            controller: controller
         );
     }
 
@@ -409,6 +408,12 @@ warning ("WITH DEBUGGING");
         });
 
         cell_grid.button_release_event.connect (stop_painting);
+        // Force window to follow grid size in both native and flatpak installs
+        cell_grid.size_allocate.connect ((alloc) => {
+            var width = alloc.width * (1 + GRID_LABELBOX_RATIO);
+            var height = alloc.height * (1 + GRID_LABELBOX_RATIO);
+            resize ((int)width, (int)height);
+        });
 
         show_all ();
     }
@@ -675,6 +680,7 @@ warning ("WITH DEBUGGING");
             cell_size -= (int)delta;
         }
     }
+
     private void action_check_errors () {
         if (controller.rewind_until_correct () == 0) {
             send_notification (_("No errors"));

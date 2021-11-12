@@ -36,11 +36,20 @@ public class Gnonograms.LabelBox : Gtk.Grid {
 
     construct {
         view.notify["cell-size"].connect (() => {
-            int width = (int)(orientation == Gtk.Orientation.HORIZONTAL ? n_labels * view.cell_size : n_cells * view.cell_size * 0.33);
-            int height = (int)(orientation == Gtk.Orientation.HORIZONTAL ? n_cells * view.cell_size * 0.33 : n_labels * view.cell_size);
+            int width = (int)(orientation == Gtk.Orientation.HORIZONTAL ?
+                n_labels * view.cell_size :
+                n_cells * view.cell_size * GRID_LABELBOX_RATIO
+            );
+
+            int height = (int)(orientation == Gtk.Orientation.HORIZONTAL ?
+                n_cells * view.cell_size * GRID_LABELBOX_RATIO :
+                n_labels * view.cell_size
+            );
+
             get_children ().foreach ((w) => {
                 ((Gnonograms.Clue)w).cell_size = view.cell_size;
             });
+
             set_size_request (width, height);
         });
 

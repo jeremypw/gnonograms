@@ -24,6 +24,7 @@ namespace Gnonograms {
     public const uint MAXSIZE = 54; // max number rows or columns
     public const uint MINSIZE = 5; // Change to 1 when debugging
     public const uint SIZESTEP = 5; // Change to 1 when debugging
+    public const double GRID_LABELBOX_RATIO = 0.33; // For simplicity give labelboxes fixed ratio of cellgrid dimension
     public const Difficulty MIN_GRADE = Difficulty.EASY; /* TRIVIAL and VERY EASY GRADES not worth supporting */
     public const string BLOCKSEPARATOR = ", ";
     public const string BLANKLABELTEXT = N_("?");
