@@ -1,5 +1,5 @@
-/* Displays clues for gnonograms
- * Copyright (C) 2010-2017  Jeremy Wootten
+/* Label.vala
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,38 +14,36 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  Author:
- *  Jeremy Wootten <jeremywootten@gmail.com>
+ *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-namespace Gnonograms {
-
-class Clue : Gtk.Label {
-
-/** PUBLIC **/
-    public bool vertical_text { get; construct; }
-
-    /* total number of cells in the row/column to which this label is attached
-       Used to calculate freedom */
-
-    public uint size {
+class Gnonograms.Clue : Gtk.Label {
+    private uint _n_cells;
+    public uint n_cells {
         set {
-            _size = value;
+            _n_cells = value;
             update_tooltip ();
         }
 
         private get {
-            return _size;
+            return _n_cells;
         }
     }
 
-    public double fontheight {
+    private int _fontsize;
+    private int _cell_size;
+    public int cell_size {
+        get {
+            return _cell_size;
+        }
         set {
-            fontsize = (int)(1024 * (value));
+            _cell_size = value;
+            _fontsize = (int)(value * 384);
             update_markup ();
         }
     }
 
+    private string _clue; /* text of clue in horizontal form */
     public string clue {
         get {
             return _clue;
@@ -58,25 +56,25 @@ class Clue : Gtk.Label {
         }
     }
 
-    construct {
-        clue = "0";
-        has_tooltip = true;
-        use_markup = true;
-    }
+    public bool vertical_text { get; construct; }
+
+    private Gee.List<Block> clue_blocks;
+    private Gee.List<Block> grid_blocks;
 
     public Clue (bool _vertical_text) {
         Object (
-                vertical_text: _vertical_text,
-                xalign: _vertical_text ? (float)0.5 : (float)1.0,
-                yalign: _vertical_text ? (float)1.0 : (float)0.5
-                );
+            vertical_text: _vertical_text,
+            xalign: _vertical_text ? (float)0.5 : (float)1.0,
+            yalign: _vertical_text ? (float)1.0 : (float)0.5,
+            clue: "0",
+            has_tooltip: true,
+            use_markup: true,
+            margin: 0,
+            expand: true
+        );
+    }
 
-
-
-        size_allocate.connect_after (() => {
-            update_markup ();
-        });
-
+    construct {
         realize.connect_after (() => {
             update_markup ();
         });
@@ -84,9 +82,9 @@ class Clue : Gtk.Label {
 
     public void highlight (bool is_highlight) {
         if (is_highlight) {
-            set_state_flags (Gtk.StateFlags.SELECTED, true);
+            get_style_context ().add_class (Granite.STYLE_CLASS_ACCENT);
         } else {
-            set_state_flags (Gtk.StateFlags.NORMAL, true);
+            get_style_context ().remove_class (Granite.STYLE_CLASS_ACCENT);
         }
     }
 
@@ -227,41 +225,18 @@ class Clue : Gtk.Label {
         update_markup ();
     }
 
-/** PRIVATE **/
-    private Gee.List<Block> clue_blocks;
-    private Gee.List<Block> grid_blocks;
-    private const string ATTR_TEMPLATE = "<span size='%i' weight='%s' strikethrough='%s'>";
-    private const string TIP_TEMPLATE = "<span size='%i'>";
-    private double fontsize;
-    private string _clue; /* text of clue in horizontal form */
-    private uint _size;
-
-    private void update_markup (double fs = fontsize) {
-        var alloc = vertical_text ? get_allocated_height () : get_allocated_width ();
-        if (!get_realized () || alloc < 10 || fontsize < 1000) {
-            return;
-        }
-
-        string markup = "<span size='%i'>".printf ((int)fs) + get_markup () + "</span>";
+private void update_markup () {
+        string markup = "<span size='%i'>".printf (_fontsize) + get_markup () + "</span>";
         set_markup (markup);
-
-        var layout = get_layout ();
-        int w, h;
-        layout.get_size (out w, out h);
-        var size = (int)((vertical_text ? h : w) / 1024);
-
-        if (size - alloc > 6) {
-            update_markup (fs * 0.9);
-        } else {
-
-            update_tooltip ();
-        }
+        update_tooltip ();
     }
 
     private void update_tooltip () {
-        set_tooltip_markup (TIP_TEMPLATE.printf ((int)fontsize / 2) +
-                            _("Freedom = %u").printf (size - Utils.blockextent_from_clue (_clue)) +
-                            "</span>");
+        set_tooltip_markup (
+            "<span size='%i'>".printf (_fontsize / 2) +
+            _("Freedom = %u").printf (n_cells - Utils.blockextent_from_clue (_clue)) +
+            "</span>"
+        );
     }
 
     private string get_markup () {
@@ -301,5 +276,4 @@ class Clue : Gtk.Label {
 
         return sb.str;
     }
-}
 }

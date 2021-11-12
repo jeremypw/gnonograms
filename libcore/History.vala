@@ -1,6 +1,5 @@
-
-/*
- * Copyright (C) 2010-2017  Jeremy Wootten
+/* History.vala
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,20 +14,15 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  Author:
- *  Jeremy Wootten <jeremywootten@gmail.com>
+ *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-namespace Gnonograms {
-
-/* Move class records the current cell coordinates, its state and previous state */
-public class History : GLib.Object {
+public class Gnonograms.History : GLib.Object {
+    public bool can_go_back { get; private set; }
+    public bool can_go_forward { get; private set; }
 
     private HistoryStack back_stack;
     private HistoryStack forward_stack;
-
-    public bool can_go_back { get; private set; }
-    public bool can_go_forward { get; private set; }
 
     construct {
         back_stack = new HistoryStack ();
@@ -50,10 +44,8 @@ public class History : GLib.Object {
 
     public void record_move (Cell cell, CellState previous_state) {
         var new_move = new Gnonograms.Move (cell, previous_state);
-
         if (new_move.cell.state != CellState.UNDEFINED) {
             Move last_move = back_stack.peek_move ();
-
             if (last_move.equal (new_move)) {
                 return;
             }
@@ -67,7 +59,6 @@ public class History : GLib.Object {
     public Move pop_next_move () {
         Move mv = forward_stack.pop_move ();
         back_stack.push_move (mv);
-
         return mv;
     }
 
@@ -76,7 +67,6 @@ public class History : GLib.Object {
         /* Record copy otherwise it will be altered by next line*/
         forward_stack.push_move (mv.clone ());
         mv.cell.state = mv.previous_state;
-
         return mv;
     }
 
@@ -90,13 +80,11 @@ public class History : GLib.Object {
 
     public void from_string (string? s) {
         clear_all ();
-
         if (s == null) {
             return;
         }
 
         var stacks = Utils.remove_blank_lines (s.split ("\n"));
-
         if (stacks != null) {
             add_to_stack_from_string (stacks[0], true);
         }
@@ -118,7 +106,6 @@ public class History : GLib.Object {
 
         foreach (string move_s in moves_s) {
             var move = Move.from_string (move_s);
-
             if (move != null) {
                 if (back) {
                     back_stack.push_move (move);
@@ -130,8 +117,9 @@ public class History : GLib.Object {
     }
 
     private class HistoryStack : Object {
-        private Gee.Deque<Move> stack;
         public bool empty { get; private set; }
+
+        private Gee.Deque<Move> stack;
 
         construct {
             stack = new Gee.LinkedList<Move> ();
@@ -154,13 +142,11 @@ public class History : GLib.Object {
 
         public Move pop_move () {
             Move mv = Move.null_move;
-
             if (!empty) {
                 mv = stack.poll_head ();
             }
 
             empty = stack.is_empty;
-
             return mv;
         }
 
@@ -171,7 +157,6 @@ public class History : GLib.Object {
 
         public string to_string () {
             var sb = new StringBuilder ("");
-
             foreach (Move mv in stack) { /* iterates from head backwards */
                 sb.prepend (mv.to_string () + ";");
             }
@@ -180,5 +165,4 @@ public class History : GLib.Object {
             return sb.str;
         }
     }
-}
 }

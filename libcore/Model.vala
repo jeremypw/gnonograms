@@ -1,5 +1,5 @@
-/* Handles working and solution data for gnonograms
- * Copyright (C) 2010-2017  Jeremy Wootten
+/* Model.vala
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,22 +14,14 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  Author:
- *  Jeremy Wootten <jeremywootten@gmail.com>
+ *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
-namespace Gnonograms {
-public class Model : GLib.Object {
-    /** PUBLIC **/
+public class Gnonograms.Model : GLib.Object {
     public signal void changed ();
-
-    public GameState game_state { get; set; default = GameState.UNDEFINED; }
-    public Dimensions dimensions { get; set; }
-    public uint rows { get {return dimensions.height;} }
-    public uint cols { get {return dimensions.width;} }
 
     public My2DCellArray display_data {
         get {
-            return game_state == GameState.SETTING ? solution_data : working_data;
+            return controller.game_state == GameState.SETTING ? solution_data : working_data;
         }
     }
 
@@ -39,17 +31,29 @@ public class Model : GLib.Object {
         }
     }
 
+    public Controller controller { get; construct; }
     private My2DCellArray solution_data { get; set; }
     private My2DCellArray working_data { get; set; }
 
+    private uint rows = 0;
+    private uint cols = 0;
+
+    public Model (Controller controller) {
+        Object (
+            controller: controller
+        );
+    }
+
     construct {
-        notify["dimensions"].connect (() => {
-            solution_data = new My2DCellArray (dimensions, CellState.EMPTY);
-            working_data = new My2DCellArray (dimensions, CellState.UNKNOWN);
+        controller.notify["dimensions"].connect (() => {
+            rows = controller.dimensions.height;
+            cols = controller.dimensions.width;
+            solution_data = new My2DCellArray (controller.dimensions, CellState.EMPTY);
+            working_data = new My2DCellArray (controller.dimensions, CellState.UNKNOWN);
             changed ();
         });
 
-        notify["game-state"].connect (() => {
+        controller.notify["game-state"].connect (() => {
             changed ();
         });
     }
@@ -57,11 +61,9 @@ public class Model : GLib.Object {
     public int count_errors () {
         CellState cs;
         int count = 0;
-
         for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols;c++) {
+            for (int c = 0; c < cols; c++) {
                 cs = working_data.get_data_from_rc (r, c);
-
                 if (cs != CellState.UNKNOWN && cs != solution_data.get_data_from_rc (r, c)) {
                     count++;
                 }
@@ -72,26 +74,17 @@ public class Model : GLib.Object {
     }
 
     private int count_state (GameState game_state, CellState cell_state) {
-        int count=0;
-        CellState cs;
         My2DCellArray arr = game_state == GameState.SOLVING ? working_data : solution_data;
-
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
-                cs = arr.get_data_from_rc (r, c);
-
-                if (cs == cell_state) {
-                    count++;
-                }
-            }
-        }
-
-        return count;
+        return arr.count_state (cell_state);
     }
 
     public void clear () {
         blank_solution ();
         blank_working ();
+    }
+
+    public bool solution_is_blank () {
+        return count_state (GameState.SETTING, CellState.FILLED) == 0;
     }
 
     public void blank_solution () {
@@ -145,7 +138,6 @@ public class Model : GLib.Object {
     private string[] get_clues (bool is_column) {
         var dim = is_column ? cols : rows;
         var texts = new string [dim];
-
         for (uint index = 0; index < dim; index++) {
             texts[index] = get_label_text_from_solution (index, is_column);
         }
@@ -172,7 +164,6 @@ public class Model : GLib.Object {
     public bool get_complete (uint idx, bool is_column) {
         var csa = new CellState[is_column ? rows : cols];
         working_data.get_array (idx, is_column, ref csa);
-
         foreach (CellState cs in csa) {
             if (cs == CellState.UNKNOWN) {
                 return false;
@@ -196,6 +187,7 @@ public class Model : GLib.Object {
         solution_data.copy (array);
         changed ();
     }
+
     public void set_working_from_array (My2DCellArray array) {
         working_data.copy (array);
         changed ();
@@ -239,15 +231,14 @@ public class Model : GLib.Object {
     }
 
     public My2DCellArray copy_working_data () {
-        var grid = new My2DCellArray (dimensions, CellState.UNKNOWN);
+        var grid = new My2DCellArray (controller.dimensions, CellState.UNKNOWN);
         grid.copy (working_data);
         return grid;
     }
 
     public My2DCellArray copy_solution_data () {
-        var grid = new My2DCellArray (dimensions, CellState.UNKNOWN);
+        var grid = new My2DCellArray (controller.dimensions, CellState.UNKNOWN);
         grid.copy (solution_data);
         return grid;
     }
-}
 }

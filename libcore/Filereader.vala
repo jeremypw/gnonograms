@@ -1,5 +1,5 @@
-/* Game file reader class for gnonograms
- * Copyright (C) 2010-2017  Jeremy Wootten
+/* Filereader.vala
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,13 +15,10 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *  Author:
- *  Jeremy Wootten  < jeremwootten@gmail.com >
+ *  Author: Jeremy Wootten  < jeremwootten@gmail.com >
  */
 
-namespace Gnonograms {
-public class Filereader : Object {
-    /** PUBLIC **/
+public class Gnonograms.Filereader : Object {
     public string err_msg = "";
 
     public File? game_file { get; set; default = null;}
@@ -79,19 +76,14 @@ public class Filereader : Object {
 
     }
 
-    /** PRIVATE **/
     private File? get_load_game_file (Gtk.Window? parent, string? load_dir_path) {
-
-        FilterInfo info = {_("Gnonogram puzzles"), {"*" + Gnonograms.GAMEFILEEXTENSION}};
-        FilterInfo [] filters = {info};
-        string? path = Utils.get_file_path (
-                            parent,
-                            Gnonograms.FileChooserAction.OPEN,
-                            _("Choose a puzzle"),
-                            filters,
-                            load_dir_path,
-                            null
-                        );
+        string? path = Utils.get_open_save_path (
+            parent,
+            _("Choose a puzzle"),
+            false,
+            load_dir_path,
+            ""
+        );
 
         if (path == null || path == "") {
             return null;
@@ -119,7 +111,6 @@ public class Filereader : Object {
                     break;
                 }
             }
-
         } catch (GLib.Error e) {
             /* Ignore read error caused by end of file */
         }
@@ -225,7 +216,6 @@ public class Filereader : Object {
         }
 
         string[] s = Utils.remove_blank_lines (body.split ("\n"));
-
         if (s.length != 2) {
             err_msg = "Wrong number of dimensions";
             return false;
@@ -240,14 +230,12 @@ public class Filereader : Object {
 
     private string[] get_gnonogram_clues (string? body, int max_block) {
         string [] clues = {};
-
         if (body == null) {
             err_msg = "No clues given";
             return {};
         }
 
         string[] clue_strings = Utils.remove_blank_lines (body.split ("\n"));
-
         if (clue_strings == null || clue_strings.length < 1) {
             err_msg = _("Missing clues");
             return {};
@@ -255,7 +243,6 @@ public class Filereader : Object {
 
         foreach (var clue_string in clue_strings) {
             string? clue = parse_gnonogram_clue (clue_string, max_block);
-
             if (clue == null) {
                 err_msg = _("Invalid clue");
                 return {};
@@ -274,7 +261,6 @@ public class Filereader : Object {
         }
 
         string[] row_strings = Utils.remove_blank_lines (body.split ("\n"));
-
         if (row_strings == null || row_strings.length != rows) {
             err_msg = _("Wrong number of rows in solution or working grid");
             return false;
@@ -282,7 +268,6 @@ public class Filereader : Object {
 
         foreach (var row in row_strings) {
             CellState[] states = Utils.cellstate_array_from_string (row);
-
             if (states.length != cols) {
                 err_msg = _("Wrong number of columns in solution or working grid");
                 return false;
@@ -312,13 +297,10 @@ public class Filereader : Object {
     private bool get_gnonogram_state (string? body) {
         /* Default to SOLVING state to avoid inadvertently showing solution */
         state = GameState.SOLVING;
-
         if (body != null) {
             string[] s = Utils.remove_blank_lines (body.split ("\n"));
-
             if (s != null && s.length == 1) {
                 var state_string = s[0];
-
                 if (state_string.up ().contains ("SETTING")) {
                     state = GameState.SETTING;
                 }
@@ -337,7 +319,6 @@ public class Filereader : Object {
         }
 
         string[] s = Utils.remove_blank_lines (body.split ("\n"));
-
         if (s.length >= 1) {
             name = Uri.unescape_string (s[0]);
         }
@@ -364,7 +345,6 @@ public class Filereader : Object {
         }
 
         string[] s = Utils.remove_blank_lines (body.split ("\n"));
-
         bool result = true;
         if (s.length >= 1) {
             bool.try_parse (s[0].down (), out result);
@@ -377,10 +357,8 @@ public class Filereader : Object {
 
     private bool get_original_game_path (string? body) {
         string result = "";
-
         if (body != null) {
             string[] s = Utils.remove_blank_lines (body.split ("\n"));
-
             if (s.length >= 1) {
                 result = s[0];
             }
@@ -393,7 +371,6 @@ public class Filereader : Object {
 
     private string? parse_gnonogram_clue (string line, int maxblock) {
         string[] blocks = Utils.remove_blank_lines (line.split_set (", "));
-
         if (blocks == null) {
             return null;
         }
@@ -401,10 +378,8 @@ public class Filereader : Object {
         int b, zero_count = 0;
         int remaining_space = maxblock;
         StringBuilder sb = new StringBuilder ();
-
         foreach (var block in blocks) {
             b = int.parse (block);
-
             if (b == 0 && zero_count > 0) {
                 continue;
             } else {
@@ -428,5 +403,4 @@ public class Filereader : Object {
 
         return sb.str;
     }
-}
 }

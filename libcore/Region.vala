@@ -1,5 +1,5 @@
-/* Represents a linear region of cells for gnonograms -elementary
- * Copyright (C) 2010 -2017  Jeremy Wootten
+/* Region.vala
+ * Copyright (C) 2010 -2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,35 +14,31 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see  < http://www.gnu.org/licenses/>.
  *
- *  Author:
- *  Jeremy Wootten  <jeremywootten@gmail.com>
+ *  Author: Jeremy Wootten  <jeremywootten@gmail.com>
  */
-namespace Gnonograms {
 
-/** A region consists of a one dimensional array of cells, corresponding
- *  to a row or column of the puzzle. Associated with this are:
- *
+/* A region consists of a one dimensional array of cells, corresponding
+   to a row or column of the puzzle. Associated with this are:
+
   1) A list of block lengths (clues)
-  2) A 'tag' bool array for each cell with
-    *   a flag for each block indicating whether that block is still a possible owner
-    *   two extra flags  - ' is completed' and ' can be empty'
-  3) A 'completed blocks' bool array with
-    *   a flag for each block indicating whether it is completed.
-  4) A status array, one per cell indicating the status of that cell as either
-    * UNKNOWN,
-    * FILLED (but not necessarily assigned to a completed block),
-    * EMPTY, or
-    * COMPLETED (assigned to a completed block).
-    *
-  5) Can save and restore its state  - used to implement (one level)
-     back tracking during trial and error solution ('advanced solver').
+  2) A boolean array for each cell with
+     - a flag for each block indicating whether that block is still a possible owner
+     - two extra flags: ' is completed' and ' can be empty'
+  3) A boolean array with
+    - a flag for each block indicating whether it is completed.
+  4) A status array, indicating the status of each cell as either
+    - UNKNOWN,
+    - FILLED (but not necessarily assigned to a completed block),
+    - EMPTY, or
+    - COMPLETED (assigned to a completed block).
+
+  5) Can save and restore its state - used to implement  back tracking (one level)
+     during trial and error solution ('advanced solver').
 
   6) Re-used if grid dimensions do not change.
+*/
 
-**/
-
-public class Region { /* Not a GObject, to reduce weight */
-    /** PUBLIC **/
+public class Gnonograms.Region {
     public bool is_column { get; private set; }
     public bool in_error { get; private set; default = false; }
     public bool is_completed { get; private set; default = false; }
@@ -68,19 +64,48 @@ public class Region { /* Not a GObject, to reduce weight */
         }
     }
 
+    private My2DCellArray grid;
+    private const int MAXCYCLES = 2;
+    private const int FORWARDS = 1;
+    private const int BACKWARDS = -1;
+    private bool is_completed_backup;
+    private bool[] completed_blocks;
+    private bool[] completed_blocks_backup;
+    private bool[,] tags;
+    private bool[,] tags_backup;
+    private CellState[] status;
+    private CellState[] temp_status;
+    private CellState[] temp_status2;
+    private CellState[] status_backup;
+    private int unchanged_count = 0;
+    private int n_blocks;
+    private int block_extent;
+    private int can_be_empty_pointer;
+    private int is_finished_pointer;
+    private int current_index;
+    private int current_block_number;
+    private int unknown;
+    private int unknown_backup;
+    private int filled;
+    private int filled_backup;
+    private int[] blocks;
+    private int[,] ranges;
+    private int[,] ranges_backup;
+    private string clue;
+#if WITH_DEBUGGING
+    private bool debugging = false;
+#endif
+
     public Region (My2DCellArray grid) {
         this.grid = grid;
-
         uint max_len = uint.max (grid.rows, grid.cols);
+        uint max_blocks = max_len / 2 + 2;
+
         status = new CellState[max_len];
         status_backup = new CellState[max_len];
-
-        uint max_blocks = max_len / 2 + 2;
         ranges = new int[max_blocks, 4];
         ranges_backup = new int[max_blocks, 4];
-
         blocks = new int[max_blocks];
-
         completed_blocks = new bool[max_blocks];
         completed_blocks_backup = new bool[max_blocks];
         tags = new bool[max_len, max_blocks + 2];
@@ -97,11 +122,11 @@ public class Region { /* Not a GObject, to reduce weight */
         temp_status = new CellState[n_cells];
         temp_status2 = new CellState[n_cells];
         int[] clue_blocks = Utils.block_array_from_clue (clue);
+
         n_blocks = clue_blocks.length;
         can_be_empty_pointer = n_blocks; //flag for cell that may be empty
         is_finished_pointer = n_blocks + 1; //flag for finished cell (filled or empty?)
         block_total = 0;
-
         for (int i = 0; i < n_blocks; i++) {
           blocks[i] = clue_blocks[i];
           block_total = block_total + blocks[i];
@@ -109,10 +134,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
         block_extent = block_total + n_blocks - 1; //minimum space needed for blocks
         set_to_initial_state ();
-
-        if (n_cells == 1) { /* Ignore single cell regions (for debugging) */
-            this.is_completed = true;
-        }
+        this.is_completed = n_cells == 1; /* Ignore single cell regions (for debugging) */
 
         _value_as_permute_region = uint.MAX;
     }
@@ -138,14 +160,12 @@ public class Region { /* Not a GObject, to reduce weight */
 
         in_error = false;
         is_completed = (n_cells == 1); //allows debugging of single row
-
         if (is_completed) {
             return;
         }
 
         this.unknown = (int)Gnonograms.MAXSIZE;
         this.filled = (int)Gnonograms.MAXSIZE;
-
         get_status ();
 
         if (blocks[0] == 0) { //trivial solution  - complete now
@@ -171,6 +191,7 @@ public class Region { /* Not a GObject, to reduce weight */
         put_status ();
     }
 
+#if WITH_DEBUGGING
     public bool debug () {
         debugging = true;
         set_to_initial_state ();
@@ -180,6 +201,7 @@ public class Region { /* Not a GObject, to reduce weight */
         stdout.printf (message);
         return changed;
     }
+#endif
 
     public bool solve () {
         /**if change has occurred since last visit (due to change in an intersecting
@@ -217,17 +239,14 @@ public class Region { /* Not a GObject, to reduce weight */
 
         int count = 0;
         bool made_changes = false;
-
         while (!is_completed && count < MAXCYCLES) {
             count++;
             full_fix ();
-
             if (in_error) {
                 break;
             }
 
             tags_to_status ();
-
             if (!totals_changed () || in_error) {
                 break;
             }
@@ -242,7 +261,6 @@ public class Region { /* Not a GObject, to reduce weight */
     public void save_state () {
         for (int i = 0; i < n_cells; i++) {
             status_backup[i] = status[i];
-
             for (int j = 0; j < n_blocks + 2; j++) {
                 tags_backup[i, j] = tags[i, j];
             }
@@ -263,7 +281,6 @@ public class Region { /* Not a GObject, to reduce weight */
     public void restore_state () {
         for (int i = 0; i < n_cells; i++) {
             status[i] = status_backup[i];
-
             for (int j = 0; j < n_blocks + 2; j++) {
                 tags[i, j] = tags_backup[i, j];
             }
@@ -287,7 +304,6 @@ public class Region { /* Not a GObject, to reduce weight */
     public string get_id () {
         string column_or_row;
         var sb = new StringBuilder ("");
-
         if (is_column) {
             column_or_row = "Column";
         } else {
@@ -311,6 +327,7 @@ public class Region { /* Not a GObject, to reduce weight */
         return status[index] == CellState.COMPLETED ? CellState.FILLED : status[index];
     }
 
+#if WITH_DEBUGGING
     /* For debugging and testing */
     public string to_string () {
         var sb = new StringBuilder ("");
@@ -344,8 +361,8 @@ public class Region { /* Not a GObject, to reduce weight */
             if (tags[i, j]) {
                 sb.append ("ALLOW EMPTY ");
             }
-            j++;
 
+            j++;
             if (tags[i, j]) {
                 sb.append ("COMPLETE");
             }
@@ -355,6 +372,7 @@ public class Region { /* Not a GObject, to reduce weight */
 
         return sb.str;
     }
+#endif
 
     /** Try and choose more restricted regions to permute to reduce number of possible
       * combinations.
@@ -365,7 +383,6 @@ public class Region { /* Not a GObject, to reduce weight */
         }
 
         int n_available_ranges = count_available_ranges (false);
-
         if (n_available_ranges != 1) {
             return 0; //useless as permute region
         }
@@ -373,7 +390,6 @@ public class Region { /* Not a GObject, to reduce weight */
         int block_extent = 0;
         int count = 0;
         int largest = 0;
-
         for (int b = 0; b < n_blocks; b++) {
             if (!completed_blocks[b]) {
                 block_extent += blocks[b];
@@ -383,51 +399,12 @@ public class Region { /* Not a GObject, to reduce weight */
         }
 
         int pvalue = (largest - 1) * block_extent; //block length 1 useless
-
         if (count == 1) {
             pvalue = pvalue * 2;
         }
 
         return pvalue;
     }
-
-    /** PRIVATE **/
-    private My2DCellArray grid;
-
-    private const int MAXCYCLES = 2;
-    private const int FORWARDS = 1;
-    private const int BACKWARDS = -1;
-
-    private bool is_completed_backup;
-    private bool[] completed_blocks;
-    private bool[] completed_blocks_backup;
-    private bool[,] tags;
-    private bool[,] tags_backup;
-
-    private CellState[] status;
-    private CellState[] temp_status;
-    private CellState[] temp_status2;
-    private CellState[] status_backup;
-
-    private int unchanged_count = 0;
-    private int n_blocks;
-    private int block_extent;
-    private int can_be_empty_pointer;
-    private int is_finished_pointer;
-    private int current_index;
-    private int current_block_number;
-    private int unknown;
-    private int unknown_backup;
-    private int filled;
-    private int filled_backup;
-
-    private int[] blocks;
-
-    private int[,] ranges;
-    private int[,] ranges_backup;
-
-    private string clue;
-    private bool debugging = false;
 
     private void initial_fix () {
         //finds cells that can be identified as FILLED from the start.
@@ -1300,7 +1277,12 @@ public class Region { /* Not a GObject, to reduce weight */
             }
 
             end = idx - 1; //last filled cell
-            available_subregions[region_count - 1] = new Range (start, end, -1, -1);
+            available_subregions[region_count - 1] = Range () {
+                start = start,
+                end = end,
+                filled = -1,
+                unknown = -1
+            };
         }
 
         if (region_count < 2 || region_count > n_blocks) {
@@ -2112,7 +2094,6 @@ public class Region { /* Not a GObject, to reduce weight */
 
     private void put_status () {
         //use temp_status2 to ovoid overwriting original input  - needed for debugging
-
         for (int i = 0; i < n_cells; i++) {
             temp_status2[i] = (status[i] == CellState.COMPLETED ? CellState.FILLED : status[i]);
         }
@@ -2122,20 +2103,16 @@ public class Region { /* Not a GObject, to reduce weight */
 
     private void status_to_tags () {
         for (int i = 0; i < n_cells; i++) {
-
             switch (status[i]) {
-
                 case CellState.COMPLETED:
                     tags[i, is_finished_pointer] = true;
                     tags[i, can_be_empty_pointer] = false;
 
                     break;
-
                 case CellState.FILLED:
                     tags[i, can_be_empty_pointer] = false;
 
                     break;
-
                 case CellState.EMPTY:
                     for (int j = 0; j < n_blocks; j++) {
                         tags[i, j] = false;
@@ -2145,7 +2122,6 @@ public class Region { /* Not a GObject, to reduce weight */
                     tags[i, is_finished_pointer] = true;
 
                     break;
-
                 default:
                     break;
             }
@@ -2180,5 +2156,4 @@ public class Region { /* Not a GObject, to reduce weight */
         message = "%s Region %u Record error in %s : %s \n"
                   .printf (is_column ? "COL" : "ROW", index, method, errmessage);
     }
-}
 }

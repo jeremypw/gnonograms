@@ -18,7 +18,7 @@
         <value value="99" nick="undefined"/>
     </enum>
 
-    <schema path="/com/github/jeremypw/gnonograms/settings/" id="com.github.jeremypw.gnonograms.settings">
+    <schema path="/com/github/jeremypw/gnonograms/settings/" id="com.github.jeremypw.gnonograms.settings" gettext-domain="com.github.jeremypw.gnonograms">
         <key name="grade" enum="com.github.jeremypw.gnonograms.difficulty">
           <default>'moderate'</default>
           <summary>difficulty of generated puzzles</summary>
@@ -43,22 +43,6 @@
           </description>
         </key>
 
-        <key type="s" name="load-game-dir">
-          <default>""</default>
-          <summary>custom directory for loading</summary>
-          <description>
-            The directory from which to load games, if not the default location.
-          </description>
-        </key>
-
-        <key type="s" name="save-game-dir">
-          <default>""</default>
-          <summary>custom directory for saving</summary>
-          <description>
-            The directory to which to save games, if not the default location.
-          </description>
-        </key>
-
         <key type="b" name="clue-help">
           <default>true</default>
           <summary>Visual hints in clues</summary>
@@ -70,7 +54,7 @@
         </key>
     </schema>
 
-    <schema path="/com/github/jeremypw/gnonograms/saved-state/" id="com.github.jeremypw.gnonograms.saved-state">
+    <schema path="/com/github/jeremypw/gnonograms/saved-state/" id="com.github.jeremypw.gnonograms.saved-state" gettext-domain="com.github.jeremypw.gnonograms">
         <key name="mode" enum="com.github.jeremypw.gnonograms.game-state">
           <default>'solving'</default>
           <summary>setting or solving puzzles</summary>
@@ -79,30 +63,21 @@
           </description>
         </key>
 
-        <key type="i" name="window-x">
-          <default>-1000</default>
-          <summary>Origin of window x coordinate</summary>
+        <key type="(ii)" name="window-position">
+          <default>(0, 0)</default>
+          <summary>Position of the window</summary>
           <description>
-            The x-coordinate of the window origin, or -1000 for centre window.
+            The x and y coordinate of the window origin.
           </description>
         </key>
 
-        <key type="i" name="window-y">
-          <default>-1000</default>
-          <summary>Origin of window y coordinate</summary>
+        <key type="(ii)" name="window-size">
+          <default>(800, 600)</default>
+          <summary>The size of the window</summary>
           <description>
-            The x-coordinate of the window origin, or -1000 for centre window.
+            The width and height of the window.
           </description>
         </key>
-
-        <key type="d" name="font-height">
-          <default>16</default>
-          <summary>Font height for clue labels</summary>
-          <description>
-            The height of the font used for clues, or -100 for default for screen and grid.
-          </description>
-        </key>
-
         <key type="s" name="current-game-path">
           <default>''</default>
           <summary>Path to game currently being played</summary>

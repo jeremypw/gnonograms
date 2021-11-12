@@ -1,5 +1,5 @@
-/* Game file reader class for gnonograms
- * Copyright (C) 2010-2017  Jeremy Wootten
+/* Filewriter.vala
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,47 +15,47 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *  Author:
- *  Jeremy Wootten  < jeremwootten@gmail.com >
+ *  Author: Jeremy Wootten  < jeremwootten@gmail.com >
  */
 
-namespace Gnonograms {
-public class Filewriter : Object {
-    /** PUBLIC **/
+public class Gnonograms.Filewriter : Object {
     public DateTime date { get; construct; }
+    public History? history { get; construct; }
+    public Gtk.Window? parent { get; construct; }
+    public Difficulty difficulty { get; set; default = Difficulty.UNDEFINED;}
+    public GameState game_state { get; set; default = GameState.UNDEFINED;}
+    public My2DCellArray? solution { get; set; default = null;}
+    public My2DCellArray? working { get; set; default = null;}
     public uint rows { get; construct; }
     public uint cols { get; construct; }
     public string name { get; set; }
     public string[] row_clues { get; construct; }
     public string[] col_clues { get; construct; }
-    public History? history { get; construct; }
-    public Gtk.Window? parent { get; construct; }
+    public bool save_solution { get; construct; }
     public string? game_path { get; private set; }
-
-    public bool is_readonly { get; set; default = true;}
     public string author { get; set; default = "";}
     public string license { get; set; default = "";}
-    public Difficulty difficulty { get; set; default = Difficulty.UNDEFINED;}
-    public GameState game_state { get; set; default = GameState.UNDEFINED;}
-    private bool save_solution = true;
-    public My2DCellArray? solution { get; set; default = null;}
-    public My2DCellArray? working { get; set; default = null;}
+    public bool is_readonly { get; set; default = true;}
 
+
+    private FileStream? stream;
 
     public Filewriter (Gtk.Window? parent,
                        Dimensions dimensions,
                        string[] row_clues,
                        string[] col_clues,
-                       History? history) throws IOError {
+                       History? history,
+                       bool save_solution) throws IOError {
 
         Object (
             name: _(UNTITLED_NAME),
             parent: parent,
-            rows: dimensions.rows (),
-            cols: dimensions.cols (),
+            rows: dimensions.height,
+            cols: dimensions.width,
             row_clues: row_clues,
             col_clues: col_clues,
-            history: history
+            history: history,
+            save_solution: save_solution
         );
     }
 
@@ -75,7 +75,12 @@ public class Filewriter : Object {
         }
 
         if (path == null || path.length <= 4) {
-            game_path = get_save_file_path (parent, save_dir_path);
+            game_path = Utils.get_open_save_path (parent,
+                _("Name and save this puzzle"),
+                true,
+                save_dir_path,
+                name
+            );
         } else {
             game_path = path;
         }
@@ -91,8 +96,15 @@ public class Filewriter : Object {
             throw new IOError.CANCELLED ("No path selected");
         }
 
-        stream = FileStream.open (game_path, "w"); /* This requires local path, not a uri */
+        var file = File.new_for_commandline_arg (game_path);
+        if (file.query_exists () &&
+            !Utils.show_confirm_dialog (_("Overwrite %s").printf (game_path),
+                                        _("This action will destroy contents of that file"))) {
 
+            throw new IOError.CANCELLED ("File exists");
+        }
+
+        stream = FileStream.open (game_path, "w"); /* This requires local path, not a uri */
         if (stream == null) {
             throw new IOError.FAILED ("Could not open filestream to %s".printf (game_path));
         }
@@ -177,37 +189,4 @@ public class Filewriter : Object {
 
         stream.flush ();
     }
-
-    /** PRIVATE **/
-    private FileStream? stream;
-
-    private string? get_save_file_path (Gtk.Window? parent, string? save_dir_path) {
-
-        var action = save_solution && solution != null ?
-                     Gnonograms.FileChooserAction.SAVE_WITH_SOLUTION : Gnonograms.FileChooserAction.SAVE_NO_SOLUTION;
-
-        bool with_solution;
-        FilterInfo info = {_("Gnonogram puzzles"), {"*" + Gnonograms.GAMEFILEEXTENSION}};
-        FilterInfo [] filters = {info};
-        var path = Utils.get_file_path (parent,
-            action,
-            _("Name and save this puzzle"),
-            filters,
-            save_dir_path,
-            out with_solution // cannot use save_solution directly (will not compile)
-        );
-
-        if (path != null) {
-            save_solution = with_solution;
-
-            if (!save_solution && solution != null) {
-                save_solution = !Utils.show_confirm_dialog (_("Confirm save without solution"),
-                                                            _("Do not save computer insoluble clues without solution"),
-                                                            parent);
-            }
-        }
-
-        return path;
-    }
-}
 }

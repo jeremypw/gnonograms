@@ -1,5 +1,5 @@
-/* Draws grid of cells and detects pointer motion over it.
- * Copyright (C) 2010-2017  Jeremy Wootten
+/* CellGrid.vala
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,23 +14,20 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  Author:
- *  Jeremy Wootten <jeremywootten@gmail.com>
+ *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-namespace Gnonograms {
-public class CellGrid : Gtk.DrawingArea {
-    /*** PUBLIC ***/
-
+public class Gnonograms.CellGrid : Gtk.DrawingArea {
     public signal void cursor_moved (Cell from, Cell to);
 
-    public Model model { get; construct; }
+    public View view { get; construct; }
     public Cell current_cell { get; set; }
     public Cell previous_cell { get; set; }
     public bool frozen { get; set; }
     public bool draw_only { get; set; default = false;}
 
-    /* Could have more options for cell pattern - only plain implemented for elementaryos*/
+    /* Could have more options for cell pattern*/
+    private CellPatternType _cell_pattern_type;
     public CellPatternType cell_pattern_type {
         get {
             return _cell_pattern_type;
@@ -43,8 +40,8 @@ public class CellGrid : Gtk.DrawingArea {
                     empty_cell_pattern = new CellPattern.cell (empty_color);
                     unknown_cell_pattern = new CellPattern.cell (unknown_color);
                     _cell_pattern_type = value;
-                    break;
 
+                    break;
                 default:
                     /* Refresh colors of existing pattern */
                     if (_cell_pattern_type != CellPatternType.UNDEFINED) {
@@ -56,40 +53,13 @@ public class CellGrid : Gtk.DrawingArea {
         }
     }
 
-    public GameState game_state { /* Do we need different colors for game state? */
-        set {
-            unknown_color = colors[(int)value, (int)CellState.UNKNOWN];
-            fill_color = colors[(int)value, (int)CellState.FILLED];
-            empty_color = colors[(int)value, (int)CellState.EMPTY];
-            cell_pattern_type = CellPatternType.UNDEFINED; /* Causes refresh of existing pattern */
-        }
-    }
-    /*---------------------------------------------------------*/
-
-    /*** PRIVATE ***/
     private const double MAJOR_GRID_LINE_WIDTH = 3.0;
     private const double MINOR_GRID_LINE_WIDTH = 1.0;
     private Gdk.RGBA[, ] colors;
 
-    private uint rows {
-        get {
-            assert (model != null);
-            return model != null ? model.rows : 0;
-        }
-    }
-    private uint cols {
-        get {
-            return model != null ? model.cols : 0;
-        }
-    }
-
-    /* Backing variable; do not assign directly */
-    private CellPatternType _cell_pattern_type;
-    /*------------------------------------------*/
-
+    private int rows = 0;
+    private int cols = 0;
     private bool dirty = false; /* Whether a redraw is needed */
-    private double alloc_width; /* Width of drawing area less frame*/
-    private double alloc_height; /* Height of drawing area less frame */
     private double cell_body_width; /* Width of cell excluding frame */
     private double cell_body_height; /* height of cell excluding frame */
     private double cell_width; /* Width of cell including frame */
@@ -105,40 +75,25 @@ public class CellGrid : Gtk.DrawingArea {
     private CellPattern unknown_cell_pattern;
     private CellPattern highlight_pattern;
 
-    private void set_colors () {
-        int setting = (int)GameState.SETTING;
-        colors[setting, (int)CellState.UNKNOWN].parse (Gnonograms.UNKNOWN_COLOR);
-        colors[setting, (int)CellState.EMPTY].parse (Gnonograms.SETTING_EMPTY_COLOR);
-        colors[setting, (int)CellState.FILLED].parse (Gnonograms.SETTING_FILLED_COLOR);
-
-        int solving = (int)GameState.SOLVING;
-        colors[solving, (int)CellState.UNKNOWN].parse (Gnonograms.UNKNOWN_COLOR);
-        colors[solving, (int)CellState.EMPTY].parse (Gnonograms.SOLVING_EMPTY_COLOR);
-        colors[solving, (int)CellState.FILLED].parse (Gnonograms.SOLVING_FILLED_COLOR);
-    }
-
     private My2DCellArray? array {
         get {
-            if (model != null) {
-                return model.display_data;
-            } else {
-                return null;
-            }
+            return view.model.display_data;
         }
-    } /* model display data */
+    }
 
-    /*---------------------------------------------------------*/
-    public CellGrid (Model model) {
-        Object (model: model);
+    public CellGrid (View view) {
+        Object (
+            view: view
+        );
     }
 
     construct {
         _current_cell = NULL_CELL;
         colors = new Gdk.RGBA[2, 3];
         grid_color.parse (Gnonograms.GRID_COLOR);
-        game_state = GameState.SETTING;
         cell_pattern_type = CellPatternType.CELL;
         set_colors ();
+
 
         this.add_events (
             Gdk.EventMask.BUTTON_PRESS_MASK |
@@ -151,43 +106,54 @@ public class CellGrid : Gtk.DrawingArea {
 
         motion_notify_event.connect (on_pointer_moved);
         draw.connect (on_draw_event);
-        size_allocate.connect (on_size_allocate);
         leave_notify_event.connect (on_leave_notify);
 
         notify["current-cell"].connect (() => {
             queue_draw ();
         });
 
-        model.notify["dimensions"].connect (dimensions_updated);
-        model.bind_property ("game-state", this, "game-state");
+        view.notify["cell-size"].connect (dimensions_updated);
+        view.controller.notify["dimensions"].connect (dimensions_updated);
+        view.controller.notify["game-state"].connect (() => {
+            var gs = view.controller.game_state;
+            unknown_color = colors[(int)gs, (int)CellState.UNKNOWN];
+            fill_color = colors[(int)gs, (int)CellState.FILLED];
+            empty_color = colors[(int)gs, (int)CellState.EMPTY];
+            cell_pattern_type = CellPatternType.UNDEFINED; /* Causes refresh of existing pattern */
+        });
 
-        model.changed.connect (() => {
+        view.model.changed.connect (() => {
             if (!dirty) {
                 dirty = true;
                 queue_draw ();
             }
         });
-    }
 
-/*************/
-/** PRIVATE **/
-/*************/
-
-
-/*** Signal Handlers ***/
-    private void on_size_allocate (Gtk.Allocation rect) {
-        alloc_width = (double)(rect.width);
-        alloc_height = (double)(rect.height);
         dimensions_updated ();
     }
 
+    private void set_colors () {
+        int setting = (int)GameState.SETTING;
+        colors[setting, (int)CellState.UNKNOWN].parse (Gnonograms.UNKNOWN_COLOR);
+        colors[setting, (int)CellState.EMPTY].parse (Gnonograms.SETTING_EMPTY_COLOR);
+        colors[setting, (int)CellState.FILLED].parse (Gnonograms.SETTING_FILLED_COLOR);
+
+        int solving = (int)GameState.SOLVING;
+        colors[solving, (int)CellState.UNKNOWN].parse (Gnonograms.UNKNOWN_COLOR);
+        colors[solving, (int)CellState.EMPTY].parse (Gnonograms.SOLVING_EMPTY_COLOR);
+        colors[solving, (int)CellState.FILLED].parse (Gnonograms.SOLVING_FILLED_COLOR);
+    }
+
     private void dimensions_updated () {
-        cell_width = (alloc_width) / (double)cols;
-        cell_height = (alloc_height) / (double)rows;
-        cell_body_width = cell_width;
-        cell_body_height = cell_height;
+        rows = (int)view.controller.dimensions.height;
+        cols = (int)view.controller.dimensions.width;
+        cell_width = view.cell_size;
+        cell_height = view.cell_size;
+        cell_body_width = cell_width - 1;
+        cell_body_height = cell_height - 1;
         /* Cause refresh of existing pattern */
         highlight_pattern = new CellPattern.highlight (cell_width, cell_height);
+        set_size_request (cols * view.cell_size + (int)MINOR_GRID_LINE_WIDTH, rows * view.cell_size + (int)MINOR_GRID_LINE_WIDTH);
     }
 
     private bool on_draw_event (Cairo.Context cr) {
@@ -212,13 +178,11 @@ public class CellGrid : Gtk.DrawingArea {
         /* Calculate which cell the pointer is over */
         uint r = ((uint)((e.y) / cell_height));
         uint c = ((uint)(e.x / cell_width));
-
         if (r >= rows || c >= cols) {
             return true;
         }
         /* Construct cell beneath pointer */
         Cell cell = {r, c, array.get_data_from_rc (r, c)};
-
         if (!cell.equal (current_cell)) {
             update_current_cell (cell);
         }
@@ -226,110 +190,81 @@ public class CellGrid : Gtk.DrawingArea {
         return true;
     }
 
-/*** --------------------------------------------------- ***/
     private void update_current_cell (Cell target) {
         previous_cell = current_cell.clone ();
         current_cell = target.clone ();
     }
 
     private void draw_grid (Cairo.Context cr) {
-        double x1, x2, y1, y2;
-
         Gdk.cairo_set_source_rgba (cr, grid_color);
         cr.set_antialias (Cairo.Antialias.NONE);
-
-        //Draw minor grid
         cr.set_line_width (MINOR_GRID_LINE_WIDTH);
 
-        // Horizontal lines
-        y1 = 0;
-        x1 = 0; x2 = alloc_width;
-
-        while (y1 < alloc_height) {
+        // Draw minor grid lines
+        double y1 = MINOR_GRID_LINE_WIDTH;
+        double x1 = MINOR_GRID_LINE_WIDTH;
+        double x2 = x1 + cols * view.cell_size;
+        double y2 = y1 + rows * view.cell_size;
+        while (y1 < y2) {
             cr.move_to (x1, y1);
             cr.line_to (x2, y1);
             cr.stroke ();
-            y1 += cell_height;
+            y1 += view.cell_size;
         }
 
-        // Vertical lines
-        x1 = 0;
-        y1 = 0; y2 = alloc_height;
-
-        while (x1 < alloc_width) {
+        y1 = MINOR_GRID_LINE_WIDTH;
+        // x1 = MINOR_GRID_LINE_WIDTH;
+        while (x1 < x2) {
             cr.move_to (x1, y1);
             cr.line_to (x1, y2);
             cr.stroke ();
-            x1 += cell_width;
-
+            x1 += view.cell_size;
         }
 
-        // Draw major grid
+        // Draw inner major grid lines
         cr.set_line_width (MAJOR_GRID_LINE_WIDTH);
-
-        // Horizontal lines
-        y1 = 0;
-        x1 = 0; x2 = alloc_width;
-
-        while (y1 < alloc_height) {
-            y1 += 5.0 * cell_height;
+        x1 = MINOR_GRID_LINE_WIDTH;
+        while (y1 < y2) {
+            y1 += 5.0 * view.cell_size;
             cr.move_to (x1, y1);
             cr.line_to (x2, y1);
             cr.stroke ();
         }
 
-        // Vertical lines
-        x1 = 0;
-        y1 = 0; y2 = alloc_height;
-
-        while (x1 < alloc_width) {
-            x1 += 5.0 * cell_width;
+        y1 = MINOR_GRID_LINE_WIDTH;
+        while (x1 < x2) {
+            x1 += 5.0 * view.cell_size;
             cr.move_to (x1, y1);
             cr.line_to (x1, y2);
             cr.stroke ();
         }
 
         // Draw frame
-        cr.set_line_width (MAJOR_GRID_LINE_WIDTH);
-        // Horizontal lines
-        y1 = MAJOR_GRID_LINE_WIDTH / 2;
-        x1 = 0; x2 = alloc_width;
+        cr.set_line_width (MINOR_GRID_LINE_WIDTH);
+        y1 = 0;
+        x1 = 0;
         cr.move_to (x1, y1);
         cr.line_to (x2, y1);
         cr.stroke ();
 
-        y1 = alloc_height - MAJOR_GRID_LINE_WIDTH / 2;
-        cr.move_to (x1, y1);
-        cr.line_to (x2, y1);
+        cr.line_to (x2, y2);
         cr.stroke ();
 
-        x1 = MAJOR_GRID_LINE_WIDTH / 2;
-        y1 = 0; y2 = alloc_height;
-        cr.move_to (x1, y1);
         cr.line_to (x1, y2);
         cr.stroke ();
 
-        x1 = alloc_width - MAJOR_GRID_LINE_WIDTH / 2;
-        cr.move_to (x1, y1);
-        cr.line_to (x1, y2);
+        cr.line_to (x1, y1);
         cr.stroke ();
-
     }
 
     private void draw_cell (Cairo.Context cr, Cell cell, bool highlight = false, bool mark = false) {
-        /*  Calculate coords of top left corner of filled part
-         *  (excluding grid if present but including highlight line)
-         */
-
         if (frozen) {
             return;
         }
 
         double x = cell.col * cell_width;
         double y = cell.row * cell_height;
-
         CellPattern cell_pattern;
-
         switch (cell.state) {
             case CellState.EMPTY:
                 cell_pattern = empty_cell_pattern;
@@ -371,17 +306,28 @@ public class CellGrid : Gtk.DrawingArea {
         return false;
     }
 
-/*** Private classes ***/
-
-    private class CellPattern: GLib.Object {
+    private class CellPattern {
         public Cairo.Pattern pattern;
         public double size { get; private set; }
+        private double red;
+        private double green;
+        private double blue;
+        private double x0 = 0;
+        private double y0 = 0;
+        private Cairo.Matrix matrix;
 
         public CellPattern.cell (Gdk.RGBA color) {
-            double red = color.red;
-            double green = color.green;
-            double blue = color.blue;
-            pattern = new Cairo.Pattern.rgba (red, green, blue, 1.0);
+            red = color.red;
+            green = color.green;
+            blue = color.blue;
+            matrix = Cairo.Matrix.identity ();
+
+            var granite_settings = Granite.Settings.get_default ();
+            set_pattern (granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK);
+
+            granite_settings.notify["prefers-color-scheme"].connect (() => {
+                set_pattern (granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK);
+            });
         }
 
         public CellPattern.highlight (double wd, double ht) {
@@ -400,12 +346,8 @@ public class CellGrid : Gtk.DrawingArea {
 
             pattern = new Cairo.Pattern.for_surface (surface);
             pattern.set_extend (Cairo.Extend.NONE);
-            pattern.set_matrix (matrix);
-
-        }
-
-        construct {
             matrix = Cairo.Matrix.identity ();
+            pattern.set_matrix (matrix);
         }
 
         public void move_to (double x, double y) {
@@ -417,9 +359,13 @@ public class CellGrid : Gtk.DrawingArea {
             y0 = y;
         }
 
-        private double x0 = 0;
-        private double y0 = 0;
-        private Cairo.Matrix matrix;
+        private void set_pattern (bool is_dark) {
+            pattern = new Cairo.Pattern.rgba (
+                is_dark ? red / 2 : red,
+                is_dark ? green / 2 : green,
+                is_dark ? blue / 2 : blue,
+                1.0
+            );
+        }
     }
-}
 }

@@ -1,4 +1,4 @@
-icon_sizes = ['16', '24', '32', '48', '64', '128']
+icon_sizes = ['24', '32', '48', '64', '128']
 
 foreach i : icon_sizes
     install_data (
@@ -6,31 +6,10 @@ foreach i : icon_sizes
         install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', i + 'x' + i, 'apps')
     )
     install_data (
-        join_paths('icons', i, 'application-x-gnonogram-puzzle' + '.svg'),
-        install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', i + 'x' + i, 'mimetypes')
+        join_paths('icons', i, meson.project_name () + '.svg'),
+        install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', i + 'x' + i + '@2', 'apps')
     )
 endforeach
-
-
-install_data (
-    join_paths('icons', meson.project_name () + '.svg'),
-    install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', 'scalable', 'apps')
-)
-
-install_data (
-    join_paths('icons', 'application-x-gnonogram-puzzle.svg'),
-    install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', 'scalable', 'mimetypes')
-)
-
-install_data (
-    meson.project_name () + '.mimeinfo' + '.xml',
-    install_dir: join_paths(get_option('datadir'), 'mime', 'packages')
-)
-
-install_data (
-    join_paths('icons', '32', 'head-thinking.svg'),
-    install_dir: join_paths(get_option('datadir'), 'icons', 'hicolor', '32x32', 'actions')
-)
 
 install_data (
     join_paths (meson.current_source_dir (),'schemas', meson.project_name() + '.gschema.xml'),
@@ -77,3 +56,4 @@ test (
     find_program ('glib-compile-schemas'),
     args: ['--dry-run', '--strict', join_paths (meson.current_source_dir (), 'schemas')]
 )
+

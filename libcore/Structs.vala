@@ -1,6 +1,5 @@
-
-/* Entry point for gnonograms  - initializes application and launches game
- * Copyright (C) 2010-2017  Jeremy Wootten
+/* Structs.vala
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,12 +14,10 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  Author:
- *  Jeremy Wootten <jeremywootten@gmail.com>
+ *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-namespace Gnonograms {
-public class Block {
+public class Gnonograms.Block {
     public int length;
     public bool is_complete;
     public bool is_error;
@@ -42,19 +39,13 @@ public class Block {
     }
 }
 
-public struct Cell {
+public struct Gnonograms.Cell {
     public uint row;
     public uint col;
     public CellState state;
 
     public bool same_coords (Cell c) {
         return (this.row == c.row && this.col == c.col);
-    }
-
-    public void copy (Cell b) {
-        this.row = b.row;
-        this.col = b.col;
-        this.state = b.state;
     }
 
     public bool equal (Cell b) {
@@ -79,7 +70,7 @@ public struct Cell {
     }
 
     public Cell clone () {
-        return {row, col, state};
+        return { row, col, state };
     }
 
     public string to_string () {
@@ -87,17 +78,9 @@ public struct Cell {
     }
 }
 
-public struct Dimensions {
+public struct Gnonograms.Dimensions {
     uint width;
     uint height;
-
-    public uint rows () {
-        return height;
-    }
-
-    public uint cols () {
-        return width;
-    }
 
     public uint area () {
         return width * height;
@@ -112,8 +95,18 @@ public struct Dimensions {
     }
 }
 
-public struct FilterInfo {
+public struct Gnonograms.FilterInfo {
     string name;
     string[] patterns;
 }
+
+public struct Gnonograms.Range { //can use for filled subregions or ranges of filled and unknown cells
+    public int start;
+    public int end;
+    public int filled;
+    public int unknown;
+
+    public int length () {
+        return end - start + 1;
+    }
 }

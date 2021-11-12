@@ -2,7 +2,7 @@
 Type=Application
 Name=Gnonograms
 Comment=Create and solve nonogram puzzles.
-Keywords=game;puzzle;logic;nonograms;Tsunami;Picross;Griddlers;Japanese Crossword;
+Keywords=game;puzzle;logic;nonograms;
 GenericName=Logic Game
 
 Exec=com.github.jeremypw.gnonograms %f
@@ -10,13 +10,8 @@ Exec=com.github.jeremypw.gnonograms %f
 Icon=com.github.jeremypw.gnonograms
 Terminal=false
 StartupNotify=true
-MimeType=application/x-gno;
 Categories=GNOME;GTK;Game;
-Actions=AboutDialog;
 X-GNOME-Gettext-Domain=com.github.jeremypw.gnonograms
 X-GNOME-UsesNotifications=false
 
-[Desktop Action AboutDialog]
-Exec=xdg-open appstream://com.github.jeremypw.gnonograms.desktop
-Name=About Gnonograms
 

@@ -1,5 +1,5 @@
-/* Handles working and solution data for gnonograms
- * Copyright (C) 2010-2017  Jeremy Wootten
+/* SimpleRandomGameGenerator.vala
+ * Copyright (C) 2010-2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,18 +14,35 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  Author:
- *  Jeremy Wootten <jeremywootten@gmail.com>
+ *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
-namespace Gnonograms {
-public class SimpleRandomGameGenerator : AbstractGameGenerator {
+public class Gnonograms.SimpleRandomGameGenerator : Object {
+    public RandomPatternGenerator pattern_gen { get; construct; }
+    public Solver solver { get; construct; }
 
-    public SimpleRandomGameGenerator (Dimensions _dimensions, AbstractSolver _solver) {
-        pattern_gen = new RandomPatternGenerator (_dimensions);
-        solver = _solver;
+    public Difficulty solution_grade { get; set; default = Difficulty.UNDEFINED; }
+
+    public bool cancelled {
+        get {
+            return solver.cancelled;
+        }
     }
 
-    public override bool generate () {
+    public Difficulty grade {
+        set {
+            pattern_gen.grade = value;
+            solver.configure_from_grade (value);
+        }
+    }
+
+    public SimpleRandomGameGenerator (Dimensions _dimensions, Solver _solver) {
+        Object (
+            pattern_gen: new RandomPatternGenerator (_dimensions),
+            solver: _solver
+        );
+    }
+
+    public async bool generate () {
         /* returns true if a game of correct grade was generated otherwise false  */
         uint count = 0;
         uint unsolved = 0;
@@ -39,14 +56,12 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
             var row_clues = Utils.row_clues_from_2D_array (pattern);
             var col_clues = Utils.col_clues_from_2D_array (pattern);
 
-            solution_grade = solver.solve_clues (row_clues, col_clues, null, null);
+            solution_grade = yield solver.solve_clues (row_clues, col_clues, null, null);
 
             if (solver.state.solved ()) {
-                if (solution_grade == grade) {
+                if (solution_grade == pattern_gen.grade) {
                     break;
-                }
-
-                if (solution_grade > grade) {
+                } else if (solution_grade > pattern_gen.grade) {
                     too_hard++;
                 } else {
                     too_easy++;
@@ -65,6 +80,7 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
                 } else if (too_easy > too_hard) {
                     pattern_gen.harder ();
                 }
+
                 count = 0;
                 too_hard = 0;
                 too_easy = 0;
@@ -72,16 +88,16 @@ public class SimpleRandomGameGenerator : AbstractGameGenerator {
         }
 
         assert (solver.state != SolverState.ERROR);
-        debug ("total tries %u, unsolved %u, too_hard %u, too_easy %u", total_tries, unsolved, too_hard, too_easy);
-        RandomPatternGenerator pg = pattern_gen as RandomPatternGenerator;
-        debug ("threshold %u, min free %u, edge %u", pg.threshold, pg.min_freedom, pg.edge_bias);
         return !cancelled;
     }
 
-    public override My2DCellArray get_solution () {
-        var solution = new My2DCellArray (dimensions);
+    public My2DCellArray get_solution () {
+        var solution = new My2DCellArray (pattern_gen.dimensions);
         solution.copy (solver.solution);
         return solution;
     }
-}
+
+    public void cancel () {
+        solver.cancel ();
+    }
 }
