@@ -18,6 +18,205 @@
  */
 
 public class Gnonograms.View : Hdy.ApplicationWindow {
+    private class HeaderButton : Gtk.Button {
+        construct {
+            valign = Gtk.Align.CENTER;
+        }
+
+        public HeaderButton (string icon_name, string action_name, string text) {
+            Object (
+                action_name: action_name,
+                tooltip_markup: Granite.markup_accel_tooltip (
+                    View.app.get_accels_for_action (action_name), text),
+                image: new Gtk.Image.from_icon_name (icon_name, Gtk.IconSize.LARGE_TOOLBAR)
+            );
+        }
+    }
+
+    private class RestartButton : HeaderButton {
+        public bool restart_destructive { get; set; }
+
+        construct {
+            restart_destructive = false;
+
+            notify["restart-destructive"].connect (() => {
+                if (restart_destructive) {
+                    image.get_style_context ().add_class ("warn");
+                    image.get_style_context ().remove_class ("dim");
+                } else {
+                    image.get_style_context ().remove_class ("warn");
+                    image.get_style_context ().add_class ("dim");
+
+                }
+            });
+
+            bind_property ("sensitive", this, "restart-destructive");
+        }
+
+        public RestartButton (string icon_name, string action_name, string text) {
+            base (icon_name, action_name, text);
+        }
+    }
+
+    private class AppMenu : Gtk.MenuButton {
+        private class GradeChooser : Gtk.ComboBoxText {
+            public Difficulty grade {
+                get {
+                    return (Difficulty)(int.parse (active_id));
+                }
+
+                set {
+                    active_id = ((uint)value).clamp (MIN_GRADE, Difficulty.MAXIMUM).to_string ();
+                }
+            }
+
+            public GradeChooser () {
+                Object (
+                    expand: false
+                );
+
+                foreach (Difficulty d in Difficulty.all_human ()) {
+                    append (((uint)d).to_string (), d.to_string ());
+                }
+            }
+        }
+
+        private class DimensionSpinButton : Gtk.SpinButton {
+            public DimensionSpinButton () {
+                Object (
+                    adjustment: new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),
+                    climb_rate: 5.0,
+                    digits: 0,
+                    snap_to_ticks: true,
+                    orientation: Gtk.Orientation.HORIZONTAL,
+                    margin_top: 3,
+                    margin_bottom: 3,
+                    width_chars: 3,
+                    can_focus: true
+                );
+            }
+        }
+
+        public unowned Controller controller { get; construct; }
+
+        public AppMenu (Controller controller) {
+            Object (
+                image: new Gtk.Image.from_icon_name ("open-menu", Gtk.IconSize.LARGE_TOOLBAR),
+                tooltip_text: _("Options"),
+                controller: controller
+            );
+        }
+
+        construct {
+            var zoom_out_button = new Gtk.Button.from_icon_name ("zoom-out-symbolic", Gtk.IconSize.MENU) {
+                action_name = ACTION_PREFIX + ACTION_ZOOM_OUT,
+                tooltip_markup = Granite.markup_accel_tooltip (
+                    app.get_accels_for_action (ACTION_PREFIX + ACTION_ZOOM_OUT), _("Zoom out")
+                )
+            };
+
+            var zoom_in_button = new Gtk.Button.from_icon_name ("zoom-in-symbolic", Gtk.IconSize.MENU) {
+                action_name = ACTION_PREFIX + ACTION_ZOOM_IN,
+                tooltip_markup = Granite.markup_accel_tooltip (
+                    app.get_accels_for_action (ACTION_PREFIX + ACTION_ZOOM_IN), _("Zoom in")
+                )
+            };
+
+            var size_grid = new Gtk.Grid () {
+                column_homogeneous = true,
+                hexpand = true,
+                margin= 12
+            };
+            size_grid.get_style_context ().add_class (Gtk.STYLE_CLASS_LINKED);
+
+            size_grid.add (zoom_out_button);
+            size_grid.add (zoom_in_button);
+
+            var grade_setting = new GradeChooser ();
+            var row_setting = new DimensionSpinButton ();
+            var column_setting = new DimensionSpinButton ();
+            var title_setting = new Gtk.Entry () {
+                placeholder_text = _("Enter title of game here")
+            };
+
+            var settings_grid = new Gtk.Grid () {
+                orientation = Gtk.Orientation.VERTICAL,
+                margin = 12,
+                row_spacing = 6,
+                column_homogeneous = false
+            };
+            settings_grid.attach (new SettingLabel (_("Name:")), 0, 0, 1);
+            settings_grid.attach (title_setting, 1, 0, 3);
+            settings_grid.attach (new SettingLabel (_("Difficulty:")), 0, 1, 1);
+            settings_grid.attach (grade_setting, 1, 1, 3);
+            settings_grid.attach (new SettingLabel (_("Rows:")), 0, 2, 1);
+            settings_grid.attach (row_setting, 1, 2, 1);
+            settings_grid.attach (new SettingLabel (_("Columns:")), 0, 3, 1);
+            settings_grid.attach (column_setting, 1, 3, 1);
+
+            var main_grid = new Gtk.Grid () {orientation = Gtk.Orientation.VERTICAL};
+            main_grid.add (size_grid);
+            main_grid.add (settings_grid);
+
+            var app_popover = new AppPopover ();
+            app_popover.add (main_grid);
+            set_popover (app_popover);
+
+            app_popover.apply_settings.connect (() => {
+                controller.generator_grade = grade_setting.grade;
+                controller.dimensions = {(uint)column_setting.@value, (uint)row_setting.@value};
+                controller.game_name = title_setting.text; // Must come after changing dimensions
+            });
+
+            toggled.connect (() => { /* Allow parent to set values first */
+                if (active) {
+                    grade_setting.grade = controller.generator_grade;
+                    row_setting.value = (double)(controller.dimensions.height);
+                    column_setting.value = (double)(controller.dimensions.width);
+                    title_setting.text = controller.game_name;
+                    popover.show_all ();
+                }
+            });
+        }
+
+        /** Popover that can be cancelled with Escape and closed by Enter **/
+        private class AppPopover : Gtk.Popover {
+            private bool cancelled = false;
+            public signal void apply_settings ();
+            public signal void cancel ();
+
+            construct {
+                closed.connect (() => {
+                    if (!cancelled) {
+                        apply_settings ();
+                    } else {
+                        cancel ();
+                    }
+
+                    cancelled = false;
+                });
+
+                key_press_event.connect ((event) => {
+                    cancelled = (event.keyval == Gdk.Key.Escape);
+
+                    if (event.keyval == Gdk.Key.KP_Enter || event.keyval == Gdk.Key.Return) {
+                        hide ();
+                    }
+                });
+            }
+        }
+
+        private class SettingLabel : Gtk.Label {
+            public SettingLabel (string text) {
+                Object (
+                    label: text,
+                    xalign: 1.0f,
+                    margin_end: 6
+                );
+            }
+        }
+    }
+
     private const double USABLE_MONITOR_HEIGHT = 0.85;
     private const double USABLE_MONITOR_WIDTH = 0.95;
     private const int GRID_BORDER = 6;
@@ -129,7 +328,8 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     public View (Model _model, Controller controller) {
         Object (
             model: _model,
-            controller: controller
+            controller: controller,
+            resizable: false
         );
     }
 
@@ -410,9 +610,12 @@ warning ("WITH DEBUGGING");
         cell_grid.button_release_event.connect (stop_painting);
         // Force window to follow grid size in both native and flatpak installs
         cell_grid.size_allocate.connect ((alloc) => {
-            var width = alloc.width * (1 + GRID_LABELBOX_RATIO);
-            var height = alloc.height * (1 + GRID_LABELBOX_RATIO);
-            resize ((int)width, (int)height);
+            Idle.add (() => {
+                var width = alloc.width * (1 + GRID_LABELBOX_RATIO);
+                var height = alloc.height * (1 + GRID_LABELBOX_RATIO);
+                resize ((int)width, (int)height);
+                return Source.REMOVE;
+            });
         });
 
         show_all ();
@@ -747,45 +950,5 @@ warning ("WITH DEBUGGING");
         }
 
         make_move_at_cell ();
-    }
-
-    private class RestartButton : HeaderButton {
-        public bool restart_destructive { get; set; }
-
-        construct {
-            restart_destructive = false;
-
-            notify["restart-destructive"].connect (() => {
-                if (restart_destructive) {
-                    image.get_style_context ().add_class ("warn");
-                    image.get_style_context ().remove_class ("dim");
-                } else {
-                    image.get_style_context ().remove_class ("warn");
-                    image.get_style_context ().add_class ("dim");
-
-                }
-            });
-
-            bind_property ("sensitive", this, "restart-destructive");
-        }
-
-        public RestartButton (string icon_name, string action_name, string text) {
-            base (icon_name, action_name, text);
-        }
-    }
-
-    private class HeaderButton : Gtk.Button {
-        construct {
-            valign = Gtk.Align.CENTER;
-        }
-
-        public HeaderButton (string icon_name, string action_name, string text) {
-            Object (
-                action_name: action_name,
-                tooltip_markup: Granite.markup_accel_tooltip (
-                    View.app.get_accels_for_action (action_name), text),
-                image: new Gtk.Image.from_icon_name (icon_name, Gtk.IconSize.LARGE_TOOLBAR)
-            );
-        }
     }
 }
