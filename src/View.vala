@@ -18,6 +18,72 @@
  */
 
 public class Gnonograms.View : Hdy.ApplicationWindow {
+    private class ProgressIndicator : Gtk.Grid {
+        private Gtk.Spinner spinner;
+        private Gtk.Button cancel_button;
+        private Gtk.Label label;
+
+        public string text {
+            set {
+                label.label = value;
+            }
+        }
+
+        public Cancellable? cancellable { get; set; }
+
+        public ProgressIndicator () {
+            Object (
+                orientation: Gtk.Orientation.HORIZONTAL,
+                column_homogeneous: false,
+                column_spacing: 6,
+                valign: Gtk.Align.CENTER
+            );
+        }
+
+        construct {
+            spinner = new Gtk.Spinner ();
+            label = new Gtk.Label (null);
+            label.get_style_context ().add_class (Granite.STYLE_CLASS_H3_LABEL);
+
+            add (label);
+            add (spinner);
+
+            cancel_button = new Gtk.Button ();
+            var img = new Gtk.Image.from_icon_name ("process-stop-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
+            img.set_tooltip_text (_("Cancel solving"));
+            cancel_button.image = img;
+            cancel_button.no_show_all = true;
+            cancel_button.get_style_context ().add_class ("warn");
+            img.get_style_context ().add_class ("warn");
+
+            add (cancel_button);
+
+            show_all ();
+
+            cancel_button.clicked.connect (() => {
+                if (cancellable != null) {
+                    cancellable.cancel ();
+                }
+            });
+
+            realize.connect (() => {
+                if (cancellable != null) {
+                    cancel_button.show ();
+                }
+
+                spinner.start ();
+            });
+
+            unrealize.connect (() => {
+                if (cancellable != null) {
+                    cancellable = null;
+                    cancel_button.hide ();
+                }
+
+                spinner.stop ();
+            });
+        }
+    }
     private class HeaderButton : Gtk.Button {
         construct {
             valign = Gtk.Align.CENTER;

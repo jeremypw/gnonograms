@@ -33,7 +33,6 @@ executable (
     'src/View.vala',
     'src/RandomPatternGenerator.vala',
     'src/SimpleRandomGameGenerator.vala',
-    'src/widgets/ProgressIndicator.vala',
     'libcore/widgets/Labelbox.vala',
     'libcore/widgets/Label.vala',
     'libcore/widgets/Cellgrid.vala',
