@@ -221,6 +221,7 @@ warning ("WITH DEBUGGING");
 
         // Unable to set markup on Granite.ModeSwitch so fake a Granite acellerator tooltip for now.
         mode_switch = new Granite.ModeSwitch.from_icon_name ("edit-symbolic", "head-thinking-symbolic") {
+            margin_end = 12,
             valign = Gtk.Align.CENTER,
             primary_icon_tooltip_text = "%s\n%s".printf (_("Edit a Game"), "Ctrl + 1"),
             secondary_icon_tooltip_text = "%s\n%s".printf (_("Manually Solve"), "Ctrl + 2")
@@ -262,18 +263,17 @@ warning ("WITH DEBUGGING");
         header_bar.pack_start (load_game_button);
         header_bar.pack_start (save_game_button);
         header_bar.pack_start (save_game_as_button);
-        header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_start (restart_button);
+        header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_start (undo_button);
         header_bar.pack_start (redo_button);
         header_bar.pack_start (check_correct_button);
         header_bar.pack_end (app_menu);
         header_bar.pack_end (auto_solve_button);
         header_bar.pack_end (hint_button);
+        header_bar.pack_end (mode_switch);
         header_bar.pack_end (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_end (generate_button);
-        header_bar.pack_end (mode_switch);
-
         toast = new Granite.Widgets.Toast ("") {
             halign = Gtk.Align.START,
             valign = Gtk.Align.START
@@ -314,17 +314,12 @@ warning ("WITH DEBUGGING");
 
         var flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
         bind_property ("restart-destructive", restart_button, "restart-destructive", BindingFlags.SYNC_CREATE);
-        //Have to set properties directly in transform functions - setting target values does not work inside Flatpak
-        controller.bind_property ("game-state", mode_switch, "active", flags,
-            (binding, src_val, ref tgt_val) => {
-                mode_switch.active = (src_val.get_enum () > GameState.SETTING);
-            },
-            (binding, src_val, ref tgt_val) => {
-                controller.game_state = (src_val.get_boolean () ? GameState.SOLVING : GameState.SETTING);
-            }
-        );
         bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
         bind_property ("previous-cell", cell_grid, "previous-cell", BindingFlags.BIDIRECTIONAL);
+
+        mode_switch.notify["active"].connect (() => {
+            controller.game_state = mode_switch.active ? GameState.SOLVING : GameState.SETTING;
+        });
 
         controller.notify["game-state"].connect (() => {
             if (controller.game_state != GameState.UNDEFINED) {
@@ -471,10 +466,11 @@ warning ("WITH DEBUGGING");
     }
 
     private void update_header_bar () {
+        mode_switch.active = controller.game_state != GameState.SETTING;
+
         switch (controller.game_state) {
             case GameState.SETTING:
                 set_buttons_sensitive (true);
-
                 break;
             case GameState.SOLVING:
                 set_buttons_sensitive (true);
