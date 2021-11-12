@@ -201,13 +201,21 @@
     <library>libgnonograms-core</library>
   </provides>
   <screenshots>
-    <screenshot type="default">
-      <caption>Solving a puzzle</caption>
-      <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/Solving.png</image>
+    <screenshot type=default>
+      <caption>Solving a puzzle - light style</caption>
+      <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/GnonogramsSolvingLight.png</image>
     </screenshot>
     <screenshot>
       <caption>Solving a puzzle - dark style</caption>
-      <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/Solving-dark.png</image>
+      <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/GnonogramsSolvingDark.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Designing a puzzle - light style</caption>
+      <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/GnonogramsDesigningLight.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Designing a puzzle - dark style</caption>
+      <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/GnonogramsDesigningDark.png</image>
     </screenshot>
   </screenshots>
 
