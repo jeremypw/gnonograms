@@ -475,11 +475,13 @@ warning ("WITH DEBUGGING");
         undo_button = new HeaderButton ("edit-undo", ACTION_PREFIX + ACTION_UNDO, _("Undo Last Move"));
         redo_button = new HeaderButton ("edit-redo", ACTION_PREFIX + ACTION_REDO, _("Redo Last Move"));
         check_correct_button = new HeaderButton ("media-seek-backward", ACTION_PREFIX + ACTION_CHECK_ERRORS, _("Check for Errors"));
-        restart_button = new RestartButton ("view-refresh", ACTION_PREFIX + ACTION_RESTART, _("Start again"));
+        restart_button = new RestartButton ("view-refresh", ACTION_PREFIX + ACTION_RESTART, _("Start again")) {
+            margin_end = 12,
+            margin_start = 12,
+        };
         hint_button = new HeaderButton ("help-contents", ACTION_PREFIX + ACTION_HINT, _("Suggest next move"));
         auto_solve_button = new HeaderButton ("system", ACTION_PREFIX + ACTION_SOLVE, _("Solve by Computer"));
         generate_button = new HeaderButton ("list-add", ACTION_PREFIX + ACTION_GENERATING_MODE, _("Generate New Puzzle"));
-
         app_menu = new AppMenu (controller) {
             tooltip_markup = Granite.markup_accel_tooltip (app.get_accels_for_action (ACTION_PREFIX + ACTION_OPTIONS), _("Options"))
         };
@@ -487,6 +489,7 @@ warning ("WITH DEBUGGING");
         // Unable to set markup on Granite.ModeSwitch so fake a Granite acellerator tooltip for now.
         mode_switch = new Granite.ModeSwitch.from_icon_name ("edit-symbolic", "head-thinking-symbolic") {
             margin_end = 12,
+            margin_start = 12,
             valign = Gtk.Align.CENTER,
             primary_icon_tooltip_text = "%s\n%s".printf (_("Edit a Game"), "Ctrl + 1"),
             secondary_icon_tooltip_text = "%s\n%s".printf (_("Manually Solve"), "Ctrl + 2")
@@ -529,16 +532,15 @@ warning ("WITH DEBUGGING");
         header_bar.pack_start (save_game_button);
         header_bar.pack_start (save_game_as_button);
         header_bar.pack_start (restart_button);
-        header_bar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
         header_bar.pack_start (undo_button);
         header_bar.pack_start (redo_button);
         header_bar.pack_start (check_correct_button);
         header_bar.pack_end (app_menu);
+        header_bar.pack_end (generate_button);
+        header_bar.pack_end (mode_switch);
         header_bar.pack_end (auto_solve_button);
         header_bar.pack_end (hint_button);
-        header_bar.pack_end (mode_switch);
-        header_bar.pack_end (new Gtk.Separator (Gtk.Orientation.VERTICAL));
-        header_bar.pack_end (generate_button);
+
         toast = new Granite.Widgets.Toast ("") {
             halign = Gtk.Align.START,
             valign = Gtk.Align.START
