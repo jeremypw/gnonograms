@@ -323,15 +323,21 @@ namespace Gnonograms.Utils {
         );
 
         dialog.set_modal (true);
-        dialog.set_filename (Path.build_path (Path.DIR_SEPARATOR_S, start_path, basename));
-        if (save) {
-            dialog.set_current_name (basename);
-        } else {
-            try {
+        try {
+            if (save) {
                 dialog.set_current_folder_file (File.new_for_path (start_path));
-            } catch (Error e) {
-                warning ("Error setting current folder: %s", e.message);
+                if (basename != null) {
+                    dialog.set_current_name (basename);
+                }
+            } else {
+                try {
+                    dialog.set_current_folder_file (File.new_for_path (start_path));
+                } catch (Error e) {
+                    warning ("Error setting current folder: %s", e.message);
+                }
             }
+        } catch (Error e) {
+            warning ("Error configuring FileChooser dialog: %s", e.message);
         }
 
         var response = dialog.run ();

@@ -97,19 +97,7 @@ public class Gnonograms.Controller : GLib.Object {
             }
         }
 
-        saved_games_folder = Path.build_path (
-            Path.DIR_SEPARATOR_S,
-            Environment.get_user_data_dir (),
-            _("Saved Games")
-        );
-        try {
-            var file = File.new_for_path (saved_games_folder);
-            file.make_directory_with_parents (null);
-        } catch (GLib.Error e) {
-            if (!(e is IOError.EXISTS)) {
-                warning ("Error making %s: %s", saved_games_folder, e.message);
-            }
-        }
+        saved_games_folder = Environment.get_user_special_dir (UserDirectory.DOCUMENTS);
 
         current_game_path = "";
         temporary_game_path = Path.build_path (
@@ -244,9 +232,9 @@ public class Gnonograms.Controller : GLib.Object {
             /* Error normally thrown running uninstalled */
             critical ("Unable to restore settings - using defaults"); /* Maybe running uninstalled */
             /* Default puzzle parameters */
-            current_game_path = temporary_game_path;
             game_state = GameState.SOLVING;
             generator_grade = Difficulty.MODERATE;
+            current_game_path = "";
         }
 
         restore_dimensions ();
@@ -550,7 +538,7 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     public void save_game () {
-        if (is_readonly || current_game_path == temporary_game_path) {
+        if (is_readonly || current_game_path == "") {
             save_game_as ();
         } else {
             var path = write_game (current_game_path, false);
