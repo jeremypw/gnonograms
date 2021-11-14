@@ -70,19 +70,18 @@
             The x and y coordinate of the window origin.
           </description>
         </key>
-
-        <key type="(ii)" name="window-size">
-          <default>(800, 600)</default>
-          <summary>The size of the window</summary>
-          <description>
-            The width and height of the window.
-          </description>
-        </key>
         <key type="s" name="current-game-path">
           <default>''</default>
           <summary>Path to game currently being played</summary>
           <description>
             The location where the current game is stored (if it is not an unsaved game).
+          </description>
+        </key>
+        <key type="i" name="cell-size">
+          <default>32</default>
+          <summary>Size of individual cells</summary>
+          <description>
+            The width and height, in pixels, of the square cells making up a puzzle grid).
           </description>
         </key>
     </schema>

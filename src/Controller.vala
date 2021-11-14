@@ -80,6 +80,8 @@ public class Gnonograms.Controller : GLib.Object {
 
             settings = new Settings (SETTINGS_SCHEMA_ID);
             saved_state = new Settings (SAVED_STATE_SCHEMA_ID);
+        } else {
+            warning ("not found one of the schemas");
         }
 
         var data_home_folder_current = Path.build_path (
@@ -222,11 +224,11 @@ public class Gnonograms.Controller : GLib.Object {
 
     private void restore_settings () {
         if (saved_state != null) {
-            int x, y, w, h;
-            saved_state.get ("window-size", "(ii)", out w, out h);
+            int x, y, cell_size;
+            saved_state.get ("cell-size", "i", out cell_size);
             saved_state.get ("window-position", "(ii)", out x, out y);
             current_game_path = saved_state.get_string ("current-game-path");
-            window.set_default_size (w, h);
+            view.cell_size = cell_size;
             window.move (x, y);
         } else {
             /* Error normally thrown running uninstalled */
@@ -527,9 +529,7 @@ public class Gnonograms.Controller : GLib.Object {
             int x_pos, y_pos;
             view.get_position (out x_pos, out y_pos);
             saved_state.set ("window-position", "(ii)", x_pos, y_pos);
-            int width, height;
-            view.get_size (out width, out height);
-            saved_state.set ("window-size", "(ii)", x_pos, y_pos);
+            saved_state.set ("cell-size", "i", view.cell_size);
 
             return false;
         });

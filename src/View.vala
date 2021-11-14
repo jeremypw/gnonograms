@@ -630,6 +630,9 @@ warning ("WITH DEBUGGING");
         });
 
         controller.notify["dimensions"].connect (() => {
+            // Update cell-size if required to fit on screen but without changing window size unnecessarily
+            // The dimensions may have increased or decreased so may need to increase or decrease cell size
+            // It is assumed up to 90% of the screen area can be used
             var monitor_area = Gdk.Rectangle () {
                 width = 1024,
                 height = 768
@@ -640,12 +643,22 @@ warning ("WITH DEBUGGING");
                 monitor_area = Utils.get_monitor_area (screen, window);
             }
 
-            var available_grid_width = (int)(get_allocated_width () - 2 * GRID_BORDER - GRID_COLUMN_SPACING);
-            var available_cell_width = available_grid_width / (controller.dimensions.width * 1.2);
-            var available_screen_height = monitor_area.height * 0.85 - header_bar.get_allocated_height () - 2 * GRID_BORDER;
+            var available_screen_width = monitor_area.width * 0.9 - 2 * GRID_BORDER - GRID_COLUMN_SPACING;
+            var max_cell_width = available_screen_width / (controller.dimensions.width * (1.0 + GRID_LABELBOX_RATIO));
 
-            var available_cell_height = available_screen_height / (controller.dimensions.height * 1.2);
-            cell_size = (int)(double.min (available_cell_width, available_cell_height));
+            var available_grid_height = (int)(window.get_height () - header_bar.get_allocated_height () - 2 * GRID_BORDER);
+            var opt_cell_height = (int)(available_grid_height / (controller.dimensions.height * (1.0 + GRID_LABELBOX_RATIO)));
+
+            var available_screen_height = monitor_area.height * 0.9 - header_bar.get_allocated_height () - 2 * GRID_BORDER;
+            var max_cell_height = available_screen_height / (controller.dimensions.height * (1.0 + GRID_LABELBOX_RATIO));
+
+            var max_cell_size = (int)(double.min (max_cell_width, max_cell_height));
+            if (max_cell_size < cell_size) {
+                cell_size = max_cell_size;
+            } else if (cell_size < opt_cell_height) {
+                cell_size = int.min (max_cell_size, opt_cell_height);
+            }
+
         });
 
        cell_grid.leave_notify_event.connect (() => {

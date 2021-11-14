@@ -36,30 +36,26 @@ public class Gnonograms.LabelBox : Gtk.Grid {
 
     construct {
         view.notify["cell-size"].connect (() => {
-            int width = (int)(orientation == Gtk.Orientation.HORIZONTAL ?
-                n_labels * view.cell_size :
-                n_cells * view.cell_size * GRID_LABELBOX_RATIO
-            );
-
-            int height = (int)(orientation == Gtk.Orientation.HORIZONTAL ?
-                n_cells * view.cell_size * GRID_LABELBOX_RATIO :
-                n_labels * view.cell_size
-            );
-
             get_children ().foreach ((w) => {
                 ((Gnonograms.Clue)w).cell_size = view.cell_size;
             });
 
-            set_size_request (width, height);
+            set_size ();
         });
 
         view.controller.notify ["dimensions"].connect (() => {
-            var new_n_labels = orientation == Gtk.Orientation.HORIZONTAL ? view.controller.dimensions.width : view.controller.dimensions.height;
-            var new_n_cells = orientation == Gtk.Orientation.HORIZONTAL ? view.controller.dimensions.height : view.controller.dimensions.width;
+            var new_n_labels = orientation == Gtk.Orientation.HORIZONTAL ?
+                                              view.controller.dimensions.width :
+                                              view.controller.dimensions.height;
+
+            var new_n_cells = orientation == Gtk.Orientation.HORIZONTAL ?
+                                             view.controller.dimensions.height :
+                                             view.controller.dimensions.width;
+
             if (new_n_labels != n_labels || new_n_cells != n_cells) {
                 n_labels = new_n_labels;
                 n_cells = new_n_cells;
-                resize ();
+                change_n_labels ();
             }
         });
 
@@ -120,7 +116,7 @@ public class Gnonograms.LabelBox : Gtk.Grid {
         }
     }
 
-    private void resize () {
+    private void change_n_labels () {
         foreach (var child in get_children ()) {
             child.destroy ();
         }
@@ -134,6 +130,21 @@ public class Gnonograms.LabelBox : Gtk.Grid {
             add (label);
         }
 
+        set_size ();
         show_all ();
+    }
+
+    private void set_size () {
+        int width = (int)(orientation == Gtk.Orientation.HORIZONTAL ?
+            n_labels * view.cell_size :
+            n_cells * view.cell_size * GRID_LABELBOX_RATIO
+        );
+
+        int height = (int)(orientation == Gtk.Orientation.HORIZONTAL ?
+            n_cells * view.cell_size * GRID_LABELBOX_RATIO :
+            n_labels * view.cell_size
+        );
+
+        set_size_request (width, height);
     }
 }
