@@ -60,8 +60,6 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     private int rows = 0;
     private int cols = 0;
     private bool dirty = false; /* Whether a redraw is needed */
-    private double cell_body_width; /* Width of cell excluding frame */
-    private double cell_body_height; /* height of cell excluding frame */
     private double cell_width; /* Width of cell including frame */
     private double cell_height; /* Height of cell including frame */
 
@@ -149,8 +147,6 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         cols = (int)view.controller.dimensions.width;
         cell_width = view.cell_size;
         cell_height = view.cell_size;
-        cell_body_width = cell_width - 1;
-        cell_body_height = cell_height - 1;
         /* Cause refresh of existing pattern */
         highlight_pattern = new CellPattern.highlight (cell_width, cell_height);
         set_size_request (cols * view.cell_size + (int)MINOR_GRID_LINE_WIDTH, rows * view.cell_size + (int)MINOR_GRID_LINE_WIDTH);
@@ -282,7 +278,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         cr.save ();
         cell_pattern.move_to (x, y); /* Not needed for plain fill, but may use a pattern later */
         cr.set_line_width (0.0);
-        cr.rectangle (x, y, cell_body_width, cell_body_height);
+        cr.rectangle (x, y, cell_width, cell_height);
         cr.set_source (cell_pattern.pattern);
         cr.fill ();
         cr.restore ();
@@ -291,7 +287,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             cr.save ();
             /* Ensure highlight centred and slightly overlapping grid */
             highlight_pattern.move_to (x, y);
-            cr.rectangle (x, y, cell_body_width, cell_body_width);
+            cr.rectangle (x, y, cell_width, cell_width);
             cr.clip ();
             cr.set_source (highlight_pattern.pattern);
             cr.set_operator (Cairo.Operator.OVER);
