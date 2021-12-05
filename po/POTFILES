@@ -1,12 +1,11 @@
-libcore/widgets/Label.vala
-libcore/widgets/Labelbox.vala
 libcore/Constants.vala
 libcore/Enums.vala
 libcore/Filereader.vala
 libcore/Filewriter.vala
 libcore/utils.vala
-src/widgets/AppMenu.vala
-src/widgets/ProgressIndicator.vala
+
+libcore/widgets/Label.vala
+
 src/Application.vala
 src/Controller.vala
 src/View.vala
