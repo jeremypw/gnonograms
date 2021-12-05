@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-05 16:40+0000\n"
+"POT-Creation-Date: 2021-12-05 16:54+0000\n"
 "PO-Revision-Date: 2020-08-21 17:24+0200\n"
 "Last-Translator: Heimen Stoffels <vistausss@outlook.com>\n"
 "Language-Team: \n"
@@ -153,7 +153,7 @@ msgstr "spel"
 #: src/Controller.vala:338
 #, c-format
 msgid "Error when loading game %s: %s"
-msgstr ""
+msgstr "Fout bij het laden van spel %s: %s"
 
 #: src/Controller.vala:361
 #, c-format
@@ -178,7 +178,7 @@ msgstr "Aanwijzingen ontbreken"
 
 #: src/Controller.vala:426
 msgid "Cannot check for errors.  Solution unknown"
-msgstr ""
+msgstr "Kan niet controleren op fouten. De oplossing is onbekend"
 
 #: src/Controller.vala:443
 #, c-format
@@ -244,11 +244,11 @@ msgstr "Opties"
 
 #: src/View.vala:180
 msgid "Zoom out"
-msgstr ""
+msgstr "Uitzoomen"
 
 #: src/View.vala:187
 msgid "Zoom in"
-msgstr ""
+msgstr "Inzoomen"
 
 #: src/View.vala:205
 msgid "Enter title of game here"
@@ -256,7 +256,7 @@ msgstr "Voer hier de spelnaam in"
 
 #: src/View.vala:214
 msgid "Name:"
-msgstr ""
+msgstr "Naam:"
 
 #: src/View.vala:216
 #, fuzzy
@@ -301,7 +301,7 @@ msgstr "Er zijn fouten"
 
 #: src/View.vala:478
 msgid "Start again"
-msgstr ""
+msgstr "Opnieuw beginnen"
 
 #: src/View.vala:482
 msgid "Suggest next move"
@@ -323,7 +323,7 @@ msgstr "Spel opslaan"
 
 #: src/View.vala:495
 msgid "Manually Solve"
-msgstr ""
+msgstr "Handmatig oplossen"
 
 #: src/View.vala:975
 msgid "No errors"

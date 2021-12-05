@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: com.github.jeremypw.gnonograms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-05 16:40+0000\n"
+"POT-Creation-Date: 2021-12-05 16:54+0000\n"
 "PO-Revision-Date: 2020-08-25 17:52+0100\n"
 "Last-Translator: André Barata <andretiagob@protonmail.com>\n"
 "Language-Team: none\n"
@@ -155,7 +155,7 @@ msgstr "jogo"
 #: src/Controller.vala:338
 #, c-format
 msgid "Error when loading game %s: %s"
-msgstr ""
+msgstr "Erro ao carregar o jogo. %s: %s"
 
 #: src/Controller.vala:361
 #, c-format
@@ -180,7 +180,7 @@ msgstr "Pistas em falta"
 
 #: src/Controller.vala:426
 msgid "Cannot check for errors.  Solution unknown"
-msgstr ""
+msgstr "Não é possível verificar se há erros. Solução correta desconhecida"
 
 #: src/Controller.vala:443
 #, c-format
@@ -246,11 +246,11 @@ msgstr "Opções"
 
 #: src/View.vala:180
 msgid "Zoom out"
-msgstr ""
+msgstr "Reduzir"
 
 #: src/View.vala:187
 msgid "Zoom in"
-msgstr ""
+msgstr "Ampliar"
 
 #: src/View.vala:205
 msgid "Enter title of game here"
@@ -258,7 +258,7 @@ msgstr "Insira o título do jogo aqui"
 
 #: src/View.vala:214
 msgid "Name:"
-msgstr ""
+msgstr "Nome:"
 
 #: src/View.vala:216
 #, fuzzy
@@ -303,7 +303,7 @@ msgstr "Existem erros"
 
 #: src/View.vala:478
 msgid "Start again"
-msgstr ""
+msgstr "Comece de novo"
 
 #: src/View.vala:482
 msgid "Suggest next move"
@@ -325,7 +325,7 @@ msgstr "Gravar Jogo"
 
 #: src/View.vala:495
 msgid "Manually Solve"
-msgstr ""
+msgstr "Solucionar manualmente"
 
 #: src/View.vala:975
 msgid "No errors"
