@@ -28,6 +28,11 @@ public class Gnonograms.App : Gtk.Application {
     }
 
     construct {
+        Intl.setlocale (LocaleCategory.ALL, "");
+        GLib.Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
+        GLib.Intl.bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+        GLib.Intl.textdomain (GETTEXT_PACKAGE);
+
         SimpleAction quit_action = new SimpleAction ("quit", null);
         quit_action.activate.connect (() => {
             if (controller != null) {

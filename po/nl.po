@@ -121,7 +121,6 @@ msgid "Freedom = %u"
 msgstr "Vrijheid = %u"
 
 #: src/Application.vala:80
-#, fuzzy
 msgid "[Gnonogram Puzzle File (.gno)]"
 msgstr "Gnonogram-puzzels"
 
@@ -259,22 +258,18 @@ msgid "Name:"
 msgstr "Naam:"
 
 #: src/View.vala:216
-#, fuzzy
 msgid "Difficulty:"
 msgstr "Moeilijkheidsgraad"
 
 #: src/View.vala:218
-#, fuzzy
 msgid "Rows:"
 msgstr "Rijen"
 
 #: src/View.vala:220
-#, fuzzy
 msgid "Columns:"
 msgstr "Kolommen"
 
 #: src/View.vala:472
-#, fuzzy
 msgid "Load Game"
 msgstr "Spel opslaan"
 
@@ -295,7 +290,6 @@ msgid "Redo Last Move"
 msgstr "Recentste zet opnieuw uitvoeren"
 
 #: src/View.vala:477
-#, fuzzy
 msgid "Check for Errors"
 msgstr "Er zijn fouten"
 
@@ -312,12 +306,10 @@ msgid "Solve by Computer"
 msgstr "Computeroplossing"
 
 #: src/View.vala:484
-#, fuzzy
 msgid "Generate New Puzzle"
 msgstr "%s puzzel samenstellen"
 
 #: src/View.vala:494
-#, fuzzy
 msgid "Edit a Game"
 msgstr "Spel opslaan"
 
