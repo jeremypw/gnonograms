@@ -84,6 +84,7 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
             });
         }
     }
+
     private class HeaderButton : Gtk.Button {
         construct {
             valign = Gtk.Align.CENTER;
@@ -395,7 +396,8 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         Object (
             model: _model,
             controller: controller,
-            resizable: false
+            resizable: false,
+            title: _("Gnonograms")
         );
     }
 
