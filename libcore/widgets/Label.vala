@@ -225,15 +225,13 @@ class Gnonograms.Clue : Gtk.Label {
         update_markup ();
     }
 
-private void update_markup () {
-        string markup = "<span size='%i'>".printf (_fontsize) + get_markup () + "</span>";
-        set_markup (markup);
+    private void update_markup () {
+        set_markup ("<span size='%i'>".printf (_fontsize) + get_markup () + "</span>");
         update_tooltip ();
     }
 
     private void update_tooltip () {
-        set_tooltip_markup (
-            "<span size='%i'>".printf (_fontsize / 2) +
+        set_tooltip_markup ("<span size='%i'>".printf (_fontsize) +
             _("Freedom = %u").printf (n_cells - Utils.blockextent_from_clue (_clue)) +
             "</span>"
         );
