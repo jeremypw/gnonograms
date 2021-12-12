@@ -1,6 +1,6 @@
 app-id: com.github.jeremypw.gnonograms
 runtime: io.elementary.Platform
-runtime-version: '6'
+runtime-version: '6.1'
 sdk: io.elementary.Sdk
 command: com.github.jeremypw.gnonograms
 finish-args:
@@ -9,8 +9,6 @@ finish-args:
   - '--socket=fallback-x11'
   - '--metadata=X-DConf=migrate-path=/com/github/jeremypw/gnonograms/'
 
-  # Needed to read prefer-color-scheme with Granite.Settings
-  - '--system-talk-name=org.freedesktop.Accounts'
   # Needed to load and save user designed games
   - '--filesystem=xdg-documents'
 modules:
