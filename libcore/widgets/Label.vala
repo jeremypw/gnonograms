@@ -30,7 +30,7 @@ class Gnonograms.Clue : Gtk.Label {
         }
     }
 
-    private int _fontsize;
+    private double _fontsize;
     private int _cell_size;
     public int cell_size {
         get {
@@ -38,7 +38,7 @@ class Gnonograms.Clue : Gtk.Label {
         }
         set {
             _cell_size = value;
-            _fontsize = (int)(value * 384);
+            _fontsize = (double)value * 0.4;
             update_markup ();
         }
     }
@@ -226,12 +226,12 @@ class Gnonograms.Clue : Gtk.Label {
     }
 
     private void update_markup () {
-        set_markup ("<span size='%i'>".printf (_fontsize) + get_markup () + "</span>");
+        set_markup ("<span font='%f'>".printf (_fontsize) + get_markup () + "</span>");
         update_tooltip ();
     }
 
     private void update_tooltip () {
-        set_tooltip_markup ("<span size='%i'>".printf (_fontsize) +
+        set_tooltip_markup ("<span font='%f'>".printf (_fontsize) +
             _("Freedom = %u").printf (n_cells - Utils.blockextent_from_clue (_clue)) +
             "</span>"
         );
