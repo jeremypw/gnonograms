@@ -595,7 +595,11 @@ warning ("WITH DEBUGGING");
                 update_all_labels_completeness ();
             }
 
-            update_header_bar ();
+            // Avoid updating header bar while generating otherwise generation will be cancelled.
+            // Headerbar will update when generation finished.
+            if (controller.game_state != GameState.GENERATING) { 
+                update_header_bar ();
+            }
         });
 
         controller.notify["game-name"].connect (() => {
