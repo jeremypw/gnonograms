@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component type="desktop">
+<component type="desktop-application">
   <id>com.github.jeremypw.gnonograms</id>
-  <metadata_license>CC-BY-SA-3.0</metadata_license>
+  <launchable type="desktop-id">io.elementary.music.desktop</launchable>
   <project_group>jeremypw</project_group>
+  <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0+</project_license>
   <name>Gnonograms</name>
   <summary>Create and solve gnonogram puzzles</summary>
@@ -19,6 +20,15 @@
     <category>LogicGame</category>
   </categories>
   <releases>
+    <release version="2.1" date="2022-06-13" urgency="low">
+      <description>
+        <ul>
+          <li>Update to elementary platform version 7</li>
+          <li>Improve speed of game generation</li>
+          <li>Fix issue with generate button in setting mode</li>
+        </ul>
+      </description>
+    </release>
     <release version="2.0.0" date="2021-08-08" urgency="low">
       <description>
         <ul>
