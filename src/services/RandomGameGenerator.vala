@@ -71,11 +71,10 @@ public class Gnonograms.SimpleRandomGameGenerator : Object {
             }
 
             count++;
-
-            if (count < 100) {
+            if (count < 1000) {
                 continue;
             } else {
-                if (too_hard >= too_easy) {
+                if (unsolved > 950 || (too_hard > too_easy)) {
                     pattern_gen.easier ();
                 } else if (too_easy > too_hard) {
                     pattern_gen.harder ();
@@ -84,6 +83,7 @@ public class Gnonograms.SimpleRandomGameGenerator : Object {
                 count = 0;
                 too_hard = 0;
                 too_easy = 0;
+                unsolved = 0;
             }
         }
 

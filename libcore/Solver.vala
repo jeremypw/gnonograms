@@ -55,7 +55,7 @@
 
     private const double MODERATE_CPP = 5.0f;
     private const double HARD_CPP = 3.0f;
-    private const double CHALLENGING_CPP = 1.5f;
+    private const double CHALLENGING_CPP = 2.5f;
     private const uint MAX_PASSES = 200;
 
     private Region[] regions;
@@ -72,9 +72,9 @@
 
         double length = (double)(dimensions.length ());
 
-        moderate_threshold = (uint)((length / MODERATE_CPP + 0.5)); /* Round up */
-        hard_threshold = (uint)((length / HARD_CPP + 0.5)); /* Round up */
-        challenging_threshold = (uint)((length / CHALLENGING_CPP - 0.5)); /* Round down */
+        moderate_threshold = (uint)(((length + 5) / MODERATE_CPP + 0.5)); /* Round up */
+        hard_threshold = (uint)(((length + 5) / HARD_CPP + 0.5)); /* Round up */
+        challenging_threshold = (uint)(((length + 5) / CHALLENGING_CPP - 0.5)); /* Round down */
     }
 
     /** Set up solver for a particular puzzle. In addition to the clues, a starting point

@@ -61,7 +61,7 @@ public class Gnonograms.RandomPatternGenerator : Object {
     }
 
     public void easier () {
-        if (min_freedom > 1) {
+        if (min_freedom >= 1) {
             min_freedom--;
         } else if (threshold > 50) {
             threshold -= 2;
@@ -125,10 +125,9 @@ public class Gnonograms.RandomPatternGenerator : Object {
         if (min_freedom > 0) {
             adjust_region (false, grid);
             adjust_region (true, grid);
+            avoid_empty_regions (false, grid);
+            avoid_empty_regions (true, grid);
         }
-
-        avoid_empty_regions (false, grid);
-        avoid_empty_regions (true, grid);
     }
 
     private void insert_random (CellState[] sa, bool column_wise, My2DCellArray grid) {
