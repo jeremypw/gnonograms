@@ -19,7 +19,6 @@
  */
 
 namespace Gnonograms {
-    public const string VERSION = "2.0.0";
     public const Cell NULL_CELL = { uint.MAX, uint.MAX, CellState.UNDEFINED };
     public const uint MAXSIZE = 54; // max number rows or columns
     public const uint MINSIZE = 5; // Change to 1 when debugging
@@ -31,7 +30,6 @@ namespace Gnonograms {
     public const string GAMEFILEEXTENSION = ".gno";
     public const string UNSAVED_FILENAME = "Unsaved Game" + GAMEFILEEXTENSION;
     public const string UNTITLED_NAME = N_("Untitled");
-    public const string APP_ID = "com.github.jeremypw.gnonograms";
     public const string APP_NAME = "Gnonograms";
     public const string SETTING_FILLED_COLOR = "#000000"; /* Elementary Black 900 */
     public const string SETTING_EMPTY_COLOR = "#fafafa"; /* Elementary Silver 100 */

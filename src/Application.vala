@@ -29,9 +29,9 @@ public class Gnonograms.App : Gtk.Application {
 
     construct {
         Intl.setlocale (LocaleCategory.ALL, "");
-        GLib.Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
-        GLib.Intl.bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
-        GLib.Intl.textdomain (GETTEXT_PACKAGE);
+        GLib.Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALEDIR);
+        GLib.Intl.bind_textdomain_codeset (Config.GETTEXT_PACKAGE, "UTF-8");
+        GLib.Intl.textdomain (Config.GETTEXT_PACKAGE);
 
         SimpleAction quit_action = new SimpleAction ("quit", null);
         quit_action.activate.connect (() => {
@@ -76,15 +76,15 @@ public class Gnonograms.App : Gtk.Application {
 private static bool version = false;
 
 private const GLib.OptionEntry[] OPTIONS = {
-    { "version", 0, 0, OptionArg.NONE, ref version, N_("Easy"), null },
+    { "version", '\0', 0, OptionArg.NONE, ref version, N_("Show the version of the program"), null },
     { null }
 };
 
 public static int main (string[] args) {
     try {
         var opt_context = new OptionContext (N_("[Gnonogram Puzzle File (.gno)]"));
-        opt_context.set_translation_domain (Gnonograms.APP_ID);
-        opt_context.add_main_entries (OPTIONS, Gnonograms.APP_ID);
+        opt_context.set_translation_domain (Config.APP_ID);
+        opt_context.add_main_entries (OPTIONS, Config.APP_ID);
         opt_context.add_group (Gtk.get_option_group (true));
         opt_context.parse (ref args);
     } catch (OptionError e) {
@@ -94,7 +94,7 @@ public static int main (string[] args) {
     }
 
     if (version) {
-        print (Gnonograms.VERSION + "\n");
+        print (Config.VERSION + "\n");
         return 0;
     }
 

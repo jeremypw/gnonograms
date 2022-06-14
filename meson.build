@@ -1,4 +1,4 @@
-project ('com.github.jeremypw.gnonograms', 'vala', 'c', version: '2.0.0', meson_version: '>= 0.49.0')
+project ('com.github.jeremypw.gnonograms', 'vala', 'c', version: '2.1.0', meson_version: '>= 0.49.0')
 
 vala_version_required = '>=0.48.0'
 
@@ -28,6 +28,8 @@ gresource = gnome.compile_resources(
 config_data = configuration_data()
 config_data.set_quoted('LOCALEDIR', join_paths(get_option('prefix'), get_option('localedir')))
 config_data.set_quoted('GETTEXT_PACKAGE', meson.project_name())
+config_data.set_quoted('VERSION', meson.project_version())
+config_data.set_quoted('APP_ID', meson.project_name())
 config_file = configure_file(
     input: 'src/Config.vala.in',
     output: '@BASENAME@',
