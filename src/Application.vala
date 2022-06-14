@@ -22,7 +22,7 @@ public class Gnonograms.App : Gtk.Application {
 
     public App () {
         Object (
-            application_id: "com.github.jeremypw.gnonograms",
+            application_id: Config.APP_ID,
             flags: ApplicationFlags.HANDLES_OPEN
         );
     }

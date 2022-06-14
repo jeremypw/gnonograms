@@ -4,10 +4,7 @@ vala_version_required = '>=0.48.0'
 
 i18n = import ('i18n')
 
-add_global_arguments (
-    '-DGETTEXT_PACKAGE="' + meson.project_name () + '"',
-    language:'c'
-)
+add_global_arguments('-DGETTEXT_PACKAGE="@0@"'.format (meson.project_name()), language:'c')
 
 if get_option('with_debugging')
     add_project_arguments('--define=WITH_DEBUGGING', language: 'vala')
