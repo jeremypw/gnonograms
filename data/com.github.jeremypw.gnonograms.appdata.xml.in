@@ -20,7 +20,14 @@
     <category>LogicGame</category>
   </categories>
   <releases>
-    <release version="2.1" date="2022-06-13" urgency="low">
+    <release version="2.1.1" date="2022-06-20" urgency="low">
+      <description>
+        <ul>
+          <li>Fix regression with font sizing</li>
+        </ul>
+      </description>
+    </release>
+    <release version="2.1.0" date="2022-06-13" urgency="low">
       <description>
         <ul>
           <li>Update to elementary platform version 7</li>
