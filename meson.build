@@ -1,4 +1,4 @@
-project ('com.github.jeremypw.gnonograms', 'vala', 'c', version: '2.1.1', meson_version: '>= 0.49.0')
+project ('com.github.jeremypw.gnonograms', 'vala', 'c', version: '2.1.2', meson_version: '>= 0.49.0')
 
 vala_version_required = '>=0.48.0'
 

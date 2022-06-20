@@ -20,6 +20,13 @@
     <category>LogicGame</category>
   </categories>
   <releases>
+    <release version="2.1.2" date="2022-06-20" urgency="low">
+      <description>
+        <ul>
+          <li>Fix launchable id in appdata</li>
+        </ul>
+      </description>
+    </release>
     <release version="2.1.1" date="2022-06-20" urgency="low">
       <description>
         <ul>
