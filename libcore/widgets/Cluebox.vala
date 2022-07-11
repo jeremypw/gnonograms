@@ -1,4 +1,4 @@
-/* Labelbox.vala
+ /*
  * Copyright (C) 2010 - 2021  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
@@ -17,34 +17,33 @@
  *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-public class Gnonograms.LabelBox : Gtk.Grid {
+public class Gnonograms.ClueBox : Gtk.Box {
     public View view { get; construct; }
 
-    private uint n_labels = 0;
+    private uint n_clues = 0;
     private uint n_cells = 0;
+    private List<unowned Clue> clues = null;
 
-    public LabelBox (Gtk.Orientation _orientation, View view) {
-        Object (view: view,
-                column_homogeneous: true,
-                row_homogeneous: true,
-                column_spacing: 0,
-                row_spacing: 0,
-                orientation: _orientation,
-                expand: false
+    public ClueBox (Gtk.Orientation _orientation, View view) {
+        Object (
+            view: view,
+            homogeneous: true,
+            spacing: 0,
+            orientation: _orientation
         );
     }
 
     construct {
         view.notify["cell-size"].connect (() => {
-            get_children ().foreach ((w) => {
-                ((Gnonograms.Clue)w).cell_size = view.cell_size;
+            clues.foreach ((clue) => {
+                clue.cell_size = view.cell_size;
             });
 
             set_size ();
         });
 
         view.controller.notify ["dimensions"].connect (() => {
-            var new_n_labels = orientation == Gtk.Orientation.HORIZONTAL ?
+            var new_n_clues = orientation == Gtk.Orientation.HORIZONTAL ?
                                               view.controller.dimensions.width :
                                               view.controller.dimensions.height;
 
@@ -52,97 +51,98 @@ public class Gnonograms.LabelBox : Gtk.Grid {
                                              view.controller.dimensions.height :
                                              view.controller.dimensions.width;
 
-            if (new_n_labels != n_labels || new_n_cells != n_cells) {
-                n_labels = new_n_labels;
+            if (new_n_clues != n_clues || new_n_cells != n_cells) {
+                n_clues = new_n_clues;
                 n_cells = new_n_cells;
-                change_n_labels ();
+                change_n_clues ();
             }
         });
-
-        show_all ();
     }
 
-    private Gnonograms.Clue? get_label (uint index) {
-        var n_children = get_children ().length ();
-        if (index >= n_children) {
+    private Gnonograms.Clue? get_clue (uint index) {
+        // var n_children = get_children ().length ();
+        if (index >= n_clues) {
             return null;
         } else {
-            return (Gnonograms.Clue)(get_children ().nth_data (n_children - index - 1));
+            return clues.nth_data (n_clues - index - 1);
         }
     }
 
     public string[] get_clues () {
-        string[] clues = new string [n_labels];
-        var index = n_labels;
-        foreach (var widget in get_children ()) { // Delivers widgets in reverse order they were added
+        string[] clue_text = new string [n_clues];
+        var index = n_clues;
+        clues.@foreach ((clue) => { // Delivers widgets in reverse order they were added
             index--;
-            clues[index] = ((Clue)widget).clue;
-        }
+            clue_text[index] = clue.text;
+        });
 
-        return clues;
+        return clue_text;
     }
 
     public void highlight (uint index, bool is_highlight) {
-        var label = get_label (index);
-        if (label != null) {
-            label.highlight (is_highlight);
+        var clue = get_clue (index);
+        if (clue != null) {
+            clue.highlight (is_highlight);
         }
     }
 
     public void unhighlight_all () {
-        get_children ().foreach ((w) => {
-            ((Gnonograms.Clue)w).highlight (false);
+        clues.foreach ((clue) => {
+            clue.highlight (false);
         });
     }
 
-    public void update_label_text (uint index, string? txt) {
-        var label = get_label (index);
-        if (label != null) {
-            label.clue = txt ?? _(BLANKLABELTEXT);
+    public void update_clue_text (uint index, string? txt) {
+        var clue = get_clue (index);
+        if (clue != null) {
+            clue.text = txt ?? _(BLANKLABELTEXT);
         }
     }
 
     public void clear_formatting (uint index) {
-        var label = get_label (index);
-        if (label != null) {
-            label.clear_formatting ();
+        var clue = get_clue (index);
+        if (clue != null) {
+            clue.clear_formatting ();
         }
     }
 
-    public void update_label_complete (uint index, Gee.List<Block> grid_blocks) {
-        var label = get_label (index);
-        if (label != null) {
-            label.update_complete (grid_blocks);
+    public void update_clue_complete (uint index, Gee.List<Block> grid_blocks) {
+        var clue = get_clue (index);
+        if (clue != null) {
+            clue.update_complete (grid_blocks);
         }
     }
 
-    private void change_n_labels () {
-        foreach (var child in get_children ()) {
-            child.destroy ();
-        }
+    private void change_n_clues () {
+        clues.@foreach ((clue) => {
+            clue.destroy ();
+        });
 
-        for (var i = 0; i < n_labels; i++) {
-            var label = new Clue (orientation == Gtk.Orientation.HORIZONTAL) {
+        clues = null;
+
+        for (var i = 0; i < n_clues; i++) {
+            var clue = new Clue (orientation == Gtk.Orientation.HORIZONTAL) {
                 n_cells = this.n_cells,
                 cell_size = view.cell_size
             };
 
-            add (label);
+            append (clue);
+            clues.append (clue);
         }
 
         set_size ();
-        show_all ();
+        // show_all ();
     }
 
     private void set_size () {
         int width = (int)(orientation == Gtk.Orientation.HORIZONTAL ?
-            n_labels * view.cell_size :
+            n_clues * view.cell_size :
             n_cells * view.cell_size * GRID_LABELBOX_RATIO
         );
 
         int height = (int)(orientation == Gtk.Orientation.HORIZONTAL ?
             n_cells * view.cell_size * GRID_LABELBOX_RATIO :
-            n_labels * view.cell_size
+            n_clues * view.cell_size
         );
 
         set_size_request (width, height);

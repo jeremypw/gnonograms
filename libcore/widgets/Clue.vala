@@ -17,7 +17,8 @@
  *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-class Gnonograms.Clue : Gtk.Label {
+class Gnonograms.Clue : Gtk.Widget {
+    public Gtk.Label label { get; construct; }
     private uint _n_cells;
     public uint n_cells {
         set {
@@ -43,14 +44,14 @@ class Gnonograms.Clue : Gtk.Label {
         }
     }
 
-    private string _clue; /* text of clue in horizontal form */
-    public string clue {
+    private string _text; /* text of clue in horizontal form */
+    public string text {
         get {
-            return _clue;
+            return _text;
         }
 
         set {
-            _clue = value;
+            _text = value;
             clue_blocks = Utils.block_struct_array_from_clue (value);
             update_markup ();
         }
@@ -63,18 +64,18 @@ class Gnonograms.Clue : Gtk.Label {
 
     public Clue (bool _vertical_text) {
         Object (
-            vertical_text: _vertical_text,
-            xalign: _vertical_text ? (float)0.5 : (float)1.0,
-            yalign: _vertical_text ? (float)1.0 : (float)0.5,
-            clue: "0",
-            has_tooltip: true,
-            use_markup: true,
-            margin: 0,
-            expand: true
+            vertical_text: _vertical_text
         );
     }
 
     construct {
+        label = new Gtk.Label ("0") {
+            xalign = _vertical_text ? (float)0.5 : (float)1.0,
+            yalign = vertical_text ? (float)1.0 : (float)0.5,
+            has_tooltip = true,
+            use_markup = true
+        };
+        
         realize.connect_after (() => {
             update_markup ();
         });
@@ -214,7 +215,7 @@ class Gnonograms.Clue : Gtk.Label {
                     }
                 }
             }
-        } else if (clue != "0") { /* Zero grid blocks should only occur if cellstates all "empty" */
+        } else if (text != "0") { /* Zero grid blocks should only occur if cellstates all "empty" */
             errors++;
         }
 
@@ -226,13 +227,13 @@ class Gnonograms.Clue : Gtk.Label {
     }
 
     private void update_markup () {
-        set_markup ("<span font='%i'>".printf (_fontsize) + get_markup () + "</span>");
+        label.set_markup ("<span font='%i'>".printf (_fontsize) + get_markup () + "</span>");
         update_tooltip ();
     }
 
     private void update_tooltip () {
-        set_tooltip_markup ("<span font='%i'>".printf (_fontsize) +
-            _("Freedom = %u").printf (n_cells - Utils.blockextent_from_clue (_clue)) +
+        label.set_tooltip_markup ("<span font='%i'>".printf (_fontsize) +
+            _("Freedom = %u").printf (n_cells - Utils.blockextent_from_clue (_text)) +
             "</span>"
         );
     }
@@ -241,7 +242,7 @@ class Gnonograms.Clue : Gtk.Label {
         string attrib = "";
         string weight = "bold";
         string strikethrough = "false";
-        bool warn = get_style_context ().has_class ("warn");
+        bool warn = label.has_css_class ("warn");
         StringBuilder sb = new StringBuilder ("");
 
         foreach (Block clue_block in clue_blocks) {

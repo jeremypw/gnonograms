@@ -17,8 +17,8 @@
  *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-public class Gnonograms.View : Hdy.ApplicationWindow {
-    private class ProgressIndicator : Gtk.Grid {
+public class Gnonograms.View : Gtk.ApplicationWindow {
+    private class ProgressIndicator : Gtk.Box {
         private Gtk.Spinner spinner;
         private Gtk.Button cancel_button;
         private Gtk.Label label;
@@ -34,8 +34,8 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         public ProgressIndicator () {
             Object (
                 orientation: Gtk.Orientation.HORIZONTAL,
-                column_homogeneous: false,
-                column_spacing: 6,
+                homogeneous: false,
+                spacing: 6,
                 valign: Gtk.Align.CENTER
             );
         }
@@ -43,22 +43,24 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         construct {
             spinner = new Gtk.Spinner ();
             label = new Gtk.Label (null);
-            label.get_style_context ().add_class (Granite.STYLE_CLASS_H3_LABEL);
+            label.add_css_class (Granite.STYLE_CLASS_H3_LABEL);
 
-            add (label);
-            add (spinner);
+            append (label);
+            append (spinner);
 
             cancel_button = new Gtk.Button ();
-            var img = new Gtk.Image.from_icon_name ("process-stop-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
-            img.set_tooltip_text (_("Cancel solving"));
-            cancel_button.image = img;
-            cancel_button.no_show_all = true;
-            cancel_button.get_style_context ().add_class ("warn");
-            img.get_style_context ().add_class ("warn");
+            var img = new Gtk.Image.from_icon_name ("process-stop-symbolic") {
+                icon_size = Gtk.IconSize.LARGE,
+                tooltip_text = _("Cancel solving")
+            };
+            cancel_button.child = img;
+            // cancel_button.no_show_all = true;
+            cancel_button.add_css_class ("warn");
+            img.add_css_class ("warn");
 
-            add (cancel_button);
+            append (cancel_button);
 
-            show_all ();
+            // show_all ();
 
             cancel_button.clicked.connect (() => {
                 if (cancellable != null) {
@@ -86,18 +88,26 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     }
 
     private class HeaderButton : Gtk.Button {
-        construct {
-            valign = Gtk.Align.CENTER;
-        }
-
+        public Gtk.Image image { get; construct; }
         public HeaderButton (string icon_name, string action_name, string text) {
             Object (
                 action_name: action_name,
                 tooltip_markup: Granite.markup_accel_tooltip (
-                    View.app.get_accels_for_action (action_name), text),
-                image: new Gtk.Image.from_icon_name (icon_name, Gtk.IconSize.LARGE_TOOLBAR)
+                    View.app.get_accels_for_action (action_name), text
+                )
             );
         }
+
+        construct {
+            valign = Gtk.Align.CENTER;
+
+            image = new Gtk.Image.from_icon_name (icon_name) {
+                icon_size = Gtk.IconSize.LARGE
+            };
+
+            child = image;
+        }
+
     }
 
     private class RestartButton : HeaderButton {
@@ -108,12 +118,11 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
 
             notify["restart-destructive"].connect (() => {
                 if (restart_destructive) {
-                    image.get_style_context ().add_class ("warn");
-                    image.get_style_context ().remove_class ("dim");
+                    image.add_css_class ("warn");
+                    image.remove_css_class ("dim");
                 } else {
-                    image.get_style_context ().remove_class ("warn");
-                    image.get_style_context ().add_class ("dim");
-
+                    image.remove_css_class ("warn");
+                    image.add_css_class ("dim");
                 }
             });
 
@@ -125,79 +134,123 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
         }
     }
 
-    private class AppMenu : Gtk.MenuButton {
-        private class GradeChooser : Gtk.ComboBoxText {
+    private class AppMenu : Gtk.Widget { // MenuButton
+        private class GradeChooser : Gtk.Widget { // ComboBoxText
+            public Gtk.ComboBoxText combo_box_text { get; construct; }
             public Difficulty grade {
                 get {
-                    return (Difficulty)(int.parse (active_id));
+                    return (Difficulty)(int.parse (combo_box_text.active_id));
                 }
 
                 set {
-                    active_id = ((uint)value).clamp (MIN_GRADE, Difficulty.MAXIMUM).to_string ();
+                    combo_box_text.active_id = ((uint)value).clamp (MIN_GRADE, Difficulty.MAXIMUM).to_string ();
                 }
             }
+            
+            static construct {
+                set_layout_manager_type (typeof (Gtk.BinLayout));
+            }
 
-            public GradeChooser () {
-                Object (
-                    expand: false
-                );
-
+            construct {
+                combo_box_text = new Gtk.ComboBoxText ();
+                combo_box_text.set_parent (this);
+                
                 foreach (Difficulty d in Difficulty.all_human ()) {
-                    append (((uint)d).to_string (), d.to_string ());
+                    combo_box_text.append (((uint)d).to_string (), d.to_string ());
                 }
             }
         }
 
-        private class DimensionSpinButton : Gtk.SpinButton {
-            public DimensionSpinButton () {
-                Object (
-                    adjustment: new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),
-                    climb_rate: 5.0,
-                    digits: 0,
-                    snap_to_ticks: true,
-                    orientation: Gtk.Orientation.HORIZONTAL,
-                    margin_top: 3,
-                    margin_bottom: 3,
-                    width_chars: 3,
-                    can_focus: true
-                );
+        private class DimensionSpinButton : Gtk.Widget { // SpinButton
+            public Gtk.SpinButton spin_button { get; construct; }
+            // public DimensionSpinButton () {
+            //     Object (
+            //         adjustment: new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),
+            //         climb_rate: 5.0,
+            //         digits: 0,
+            //         snap_to_ticks: true,
+            //         orientation: Gtk.Orientation.HORIZONTAL,
+            //         margin_top: 3,
+            //         margin_bottom: 3,
+            //         width_chars: 3,
+            //         can_focus: true
+            //     );
+            // }
+            
+            public uint size {
+                get {
+                    return (uint)(spin_button.@value);
+                }
+                
+                set {
+                    spin_button.@value = value;
+                }
+            }
+            
+            static construct {
+                set_layout_manager_type (typeof (Gtk.BinLayout));
+            }
+
+            construct {
+                spin_button = new Gtk.SpinButton (
+                    new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),
+                    5.0,
+                    0
+                ) {
+                    snap_to_ticks = true,
+                    orientation = Gtk.Orientation.HORIZONTAL,
+                    margin_top = 3,
+                    margin_bottom = 3,
+                    width_chars = 3,
+                    can_focus = true
+                };
+                
+                spin_button.set_parent (this);
             }
         }
 
+        public Gtk.MenuButton menu_button { get; construct; }
         public unowned Controller controller { get; construct; }
 
         public AppMenu (Controller controller) {
             Object (
-                image: new Gtk.Image.from_icon_name ("open-menu", Gtk.IconSize.LARGE_TOOLBAR),
-                tooltip_text: _("Options"),
+                // tooltip_text: _("Options"),
                 controller: controller
             );
         }
 
+        static construct {
+            set_layout_manager_type (typeof (Gtk.BinLayout));
+        }
+
         construct {
-            var zoom_out_button = new Gtk.Button.from_icon_name ("zoom-out-symbolic", Gtk.IconSize.MENU) {
+            menu_button = new Gtk.MenuButton () {
+                tooltip_text = _("Options")
+            };
+            
+            menu_button.set_parent (this);
+            
+            var zoom_out_button = new Gtk.Button.from_icon_name ("zoom-out-symbolic") {
                 action_name = ACTION_PREFIX + ACTION_ZOOM_OUT,
                 tooltip_markup = Granite.markup_accel_tooltip (
                     app.get_accels_for_action (ACTION_PREFIX + ACTION_ZOOM_OUT), _("Zoom out")
                 )
             };
 
-            var zoom_in_button = new Gtk.Button.from_icon_name ("zoom-in-symbolic", Gtk.IconSize.MENU) {
+            var zoom_in_button = new Gtk.Button.from_icon_name ("zoom-in-symbolic") {
                 action_name = ACTION_PREFIX + ACTION_ZOOM_IN,
                 tooltip_markup = Granite.markup_accel_tooltip (
                     app.get_accels_for_action (ACTION_PREFIX + ACTION_ZOOM_IN), _("Zoom in")
                 )
             };
 
-            var size_grid = new Gtk.Grid () {
-                column_homogeneous = true,
+            var size_grid = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 6) {
+                homogeneous = true,
                 hexpand = true,
-                margin= 12
             };
-            size_grid.get_style_context ().add_class (Gtk.STYLE_CLASS_LINKED);
-
-            size_grid.add (zoom_out_button);
-            size_grid.add (zoom_in_button);
+            // size_grid.add_css_class (Gtk.STYLE_CLASS_LINKED);
+            size_grid.append (zoom_out_button);
+            size_grid.append (zoom_in_button);
 
             var grade_setting = new GradeChooser ();
             var row_setting = new DimensionSpinButton ();
@@ -208,47 +261,59 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
 
             var settings_grid = new Gtk.Grid () {
                 orientation = Gtk.Orientation.VERTICAL,
-                margin = 12,
                 row_spacing = 6,
                 column_homogeneous = false
             };
-            settings_grid.attach (new SettingLabel (_("Name:")), 0, 0, 1);
+            settings_grid.attach (new Gtk.Label (_("Name:")), 0, 0, 1);
             settings_grid.attach (title_setting, 1, 0, 3);
-            settings_grid.attach (new SettingLabel (_("Difficulty:")), 0, 1, 1);
+            settings_grid.attach (new Gtk.Label  (_("Difficulty:")), 0, 1, 1);
             settings_grid.attach (grade_setting, 1, 1, 3);
-            settings_grid.attach (new SettingLabel (_("Rows:")), 0, 2, 1);
+            settings_grid.attach (new Gtk.Label (_("Rows:")), 0, 2, 1);
             settings_grid.attach (row_setting, 1, 2, 1);
-            settings_grid.attach (new SettingLabel (_("Columns:")), 0, 3, 1);
+            settings_grid.attach (new Gtk.Label  (_("Columns:")), 0, 3, 1);
             settings_grid.attach (column_setting, 1, 3, 1);
 
-            var main_grid = new Gtk.Grid () {orientation = Gtk.Orientation.VERTICAL};
-            main_grid.add (size_grid);
-            main_grid.add (settings_grid);
+            var main_grid = new Gtk.Box (Gtk.Orientation.VERTICAL, 6);
+            main_grid.append (size_grid);
+            main_grid.append (settings_grid);
 
-            var app_popover = new AppPopover ();
-            app_popover.add (main_grid);
-            set_popover (app_popover);
+            var app_popover = new AppPopover () {
+                child = main_grid
+            };
+
+            var popover_key_controller = new Gtk.EventControllerKey ();
+            main_grid.add_controller (popover_key_controller);
+            popover_key_controller.key_pressed.connect ((keyval, keycode, state) => {
+                app_popover.cancelled = (keyval == Gdk.Key.Escape);
+
+                if (keyval == Gdk.Key.KP_Enter || keyval == Gdk.Key.Return) {
+                    app_popover.hide ();
+                }
+            });
+
+            menu_button.set_popover (app_popover);
+            menu_button.child = new Gtk.Image.from_icon_name ("open-menu") { icon_size = Gtk.IconSize.LARGE };
 
             app_popover.apply_settings.connect (() => {
                 controller.generator_grade = grade_setting.grade;
-                controller.dimensions = {(uint)column_setting.@value, (uint)row_setting.@value};
+                controller.dimensions = {column_setting.size, row_setting.size};
                 controller.game_name = title_setting.text; // Must come after changing dimensions
             });
 
-            toggled.connect (() => { /* Allow parent to set values first */
-                if (active) {
+            menu_button.activate.connect (() => { /* Allow parent to set values first */
+                // if (active) {
                     grade_setting.grade = controller.generator_grade;
-                    row_setting.value = (double)(controller.dimensions.height);
-                    column_setting.value = (double)(controller.dimensions.width);
+                    row_setting.size = controller.dimensions.height;
+                    column_setting.size = controller.dimensions.width;
                     title_setting.text = controller.game_name;
-                    popover.show_all ();
-                }
+                    // popover.show_all ();
+                // }
             });
         }
 
         /** Popover that can be cancelled with Escape and closed by Enter **/
         private class AppPopover : Gtk.Popover {
-            private bool cancelled = false;
+            public bool cancelled { get; set; }
             public signal void apply_settings ();
             public signal void cancel ();
 
@@ -262,24 +327,6 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
 
                     cancelled = false;
                 });
-
-                key_press_event.connect ((event) => {
-                    cancelled = (event.keyval == Gdk.Key.Escape);
-
-                    if (event.keyval == Gdk.Key.KP_Enter || event.keyval == Gdk.Key.Return) {
-                        hide ();
-                    }
-                });
-            }
-        }
-
-        private class SettingLabel : Gtk.Label {
-            public SettingLabel (string text) {
-                Object (
-                    label: text,
-                    xalign: 1.0f,
-                    margin_end: 6
-                );
             }
         }
     }
@@ -366,17 +413,18 @@ public class Gnonograms.View : Hdy.ApplicationWindow {
     };
 
     public static Gtk.Application app;
-    private LabelBox row_clue_box;
-    private LabelBox column_clue_box;
+    private Gtk.EventControllerKey key_controller;
+    private ClueBox row_clue_box;
+    private ClueBox column_clue_box;
     private CellGrid cell_grid;
     private ProgressIndicator progress_indicator;
     private AppMenu app_menu;
     private CellState drawing_with_state = CellState.UNDEFINED;
-    private Hdy.HeaderBar header_bar;
-    private Granite.Widgets.Toast toast;
+    private Gtk.HeaderBar header_bar;
+    // private Adw.Toast toast;
     private Granite.ModeSwitch mode_switch;
     private Gtk.Grid main_grid;
-    private Gtk.Overlay overlay;
+    private Adw.ToastOverlay toast_overlay;
     private Gtk.Stack progress_stack;
     private Gtk.Label title_label;
     private Gtk.Label grade_label;
@@ -445,18 +493,18 @@ warning ("WITH DEBUGGING");
         try {
             var css_provider = new Gtk.CssProvider ();
             css_provider.load_from_resource ("com/github/jeremypw/gnonograms/Application.css");
-            Gtk.StyleContext.add_provider_for_screen (
-                Gdk.Screen.get_default (), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+            Gtk.StyleContext.add_provider_for_display (
+                Gdk.Display.get_default (), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
             );
         } catch (Error e) {
             warning ("Error adding css provider: %s", e.message);
         }
 
-        Hdy.init ();
+        // Hdy.init ();
     }
 
     construct {
-        weak Gtk.IconTheme default_theme = Gtk.IconTheme.get_default ();
+        weak Gtk.IconTheme default_theme = Gtk.IconTheme.get_for_display (Gdk.Display.get_default ());
         default_theme.add_resource_path ("/com/github/jeremypw/gnonograms");
 
         var view_actions = new GLib.SimpleActionGroup ();
@@ -503,33 +551,30 @@ warning ("WITH DEBUGGING");
             use_markup = true,
             xalign = 0.5f
         };
-        title_label.get_style_context ().add_class (Granite.STYLE_CLASS_H3_LABEL);
+        title_label.add_css_class (Granite.STYLE_CLASS_H3_LABEL);
         title_label.show ();
 
         grade_label = new Gtk.Label ("Easy") {
             use_markup = true,
             xalign = 0.5f
         };
-        grade_label.get_style_context ().add_class (Granite.STYLE_CLASS_H4_LABEL);
+        grade_label.add_css_class (Granite.STYLE_CLASS_H4_LABEL);
 
-        var title_grid = new Gtk.Grid () {
-            orientation = Gtk.Orientation.VERTICAL
-        };
-        title_grid.add (title_label);
-        title_grid.add (grade_label);
-        title_grid.show_all ();
+        var title_grid = new Gtk.Box (Gtk.Orientation.VERTICAL, 6);
+        title_grid.append (title_label);
+        title_grid.append (grade_label);
+        // title_grid.show_all ();
 
         progress_stack = new Gtk.Stack ();
         progress_stack.add_named (progress_indicator, "Progress");
         progress_stack.add_named (title_grid, "Title");
         progress_stack.set_visible_child_name ("Title");
 
-        header_bar = new Hdy.HeaderBar () {
-            has_subtitle = false,
-            show_close_button = true,
-            custom_title = progress_stack
+        header_bar = new Gtk.HeaderBar () {
+            show_title_buttons = true,
+            title_widget = progress_stack
         };
-        header_bar.get_style_context ().add_class ("gnonograms-header");
+        header_bar.add_css_class ("gnonograms-header");
         header_bar.pack_start (load_game_button);
         header_bar.pack_start (save_game_button);
         header_bar.pack_start (save_game_as_button);
@@ -543,43 +588,44 @@ warning ("WITH DEBUGGING");
         header_bar.pack_end (auto_solve_button);
         header_bar.pack_end (hint_button);
 
-        toast = new Granite.Widgets.Toast ("") {
-            halign = Gtk.Align.START,
-            valign = Gtk.Align.START
-        };
-        toast.set_default_action (null);
+        // toast = new Adw.Toast ("");
+        // toast.set_default_action (null);
 
-        row_clue_box = new LabelBox (Gtk.Orientation.VERTICAL, this);
-        column_clue_box = new LabelBox (Gtk.Orientation.HORIZONTAL, this);
+        row_clue_box = new ClueBox (Gtk.Orientation.VERTICAL, this);
+        column_clue_box = new ClueBox (Gtk.Orientation.HORIZONTAL, this);
         cell_grid = new CellGrid (this);
 
         main_grid = new Gtk.Grid () {
             row_spacing = 0,
-            column_spacing = GRID_COLUMN_SPACING,
-            border_width = GRID_BORDER,
-            expand = true
+            column_spacing = GRID_COLUMN_SPACING
+            // border_width = GRID_BORDER,
+            // expand = true
         };
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues fordimensions.height*/
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
         main_grid.attach (cell_grid, 1, 1, 1, 1);
 
-        var ev = new Gtk.EventBox () {expand = true};
-        ev.add_events (Gdk.EventMask.SCROLL_MASK);
-        ev.scroll_event.connect (on_grid_scroll_event);
-        ev.add (main_grid);
+        var scroll_controller = new Gtk.EventControllerScroll (Gtk.EventControllerScrollFlags.VERTICAL);
+        main_grid.add_controller (scroll_controller);
+        scroll_controller.scroll.connect (on_grid_scroll);
+        key_controller = new Gtk.EventControllerKey ();
+        main_grid.add_controller (key_controller);
+        key_controller.key_released.connect ((keyval, keycode, state) => {
+            if (keyval == drawing_with_key) {
+                stop_painting ();
+            }
 
-        overlay = new Gtk.Overlay () {
-            expand = true
-        };
-        overlay.add_overlay (toast);
-        overlay.add (ev);
+            return;
+        });
 
-        var grid = new Gtk.Grid () {
-            orientation = Gtk.Orientation.VERTICAL
+        toast_overlay = new Adw.ToastOverlay () {
+            child = main_grid
         };
-        grid.add (header_bar);
-        grid.add (overlay);
-        add (grid);
+
+        var grid = new Gtk.Box (Gtk.Orientation.VERTICAL, 6);
+        grid.append (header_bar);
+        grid.append (toast_overlay);
+        child = grid;
 
         var flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
         bind_property ("restart-destructive", restart_button, "restart-destructive", BindingFlags.SYNC_CREATE);
@@ -597,7 +643,7 @@ warning ("WITH DEBUGGING");
 
             // Avoid updating header bar while generating otherwise generation will be cancelled.
             // Headerbar will update when generation finished.
-            if (controller.game_state != GameState.GENERATING) { 
+            if (controller.game_state != GameState.GENERATING) {
                 update_header_bar ();
             }
         });
@@ -646,15 +692,15 @@ warning ("WITH DEBUGGING");
                 height = 768
             };
 
-            Gdk.Window? window = get_window ();
-            if (window != null) {
-                monitor_area = Utils.get_monitor_area (screen, window);
+            Gdk.Surface? surface = get_surface ();
+            if (surface != null) {
+                monitor_area = Utils.get_monitor_area (surface);
             }
 
             var available_screen_width = monitor_area.width * 0.9 - 2 * GRID_BORDER - GRID_COLUMN_SPACING;
             var max_cell_width = available_screen_width / (controller.dimensions.width * (1.0 + GRID_LABELBOX_RATIO));
 
-            var available_grid_height = (int)(window.get_height () - header_bar.get_allocated_height () - 2 * GRID_BORDER);
+            var available_grid_height = (int)(surface.get_height () - header_bar.get_allocated_height () - 2 * GRID_BORDER);
             var opt_cell_height = (int)(available_grid_height / (controller.dimensions.height * (1.0 + GRID_LABELBOX_RATIO)));
 
             var available_screen_height = monitor_area.height * 0.9 - header_bar.get_allocated_height () - 2 * GRID_BORDER;
@@ -669,43 +715,35 @@ warning ("WITH DEBUGGING");
 
         });
 
-       cell_grid.leave_notify_event.connect (() => {
+       cell_grid.leave.connect (() => {
             row_clue_box.unhighlight_all ();
             column_clue_box.unhighlight_all ();
-            return false;
         });
 
-        cell_grid.button_press_event.connect ((event) => {
-            if (event.type == Gdk.EventType.@2BUTTON_PRESS || event.button == Gdk.BUTTON_MIDDLE) {
+        cell_grid.button_pressed.connect ((button, double_click) => {
+            if (double_click || button == Gdk.BUTTON_MIDDLE) {
                 drawing_with_state = controller.game_state == GameState.SOLVING ? CellState.UNKNOWN : CellState.EMPTY;
             } else {
-                drawing_with_state = event.button == Gdk.BUTTON_PRIMARY ? CellState.FILLED : CellState.EMPTY;
+                drawing_with_state = button == Gdk.BUTTON_PRIMARY ? CellState.FILLED : CellState.EMPTY;
             }
 
             make_move_at_cell ();
-            return true;
         });
 
-        key_release_event.connect ((event) => {
-            if (event.keyval == drawing_with_key) {
-                stop_painting ();
-            }
 
-            return false;
-        });
 
-        cell_grid.button_release_event.connect (stop_painting);
+        cell_grid.button_released.connect (stop_painting);
         // Force window to follow grid size in both native and flatpak installs
-        cell_grid.size_allocate.connect ((alloc) => {
-            Idle.add (() => {
-                var width = alloc.width * (1 + GRID_LABELBOX_RATIO);
-                var height = alloc.height * (1 + GRID_LABELBOX_RATIO);
-                resize ((int)width, (int)height);
-                return Source.REMOVE;
-            });
-        });
+        // cell_grid.size_allocate.connect ((alloc) => {
+        //     Idle.add (() => {
+        //         var width = alloc.width * (1 + GRID_LABELBOX_RATIO);
+        //         var height = alloc.height * (1 + GRID_LABELBOX_RATIO);
+        //         resize ((int)width, (int)height);
+        //         return Source.REMOVE;
+        //     });
+        // });
 
-        show_all ();
+        // show_all ();
     }
 
     public string[] get_clues (bool is_column) {
@@ -713,22 +751,22 @@ warning ("WITH DEBUGGING");
         return label_box.get_clues ();
     }
 
-    public void update_labels_from_string_array (string[] clues, bool is_column) {
+    public void update_clues_from_string_array (string[] clues, bool is_column) {
         var clue_box = is_column ? column_clue_box : row_clue_box;
         var lim = is_column ? controller.dimensions.width : controller.dimensions.height;
 
         for (int i = 0; i < lim; i++) {
-            clue_box.update_label_text (i, clues[i]);
+            clue_box.update_clue_text (i, clues[i]);
         }
     }
 
-    public void update_labels_from_solution () {
+    public void update_clues_from_solution () {
         for (int r = 0; r < controller.dimensions.height; r++) {
-            row_clue_box.update_label_text (r, model.get_label_text_from_solution (r, false));
+            row_clue_box.update_clue_text (r, model.get_label_text_from_solution (r, false));
         }
 
         for (int c = 0; c < controller.dimensions.width; c++) {
-            column_clue_box.update_label_text (c, model.get_label_text_from_solution (c, true));
+            column_clue_box.update_clue_text (c, model.get_label_text_from_solution (c, true));
         }
 
         update_all_labels_completeness ();
@@ -741,8 +779,7 @@ warning ("WITH DEBUGGING");
     }
 
     public void send_notification (string text) {
-        toast.title = text.dup ();
-        toast.send_notification ();
+        toast_overlay.add_toast (new Adw.Toast (text));
     }
 
     public void show_working (Cancellable cancellable, string text = "") {
@@ -813,21 +850,21 @@ warning ("WITH DEBUGGING");
 
     private void update_all_labels_completeness () {
         for (int r = 0; r < controller.dimensions.height; r++) {
-            update_label_complete (r, false);
+            update_clue_complete (r, false);
         }
 
         for (int c = 0; c < controller.dimensions.width; c++) {
-            update_label_complete (c, true);
+            update_clue_complete (c, true);
         }
     }
 
-    private void update_label_complete (uint idx, bool is_col) {
+    private void update_clue_complete (uint idx, bool is_col) {
         var lbox = is_col ? column_clue_box : row_clue_box;
 
         if (controller.game_state == GameState.SOLVING && strikeout_complete) {
             var blocks = Gee.List.empty<Block> ();
             blocks = model.get_complete_blocks_from_working (idx, is_col);
-            lbox.update_label_complete (idx, blocks);
+            lbox.update_clue_complete (idx, blocks);
         } else {
             lbox.clear_formatting (idx);
         }
@@ -857,11 +894,11 @@ warning ("WITH DEBUGGING");
         var col = current_cell.col;
 
         if (controller.game_state == GameState.SETTING) {
-            row_clue_box.update_label_text (row, model.get_label_text_from_solution (row, false));
-            column_clue_box.update_label_text (col, model.get_label_text_from_solution (col, true));
+            row_clue_box.update_clue_text (row, model.get_label_text_from_solution (row, false));
+            column_clue_box.update_clue_text (col, model.get_label_text_from_solution (col, true));
         } else {
-            update_label_complete (row, false);
-            update_label_complete (col, true);
+            update_clue_complete (row, false);
+            update_clue_complete (col, true);
         }
 
         return cell;
@@ -882,32 +919,22 @@ warning ("WITH DEBUGGING");
         });
     }
 
-    private bool stop_painting () {
+    private void stop_painting () {
         drawing_with_state = CellState.UNDEFINED;
         drawing_with_key = 0;
-        return false;
     }
 
     /** With Control pressed, zoom using the fontsize. **/
-    private bool on_grid_scroll_event (Gdk.EventScroll event) {
-        if (Gdk.ModifierType.CONTROL_MASK in event.state) {
-            switch (event.direction) {
-                case Gdk.ScrollDirection.UP:
-                    change_cell_size (false);
-                    break;
-
-                case Gdk.ScrollDirection.DOWN:
-                    change_cell_size (true);
-                    break;
-
-                default:
-                    break;
-            }
-
-            return true;
+    private bool on_grid_scroll (double dx, double dy) {
+        uint keyval;
+        Gdk.ModifierType modifiers;
+        ((Gdk.KeyEvent)key_controller.get_current_event ()).get_match (out keyval, out modifiers);
+        if (Gdk.ModifierType.CONTROL_MASK in modifiers) {
+            change_cell_size (dy > 0);
+            return Gdk.EVENT_STOP;
         }
 
-        return false;
+        return Gdk.EVENT_PROPAGATE;
     }
 
     /** Action callbacks **/
@@ -1036,10 +1063,8 @@ warning ("WITH DEBUGGING");
         }
 
         drawing_with_state = cs;
-        var current_event = Gtk.get_current_event ();
-        if (current_event.type == Gdk.EventType.KEY_PRESS) {
-            drawing_with_key = ((Gdk.EventKey)current_event).keyval;
-        }
+        var current_event = key_controller.get_current_event ();
+        drawing_with_key = ((Gdk.KeyEvent)current_event).get_keyval ();
 
         make_move_at_cell ();
     }

@@ -85,7 +85,7 @@ public static int main (string[] args) {
         var opt_context = new OptionContext (N_("[Gnonogram Puzzle File (.gno)]"));
         opt_context.set_translation_domain (Config.APP_ID);
         opt_context.add_main_entries (OPTIONS, Config.APP_ID);
-        opt_context.add_group (Gtk.get_option_group (true));
+        // opt_context.add_group (Gtk.get_option_group (true));
         opt_context.parse (ref args);
     } catch (OptionError e) {
         printerr ("error: %s\n", e.message);

@@ -10,11 +10,6 @@ if get_option('with_debugging')
     add_project_arguments('--define=WITH_DEBUGGING', language: 'vala')
 endif
 
-GTK3 = dependency('gtk+-3.0', version: '>=3.24')
-GEE = dependency('gee-0.8', version: '>=0.20')
-GRANITE = dependency('granite', version: '>=6.1.0')
-HDY = dependency('libhandy-1', version: '>=1.2.0')
-
 gnome = import('gnome')
 gresource = gnome.compile_resources(
     'gresource',
@@ -41,8 +36,8 @@ executable (
     'src/View.vala',
     'src/services/RandomPatternGenerator.vala',
     'src/services/RandomGameGenerator.vala',
-    'libcore/widgets/Labelbox.vala',
-    'libcore/widgets/Label.vala',
+    'libcore/widgets/Cluebox.vala',
+    'libcore/widgets/Clue.vala',
     'libcore/widgets/Cellgrid.vala',
     'libcore/utils.vala',
     'libcore/Model.vala',
@@ -59,10 +54,8 @@ executable (
      config_file,
 
     dependencies : [
-        GTK3,
-        GEE,
-        GRANITE,
-        HDY
+        dependency('granite-7'),
+        dependency('libadwaita-1')
     ],
 
     install: true

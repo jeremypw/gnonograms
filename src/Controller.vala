@@ -51,8 +51,11 @@ public class Gnonograms.Controller : GLib.Object {
         view = new View (model, this);
         history = new Gnonograms.History ();
 
-        view.delete_event.connect (on_view_deleted);
-        view.configure_event.connect (on_view_configure);
+        view.close_request.connect (on_view_deleted);
+        view.notify["default-width"].connect (on_view_configure);
+        view.notify["default-height"].connect (on_view_configure);
+        view.notify["maximized"].connect (on_view_configure);
+        view.notify["fullscreened"].connect (on_view_configure);
 #if WITH_DEBUGGING
         view.debug_request.connect (on_debug_request);
 #endif
@@ -114,7 +117,7 @@ public class Gnonograms.Controller : GLib.Object {
             settings.bind ("clue-help", view, "strikeout-complete", SettingsBindFlags.DEFAULT);
         }
 
-        view.show_all ();
+        // view.show_all ();
         view.present ();
 
         restore_settings ();
@@ -158,7 +161,7 @@ public class Gnonograms.Controller : GLib.Object {
 
     private void clear () {
         model.clear ();
-        view.update_labels_from_solution ();
+        view.update_clues_from_solution ();
         clear_history ();
         is_readonly = true; // Force Save As when saving new design
     }
@@ -187,7 +190,7 @@ public class Gnonograms.Controller : GLib.Object {
             if (success) {
                     model.set_solution_from_array (generator.get_solution ());
                     game_state = GameState.SOLVING;
-                    view.update_labels_from_solution ();
+                    view.update_clues_from_solution ();
                     view.game_grade = generator.solution_grade;
                 } else {
                     clear ();
@@ -224,12 +227,12 @@ public class Gnonograms.Controller : GLib.Object {
 
     private void restore_settings () {
         if (saved_state != null) {
-            int x, y, cell_size;
+            int cell_size;
             saved_state.get ("cell-size", "i", out cell_size);
-            saved_state.get ("window-position", "(ii)", out x, out y);
+            // saved_state.get ("window-position", "(ii)", out x, out y);
             current_game_path = saved_state.get_string ("current-game-path");
             view.cell_size = cell_size;
-            window.move (x, y);
+            // window.move (x, y);
         } else {
             /* Error normally thrown running uninstalled */
             critical ("Unable to restore settings - using defaults"); /* Maybe running uninstalled */
@@ -388,8 +391,8 @@ public class Gnonograms.Controller : GLib.Object {
             if (reader.has_solution) {
                 view.game_grade = reader.difficulty;
             } else if (reader.has_row_clues && reader.has_col_clues) {
-                view.update_labels_from_string_array (reader.row_clues, false);
-                view.update_labels_from_string_array (reader.col_clues, true);
+                view.update_clues_from_string_array (reader.row_clues, false);
+                view.update_clues_from_string_array (reader.col_clues, true);
             } else {
                 reader.err_msg = (_("Clues missing"));
                 return false;
@@ -397,7 +400,7 @@ public class Gnonograms.Controller : GLib.Object {
 
             if (reader.has_solution) {
                 model.set_solution_data_from_string_array (reader.solution[0 : dimensions.height]);
-                view.update_labels_from_solution (); /* Ensure completeness correctly set */
+                view.update_clues_from_solution (); /* Ensure completeness correctly set */
             }
 
             if (reader.name.length > 1 && reader.name != "") {
@@ -510,13 +513,13 @@ public class Gnonograms.Controller : GLib.Object {
 
     private bool on_view_deleted () {
         quit ();
-        return false;
+        return Gdk.EVENT_PROPAGATE;
     }
 
     private uint configure_id = 0;
-    private bool on_view_configure () {
+    private void on_view_configure () {
         if (saved_state == null) {
-            return false;
+            return;
         }
 
         if (configure_id != 0) {
@@ -525,16 +528,12 @@ public class Gnonograms.Controller : GLib.Object {
 
         configure_id = Timeout.add (100, () => {
             configure_id = 0;
-
-            int x_pos, y_pos;
-            view.get_position (out x_pos, out y_pos);
-            saved_state.set ("window-position", "(ii)", x_pos, y_pos);
             saved_state.set ("cell-size", "i", view.cell_size);
 
-            return false;
+            return Source.REMOVE;
         });
 
-        return false;
+        return;
     }
 
     public void save_game () {
