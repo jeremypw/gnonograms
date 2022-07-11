@@ -235,7 +235,7 @@ public class Gnonograms.Controller : GLib.Object {
             // window.move (x, y);
         } else {
             /* Error normally thrown running uninstalled */
-            critical ("Unable to restore settings - using defaults"); /* Maybe running uninstalled */
+            warning ("Unable to restore settings - using defaults"); /* Maybe running uninstalled */
             /* Default puzzle parameters */
             game_state = GameState.SOLVING;
             generator_grade = Difficulty.MODERATE;

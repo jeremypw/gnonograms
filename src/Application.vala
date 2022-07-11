@@ -43,14 +43,14 @@ public class Gnonograms.App : Gtk.Application {
         add_action (quit_action);
         set_accels_for_action ("app.quit", {"<Ctrl>q"});
 
-        var granite_settings = Granite.Settings.get_default ();
-        var gtk_settings = Gtk.Settings.get_default ();
+        // var granite_settings = Granite.Settings.get_default ();
+        // var gtk_settings = Gtk.Settings.get_default ();
 
-        gtk_settings.gtk_application_prefer_dark_theme = granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
+        // gtk_settings.gtk_application_prefer_dark_theme = granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
 
-        granite_settings.notify["prefers-color-scheme"].connect (() => {
-            gtk_settings.gtk_application_prefer_dark_theme = granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
-        });
+        // granite_settings.notify["prefers-color-scheme"].connect (() => {
+        //     gtk_settings.gtk_application_prefer_dark_theme = granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
+        // });
     }
 
     public override void open (File[] files, string hint) {
@@ -85,7 +85,6 @@ public static int main (string[] args) {
         var opt_context = new OptionContext (N_("[Gnonogram Puzzle File (.gno)]"));
         opt_context.set_translation_domain (Config.APP_ID);
         opt_context.add_main_entries (OPTIONS, Config.APP_ID);
-        // opt_context.add_group (Gtk.get_option_group (true));
         opt_context.parse (ref args);
     } catch (OptionError e) {
         printerr ("error: %s\n", e.message);

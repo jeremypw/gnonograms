@@ -88,9 +88,9 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     }
 
     private class HeaderButton : Gtk.Button {
-        public Gtk.Image image { get; construct; }
         public HeaderButton (string icon_name, string action_name, string text) {
             Object (
+                icon_name: icon_name,
                 action_name: action_name,
                 tooltip_markup: Granite.markup_accel_tooltip (
                     View.app.get_accels_for_action (action_name), text
@@ -100,12 +100,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
         construct {
             valign = Gtk.Align.CENTER;
-
-            image = new Gtk.Image.from_icon_name (icon_name) {
-                icon_size = Gtk.IconSize.LARGE
-            };
-
-            child = image;
         }
 
     }
@@ -118,11 +112,11 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
             notify["restart-destructive"].connect (() => {
                 if (restart_destructive) {
-                    image.add_css_class ("warn");
-                    image.remove_css_class ("dim");
+                    add_css_class ("warn");
+                    remove_css_class ("dim");
                 } else {
-                    image.remove_css_class ("warn");
-                    image.add_css_class ("dim");
+                    remove_css_class ("warn");
+                    add_css_class ("dim");
                 }
             });
 
@@ -146,7 +140,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
                     combo_box_text.active_id = ((uint)value).clamp (MIN_GRADE, Difficulty.MAXIMUM).to_string ();
                 }
             }
-            
+
             static construct {
                 set_layout_manager_type (typeof (Gtk.BinLayout));
             }
@@ -154,7 +148,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             construct {
                 combo_box_text = new Gtk.ComboBoxText ();
                 combo_box_text.set_parent (this);
-                
+
                 foreach (Difficulty d in Difficulty.all_human ()) {
                     combo_box_text.append (((uint)d).to_string (), d.to_string ());
                 }
@@ -163,30 +157,17 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
         private class DimensionSpinButton : Gtk.Widget { // SpinButton
             public Gtk.SpinButton spin_button { get; construct; }
-            // public DimensionSpinButton () {
-            //     Object (
-            //         adjustment: new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),
-            //         climb_rate: 5.0,
-            //         digits: 0,
-            //         snap_to_ticks: true,
-            //         orientation: Gtk.Orientation.HORIZONTAL,
-            //         margin_top: 3,
-            //         margin_bottom: 3,
-            //         width_chars: 3,
-            //         can_focus: true
-            //     );
-            // }
-            
+
             public uint size {
                 get {
                     return (uint)(spin_button.@value);
                 }
-                
+
                 set {
                     spin_button.@value = value;
                 }
             }
-            
+
             static construct {
                 set_layout_manager_type (typeof (Gtk.BinLayout));
             }
@@ -204,7 +185,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
                     width_chars = 3,
                     can_focus = true
                 };
-                
+
                 spin_button.set_parent (this);
             }
         }
@@ -214,7 +195,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
         public AppMenu (Controller controller) {
             Object (
-                // tooltip_text: _("Options"),
                 controller: controller
             );
         }
@@ -225,11 +205,12 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
         construct {
             menu_button = new Gtk.MenuButton () {
-                tooltip_text = _("Options")
+                tooltip_text = _("Options"),
+                icon_name = "open-menu"
             };
-            
+
             menu_button.set_parent (this);
-            
+
             var zoom_out_button = new Gtk.Button.from_icon_name ("zoom-out-symbolic") {
                 action_name = ACTION_PREFIX + ACTION_ZOOM_OUT,
                 tooltip_markup = Granite.markup_accel_tooltip (
@@ -292,7 +273,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             });
 
             menu_button.set_popover (app_popover);
-            menu_button.child = new Gtk.Image.from_icon_name ("open-menu") { icon_size = Gtk.IconSize.LARGE };
+            // menu_button.child = new Gtk.Image.from_icon_name ("open-menu") { icon_size = Gtk.IconSize.LARGE };
 
             app_popover.apply_settings.connect (() => {
                 controller.generator_grade = grade_setting.grade;
@@ -588,8 +569,7 @@ warning ("WITH DEBUGGING");
         header_bar.pack_end (auto_solve_button);
         header_bar.pack_end (hint_button);
 
-        // toast = new Adw.Toast ("");
-        // toast.set_default_action (null);
+        set_titlebar (header_bar);
 
         row_clue_box = new ClueBox (Gtk.Orientation.VERTICAL, this);
         column_clue_box = new ClueBox (Gtk.Orientation.HORIZONTAL, this);

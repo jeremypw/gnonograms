@@ -68,14 +68,22 @@ class Gnonograms.Clue : Gtk.Widget {
         );
     }
 
+    static construct {
+        set_layout_manager_type (typeof (Gtk.BinLayout));
+    }
+
     construct {
-        label = new Gtk.Label ("0") {
+        label = new Gtk.Label ("") {
             xalign = _vertical_text ? (float)0.5 : (float)1.0,
             yalign = vertical_text ? (float)1.0 : (float)0.5,
             has_tooltip = true,
             use_markup = true
         };
-        
+
+        label.set_parent (this);
+
+        text = "0";
+
         realize.connect_after (() => {
             update_markup ();
         });
@@ -83,16 +91,15 @@ class Gnonograms.Clue : Gtk.Widget {
 
     public void highlight (bool is_highlight) {
         if (is_highlight) {
-            get_style_context ().add_class (Granite.STYLE_CLASS_ACCENT);
+            label.add_css_class (Granite.STYLE_CLASS_ACCENT);
         } else {
-            get_style_context ().remove_class (Granite.STYLE_CLASS_ACCENT);
+            label.remove_css_class (Granite.STYLE_CLASS_ACCENT);
         }
     }
 
     public void clear_formatting () {
-        var sc = get_style_context ();
-        sc.remove_class ("warn");
-        sc.remove_class ("dim");
+        label.remove_css_class ("warn");
+        label.remove_css_class ("dim");
     }
 
     public void update_complete (Gee.List<Block> _grid_blocks) {
@@ -102,9 +109,8 @@ class Gnonograms.Clue : Gtk.Widget {
             block.is_error = false;
         }
 
-        var sc = get_style_context ();
-        sc.remove_class ("warn");
-        sc.remove_class ("dim");
+        label.remove_css_class ("warn");
+        label.remove_css_class ("dim");
 
         uint complete = 0;
         uint errors = 0;
@@ -150,12 +156,12 @@ class Gnonograms.Clue : Gtk.Widget {
             }
 
             if (errors > 0) {
-                sc.add_class ("warn");
+                label.add_css_class ("warn");
             }
 
             if (complete == clue_blocks.size && errors == 0 && grid_null == 0) {
                 update_markup ();
-                sc.add_class ("dim");
+                label.add_css_class ("dim");
                 return;
             }
 
@@ -220,18 +226,25 @@ class Gnonograms.Clue : Gtk.Widget {
         }
 
         if (errors > 0) {
-            sc.add_class ("warn");
+            label.add_css_class ("warn");
         }
 
         update_markup ();
     }
 
     private void update_markup () {
+//         if (!(label is Gtk.Label)) {
+// warning ("invalid label");
+//             return;
+//         }
         label.set_markup ("<span font='%i'>".printf (_fontsize) + get_markup () + "</span>");
         update_tooltip ();
     }
 
     private void update_tooltip () {
+        // if (!(label is Gtk.Label)) {
+        //     return;
+        // }
         label.set_tooltip_markup ("<span font='%i'>".printf (_fontsize) +
             _("Freedom = %u").printf (n_cells - Utils.blockextent_from_clue (_text)) +
             "</span>"
