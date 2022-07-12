@@ -81,8 +81,9 @@
             };
 
             var size_grid = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 6) {
-                homogeneous = true,
-                hexpand = true,
+                margin_top = margin_bottom = 12,
+                margin_start = margin_end = 12,
+                homogeneous = true
             };
             // size_grid.add_css_class (Gtk.STYLE_CLASS_LINKED);
             size_grid.append (zoom_out_button);
@@ -119,8 +120,10 @@
 
             var settings_grid = new Gtk.Grid () {
                 orientation = Gtk.Orientation.VERTICAL,
-                row_spacing = 6,
-                column_homogeneous = false
+                row_spacing = 12,
+                column_spacing = 12,
+                margin_start = margin_end = 12,
+                margin_bottom = 24
             };
             settings_grid.attach (new Gtk.Label (_("Name:")), 0, 0, 1);
             settings_grid.attach (title_setting, 1, 0, 3);
