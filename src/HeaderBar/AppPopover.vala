@@ -85,7 +85,7 @@
                 margin_start = margin_end = 12,
                 homogeneous = true
             };
-            // size_grid.add_css_class (Gtk.STYLE_CLASS_LINKED);
+            size_grid.add_css_class ("linked");
             size_grid.append (zoom_out_button);
             size_grid.append (zoom_in_button);
 

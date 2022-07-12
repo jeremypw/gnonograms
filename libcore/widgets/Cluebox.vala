@@ -131,7 +131,6 @@ public class Gnonograms.ClueBox : Gtk.Box {
         }
 
         set_size ();
-        // show_all ();
     }
 
     private void set_size () {

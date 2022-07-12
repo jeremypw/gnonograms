@@ -233,18 +233,11 @@ class Gnonograms.Clue : Gtk.Widget {
     }
 
     private void update_markup () {
-//         if (!(label is Gtk.Label)) {
-// warning ("invalid label");
-//             return;
-//         }
         label.set_markup ("<span font='%i'>".printf (_fontsize) + get_markup () + "</span>");
         update_tooltip ();
     }
 
     private void update_tooltip () {
-        // if (!(label is Gtk.Label)) {
-        //     return;
-        // }
         label.set_tooltip_markup ("<span font='%i'>".printf (_fontsize) +
             _("Freedom = %u").printf (n_cells - Utils.blockextent_from_clue (_text)) +
             "</span>"

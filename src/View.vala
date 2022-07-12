@@ -224,9 +224,12 @@ warning ("WITH DEBUGGING");
             icon_name = "open-menu"
         };
 
-        var app_popover = new AppPopover ();
+        var app_popover = new AppPopover () {
+            has_arrow = false
+        };
 
         menu_button.set_popover (app_popover);
+
         app_popover.apply_settings.connect (() => {
             controller.generator_grade = app_popover.grade;
             controller.dimensions = {app_popover.columns, app_popover.rows};
@@ -307,11 +310,37 @@ warning ("WITH DEBUGGING");
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
         main_grid.attach (cell_grid, 1, 1, 1, 1);
 
-        var scroll_controller = new Gtk.EventControllerScroll (Gtk.EventControllerScrollFlags.VERTICAL);
+        var scroll_controller = new Gtk.EventControllerScroll (
+            Gtk.EventControllerScrollFlags.VERTICAL | Gtk.EventControllerScrollFlags.DISCRETE
+        );
         main_grid.add_controller (scroll_controller);
-        scroll_controller.scroll.connect (on_grid_scroll);
+        scroll_controller.scroll.connect ((dx, dy) => {
+            var modifiers = scroll_controller.
+                            get_current_event_device ().
+                            get_seat ().
+                            get_keyboard ().
+                            get_modifier_state ();
+
+            if (modifiers == Gdk.ModifierType.CONTROL_MASK) {
+                    Idle.add (() => {
+                        if (dy > 0.0) {
+                             action_zoom_in ();
+                        } else {
+                            action_zoom_out ();
+                        }
+
+                        return Source.REMOVE;
+                    });
+
+                return Gdk.EVENT_STOP;
+            }
+
+            return Gdk.EVENT_PROPAGATE;
+        });
+
         key_controller = new Gtk.EventControllerKey ();
         main_grid.add_controller (key_controller);
+
         key_controller.key_released.connect ((keyval, keycode, state) => {
             if (keyval == drawing_with_key) {
                 stop_painting ();
@@ -324,9 +353,6 @@ warning ("WITH DEBUGGING");
             child = main_grid
         };
 
-        // var grid = new Gtk.Box (Gtk.Orientation.VERTICAL, 6);
-        // grid.append (header_bar);
-        // grid.append (toast_overlay);
         child = toast_overlay;
 
         var flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
@@ -624,19 +650,6 @@ warning ("WITH DEBUGGING");
     private void stop_painting () {
         drawing_with_state = CellState.UNDEFINED;
         drawing_with_key = 0;
-    }
-
-    /** With Control pressed, zoom using the fontsize. **/
-    private bool on_grid_scroll (double dx, double dy) {
-        uint keyval;
-        Gdk.ModifierType modifiers;
-        ((Gdk.KeyEvent)key_controller.get_current_event ()).get_match (out keyval, out modifiers);
-        if (Gdk.ModifierType.CONTROL_MASK in modifiers) {
-            change_cell_size (dy > 0);
-            return Gdk.EVENT_STOP;
-        }
-
-        return Gdk.EVENT_PROPAGATE;
     }
 
     /** Action callbacks **/
