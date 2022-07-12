@@ -216,7 +216,7 @@ public class Gnonograms.Controller : GLib.Object {
                 /* Error normally thrown on first run */
                 debug ("Error deleting temporary game file %s - %s", temporary_game_path, e.message);
             } finally {
-            warning ("writing unsaved game to %s", temporary_game_path);
+                debug ("writing unsaved game to %s", temporary_game_path);
                 /* Save solution and current state */
                 write_game (temporary_game_path, true);
             }
@@ -229,10 +229,8 @@ public class Gnonograms.Controller : GLib.Object {
         if (saved_state != null) {
             int cell_size;
             saved_state.get ("cell-size", "i", out cell_size);
-            // saved_state.get ("window-position", "(ii)", out x, out y);
             current_game_path = saved_state.get_string ("current-game-path");
             view.cell_size = cell_size;
-            // window.move (x, y);
         } else {
             /* Error normally thrown running uninstalled */
             warning ("Unable to restore settings - using defaults"); /* Maybe running uninstalled */
