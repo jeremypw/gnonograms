@@ -65,30 +65,6 @@
         }
 
         construct {
-            var app = (Gtk.Application)(Application.get_default ());
-            var zoom_out_button = new Gtk.Button.from_icon_name ("zoom-out-symbolic") {
-                action_name = View.ACTION_PREFIX + View.ACTION_ZOOM_OUT,
-                tooltip_markup = Granite.markup_accel_tooltip (
-                    app.get_accels_for_action (View.ACTION_PREFIX + View.ACTION_ZOOM_OUT), _("Zoom out")
-                )
-            };
-
-            var zoom_in_button = new Gtk.Button.from_icon_name ("zoom-in-symbolic") {
-                action_name = View.ACTION_PREFIX + View.ACTION_ZOOM_IN,
-                tooltip_markup = Granite.markup_accel_tooltip (
-                    app.get_accels_for_action (View.ACTION_PREFIX + View.ACTION_ZOOM_IN), _("Zoom in")
-                )
-            };
-
-            var size_grid = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 6) {
-                margin_top = margin_bottom = 12,
-                margin_start = margin_end = 12,
-                homogeneous = true
-            };
-            size_grid.add_css_class ("linked");
-            size_grid.append (zoom_out_button);
-            size_grid.append (zoom_in_button);
-
             grade_setting = new Gtk.ComboBoxText ();
             foreach (Difficulty d in Difficulty.all_human ()) {
                 grade_setting.append (((uint)d).to_string (), d.to_string ());
@@ -122,7 +98,7 @@
                 orientation = Gtk.Orientation.VERTICAL,
                 row_spacing = 12,
                 column_spacing = 12,
-                margin_start = margin_end = 12,
+                margin_start = margin_end = margin_top = 12,
                 margin_bottom = 24
             };
             settings_grid.attach (new Gtk.Label (_("Name:")), 0, 0, 1);
@@ -148,12 +124,12 @@
             popover_actions.pack_start (cancel_button);
             popover_actions.pack_end (apply_button);
 
-            var main_grid = new Gtk.Box (Gtk.Orientation.VERTICAL, 6);
-            main_grid.append (size_grid);
-            main_grid.append (settings_grid);
-            main_grid.append (popover_actions);
+            var main_widget = new Gtk.Box (Gtk.Orientation.VERTICAL, 6);
+            // main_grid.append (size_grid);
+            main_widget.append (settings_grid);
+            main_widget.append (popover_actions);
 
-            child = main_grid;
+            child = main_widget;
         }
     }
 
