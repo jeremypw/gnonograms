@@ -117,7 +117,6 @@ public class Gnonograms.Controller : GLib.Object {
             settings.bind ("clue-help", view, "strikeout-complete", SettingsBindFlags.DEFAULT);
         }
 
-        // view.show_all ();
         view.present ();
 
         restore_settings ();

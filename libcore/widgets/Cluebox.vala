@@ -20,8 +20,8 @@
 public class Gnonograms.ClueBox : Gtk.Box {
     public View view { get; construct; }
 
-    private uint n_clues = 0;
-    private uint n_cells = 0;
+    private uint n_clues = 0; // The number of cells this box spans.
+    private uint n_cells = 0; // The number of cells each clue addresses
     private List<unowned Clue> clues = null;
 
     public ClueBox (Gtk.Orientation _orientation, View view) {
@@ -60,7 +60,6 @@ public class Gnonograms.ClueBox : Gtk.Box {
     }
 
     private Gnonograms.Clue? get_clue (uint index) {
-        // var n_children = get_children ().length ();
         if (index >= n_clues) {
             return null;
         } else {

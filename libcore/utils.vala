@@ -280,7 +280,6 @@ namespace Gnonograms.Utils {
             dialog.set_default_response (Gtk.ResponseType.NO);
         }
 
-        // dialog.set_position (Gtk.WindowPosition.MOUSE);
         Gtk.ResponseType response = Gtk.ResponseType.NO;
         dialog.response.connect ((resp) => {
             dialog.destroy ();
@@ -362,7 +361,6 @@ namespace Gnonograms.Utils {
     public Gdk.Rectangle get_monitor_area (Gdk.Surface surface) {
         var display = Gdk.Display.get_default ();
         var monitor = display.get_monitor_at_surface (surface);
-        // var monitor = display.get_monitor_at_window (window);
         return monitor.get_geometry ();
     }
 }

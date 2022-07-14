@@ -448,7 +448,7 @@ warning ("WITH DEBUGGING");
             column_clue_box.unhighlight_all ();
         });
 
-        cell_grid.button_pressed.connect ((button, double_click) => {
+        cell_grid.start_drawing.connect ((button, double_click) => {
             if (double_click || button == Gdk.BUTTON_MIDDLE) {
                 drawing_with_state = controller.game_state == GameState.SOLVING ? CellState.UNKNOWN : CellState.EMPTY;
             } else {
@@ -458,20 +458,7 @@ warning ("WITH DEBUGGING");
             make_move_at_cell ();
         });
 
-
-
-        cell_grid.button_released.connect (stop_painting);
-        // Force window to follow grid size in both native and flatpak installs
-        // cell_grid.size_allocate.connect ((alloc) => {
-        //     Idle.add (() => {
-        //         var width = alloc.width * (1 + GRID_LABELBOX_RATIO);
-        //         var height = alloc.height * (1 + GRID_LABELBOX_RATIO);
-        //         resize ((int)width, (int)height);
-        //         return Source.REMOVE;
-        //     });
-        // });
-
-        // show_all ();
+        cell_grid.stop_drawing.connect (stop_painting);
     }
 
     public string[] get_clues (bool is_column) {
