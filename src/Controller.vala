@@ -355,7 +355,7 @@ public class Gnonograms.Controller : GLib.Object {
 
             history.from_string (reader.moves);
             if (history.can_go_back) {
-                make_move (history.get_current_move ());
+                view.make_move (history.get_current_move ());
             }
         } else {
             view.send_notification (_("Unable to load game. %s").printf (reader.err_msg));
@@ -447,10 +447,6 @@ public class Gnonograms.Controller : GLib.Object {
         return errors;
     }
 
-    private void make_move (Move mv) {
-        view.make_move (mv);
-    }
-
     private void clear_history () {
         history.clear_all ();
     }
@@ -464,7 +460,7 @@ public class Gnonograms.Controller : GLib.Object {
 
         var moves = solver.hint (row_clues, col_clues, model.copy_working_data ());
         foreach (Move mv in moves) {
-            make_move (mv);
+            view.make_move (mv);
             history.record_move (mv.cell, mv.previous_state);
         }
 
@@ -492,7 +488,7 @@ public class Gnonograms.Controller : GLib.Object {
 
     public bool next_move () {
         if (history.can_go_forward) {
-            make_move (history.pop_next_move ());
+            view.make_move (history.pop_next_move ());
             return true;
         } else {
             return false;
@@ -501,7 +497,7 @@ public class Gnonograms.Controller : GLib.Object {
 
     public bool previous_move () {
         if (history.can_go_back) {
-            make_move (history.pop_previous_move ());
+            view.make_move (history.pop_previous_move ());
             return true;
         } else {
             return false;
@@ -596,7 +592,7 @@ public class Gnonograms.Controller : GLib.Object {
 
         var moves = solver.debug (idx, is_column, row_clues, col_clues, model.copy_working_data ());
         foreach (Move mv in moves) {
-            make_move (mv);
+            view.make_move (mv);
             history.record_move (mv.cell, mv.previous_state);
         }
     }
