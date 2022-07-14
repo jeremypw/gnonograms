@@ -302,9 +302,8 @@ warning ("WITH DEBUGGING");
 
         main_grid = new Gtk.Grid () {
             row_spacing = 0,
-            column_spacing = GRID_COLUMN_SPACING,
-            // border_width = GRID_BORDER,
-            // hexpand = true
+            margin_bottom = margin_end = GRID_BORDER,
+            column_spacing = GRID_COLUMN_SPACING
         };
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues fordimensions.height*/
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
@@ -413,44 +412,14 @@ warning ("WITH DEBUGGING");
         });
 
         controller.notify["dimensions"].connect (() => {
-            // Update cell-size if required to fit on screen but without changing window size unnecessarily
-            // The dimensions may have increased or decreased so may need to increase or decrease cell size
-            // It is assumed up to 90% of the screen area can be used
-            var n_cols = controller.dimensions.width;
-            var n_rows = controller.dimensions.height;
-
-            var monitor_area = Gdk.Rectangle () {
-                width = 1024,
-                height = 768
-            };
-
-            Gdk.Surface? surface = get_surface ();
-            if (surface != null) {
-                monitor_area = Utils.get_monitor_area (surface);
-            }
-
-            var available_screen_width = monitor_area.width * 0.9 - 2 * GRID_BORDER - GRID_COLUMN_SPACING;
-            var max_cell_width = available_screen_width / (n_cols * (1.3));
-
-            var available_grid_height = (int)(surface.get_height () - header_bar.get_allocated_height () - 2 * GRID_BORDER);
-            var opt_cell_height = (int)(available_grid_height / (n_rows * (1.3)));
-
-            var available_screen_height = monitor_area.height * 0.9 - header_bar.get_allocated_height () - 2 * GRID_BORDER;
-            var max_cell_height = available_screen_height / (n_rows * (1.3));
-
-            var max_cell_size = (int)(double.min (max_cell_width, max_cell_height));
-            if (max_cell_size < cell_size) {
-                cell_size = max_cell_size;
-            } else if (cell_size < opt_cell_height) {
-                cell_size = int.min (max_cell_size, opt_cell_height);
-            }
-
-warning ("setting window size");
-            main_grid.set_size_request (
-                (int)((double)(n_cols * cell_size) * 1.3), 
-                (int)((double)(n_rows * cell_size) * 1.3)
-            );
+            calc_cell_size ();
+            set_size ();
         });
+
+        notify["cell-size"].connect (() => {
+            set_size ();
+        });
+
 
        cell_grid.leave.connect (() => {
             row_clue_box.unhighlight_all ();
@@ -468,6 +437,57 @@ warning ("setting window size");
         });
 
         cell_grid.stop_drawing.connect (stop_painting);
+    }
+
+    private void calc_cell_size () {
+        // Update cell-size if required to fit on screen but without changing window size unnecessarily
+        // The dimensions may have increased or decreased so may need to increase or decrease cell size
+        // It is assumed up to 90% of the screen area can be used
+        var n_cols = controller.dimensions.width;
+        var n_rows = controller.dimensions.height;
+
+        var monitor_area = Gdk.Rectangle () {
+            width = 1024,
+            height = 768
+        };
+
+        Gdk.Surface? surface = get_surface ();
+        if (surface != null) {
+            monitor_area = Utils.get_monitor_area (surface);
+        }
+
+        var available_screen_width = monitor_area.width * 0.9 - GRID_BORDER - GRID_COLUMN_SPACING;
+        var max_cell_width = available_screen_width / (n_cols * (1.3));
+        var available_grid_height = (int)(surface.get_height () - header_bar.get_allocated_height () - GRID_BORDER);
+        var opt_cell_height = (int)(available_grid_height / (n_rows * (1.4)));
+
+        var available_screen_height = monitor_area.height * 0.9 - header_bar.get_allocated_height () - GRID_BORDER;
+        var max_cell_height = available_screen_height / (n_rows * (1.4));
+
+        var max_cell_size = (int)(double.min (max_cell_width, max_cell_height));
+        if (max_cell_size < cell_size) {
+            cell_size = max_cell_size;
+        } else if (opt_cell_height > 0 && cell_size < opt_cell_height) {
+            cell_size = int.min (max_cell_size, opt_cell_height);
+        }
+    }
+
+    private void set_size () {
+        var n_cols = controller.dimensions.width;
+        var n_rows = controller.dimensions.height;
+        var width = (int)((double)(n_cols * cell_size) * 1.3);
+        var height = (int)((double)(n_rows * cell_size) * 1.4);
+
+        set_default_size (
+            width + GRID_BORDER + GRID_COLUMN_SPACING,
+            height + header_bar.get_allocated_height () + GRID_BORDER
+        );
+        main_grid.set_size_request (
+            width,
+            height
+        );
+
+        queue_draw ();
     }
 
     public string[] get_clues (bool is_column) {

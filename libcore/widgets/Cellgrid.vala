@@ -155,7 +155,9 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         cell_height = view.cell_size;
         /* Cause refresh of existing pattern */
         highlight_pattern = new CellPattern.highlight (cell_width, cell_height);
-        set_size_request (cols * view.cell_size + (int)MINOR_GRID_LINE_WIDTH, rows * view.cell_size + (int)MINOR_GRID_LINE_WIDTH);
+        var width = cols * view.cell_size + (int)MINOR_GRID_LINE_WIDTH;
+        var height = rows * view.cell_size + (int)MINOR_GRID_LINE_WIDTH;
+        set_size_request (width, height);
     }
 
     private void draw_func (Gtk.DrawingArea drawing_area, Cairo.Context cr, int x, int y) {

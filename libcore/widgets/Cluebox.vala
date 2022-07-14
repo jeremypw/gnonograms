@@ -37,7 +37,6 @@ public class Gnonograms.ClueBox : Gtk.Box {
     construct {
         clues = new Gee.ArrayList<Clue> ();
         view.bind_property ("cell-size", this, "cell-size", BindingFlags.DEFAULT | BindingFlags.SYNC_CREATE);
-
         view.controller.notify ["dimensions"].connect (() => {
             var new_n_clues = orientation == Gtk.Orientation.HORIZONTAL ?
                                               view.controller.dimensions.width :
@@ -48,7 +47,7 @@ public class Gnonograms.ClueBox : Gtk.Box {
                                              view.controller.dimensions.width;
 
             if (new_n_clues != clues.size) {
-                // n_cells = new_n_cells;
+                n_cells = new_n_cells;
                 clues.@foreach ((clue) => {
                     remove (clue.label);
                 });
@@ -59,16 +58,11 @@ public class Gnonograms.ClueBox : Gtk.Box {
                     clues.add (clue);
                     append (clue.label);
                 }
-
+            } else if (new_n_cells != n_cells) {
+                n_cells = new_n_cells;
+            } else {
                 return;
             }
-
-            // Do not need to recreate the clues if only n_cells changed
-            if (new_n_cells != n_cells) {
-                n_cells = new_n_cells;
-            }
-
-            // set_size ();
         });
     }
 
@@ -110,18 +104,4 @@ public class Gnonograms.ClueBox : Gtk.Box {
             clues[(int)index].update_complete (grid_blocks);
         }
     }
-
-    // private void set_size () {
-    //     int width = (int)(orientation == Gtk.Orientation.HORIZONTAL ?
-    //         clues.size * view.cell_size :
-    //         n_cells * view.cell_size * GRID_LABELBOX_RATIO
-    //     );
-
-    //     int height = (int)(orientation == Gtk.Orientation.HORIZONTAL ?
-    //         n_cells * view.cell_size * GRID_LABELBOX_RATIO :
-    //         clues.size * view.cell_size
-    //     );
-
-    //     set_size_request (width, height);
-    // }
 }

@@ -229,7 +229,9 @@ public class Gnonograms.Controller : GLib.Object {
             int cell_size;
             saved_state.get ("cell-size", "i", out cell_size);
             current_game_path = saved_state.get_string ("current-game-path");
-            view.cell_size = cell_size;
+            if (cell_size > 0) {
+                view.cell_size = cell_size;
+            }
         } else {
             /* Error normally thrown running uninstalled */
             warning ("Unable to restore settings - using defaults"); /* Maybe running uninstalled */
