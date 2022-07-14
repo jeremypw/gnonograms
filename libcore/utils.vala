@@ -240,7 +240,7 @@ namespace Gnonograms.Utils {
         return sb.str;
     }
 
-    public static int show_dlg (string primary_text,
+    private static int show_dlg (string primary_text,
                                 Gtk.MessageType type,
                                 string? secondary_text,
                                 Gtk.Window? parent) {

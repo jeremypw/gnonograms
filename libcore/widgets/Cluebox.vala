@@ -19,28 +19,24 @@
 
 public class Gnonograms.ClueBox : Gtk.Box {
     public View view { get; construct; }
-
-    private uint n_clues = 0; // The number of cells this box spans.
-    private uint n_cells = 0; // The number of cells each clue addresses
-    private List<unowned Clue> clues = null;
+    public uint n_cells { get; set; default = 0; } // The number of cells each clue addresses, monitored by clues
+    public uint cell_size { get; set; default = 0; } // Dimensions of individual grid cells, monitored by clues
+    private Gee.ArrayList<Clue> clues;
 
     public ClueBox (Gtk.Orientation _orientation, View view) {
         Object (
             view: view,
             homogeneous: true,
             spacing: 0,
+            hexpand: _orientation == Gtk.Orientation.HORIZONTAL ? false : true,
+            vexpand: _orientation == Gtk.Orientation.HORIZONTAL ? true : false,
             orientation: _orientation
         );
     }
 
     construct {
-        view.notify["cell-size"].connect (() => {
-            clues.foreach ((clue) => {
-                clue.cell_size = view.cell_size;
-            });
-
-            set_size ();
-        });
+        clues = new Gee.ArrayList<Clue> ();
+        view.bind_property ("cell-size", this, "cell-size", BindingFlags.DEFAULT | BindingFlags.SYNC_CREATE);
 
         view.controller.notify ["dimensions"].connect (() => {
             var new_n_clues = orientation == Gtk.Orientation.HORIZONTAL ?
@@ -51,98 +47,81 @@ public class Gnonograms.ClueBox : Gtk.Box {
                                              view.controller.dimensions.height :
                                              view.controller.dimensions.width;
 
-            if (new_n_clues != n_clues || new_n_cells != n_cells) {
-                n_clues = new_n_clues;
-                n_cells = new_n_cells;
-                change_n_clues ();
+            if (new_n_clues != clues.size) {
+                // n_cells = new_n_cells;
+                clues.@foreach ((clue) => {
+                    remove (clue.label);
+                });
+
+                clues.clear ();
+                for (int index = 0; index < new_n_clues; index++) {
+                    var clue = new Clue (orientation == Gtk.Orientation.HORIZONTAL, this);
+                    clues.add (clue);
+                    append (clue.label);
+                }
+
+                return;
             }
+
+            // Do not need to recreate the clues if only n_cells changed
+            if (new_n_cells != n_cells) {
+                n_cells = new_n_cells;
+            }
+
+            // set_size ();
         });
     }
 
-    private Gnonograms.Clue? get_clue (uint index) {
-        if (index >= n_clues) {
-            return null;
-        } else {
-            return clues.nth_data (n_clues - index - 1);
+    public string[] get_clue_texts () {
+        string[] clue_texts = new string [clues.size];
+        foreach (var clue in clues) {
+            clue_texts += clue.text;
         }
-    }
 
-    public string[] get_clues () {
-        string[] clue_text = new string [n_clues];
-        var index = n_clues;
-        clues.@foreach ((clue) => { // Delivers widgets in reverse order they were added
-            index--;
-            clue_text[index] = clue.text;
-        });
-
-        return clue_text;
+        return clue_texts;
     }
 
     public void highlight (uint index, bool is_highlight) {
-        var clue = get_clue (index);
-        if (clue != null) {
-            clue.highlight (is_highlight);
+        if (index < clues.size) {
+            clues[(int)index].highlight (is_highlight);
         }
     }
 
     public void unhighlight_all () {
-        clues.foreach ((clue) => {
+        foreach (var clue in clues) {
             clue.highlight (false);
-        });
+        }
     }
 
-    public void update_clue_text (uint index, string? txt) {
-        var clue = get_clue (index);
-        if (clue != null) {
-            clue.text = txt ?? _(BLANKLABELTEXT);
+    public void update_clue_text (uint index, string? text) {
+        if (index < clues.size) {
+            clues[(int)index].text = text ?? _(BLANKLABELTEXT);
         }
     }
 
     public void clear_formatting (uint index) {
-        var clue = get_clue (index);
-        if (clue != null) {
-            clue.clear_formatting ();
+        if (index < clues.size) {
+            clues[(int)index].clear_formatting ();
         }
     }
 
     public void update_clue_complete (uint index, Gee.List<Block> grid_blocks) {
-        var clue = get_clue (index);
-        if (clue != null) {
-            clue.update_complete (grid_blocks);
+        if (index < clues.size) {
+            clues[(int)index].update_complete (grid_blocks);
         }
     }
 
-    private void change_n_clues () {
-        clues.@foreach ((clue) => {
-            clue.destroy ();
-        });
+    // private void set_size () {
+    //     int width = (int)(orientation == Gtk.Orientation.HORIZONTAL ?
+    //         clues.size * view.cell_size :
+    //         n_cells * view.cell_size * GRID_LABELBOX_RATIO
+    //     );
 
-        clues = null;
+    //     int height = (int)(orientation == Gtk.Orientation.HORIZONTAL ?
+    //         n_cells * view.cell_size * GRID_LABELBOX_RATIO :
+    //         clues.size * view.cell_size
+    //     );
 
-        for (var i = 0; i < n_clues; i++) {
-            var clue = new Clue (orientation == Gtk.Orientation.HORIZONTAL) {
-                n_cells = this.n_cells,
-                cell_size = view.cell_size
-            };
-
-            append (clue);
-            clues.append (clue);
-        }
-
-        set_size ();
-    }
-
-    private void set_size () {
-        int width = (int)(orientation == Gtk.Orientation.HORIZONTAL ?
-            n_clues * view.cell_size :
-            n_cells * view.cell_size * GRID_LABELBOX_RATIO
-        );
-
-        int height = (int)(orientation == Gtk.Orientation.HORIZONTAL ?
-            n_cells * view.cell_size * GRID_LABELBOX_RATIO :
-            n_clues * view.cell_size
-        );
-
-        set_size_request (width, height);
-    }
+    //     set_size_request (width, height);
+    // }
 }

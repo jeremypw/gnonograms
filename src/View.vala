@@ -130,7 +130,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         Object (
             model: _model,
             controller: controller,
-            resizable: false,
+            resizable: true,
             title: _("Gnonograms")
         );
     }
@@ -302,9 +302,9 @@ warning ("WITH DEBUGGING");
 
         main_grid = new Gtk.Grid () {
             row_spacing = 0,
-            column_spacing = GRID_COLUMN_SPACING
+            column_spacing = GRID_COLUMN_SPACING,
             // border_width = GRID_BORDER,
-            // expand = true
+            // hexpand = true
         };
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues fordimensions.height*/
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
@@ -313,6 +313,7 @@ warning ("WITH DEBUGGING");
         var scroll_controller = new Gtk.EventControllerScroll (
             Gtk.EventControllerScrollFlags.VERTICAL | Gtk.EventControllerScrollFlags.DISCRETE
         );
+
         main_grid.add_controller (scroll_controller);
         scroll_controller.scroll.connect ((dx, dy) => {
             var modifiers = scroll_controller.
@@ -415,6 +416,9 @@ warning ("WITH DEBUGGING");
             // Update cell-size if required to fit on screen but without changing window size unnecessarily
             // The dimensions may have increased or decreased so may need to increase or decrease cell size
             // It is assumed up to 90% of the screen area can be used
+            var n_cols = controller.dimensions.width;
+            var n_rows = controller.dimensions.height;
+
             var monitor_area = Gdk.Rectangle () {
                 width = 1024,
                 height = 768
@@ -426,13 +430,13 @@ warning ("WITH DEBUGGING");
             }
 
             var available_screen_width = monitor_area.width * 0.9 - 2 * GRID_BORDER - GRID_COLUMN_SPACING;
-            var max_cell_width = available_screen_width / (controller.dimensions.width * (1.0 + GRID_LABELBOX_RATIO));
+            var max_cell_width = available_screen_width / (n_cols * (1.3));
 
             var available_grid_height = (int)(surface.get_height () - header_bar.get_allocated_height () - 2 * GRID_BORDER);
-            var opt_cell_height = (int)(available_grid_height / (controller.dimensions.height * (1.0 + GRID_LABELBOX_RATIO)));
+            var opt_cell_height = (int)(available_grid_height / (n_rows * (1.3)));
 
             var available_screen_height = monitor_area.height * 0.9 - header_bar.get_allocated_height () - 2 * GRID_BORDER;
-            var max_cell_height = available_screen_height / (controller.dimensions.height * (1.0 + GRID_LABELBOX_RATIO));
+            var max_cell_height = available_screen_height / (n_rows * (1.3));
 
             var max_cell_size = (int)(double.min (max_cell_width, max_cell_height));
             if (max_cell_size < cell_size) {
@@ -441,6 +445,11 @@ warning ("WITH DEBUGGING");
                 cell_size = int.min (max_cell_size, opt_cell_height);
             }
 
+warning ("setting window size");
+            main_grid.set_size_request (
+                (int)((double)(n_cols * cell_size) * 1.3), 
+                (int)((double)(n_rows * cell_size) * 1.3)
+            );
         });
 
        cell_grid.leave.connect (() => {
@@ -463,7 +472,7 @@ warning ("WITH DEBUGGING");
 
     public string[] get_clues (bool is_column) {
         var label_box = is_column ? column_clue_box : row_clue_box;
-        return label_box.get_clues ();
+        return label_box.get_clue_texts ();
     }
 
     public void update_clues_from_string_array (string[] clues, bool is_column) {

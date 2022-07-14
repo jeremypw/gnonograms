@@ -17,32 +17,10 @@
  *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-class Gnonograms.Clue : Gtk.Widget {
+class Gnonograms.Clue : Object {
     public Gtk.Label label { get; construct; }
-    private uint _n_cells;
-    public uint n_cells {
-        set {
-            _n_cells = value;
-            update_tooltip ();
-        }
-
-        private get {
-            return _n_cells;
-        }
-    }
-
+    public ClueBox cluebox {get; construct; }
     private int _fontsize;
-    private int _cell_size;
-    public int cell_size {
-        get {
-            return _cell_size;
-        }
-        set {
-            _cell_size = value;
-            _fontsize = (int)((double)value * 0.4);
-            update_markup ();
-        }
-    }
 
     private string _text; /* text of clue in horizontal form */
     public string text {
@@ -59,17 +37,13 @@ class Gnonograms.Clue : Gtk.Widget {
 
     public bool vertical_text { get; construct; }
 
-    private Gee.List<Block> clue_blocks;
-    private Gee.List<Block> grid_blocks;
+    private Gee.List<Block> clue_blocks; // List of blocks based on clue
 
-    public Clue (bool _vertical_text) {
+    public Clue (bool _vertical_text, ClueBox cluebox) {
         Object (
-            vertical_text: _vertical_text
+            vertical_text: _vertical_text,
+            cluebox: cluebox
         );
-    }
-
-    static construct {
-        set_layout_manager_type (typeof (Gtk.BinLayout));
     }
 
     construct {
@@ -80,11 +54,20 @@ class Gnonograms.Clue : Gtk.Widget {
             use_markup = true
         };
 
-        label.set_parent (this);
-
         text = "0";
 
-        realize.connect_after (() => {
+        label.realize.connect_after (() => {
+            _fontsize = (int)((double)cluebox.cell_size * 0.4);
+
+            update_markup ();
+        });
+
+        cluebox.notify["n_cells"].connect (() => {
+            update_tooltip ();
+        });
+
+        cluebox.notify["cell-size"].connect (() => {
+            _fontsize = (int)((double)cluebox.cell_size * 0.4);
             update_markup ();
         });
     }
@@ -102,8 +85,7 @@ class Gnonograms.Clue : Gtk.Widget {
         label.remove_css_class ("dim");
     }
 
-    public void update_complete (Gee.List<Block> _grid_blocks) {
-        grid_blocks = _grid_blocks;
+    public void update_complete (Gee.List<Block> grid_blocks) {
         foreach (Block block in clue_blocks) {
             block.is_complete = false;
             block.is_error = false;
@@ -239,7 +221,7 @@ class Gnonograms.Clue : Gtk.Widget {
 
     private void update_tooltip () {
         label.set_tooltip_markup ("<span font='%i'>".printf (_fontsize) +
-            _("Freedom = %u").printf (n_cells - Utils.blockextent_from_clue (_text)) +
+            _("Freedom = %u").printf (cluebox.n_cells - Utils.blockextent_from_clue (_text)) +
             "</span>"
         );
     }
