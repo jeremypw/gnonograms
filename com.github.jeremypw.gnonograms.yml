@@ -4,6 +4,7 @@ runtime-version: '7'
 sdk: io.elementary.Sdk
 command: com.github.jeremypw.gnonograms
 finish-args:
+  - '--device=dri'
   - '--share=ipc'
   - '--socket=wayland'
   - '--socket=fallback-x11'
