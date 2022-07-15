@@ -111,10 +111,6 @@
         return valid ();
     }
 
-    /** Initiate solving, specifying whether or not to use the advanced
-      * procedures. Also specify whether in debugging mode and whether to solve one step
-      * at a time (used for hinting if implemented).
-    **/
     public async Difficulty solve_clues (string[] row_clues,
                                          string[] col_clues,
                                          My2DCellArray? start_grid = null,
@@ -265,7 +261,6 @@
 
     public Gee.ArrayQueue<Move> hint (string[] row_clues, string[] col_clues, My2DCellArray working) {
         initialize (row_clues, col_clues, working, null);
-
         bool changed = false;
         uint count = 0;
         var moves = new Gee.ArrayQueue<Move> ();

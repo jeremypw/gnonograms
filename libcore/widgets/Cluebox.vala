@@ -67,7 +67,7 @@ public class Gnonograms.ClueBox : Gtk.Box {
     }
 
     public string[] get_clue_texts () {
-        string[] clue_texts = new string [clues.size];
+        string[] clue_texts = {};
         foreach (var clue in clues) {
             clue_texts += clue.text;
         }
