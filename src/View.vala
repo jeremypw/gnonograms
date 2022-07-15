@@ -25,6 +25,9 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private const double TYPICAL_MAX_BLOCKS_RATIO = 0.3;
     private const double ZOOM_RATIO = 0.05;
     private const uint PROGRESS_DELAY_MSEC = 500;
+    private const string PAINT_FILL_ACCEL = "f"; // Must be lower case
+    private const string PAINT_EMPTY_ACCEL = "e"; // Must be lower case
+    private const string PAINT_UNKNOWN_ACCEL = "x"; // Must be lower case
 
 #if WITH_DEBUGGING
     public signal void debug_request (uint idx, bool is_column);
@@ -100,7 +103,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     };
 
     public static Gtk.Application app;
-    private Gtk.EventControllerKey key_controller;
     private ClueBox row_clue_box;
     private ClueBox column_clue_box;
     private CellGrid cell_grid;
@@ -160,9 +162,9 @@ warning ("WITH DEBUGGING");
         action_accelerators.set (ACTION_OPEN, "<Ctrl>O");
         action_accelerators.set (ACTION_SAVE, "<Ctrl>S");
         action_accelerators.set (ACTION_SAVE_AS, "<Ctrl><Shift>S");
-        action_accelerators.set (ACTION_PAINT_FILLED, "F");
-        action_accelerators.set (ACTION_PAINT_EMPTY, "E");
-        action_accelerators.set (ACTION_PAINT_UNKNOWN, "X");
+        action_accelerators.set (ACTION_PAINT_FILLED, PAINT_FILL_ACCEL);
+        action_accelerators.set (ACTION_PAINT_EMPTY, PAINT_EMPTY_ACCEL);
+        action_accelerators.set (ACTION_PAINT_UNKNOWN, PAINT_UNKNOWN_ACCEL);
         action_accelerators.set (ACTION_CHECK_ERRORS, "F7");
         action_accelerators.set (ACTION_RESTART, "F5");
         action_accelerators.set (ACTION_RESTART, "<Ctrl>R");
@@ -301,6 +303,7 @@ warning ("WITH DEBUGGING");
         cell_grid = new CellGrid (this);
 
         main_grid = new Gtk.Grid () {
+            focusable = true, // Needed for key controller to work
             row_spacing = 0,
             margin_bottom = margin_end = GRID_BORDER,
             column_spacing = GRID_COLUMN_SPACING
@@ -338,11 +341,11 @@ warning ("WITH DEBUGGING");
             return Gdk.EVENT_PROPAGATE;
         });
 
-        key_controller = new Gtk.EventControllerKey ();
+        var key_controller = new Gtk.EventControllerKey ();
         main_grid.add_controller (key_controller);
 
         key_controller.key_released.connect ((keyval, keycode, state) => {
-            if (keyval == drawing_with_key) {
+            if (Gdk.keyval_to_lower (keyval) == drawing_with_key) {
                 stop_painting ();
             }
 
@@ -781,12 +784,15 @@ warning ("WITH DEBUGGING");
 
     private void action_paint_filled () {
         paint_cell_state (CellState.FILLED);
+        drawing_with_key = Gdk.keyval_from_name (PAINT_FILL_ACCEL);
     }
     private void action_paint_empty () {
         paint_cell_state (CellState.EMPTY);
+        drawing_with_key = Gdk.keyval_from_name (PAINT_EMPTY_ACCEL);
     }
     private void action_paint_unknown () {
         paint_cell_state (CellState.UNKNOWN);
+        drawing_with_key = Gdk.keyval_from_name (PAINT_UNKNOWN_ACCEL);
     }
     private void paint_cell_state (CellState cs) {
         if (cs == CellState.UNKNOWN && controller.game_state != GameState.SOLVING) {
@@ -794,8 +800,6 @@ warning ("WITH DEBUGGING");
         }
 
         drawing_with_state = cs;
-        var current_event = key_controller.get_current_event ();
-        drawing_with_key = ((Gdk.KeyEvent)current_event).get_keyval ();
 
         make_move_at_cell ();
     }
