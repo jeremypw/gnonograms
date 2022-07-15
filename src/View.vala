@@ -190,6 +190,17 @@ warning ("WITH DEBUGGING");
     }
 
     construct {
+        var granite_settings = Granite.Settings.get_default ();
+        var gtk_settings = Gtk.Settings.get_default ();
+
+        if (gtk_settings != null && granite_settings != null) {
+            gtk_settings.gtk_application_prefer_dark_theme = granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
+
+            granite_settings.notify["prefers-color-scheme"].connect (() => {
+                gtk_settings.gtk_application_prefer_dark_theme = granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
+            });
+        }
+
         weak Gtk.IconTheme default_theme = Gtk.IconTheme.get_for_display (Gdk.Display.get_default ());
         default_theme.add_resource_path ("/com/github/jeremypw/gnonograms");
 
