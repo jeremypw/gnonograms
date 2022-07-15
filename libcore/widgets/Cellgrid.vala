@@ -174,28 +174,34 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         draw_grid (cr);
     }
 
-    private void on_pointer_moved (double dx, double dy) {
-        if (draw_only || dx < 0 || dy < 0) {
+    private double previous_pointer_x = 0.0;
+    private double previous_pointer_y = 0.0;
+    private void on_pointer_moved (double x, double y) {
+        if (draw_only || x < 0 || y < 0) {
             return;
         }
+
+        // Need to ignore spurious "movements" in Gtk4
+        if (previous_pointer_x == x && previous_pointer_y == y) {
+            return;
+        } else {
+            previous_pointer_x = x;
+            previous_pointer_y = y;
+        }
         /* Calculate which cell the pointer is over */
-        uint r = ((uint)((dy) / cell_height));
-        uint c = ((uint)(dx / cell_width));
+        uint r = ((uint)((y) / cell_height));
+        uint c = ((uint)(x / cell_width));
         if (r >= rows || c >= cols) {
             return;
         }
         /* Construct cell beneath pointer */
         Cell cell = {r, c, array.get_data_from_rc (r, c)};
         if (!cell.equal (current_cell)) {
-            update_current_cell (cell);
+            previous_cell = current_cell.clone ();
+            current_cell = cell.clone ();
         }
 
         return;
-    }
-
-    private void update_current_cell (Cell target) {
-        previous_cell = current_cell.clone ();
-        current_cell = target.clone ();
     }
 
     private void draw_grid (Cairo.Context cr) {

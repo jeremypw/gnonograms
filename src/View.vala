@@ -405,7 +405,7 @@ warning ("WITH DEBUGGING");
             highlight_labels (previous_cell, false);
             highlight_labels (current_cell, true);
 
-            if (drawing_with_state != CellState.UNDEFINED) {
+            if (current_cell != NULL_CELL && drawing_with_state != CellState.UNDEFINED) {
                 make_move_at_cell ();
             }
         });
