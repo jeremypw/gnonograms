@@ -302,12 +302,18 @@ warning ("WITH DEBUGGING");
         column_clue_box = new ClueBox (Gtk.Orientation.HORIZONTAL, this);
         cell_grid = new CellGrid (this);
 
+        toast_overlay = new Adw.ToastOverlay () {
+            vexpand = false,
+            valign = Gtk.Align.START
+        };
+
         main_grid = new Gtk.Grid () {
             focusable = true, // Needed for key controller to work
             row_spacing = 0,
             margin_bottom = margin_end = GRID_BORDER,
             column_spacing = GRID_COLUMN_SPACING
         };
+        main_grid.attach (toast_overlay, 0, 0, 1, 1); /* show temporary messages */
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues fordimensions.height*/
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
         main_grid.attach (cell_grid, 1, 1, 1, 1);
@@ -352,11 +358,7 @@ warning ("WITH DEBUGGING");
             return;
         });
 
-        toast_overlay = new Adw.ToastOverlay () {
-            child = main_grid
-        };
-
-        child = toast_overlay;
+        child = main_grid;
 
         var flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
         bind_property ("restart-destructive", restart_button, "restart-destructive", BindingFlags.SYNC_CREATE);
