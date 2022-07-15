@@ -115,11 +115,12 @@ public class Gnonograms.Controller : GLib.Object {
             saved_state.bind ("mode", this, "game_state", SettingsBindFlags.DEFAULT);
             settings.bind ("grade", this, "generator_grade", SettingsBindFlags.DEFAULT);
             settings.bind ("clue-help", view, "strikeout-complete", SettingsBindFlags.DEFAULT);
+        } else {
+            restore_settings ();
         }
 
         view.present ();
 
-        restore_settings ();
         bind_property ("generator-grade", view, "generator-grade", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         bind_property ("is-readonly", view, "readonly", BindingFlags.SYNC_CREATE);
 
@@ -226,18 +227,15 @@ public class Gnonograms.Controller : GLib.Object {
 
     private void restore_settings () {
         if (saved_state != null) {
-            int cell_size;
-            saved_state.get ("cell-size", "i", out cell_size);
+            int cell_size = saved_state.get_int ("cell-size");
             current_game_path = saved_state.get_string ("current-game-path");
             if (cell_size > 0) {
                 view.cell_size = cell_size;
             }
         } else {
             /* Error normally thrown running uninstalled */
-            warning ("Unable to restore settings - using defaults"); /* Maybe running uninstalled */
             /* Default puzzle parameters */
-            game_state = GameState.SOLVING;
-            generator_grade = Difficulty.MODERATE;
+            view.cell_size = 24;
             current_game_path = "";
         }
 

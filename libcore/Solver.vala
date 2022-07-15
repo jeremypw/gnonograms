@@ -87,7 +87,6 @@
 
         assert (row_clues.length == rows && col_clues.length == cols);
         should_check_solution = solution_grid != null;
-
         if (should_check_solution) {
             solution.copy (solution_grid);
         }
@@ -180,10 +179,13 @@
         advanced_only = false;
         human_only = true;
         switch (grade) {
+            case Difficulty.TRIVIAL:
+            case Difficulty.VERY_EASY:
             case Difficulty.EASY:
             case Difficulty.MODERATE:
             case Difficulty.HARD:
             case Difficulty.CHALLENGING:
+            case Difficulty.UNDEFINED:
 
                 break;
             case Difficulty.ADVANCED:
@@ -204,8 +206,6 @@
                 human_only = false;
 
                 break;
-            default:
-                assert_not_reached ();
         }
     }
 

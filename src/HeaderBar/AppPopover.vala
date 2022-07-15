@@ -26,7 +26,7 @@
 
         public Difficulty grade {
             get {
-                return (Difficulty)(int.parse (grade_setting.get_active_text ()));
+                return (Difficulty)(int.parse (grade_setting.get_active_id ()));
             }
 
             set {
