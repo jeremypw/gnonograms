@@ -101,10 +101,10 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         motion_controller.leave.connect (on_leave_notify);
 
         var button_controller = new Gtk.GestureClick ();
+        button_controller.set_button (0); // Listen to any button
         add_controller (button_controller);
         button_controller.pressed.connect ((n_press, x, y) => {
-            var button_event = (Gdk.ButtonEvent)(button_controller.get_current_event ());
-            start_drawing (button_event.get_button (), n_press > 1);
+            start_drawing (button_controller.get_current_button (), n_press > 1);
         });
         button_controller.released.connect ((n_press, x, y) => {
             stop_drawing ();
