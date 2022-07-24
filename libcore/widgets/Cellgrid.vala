@@ -19,6 +19,9 @@
 
 public class Gnonograms.CellGrid : Gtk.DrawingArea {
     public signal void cursor_moved (Cell from, Cell to);
+    public signal void start_drawing (uint button, bool double_click);
+    public signal void stop_drawing ();
+    public signal void leave ();
 
     public View view { get; construct; }
     public Cell current_cell { get; set; }
@@ -92,19 +95,22 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         cell_pattern_type = CellPatternType.CELL;
         set_colors ();
 
+        var motion_controller = new Gtk.EventControllerMotion ();
+        add_controller (motion_controller);
+        motion_controller.motion.connect (on_pointer_moved);
+        motion_controller.leave.connect (on_leave_notify);
 
-        this.add_events (
-            Gdk.EventMask.BUTTON_PRESS_MASK |
-            Gdk.EventMask.BUTTON_RELEASE_MASK |
-            Gdk.EventMask.POINTER_MOTION_MASK |
-            Gdk.EventMask.KEY_PRESS_MASK |
-            Gdk.EventMask.KEY_RELEASE_MASK |
-            Gdk.EventMask.LEAVE_NOTIFY_MASK
-        );
+        var button_controller = new Gtk.GestureClick ();
+        button_controller.set_button (0); // Listen to any button
+        add_controller (button_controller);
+        button_controller.pressed.connect ((n_press, x, y) => {
+            start_drawing (button_controller.get_current_button (), n_press > 1);
+        });
+        button_controller.released.connect ((n_press, x, y) => {
+            stop_drawing ();
+        });
 
-        motion_notify_event.connect (on_pointer_moved);
-        draw.connect (on_draw_event);
-        leave_notify_event.connect (on_leave_notify);
+        set_draw_func (draw_func);
 
         notify["current-cell"].connect (() => {
             queue_draw ();
@@ -149,10 +155,12 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         cell_height = view.cell_size;
         /* Cause refresh of existing pattern */
         highlight_pattern = new CellPattern.highlight (cell_width, cell_height);
-        set_size_request (cols * view.cell_size + (int)MINOR_GRID_LINE_WIDTH, rows * view.cell_size + (int)MINOR_GRID_LINE_WIDTH);
+        var width = cols * view.cell_size + (int)MINOR_GRID_LINE_WIDTH;
+        var height = rows * view.cell_size + (int)MINOR_GRID_LINE_WIDTH;
+        set_size_request (width, height);
     }
 
-    private bool on_draw_event (Cairo.Context cr) {
+    private void draw_func (Gtk.DrawingArea drawing_area, Cairo.Context cr, int x, int y) {
         dirty = false;
 
         if (array != null) {
@@ -164,31 +172,36 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         }
 
         draw_grid (cr);
-        return true;
     }
 
-    private bool on_pointer_moved (Gdk.EventMotion e) {
-        if (draw_only || e.x < 0 || e.y < 0) {
-            return false;
+    private double previous_pointer_x = 0.0;
+    private double previous_pointer_y = 0.0;
+    private void on_pointer_moved (double x, double y) {
+        if (draw_only || x < 0 || y < 0) {
+            return;
+        }
+
+        // Need to ignore spurious "movements" in Gtk4
+        if (previous_pointer_x == x && previous_pointer_y == y) {
+            return;
+        } else {
+            previous_pointer_x = x;
+            previous_pointer_y = y;
         }
         /* Calculate which cell the pointer is over */
-        uint r = ((uint)((e.y) / cell_height));
-        uint c = ((uint)(e.x / cell_width));
+        uint r = ((uint)((y) / cell_height));
+        uint c = ((uint)(x / cell_width));
         if (r >= rows || c >= cols) {
-            return true;
+            return;
         }
         /* Construct cell beneath pointer */
         Cell cell = {r, c, array.get_data_from_rc (r, c)};
         if (!cell.equal (current_cell)) {
-            update_current_cell (cell);
+            previous_cell = current_cell.clone ();
+            current_cell = cell.clone ();
         }
 
-        return true;
-    }
-
-    private void update_current_cell (Cell target) {
-        previous_cell = current_cell.clone ();
-        current_cell = target.clone ();
+        return;
     }
 
     private void draw_grid (Cairo.Context cr) {
@@ -296,10 +309,11 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         }
     }
 
-    private bool on_leave_notify () {
+    private void on_leave_notify () {
         previous_cell = NULL_CELL;
         current_cell = NULL_CELL;
-        return false;
+        leave ();
+        return;
     }
 
     private class CellPattern {

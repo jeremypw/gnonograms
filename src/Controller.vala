@@ -51,8 +51,11 @@ public class Gnonograms.Controller : GLib.Object {
         view = new View (model, this);
         history = new Gnonograms.History ();
 
-        view.delete_event.connect (on_view_deleted);
-        view.configure_event.connect (on_view_configure);
+        view.close_request.connect (on_view_deleted);
+        view.notify["default-width"].connect (on_view_configure);
+        view.notify["default-height"].connect (on_view_configure);
+        view.notify["maximized"].connect (on_view_configure);
+        view.notify["fullscreened"].connect (on_view_configure);
 #if WITH_DEBUGGING
         view.debug_request.connect (on_debug_request);
 #endif
@@ -112,12 +115,12 @@ public class Gnonograms.Controller : GLib.Object {
             saved_state.bind ("mode", this, "game_state", SettingsBindFlags.DEFAULT);
             settings.bind ("grade", this, "generator_grade", SettingsBindFlags.DEFAULT);
             settings.bind ("clue-help", view, "strikeout-complete", SettingsBindFlags.DEFAULT);
+        } else {
+            restore_settings ();
         }
 
-        view.show_all ();
         view.present ();
 
-        restore_settings ();
         bind_property ("generator-grade", view, "generator-grade", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         bind_property ("is-readonly", view, "readonly", BindingFlags.SYNC_CREATE);
 
@@ -158,7 +161,7 @@ public class Gnonograms.Controller : GLib.Object {
 
     private void clear () {
         model.clear ();
-        view.update_labels_from_solution ();
+        view.update_clues_from_solution ();
         clear_history ();
         is_readonly = true; // Force Save As when saving new design
     }
@@ -187,7 +190,7 @@ public class Gnonograms.Controller : GLib.Object {
             if (success) {
                     model.set_solution_from_array (generator.get_solution ());
                     game_state = GameState.SOLVING;
-                    view.update_labels_from_solution ();
+                    view.update_clues_from_solution ();
                     view.game_grade = generator.solution_grade;
                 } else {
                     clear ();
@@ -213,7 +216,7 @@ public class Gnonograms.Controller : GLib.Object {
                 /* Error normally thrown on first run */
                 debug ("Error deleting temporary game file %s - %s", temporary_game_path, e.message);
             } finally {
-            warning ("writing unsaved game to %s", temporary_game_path);
+                debug ("writing unsaved game to %s", temporary_game_path);
                 /* Save solution and current state */
                 write_game (temporary_game_path, true);
             }
@@ -224,18 +227,15 @@ public class Gnonograms.Controller : GLib.Object {
 
     private void restore_settings () {
         if (saved_state != null) {
-            int x, y, cell_size;
-            saved_state.get ("cell-size", "i", out cell_size);
-            saved_state.get ("window-position", "(ii)", out x, out y);
+            int cell_size = saved_state.get_int ("cell-size");
             current_game_path = saved_state.get_string ("current-game-path");
-            view.cell_size = cell_size;
-            window.move (x, y);
+            if (cell_size > 0) {
+                view.cell_size = cell_size;
+            }
         } else {
             /* Error normally thrown running uninstalled */
-            critical ("Unable to restore settings - using defaults"); /* Maybe running uninstalled */
             /* Default puzzle parameters */
-            game_state = GameState.SOLVING;
-            generator_grade = Difficulty.MODERATE;
+            view.cell_size = 24;
             current_game_path = "";
         }
 
@@ -355,7 +355,7 @@ public class Gnonograms.Controller : GLib.Object {
 
             history.from_string (reader.moves);
             if (history.can_go_back) {
-                make_move (history.get_current_move ());
+                view.make_move (history.get_current_move ());
             }
         } else {
             view.send_notification (_("Unable to load game. %s").printf (reader.err_msg));
@@ -388,8 +388,8 @@ public class Gnonograms.Controller : GLib.Object {
             if (reader.has_solution) {
                 view.game_grade = reader.difficulty;
             } else if (reader.has_row_clues && reader.has_col_clues) {
-                view.update_labels_from_string_array (reader.row_clues, false);
-                view.update_labels_from_string_array (reader.col_clues, true);
+                view.update_clues_from_string_array (reader.row_clues, false);
+                view.update_clues_from_string_array (reader.col_clues, true);
             } else {
                 reader.err_msg = (_("Clues missing"));
                 return false;
@@ -397,7 +397,7 @@ public class Gnonograms.Controller : GLib.Object {
 
             if (reader.has_solution) {
                 model.set_solution_data_from_string_array (reader.solution[0 : dimensions.height]);
-                view.update_labels_from_solution (); /* Ensure completeness correctly set */
+                view.update_clues_from_solution (); /* Ensure completeness correctly set */
             }
 
             if (reader.name.length > 1 && reader.name != "") {
@@ -447,10 +447,6 @@ public class Gnonograms.Controller : GLib.Object {
         return errors;
     }
 
-    private void make_move (Move mv) {
-        view.make_move (mv);
-    }
-
     private void clear_history () {
         history.clear_all ();
     }
@@ -464,7 +460,7 @@ public class Gnonograms.Controller : GLib.Object {
 
         var moves = solver.hint (row_clues, col_clues, model.copy_working_data ());
         foreach (Move mv in moves) {
-            make_move (mv);
+            view.make_move (mv);
             history.record_move (mv.cell, mv.previous_state);
         }
 
@@ -492,7 +488,7 @@ public class Gnonograms.Controller : GLib.Object {
 
     public bool next_move () {
         if (history.can_go_forward) {
-            make_move (history.pop_next_move ());
+            view.make_move (history.pop_next_move ());
             return true;
         } else {
             return false;
@@ -501,7 +497,7 @@ public class Gnonograms.Controller : GLib.Object {
 
     public bool previous_move () {
         if (history.can_go_back) {
-            make_move (history.pop_previous_move ());
+            view.make_move (history.pop_previous_move ());
             return true;
         } else {
             return false;
@@ -510,13 +506,13 @@ public class Gnonograms.Controller : GLib.Object {
 
     private bool on_view_deleted () {
         quit ();
-        return false;
+        return Gdk.EVENT_PROPAGATE;
     }
 
     private uint configure_id = 0;
-    private bool on_view_configure () {
+    private void on_view_configure () {
         if (saved_state == null) {
-            return false;
+            return;
         }
 
         if (configure_id != 0) {
@@ -525,16 +521,12 @@ public class Gnonograms.Controller : GLib.Object {
 
         configure_id = Timeout.add (100, () => {
             configure_id = 0;
-
-            int x_pos, y_pos;
-            view.get_position (out x_pos, out y_pos);
-            saved_state.set ("window-position", "(ii)", x_pos, y_pos);
             saved_state.set ("cell-size", "i", view.cell_size);
 
-            return false;
+            return Source.REMOVE;
         });
 
-        return false;
+        return;
     }
 
     public void save_game () {
@@ -600,7 +592,7 @@ public class Gnonograms.Controller : GLib.Object {
 
         var moves = solver.debug (idx, is_column, row_clues, col_clues, model.copy_working_data ());
         foreach (Move mv in moves) {
-            make_move (mv);
+            view.make_move (mv);
             history.record_move (mv.cell, mv.previous_state);
         }
     }

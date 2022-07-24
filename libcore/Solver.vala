@@ -87,7 +87,6 @@
 
         assert (row_clues.length == rows && col_clues.length == cols);
         should_check_solution = solution_grid != null;
-
         if (should_check_solution) {
             solution.copy (solution_grid);
         }
@@ -112,10 +111,6 @@
         return valid ();
     }
 
-    /** Initiate solving, specifying whether or not to use the advanced
-      * procedures. Also specify whether in debugging mode and whether to solve one step
-      * at a time (used for hinting if implemented).
-    **/
     public async Difficulty solve_clues (string[] row_clues,
                                          string[] col_clues,
                                          My2DCellArray? start_grid = null,
@@ -180,10 +175,13 @@
         advanced_only = false;
         human_only = true;
         switch (grade) {
+            case Difficulty.TRIVIAL:
+            case Difficulty.VERY_EASY:
             case Difficulty.EASY:
             case Difficulty.MODERATE:
             case Difficulty.HARD:
             case Difficulty.CHALLENGING:
+            case Difficulty.UNDEFINED:
 
                 break;
             case Difficulty.ADVANCED:
@@ -204,8 +202,6 @@
                 human_only = false;
 
                 break;
-            default:
-                assert_not_reached ();
         }
     }
 
@@ -265,7 +261,6 @@
 
     public Gee.ArrayQueue<Move> hint (string[] row_clues, string[] col_clues, My2DCellArray working) {
         initialize (row_clues, col_clues, working, null);
-
         bool changed = false;
         uint count = 0;
         var moves = new Gee.ArrayQueue<Move> ();

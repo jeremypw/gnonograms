@@ -240,7 +240,7 @@ namespace Gnonograms.Utils {
         return sb.str;
     }
 
-    public static int show_dlg (string primary_text,
+    private static int show_dlg (string primary_text,
                                 Gtk.MessageType type,
                                 string? secondary_text,
                                 Gtk.Window? parent) {
@@ -280,9 +280,13 @@ namespace Gnonograms.Utils {
             dialog.set_default_response (Gtk.ResponseType.NO);
         }
 
-        dialog.set_position (Gtk.WindowPosition.MOUSE);
-        int response = dialog.run ();
-        dialog.destroy ();
+        Gtk.ResponseType response = Gtk.ResponseType.NO;
+        dialog.response.connect ((resp) => {
+            dialog.destroy ();
+            response = (Gtk.ResponseType)resp;
+        });
+
+        dialog.show ();
         return response;
     }
 
@@ -309,7 +313,7 @@ namespace Gnonograms.Utils {
     public static string? get_open_save_path (Gtk.Window? parent,
                                              string dialogname,
                                              bool save,
-                                             string start_path,
+                                             string start_folder_path,
                                              string basename) {
         string? file_path = null;
         string button_label = save ? _("Save") : _("Open");
@@ -325,13 +329,13 @@ namespace Gnonograms.Utils {
         dialog.set_modal (true);
         try {
             if (save) {
-                dialog.set_current_folder_file (File.new_for_path (start_path));
+                dialog.set_current_folder (File.new_for_path (start_folder_path));
                 if (basename != null) {
                     dialog.set_current_name (basename);
                 }
             } else {
                 try {
-                    dialog.set_current_folder_file (File.new_for_path (start_path));
+                    dialog.set_current_folder (File.new_for_path (start_folder_path));
                 } catch (Error e) {
                     warning ("Error setting current folder: %s", e.message);
                 }
@@ -340,19 +344,23 @@ namespace Gnonograms.Utils {
             warning ("Error configuring FileChooser dialog: %s", e.message);
         }
 
-        var response = dialog.run ();
-        if (response == Gtk.ResponseType.ACCEPT) {
-            file_path = dialog.get_filename ();
-        }
+        dialog.response.connect ((response) => {
+            if (response == Gtk.ResponseType.ACCEPT) {
+                file_path = dialog.get_file ().get_path ();
+            }
 
-        dialog.destroy ();
+            dialog.destroy ();
+        });
+
+        dialog.show ();
+
 
         return file_path;
     }
 
-    public Gdk.Rectangle get_monitor_area (Gdk.Screen screen, Gdk.Window window) {
+    public Gdk.Rectangle get_monitor_area (Gdk.Surface surface) {
         var display = Gdk.Display.get_default ();
-        var monitor = display.get_monitor_at_window (window);
+        var monitor = display.get_monitor_at_surface (surface);
         return monitor.get_geometry ();
     }
 }

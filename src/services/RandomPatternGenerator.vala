@@ -78,6 +78,8 @@ public class Gnonograms.RandomPatternGenerator : Object {
         edge_bias = 0;
 
         switch (grade) {
+            case Difficulty.TRIVIAL:
+            case Difficulty.VERY_EASY:
             case Difficulty.EASY:
                     threshold = 60;
                     min_freedom = 1;
@@ -106,11 +108,9 @@ public class Gnonograms.RandomPatternGenerator : Object {
                     min_freedom = 4;
                     break;
             case Difficulty.UNDEFINED:
+            case Difficulty.COMPUTER:
                     /* May not be defined on creation */
                     break;
-            default:
-                critical ("unexpected grade %s", grade.to_string ());
-                assert_not_reached ();
         }
     }
 
