@@ -1,21 +1,22 @@
-project ('com.github.jeremypw.gnonograms', 'vala', 'c', version: '2.1.2', meson_version: '>= 0.49.0')
+project (
+    'com.github.jeremypw.gnonograms',
+    'vala', 'c',
+    version: '2.1.2',
+    meson_version: '>= 0.58.0'
+)
 
-vala_version_required = '>=0.48.0'
+vala_version_required = '>=0.56.0'
 
-i18n = import ('i18n')
-
-add_global_arguments('-DGETTEXT_PACKAGE="@0@"'.format (meson.project_name()), language:'c')
+add_project_arguments('-DGETTEXT_PACKAGE="@0@"'.format (meson.project_name()), language:'c')
 
 if get_option('with_debugging')
     add_project_arguments('--define=WITH_DEBUGGING', language: 'vala')
 endif
 
-GTK3 = dependency('gtk+-3.0', version: '>=3.24')
-GEE = dependency('gee-0.8', version: '>=0.20')
-GRANITE = dependency('granite', version: '>=6.1.0')
-HDY = dependency('libhandy-1', version: '>=1.2.0')
 
+i18n = import ('i18n')
 gnome = import('gnome')
+
 gresource = gnome.compile_resources(
     'gresource',
     'data/gresource.xml',
@@ -32,6 +33,15 @@ config_file = configure_file(
     output: '@BASENAME@',
     configuration: config_data
 )
+
+gnonogram_deps = [
+    dependency('glib-2.0'),
+    dependency('gobject-2.0'),
+    dependency('granite', version: '>=6.2.0'),
+    dependency('gtk+-3.0'),
+    dependency('gee-0.8', version: '>=0.8.5'),
+    dependency('libhandy-1', version: '>=1.2.0')
+]
 
 executable (
     meson.project_name (),
@@ -56,19 +66,12 @@ executable (
     'libcore/Enums.vala',
     'libcore/Structs.vala',
     'libcore/Constants.vala',
-     config_file,
-
-    dependencies : [
-        GTK3,
-        GEE,
-        GRANITE,
-        HDY
-    ],
-
+    config_file,
+    dependencies : gnonogram_deps,
     install: true
 )
 
-meson.add_install_script('meson/post_install.py')
-
 subdir ('po')
 subdir ('data')
+
+gnome.post_install(glib_compile_schemas: true)
