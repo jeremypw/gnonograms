@@ -16,120 +16,119 @@
 *
 *  Author: Jeremy Wootten <jeremywootten@gmail.com>
 */
-    public class Gnonograms.AppPopover : Gtk.Popover {
-        public signal void apply_settings ();
+public class Gnonograms.AppPopover : Gtk.Popover {
+    public signal void apply_settings ();
 
-        private Gtk.ComboBoxText grade_setting;
-        private Gtk.SpinButton row_setting;
-        private Gtk.SpinButton column_setting;
-        private Gtk.Entry title_setting;
+    private Gtk.ComboBoxText grade_setting;
+    private Gtk.SpinButton row_setting;
+    private Gtk.SpinButton column_setting;
+    private Gtk.Entry title_setting;
 
-        public Difficulty grade {
-            get {
-                return (Difficulty)(int.parse (grade_setting.get_active_id ()));
-            }
-
-            set {
-                grade_setting.active_id = ((uint)value).clamp (MIN_GRADE, Difficulty.MAXIMUM).to_string ();
-            }
+    public Difficulty grade {
+        get {
+            return (Difficulty)(int.parse (grade_setting.get_active_id ()));
         }
 
-        public uint rows {
-            get {
-                return (uint)(row_setting.@value);
-            }
-
-            set {
-                row_setting.@value = value;
-            }
-        }
-
-        public uint columns {
-            get {
-                return (uint)(column_setting.@value);
-            }
-
-            set {
-                column_setting.@value = value;
-            }
-        }
-
-        public string title {
-            get {
-                return title_setting.text;
-            }
-
-            set {
-                title_setting.text = value;
-            }
-        }
-
-        construct {
-            grade_setting = new Gtk.ComboBoxText ();
-            foreach (Difficulty d in Difficulty.all_human ()) {
-                grade_setting.append (((uint)d).to_string (), d.to_string ());
-            }
-
-            row_setting = new Gtk.SpinButton (
-                new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),
-                5.0,
-                0
-            ) {
-                snap_to_ticks = true,
-                orientation = Gtk.Orientation.HORIZONTAL,
-                width_chars = 3,
-            };
-
-            column_setting = new Gtk.SpinButton (
-                new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),
-                5.0,
-                0
-            ) {
-                snap_to_ticks = true,
-                orientation = Gtk.Orientation.HORIZONTAL,
-                width_chars = 3,
-            };
-
-            title_setting = new Gtk.Entry () {
-                placeholder_text = _("Enter title of game here")
-            };
-
-            var settings_grid = new Gtk.Grid () {
-                orientation = Gtk.Orientation.VERTICAL,
-                row_spacing = 12,
-                column_spacing = 12,
-                margin_start = margin_end = margin_top = 12,
-                margin_bottom = 24
-            };
-            settings_grid.attach (new Gtk.Label (_("Name:")), 0, 0, 1);
-            settings_grid.attach (title_setting, 1, 0, 3);
-            settings_grid.attach (new Gtk.Label  (_("Difficulty:")), 0, 1, 1);
-            settings_grid.attach (grade_setting, 1, 1, 3);
-            settings_grid.attach (new Gtk.Label (_("Rows:")), 0, 2, 1);
-            settings_grid.attach (row_setting, 1, 2, 1);
-            settings_grid.attach (new Gtk.Label  (_("Columns:")), 0, 3, 1);
-            settings_grid.attach (column_setting, 1, 3, 1);
-
-            var cancel_button = new Gtk.Button.with_label (_("Cancel"));
-            var apply_button = new Gtk.Button.with_label (_("Apply"));
-            default_widget = apply_button;
-            cancel_button.clicked.connect (() => {
-                hide ();
-            });
-            apply_button.clicked.connect (() => {
-                apply_settings ();
-                hide ();
-            });
-            var popover_actions = new Gtk.ActionBar ();
-            popover_actions.pack_start (cancel_button);
-            popover_actions.pack_end (apply_button);
-
-            var main_widget = new Gtk.Box (Gtk.Orientation.VERTICAL, 6);
-            // main_grid.append (size_grid);
-            main_widget.append (settings_grid);
-            main_widget.append (popover_actions);
-
-            child = main_widget;
+        set {
+            grade_setting.active_id = ((uint)value).clamp (MIN_GRADE, Difficulty.MAXIMUM).to_string ();
         }
     }
 
+    public uint rows {
+        get {
+            return (uint)(row_setting.@value);
+        }
+
+        set {
+            row_setting.@value = value;
+        }
+    }
+
+    public uint columns {
+        get {
+            return (uint)(column_setting.@value);
+        }
+
+        set {
+            column_setting.@value = value;
+        }
+    }
+
+    public string title {
+        get {
+            return title_setting.text;
+        }
+
+        set {
+            title_setting.text = value;
+        }
+    }
+
+    construct {
+        grade_setting = new Gtk.ComboBoxText ();
+        foreach (Difficulty d in Difficulty.all_human ()) {
+            grade_setting.append (((uint)d).to_string (), d.to_string ());
+        }
+
+        row_setting = new Gtk.SpinButton (
+            new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),
+            5.0,
+            0
+        ) {
+            snap_to_ticks = true,
+            orientation = Gtk.Orientation.HORIZONTAL,
+            width_chars = 3,
+        };
+
+        column_setting = new Gtk.SpinButton (
+            new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),
+            5.0,
+            0
+        ) {
+            snap_to_ticks = true,
+            orientation = Gtk.Orientation.HORIZONTAL,
+            width_chars = 3,
+        };
+
+        title_setting = new Gtk.Entry () {
+            placeholder_text = _("Enter title of game here")
+        };
+
+        var settings_grid = new Gtk.Grid () {
+            orientation = Gtk.Orientation.VERTICAL,
+            row_spacing = 12,
+            column_spacing = 12,
+            margin_start = margin_end = margin_top = 12,
+            margin_bottom = 24
+        };
+        settings_grid.attach (new Gtk.Label (_("Name:")), 0, 0, 1);
+        settings_grid.attach (title_setting, 1, 0, 3);
+        settings_grid.attach (new Gtk.Label (_("Difficulty:")), 0, 1, 1);
+        settings_grid.attach (grade_setting, 1, 1, 3);
+        settings_grid.attach (new Gtk.Label (_("Rows:")), 0, 2, 1);
+        settings_grid.attach (row_setting, 1, 2, 1);
+        settings_grid.attach (new Gtk.Label (_("Columns:")), 0, 3, 1);
+        settings_grid.attach (column_setting, 1, 3, 1);
+
+        var cancel_button = new Gtk.Button.with_label (_("Cancel"));
+        var apply_button = new Gtk.Button.with_label (_("Apply"));
+        default_widget = apply_button;
+        cancel_button.clicked.connect (() => {
+            hide ();
+        });
+        apply_button.clicked.connect (() => {
+            apply_settings ();
+            hide ();
+        });
+        var popover_actions = new Gtk.ActionBar ();
+        popover_actions.pack_start (cancel_button);
+        popover_actions.pack_end (apply_button);
+
+        var main_widget = new Gtk.Box (Gtk.Orientation.VERTICAL, 6);
+        // main_grid.append (size_grid);
+        main_widget.append (settings_grid);
+        main_widget.append (popover_actions);
+
+        child = main_widget;
+    }
+}

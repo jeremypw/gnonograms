@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2010-2022  Jeremy Wootten
  *
     This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
  *
  *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
- 
+
     private class Gnonograms.RestartButton : Gnonograms.HeaderButton {
         public bool restart_destructive { get; set; }
 
