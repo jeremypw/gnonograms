@@ -775,6 +775,7 @@ warning ("WITH DEBUGGING");
     }
     private void move_cursor (int row_delta, int col_delta) {
         if (current_cell == NULL_CELL) {
+            update_current_cell ({0, 0, CellState.UNDEFINED});
             return;
         }
 

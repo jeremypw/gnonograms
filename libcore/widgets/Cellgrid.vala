@@ -18,7 +18,6 @@
  */
 
 public class Gnonograms.CellGrid : Gtk.DrawingArea {
-    public signal void cursor_moved (Cell from, Cell to);
     public signal void start_drawing (uint button, Gdk.ModifierType state, bool double_click);
     public signal void stop_drawing ();
     public signal void leave ();
@@ -106,7 +105,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         button_controller.pressed.connect ((n_press, x, y) => {
             start_drawing (
                 button_controller.get_current_button (),
-                button_controller.get_current_event_state (), 
+                button_controller.get_current_event_state (),
                 n_press > 1);
         });
         button_controller.released.connect ((n_press, x, y) => {
