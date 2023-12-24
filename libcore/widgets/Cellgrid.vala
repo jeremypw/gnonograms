@@ -318,6 +318,27 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         return;
     }
 
+    public override void measure (
+        Gtk.Orientation orientation,
+        int for_size,
+        out int minimum,
+        out int natural,
+        out int minimum_baseline,
+        out int natural_baseline
+    ) {
+        if (orientation == HORIZONTAL) {
+            minimum = (int)(cell_width * cols);
+            natural = minimum;
+            minimum_baseline = -1;
+            natural_baseline = -1;
+        } else {
+            minimum = (int)(cell_height * rows);
+            natural = minimum;
+            minimum_baseline = -1;
+            natural_baseline = -1;
+        }
+    }
+
     private class CellPattern {
         public Cairo.Pattern pattern;
         public double size { get; private set; }
