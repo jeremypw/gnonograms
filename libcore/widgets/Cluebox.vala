@@ -46,22 +46,15 @@ public class Gnonograms.ClueBox : Gtk.Box {
                                              view.controller.dimensions.height :
                                              view.controller.dimensions.width;
 
-            if (new_n_clues != clues.size) {
-                n_cells = new_n_cells;
-                clues.@foreach ((clue) => {
-                    remove (clue.label);
-                });
-
-                clues.clear ();
-                for (int index = 0; index < new_n_clues; index++) {
-                    var clue = new Clue (orientation == Gtk.Orientation.HORIZONTAL, this);
-                    clues.add (clue);
-                    append (clue.label);
-                }
-            } else if (new_n_cells != n_cells) {
-                n_cells = new_n_cells;
-            } else {
-                return;
+            foreach (var clue in clues) {
+                remove (clue.label);
+            }
+            clues.clear ();
+            n_cells = new_n_cells;
+            for (int index = 0; index < new_n_clues; index++) {
+                var clue = new Clue (orientation == Gtk.Orientation.HORIZONTAL, this);
+                clues.add (clue);
+                append (clue.label);
             }
         });
     }
