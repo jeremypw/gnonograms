@@ -108,7 +108,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private CellGrid cell_grid;
     private ProgressIndicator progress_indicator;
     private Gtk.MenuButton menu_button;
-    private CellState drawing_with_state = CellState.UNDEFINED;
+    private CellState drawing_with_state = UNDEFINED;
     private Gtk.HeaderBar header_bar;
     private Granite.ModeSwitch mode_switch;
     private Gtk.Grid main_grid;
@@ -442,11 +442,16 @@ warning ("WITH DEBUGGING");
             column_clue_box.unhighlight_all ();
         });
 
-        cell_grid.start_drawing.connect ((button, double_click) => {
+        cell_grid.start_drawing.connect ((button, state, double_click) => {
             if (double_click || button == Gdk.BUTTON_MIDDLE) {
-                drawing_with_state = controller.game_state == GameState.SOLVING ? CellState.UNKNOWN : CellState.EMPTY;
+                drawing_with_state = controller.game_state == SOLVING ? CellState.UNKNOWN : CellState.EMPTY;
             } else {
-                drawing_with_state = button == Gdk.BUTTON_PRIMARY ? CellState.FILLED : CellState.EMPTY;
+                if (state == SHIFT_MASK && button == Gdk.BUTTON_PRIMARY) {
+                    drawing_with_state = CellState.EMPTY;
+                } else {
+                    drawing_with_state = button == Gdk.BUTTON_PRIMARY ? CellState.FILLED : CellState.EMPTY;
+                }
+
             }
 
             make_move_at_cell ();
