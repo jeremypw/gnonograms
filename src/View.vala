@@ -342,13 +342,8 @@ warning ("WITH DEBUGGING");
 
         main_grid.add_controller (scroll_controller);
         scroll_controller.scroll.connect ((dx, dy) => {
-            var modifiers = scroll_controller.
-                            get_current_event_device ().
-                            get_seat ().
-                            get_keyboard ().
-                            get_modifier_state ();
-
-            if (modifiers == Gdk.ModifierType.CONTROL_MASK) {
+            var modifiers = scroll_controller.get_current_event_state ();
+            if ((modifiers & Gdk.ModifierType.CONTROL_MASK) > 0) {
                     Idle.add (() => {
                         if (dy > 0.0) {
                              action_zoom_in ();
