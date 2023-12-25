@@ -118,8 +118,8 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             queue_draw ();
         });
 
-        view.notify["cell-size"].connect (dimensions_updated);
-        view.controller.notify["dimensions"].connect (dimensions_updated);
+        view.notify["cell-size"].connect (size_updated);
+        view.controller.notify["dimensions"].connect (size_updated);
         view.controller.notify["game-state"].connect (() => {
             var gs = view.controller.game_state;
             unknown_color = colors[(int)gs, (int)CellState.UNKNOWN];
@@ -135,7 +135,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             }
         });
 
-        dimensions_updated ();
+        size_updated ();
     }
 
     private void set_colors () {
@@ -150,16 +150,15 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         colors[solving, (int)CellState.FILLED].parse (Gnonograms.SOLVING_FILLED_COLOR);
     }
 
-    private void dimensions_updated () {
+    private void size_updated () {
         rows = (int)view.controller.dimensions.height;
         cols = (int)view.controller.dimensions.width;
         cell_width = view.cell_size;
         cell_height = view.cell_size;
         /* Cause refresh of existing pattern */
         highlight_pattern = new CellPattern.highlight (cell_width, cell_height);
-        var width = cols * view.cell_size + (int)MINOR_GRID_LINE_WIDTH;
-        var height = rows * view.cell_size + (int)MINOR_GRID_LINE_WIDTH;
-        set_size_request (width, height);
+        content_width = cols * view.cell_size + (int)MINOR_GRID_LINE_WIDTH;
+        content_height = rows * view.cell_size + (int)MINOR_GRID_LINE_WIDTH;
     }
 
     private void draw_func (Gtk.DrawingArea drawing_area, Cairo.Context cr, int x, int y) {

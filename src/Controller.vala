@@ -52,10 +52,6 @@ public class Gnonograms.Controller : GLib.Object {
         history = new Gnonograms.History ();
 
         view.close_request.connect (on_view_deleted);
-        view.notify["default-width"].connect (on_view_configure);
-        view.notify["default-height"].connect (on_view_configure);
-        view.notify["maximized"].connect (on_view_configure);
-        view.notify["fullscreened"].connect (on_view_configure);
 #if WITH_DEBUGGING
         view.debug_request.connect (on_debug_request);
 #endif
@@ -507,26 +503,6 @@ public class Gnonograms.Controller : GLib.Object {
     private bool on_view_deleted () {
         quit ();
         return Gdk.EVENT_PROPAGATE;
-    }
-
-    private uint configure_id = 0;
-    private void on_view_configure () {
-        if (saved_state == null) {
-            return;
-        }
-
-        if (configure_id != 0) {
-            GLib.Source.remove (configure_id);
-        }
-
-        configure_id = Timeout.add (100, () => {
-            configure_id = 0;
-            saved_state.set ("cell-size", "i", view.cell_size);
-
-            return Source.REMOVE;
-        });
-
-        return;
     }
 
     public void save_game () {

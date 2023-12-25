@@ -18,9 +18,8 @@
  */
 
 public class Gnonograms.ClueBox : Gtk.Box {
-    public View view { get; construct; }
+    public unowned View view { get; construct; }
     public uint n_cells { get; set; default = 0; } // The number of cells each clue addresses, monitored by clues
-    public uint cell_size { get; set; default = 0; } // Dimensions of individual grid cells, monitored by clues
     private Gee.ArrayList<Clue> clues;
 
     public ClueBox (Gtk.Orientation _orientation, View view) {
@@ -36,7 +35,6 @@ public class Gnonograms.ClueBox : Gtk.Box {
 
     construct {
         clues = new Gee.ArrayList<Clue> ();
-        view.bind_property ("cell-size", this, "cell-size", BindingFlags.DEFAULT | BindingFlags.SYNC_CREATE);
         view.controller.notify ["dimensions"].connect (() => {
             var new_n_clues = orientation == Gtk.Orientation.HORIZONTAL ?
                                               view.controller.dimensions.width :

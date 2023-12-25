@@ -57,8 +57,7 @@ class Gnonograms.Clue : Object {
         text = "0";
 
         label.realize.connect_after (() => {
-            _fontsize = (int)((double)cluebox.cell_size * 0.4);
-
+            _fontsize = (int)((double)cluebox.view.cell_size * 0.4);
             update_markup ();
         });
 
@@ -66,8 +65,8 @@ class Gnonograms.Clue : Object {
             update_tooltip ();
         });
 
-        cluebox.notify["cell-size"].connect (() => {
-            _fontsize = (int)((double)cluebox.cell_size * 0.4);
+        cluebox.view.notify["cell-size"].connect (() => {
+            _fontsize = (int)((double)cluebox.view.cell_size * 0.4);
             update_markup ();
         });
     }

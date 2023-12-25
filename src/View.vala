@@ -132,7 +132,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         Object (
             model: _model,
             controller: controller,
-            resizable: true,
             title: _("Gnonograms")
         );
     }
@@ -190,6 +189,7 @@ warning ("WITH DEBUGGING");
     }
 
     construct {
+        resizable = false;
         var granite_settings = Granite.Settings.get_default ();
         var gtk_settings = Gtk.Settings.get_default ();
 
@@ -313,6 +313,13 @@ warning ("WITH DEBUGGING");
         column_clue_box = new ClueBox (Gtk.Orientation.HORIZONTAL, this);
         cell_grid = new CellGrid (this);
 
+        var vert_sizegroup = new Gtk.SizeGroup (VERTICAL);
+        vert_sizegroup.add_widget (row_clue_box);
+        vert_sizegroup.add_widget (cell_grid);
+        var horiz_sizegroup = new Gtk.SizeGroup (HORIZONTAL);
+        horiz_sizegroup.add_widget (column_clue_box);
+        horiz_sizegroup.add_widget (cell_grid);
+
         toast_overlay = new Adw.ToastOverlay () {
             vexpand = false,
             valign = Gtk.Align.START
@@ -429,13 +436,7 @@ warning ("WITH DEBUGGING");
 
         controller.notify["dimensions"].connect (() => {
             calc_cell_size ();
-            set_size ();
         });
-
-        notify["cell-size"].connect (() => {
-            set_size ();
-        });
-
 
        cell_grid.leave.connect (() => {
             row_clue_box.unhighlight_all ();
@@ -491,24 +492,6 @@ warning ("WITH DEBUGGING");
         } else if (opt_cell_height > 0 && cell_size < opt_cell_height) {
             cell_size = int.min (max_cell_size, opt_cell_height);
         }
-    }
-
-    private void set_size () {
-        var n_cols = controller.dimensions.width;
-        var n_rows = controller.dimensions.height;
-        var width = (int)((double)(n_cols * cell_size) * 1.3);
-        var height = (int)((double)(n_rows * cell_size) * 1.4);
-
-        set_default_size (
-            width + GRID_BORDER + GRID_COLUMN_SPACING,
-            height + header_bar.get_allocated_height () + GRID_BORDER
-        );
-        main_grid.set_size_request (
-            width,
-            height
-        );
-
-        queue_draw ();
     }
 
     public string[] get_clues (bool is_column) {
@@ -751,7 +734,13 @@ warning ("WITH DEBUGGING");
         if (increase) {
             cell_size += (int)delta;
         } else {
-            cell_size -= (int)delta;
+            //FIXME This is a hack to fix redrawing the window when the grid gets smaller. For some
+            //reason the window only properly redraws when the size increases
+            cell_size -= 2 * (int)delta;
+            Idle.add (() => {
+                cell_size += (int)delta;
+                return Source.REMOVE;
+            });
         }
     }
 
