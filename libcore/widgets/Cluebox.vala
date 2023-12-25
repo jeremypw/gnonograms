@@ -54,7 +54,19 @@ public class Gnonograms.ClueBox : Gtk.Box {
                 clues.add (clue);
                 append (clue.label);
             }
+
+            set_size ();
         });
+
+        view.notify["cell-size"].connect (set_size);
+    }
+
+    private void set_size () {
+        if (orientation == HORIZONTAL) {
+            height_request = (int) ((double)(view.controller.dimensions.height * view.cell_size) / 3.0);
+        } else {
+            width_request = (int) ((double) (view.controller.dimensions.width * view.cell_size) / 3.0);
+        }
     }
 
     public string[] get_clue_texts () {

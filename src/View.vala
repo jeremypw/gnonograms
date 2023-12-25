@@ -730,9 +730,10 @@ warning ("WITH DEBUGGING");
         if (increase) {
             cell_size += (int)delta;
         } else {
+            cell_size -= (int)delta;
             //FIXME This is a hack to fix redrawing the window when the grid gets smaller. For some
-            //reason the window only properly redraws when the size increases
-            cell_size -= 2 * (int)delta;
+            //reason the window only properly redraws when the size increases.  Review for later versions of Gtk4/Elementary
+            cell_size -= (int)delta;
             Idle.add (() => {
                 cell_size += (int)delta;
                 return Source.REMOVE;
