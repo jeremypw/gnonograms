@@ -442,12 +442,12 @@ warning ("WITH DEBUGGING");
             if (double_click || button == Gdk.BUTTON_MIDDLE) {
                 drawing_with_state = controller.game_state == SOLVING ? CellState.UNKNOWN : CellState.EMPTY;
             } else {
-                if (((state & Gdk.ModifierType.SHIFT_MASK) > 0) && button == Gdk.BUTTON_PRIMARY) {
+                if (button == Gdk.BUTTON_SECONDARY ||
+                    ((state & Gdk.ModifierType.SHIFT_MASK) > 0) && button == Gdk.BUTTON_PRIMARY) {
                     drawing_with_state = CellState.EMPTY;
                 } else {
-                    drawing_with_state = button == Gdk.BUTTON_PRIMARY ? CellState.FILLED : CellState.EMPTY;
+                    drawing_with_state = CellState.FILLED;
                 }
-
             }
 
             make_move_at_cell ();
