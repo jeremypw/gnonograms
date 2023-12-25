@@ -291,7 +291,8 @@ warning ("WITH DEBUGGING");
 
         header_bar = new Gtk.HeaderBar () {
             show_title_buttons = true,
-            title_widget = progress_stack
+            title_widget = progress_stack,
+            can_focus = false
         };
         header_bar.add_css_class ("gnonograms-header");
         header_bar.pack_start (load_game_button);
