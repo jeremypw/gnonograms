@@ -21,10 +21,8 @@
 @define-color GNONOGRAMS_DARK_PURPLE #180297;
 @define-color GNONOGRAMS_PALE_PURPLE #cdc9e0;
 .gnonograms-header {
-    border: solid;
-    border-top-width: 1px;
+    border-style: ridge;
+    border-top-width: 10px;
     border-color: @GNONOGRAMS_DARK_PURPLE;
-    background-image: linear-gradient(to left,
-    alpha(@GNONOGRAMS_DARK_PURPLE, 1.0), alpha(@GNONOGRAMS_PALE_PURPLE, 0));
 }
 
