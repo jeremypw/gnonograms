@@ -41,14 +41,13 @@
         construct {
             spinner = new Gtk.Spinner ();
             label = new Gtk.Label (null);
-            label.add_css_class (Granite.STYLE_CLASS_H3_LABEL);
+            label.add_css_class (Granite.STYLE_CLASS_H4_LABEL);
 
             append (label);
             append (spinner);
 
             cancel_button = new Gtk.Button ();
             var img = new Gtk.Image.from_icon_name ("process-stop-symbolic") {
-                icon_size = Gtk.IconSize.LARGE,
                 tooltip_text = _("Cancel solving")
             };
             cancel_button.child = img;

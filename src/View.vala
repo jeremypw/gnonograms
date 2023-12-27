@@ -320,18 +320,15 @@ warning ("WITH DEBUGGING");
         };
         grade_label.add_css_class (Granite.STYLE_CLASS_H4_LABEL);
 
-        var title_grid = new Gtk.Box (Gtk.Orientation.VERTICAL, 6);
-        title_grid.append (title_label);
-        title_grid.append (grade_label);
-
         progress_stack = new Gtk.Stack ();
         progress_stack.add_named (progress_indicator, "Progress");
-        progress_stack.add_named (title_grid, "Title");
-        progress_stack.set_visible_child_name ("Title");
+        progress_stack.add_named (grade_label, "Grade");
+        progress_stack.add_named (new Gtk.Label (""), "None");
+        progress_stack.set_visible_child_name ("None");
 
         header_bar = new Gtk.HeaderBar () {
             show_title_buttons = true,
-            title_widget = progress_stack,
+            title_widget = title_label,
             can_focus = false
         };
         header_bar.add_css_class ("gnonograms-header");
@@ -350,9 +347,18 @@ warning ("WITH DEBUGGING");
 
         set_titlebar (header_bar);
 
-        row_clue_box = new ClueBox (Gtk.Orientation.VERTICAL, this);
-        column_clue_box = new ClueBox (Gtk.Orientation.HORIZONTAL, this);
-        cell_grid = new CellGrid (this);
+        row_clue_box = new ClueBox (Gtk.Orientation.VERTICAL, this) {
+            halign = Gtk.Align.END,
+            vexpand = false
+        };
+        column_clue_box = new ClueBox (Gtk.Orientation.HORIZONTAL, this) {
+            valign = Gtk.Align.END,
+            hexpand = false
+        };
+        cell_grid = new CellGrid (this) {
+            halign = START,
+            valign = START
+        };
 
         var vert_sizegroup = new Gtk.SizeGroup (VERTICAL);
         vert_sizegroup.add_widget (row_clue_box);
@@ -363,14 +369,18 @@ warning ("WITH DEBUGGING");
 
         toast_overlay = new Adw.ToastOverlay () {
             vexpand = false,
-            valign = Gtk.Align.START
+            valign = Gtk.Align.CENTER,
+            halign = Gtk.Align.CENTER,
+            child = progress_stack
         };
 
         main_grid = new Gtk.Grid () {
             focusable = true, // Needed for key controller to work
             row_spacing = 0,
             margin_bottom = margin_end = GRID_BORDER,
-            column_spacing = GRID_COLUMN_SPACING
+            column_spacing = GRID_COLUMN_SPACING,
+            valign = Gtk.Align.START,
+            halign = Gtk.Align.START
         };
         main_grid.attach (toast_overlay, 0, 0, 1, 1); /* show temporary messages */
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues fordimensions.height*/
@@ -578,8 +588,12 @@ warning ("WITH DEBUGGING");
         if (progress_timeout_id > 0) {
             Source.remove (progress_timeout_id);
             progress_timeout_id = 0;
+        }
+
+        if (game_grade != Difficulty.UNDEFINED) {
+            progress_stack.set_visible_child_name ("Grade");
         } else {
-            progress_stack.set_visible_child_name ("Title");
+            progress_stack.set_visible_child_name ("None");
         }
 
         update_all_labels_completeness ();
@@ -610,6 +624,11 @@ warning ("WITH DEBUGGING");
         title_label.label = game_name;
         title_label.tooltip_text = controller.current_game_path;
         grade_label.label = game_grade.to_string ();
+        if (game_grade != Difficulty.UNDEFINED) {
+            progress_stack.set_visible_child_name ("Grade");
+        } else {
+            progress_stack.set_visible_child_name ("None");
+        }
     }
 
     private void set_buttons_sensitive (bool sensitive) {
