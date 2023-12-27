@@ -194,10 +194,12 @@ warning ("WITH DEBUGGING");
         var gtk_settings = Gtk.Settings.get_default ();
 
         if (gtk_settings != null && granite_settings != null) {
-            gtk_settings.gtk_application_prefer_dark_theme = granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
+            gtk_settings.gtk_application_prefer_dark_theme =
+                granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
 
             granite_settings.notify["prefers-color-scheme"].connect (() => {
-                gtk_settings.gtk_application_prefer_dark_theme = granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
+                gtk_settings.gtk_application_prefer_dark_theme =
+                    granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
             });
         }
 
@@ -215,40 +217,68 @@ warning ("WITH DEBUGGING");
             app.set_accels_for_action (ACTION_PREFIX + action, accels_array);
         }
 
-        load_game_button = new HeaderButton ("document-open", ACTION_PREFIX + ACTION_OPEN, _("Load Game"));
-        save_game_button = new HeaderButton ("document-save", ACTION_PREFIX + ACTION_SAVE, _("Save Game"));
-        save_game_as_button = new HeaderButton ("document-save-as", ACTION_PREFIX + ACTION_SAVE_AS, _("Save Game to Different File"));
-        undo_button = new HeaderButton ("edit-undo", ACTION_PREFIX + ACTION_UNDO, _("Undo Last Move"));
-        redo_button = new HeaderButton ("edit-redo", ACTION_PREFIX + ACTION_REDO, _("Redo Last Move"));
-        check_correct_button = new HeaderButton ("media-seek-backward", ACTION_PREFIX + ACTION_CHECK_ERRORS, _("Check for Errors"));
-        restart_button = new RestartButton ("view-refresh", ACTION_PREFIX + ACTION_RESTART, _("Start again")) {
+        load_game_button = new HeaderButton (
+            "document-open",
+            ACTION_PREFIX + ACTION_OPEN,
+            _("Load Game")
+        );
+        save_game_button = new HeaderButton (
+            "document-save",
+            ACTION_PREFIX + ACTION_SAVE,
+            _("Save Game")
+        );
+        save_game_as_button = new HeaderButton (
+            "document-save-as",
+            ACTION_PREFIX + ACTION_SAVE_AS,
+            _("Save Game to Different File")
+        );
+        undo_button = new HeaderButton (
+            "edit-undo",
+            ACTION_PREFIX + ACTION_UNDO,
+            _("Undo Last Move")
+        );
+        redo_button = new HeaderButton (
+            "edit-redo",
+            ACTION_PREFIX + ACTION_REDO,
+            _("Redo Last Move")
+        );
+        check_correct_button = new HeaderButton (
+            "media-seek-backward",
+            ACTION_PREFIX + ACTION_CHECK_ERRORS,
+            _("Check for Errors")
+        );
+        restart_button = new RestartButton (
+            "view-refresh",
+            ACTION_PREFIX + ACTION_RESTART,
+            _("Start again")
+        ) {
             margin_end = 12,
             margin_start = 12,
         };
-
-        hint_button = new HeaderButton ("help-contents", ACTION_PREFIX + ACTION_HINT, _("Suggest next move"));
-        auto_solve_button = new HeaderButton ("system", ACTION_PREFIX + ACTION_SOLVE, _("Solve by Computer"));
-        generate_button = new HeaderButton ("list-add", ACTION_PREFIX + ACTION_GENERATING_MODE, _("Generate New Puzzle"));
-
-        menu_button = new Gtk.MenuButton () {
-            tooltip_markup = Granite.markup_accel_tooltip (
-                app.get_accels_for_action (ACTION_PREFIX + ACTION_OPTIONS), _("Options")
-            ),
-            icon_name = "open-menu"
-        };
+        hint_button = new HeaderButton (
+            "help-contents",
+            ACTION_PREFIX + ACTION_HINT,
+            _("Suggest next move")
+        );
+        auto_solve_button = new HeaderButton (
+            "system",
+            ACTION_PREFIX + ACTION_SOLVE,
+            _("Solve by Computer")
+        );
+        generate_button = new HeaderButton (
+            "list-add",
+            ACTION_PREFIX + ACTION_GENERATING_MODE,
+            _("Generate New Puzzle")
+        );
 
         var app_popover = new AppPopover () {
             has_arrow = false
         };
-
-        menu_button.set_popover (app_popover);
-
         app_popover.apply_settings.connect (() => {
             controller.generator_grade = app_popover.grade;
             controller.dimensions = {app_popover.columns, app_popover.rows};
             controller.game_name = app_popover.title; // Must come after changing dimensions
         });
-
         app_popover.show.connect (() => { /* Allow parent to set values first */
             app_popover.grade = controller.generator_grade;
             app_popover.rows = controller.dimensions.height;
@@ -256,8 +286,19 @@ warning ("WITH DEBUGGING");
             app_popover.title = controller.game_name;
         });
 
+        menu_button = new Gtk.MenuButton () {
+            tooltip_markup = Granite.markup_accel_tooltip (
+                app.get_accels_for_action (ACTION_PREFIX + ACTION_OPTIONS), _("Options")
+            ),
+            icon_name = "open-menu"
+        };
+        menu_button.set_popover (app_popover);
+
         // Unable to set markup on Granite.ModeSwitch so fake a Granite acellerator tooltip for now.
-        mode_switch = new Granite.ModeSwitch.from_icon_name ("edit-symbolic", "head-thinking-symbolic") {
+        mode_switch = new Granite.ModeSwitch.from_icon_name (
+            "edit-symbolic",
+            "head-thinking-symbolic"
+        ) {
             margin_end = 12,
             margin_start = 12,
             valign = Gtk.Align.CENTER,
@@ -272,7 +313,6 @@ warning ("WITH DEBUGGING");
             xalign = 0.5f
         };
         title_label.add_css_class (Granite.STYLE_CLASS_H3_LABEL);
-        title_label.show ();
 
         grade_label = new Gtk.Label ("Easy") {
             use_markup = true,
