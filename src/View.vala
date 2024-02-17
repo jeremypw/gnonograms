@@ -224,17 +224,17 @@ warning ("WITH DEBUGGING");
             _("Save Game to Different File")
         );
         undo_button = new HeaderButton (
-            "edit-undo",
+            "edit-undo-symbolic",
             ACTION_PREFIX + ACTION_UNDO,
             _("Undo Last Move")
         );
         redo_button = new HeaderButton (
-            "edit-redo",
+            "edit-redo-symbolic",
             ACTION_PREFIX + ACTION_REDO,
             _("Redo Last Move")
         );
         check_correct_button = new HeaderButton (
-            "media-seek-backward",
+            "media-seek-backward-symbolic",
             ACTION_PREFIX + ACTION_CHECK_ERRORS,
             _("Check for Errors")
         );
