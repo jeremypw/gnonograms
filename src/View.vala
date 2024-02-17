@@ -177,15 +177,6 @@ warning ("WITH DEBUGGING");
         action_accelerators.set (ACTION_DEBUG_COL, "<Alt>C");
 #endif
 
-        try {
-            var css_provider = new Gtk.CssProvider ();
-            css_provider.load_from_resource ("com/github/jeremypw/gnonograms/Application.css");
-            Gtk.StyleContext.add_provider_for_display (
-                Gdk.Display.get_default (), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-            );
-        } catch (Error e) {
-            warning ("Error adding css provider: %s", e.message);
-        }
     }
 
     construct {
