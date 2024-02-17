@@ -194,8 +194,6 @@ warning ("WITH DEBUGGING");
             });
         }
 
-        weak Gtk.IconTheme default_theme = Gtk.IconTheme.get_for_display (Gdk.Display.get_default ());
-        default_theme.add_resource_path ("/com/github/jeremypw/gnonograms");
 
         var view_actions = new GLib.SimpleActionGroup ();
         view_actions.add_action_entries (view_action_entries, this);
@@ -289,7 +287,7 @@ warning ("WITH DEBUGGING");
         };
         menu_button.set_popover (app_popover);
 
-        // Unable to set markup on Granite.ModeSwitch so fake a Granite acellerator tooltip for now.
+        // Unable to set markup on Granite.ModeSwitch so fake a Granite accelerator tooltip for now.
         mode_switch = new Granite.ModeSwitch.from_icon_name (
             "edit-symbolic",
             "system-run-symbolic"
