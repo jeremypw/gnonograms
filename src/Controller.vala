@@ -222,30 +222,26 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     private void restore_settings () {
+        view.cell_size = 48;
+        current_game_path = "";
         if (saved_state != null) {
             int cell_size = saved_state.get_int ("cell-size");
             current_game_path = saved_state.get_string ("current-game-path");
             if (cell_size > 0) {
                 view.cell_size = cell_size;
             }
-        } else {
-            /* Error normally thrown running uninstalled */
-            /* Default puzzle parameters */
-            view.cell_size = 24;
-            current_game_path = "";
         }
 
         restore_dimensions ();
     }
 
     private void restore_dimensions () {
+        dimensions = { 15, 10 }; /* Fallback dimensions */
         if (settings != null) {
             dimensions = {
                 settings.get_uint ("columns").clamp (10, 50),
                 settings.get_uint ("rows").clamp (10, 50)
             };
-        } else {
-            dimensions = { 15, 10 }; /* Fallback dimensions */
         }
     }
 
