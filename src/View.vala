@@ -277,11 +277,15 @@ warning ("WITH DEBUGGING");
             app_popover.title = controller.game_name;
         });
 
+        var menu_image =  new Gtk.Image.from_icon_name ("open-menu") {
+            pixel_size = 32
+        };
         menu_button = new Gtk.MenuButton () {
             tooltip_markup = Granite.markup_accel_tooltip (
                 app.get_accels_for_action (ACTION_PREFIX + ACTION_OPTIONS), _("Options")
             ),
-            icon_name = "open-menu"
+            child = menu_image,
+            has_frame = false
         };
         menu_button.set_popover (app_popover);
 

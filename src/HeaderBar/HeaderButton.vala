@@ -20,16 +20,23 @@
     public class Gnonograms.HeaderButton : Gtk.Button {
         public HeaderButton (string icon_name, string action_name, string text) {
             Object (
-                icon_name: icon_name,
                 action_name: action_name,
                 tooltip_markup: Granite.markup_accel_tooltip (
                     View.app.get_accels_for_action (action_name), text
-                )
+                ),
+                valign: Gtk.Align.CENTER
             );
+
+            var image = new Gtk.Image.from_icon_name (icon_name) {
+                pixel_size = 24
+            };
+
+            child = image;
+            add_css_class ("flat");
         }
 
         construct {
-            valign = Gtk.Align.CENTER;
+
         }
 
     }
