@@ -11,11 +11,6 @@ if get_option('with_debugging')
 endif
 
 gnome = import('gnome')
-gresource = gnome.compile_resources(
-    'gresource',
-    'data/gresource.xml',
-    source_dir: 'data'
-)
 
 config_data = configuration_data()
 config_data.set_quoted('LOCALEDIR', join_paths(get_option('prefix'), get_option('localedir')))
@@ -30,7 +25,6 @@ config_file = configure_file(
 
 executable (
     meson.project_name (),
-    gresource,
     'src/Application.vala',
     'src/Controller.vala',
     'src/View.vala',

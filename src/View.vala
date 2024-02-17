@@ -297,7 +297,7 @@ warning ("WITH DEBUGGING");
         // Unable to set markup on Granite.ModeSwitch so fake a Granite acellerator tooltip for now.
         mode_switch = new Granite.ModeSwitch.from_icon_name (
             "edit-symbolic",
-            "head-thinking-symbolic"
+            "system-run-symbolic"
         ) {
             margin_end = 12,
             margin_start = 12,
