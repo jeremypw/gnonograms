@@ -20,9 +20,6 @@
 public class Gnonograms.Controller : GLib.Object {
     public signal void quit_app ();
 
-    private const string SETTINGS_SCHEMA_ID = "com.github.jeremypw.gnonograms.settings";
-    private const string SAVED_STATE_SCHEMA_ID = "com.github.jeremypw.gnonograms.saved-state";
-
     public Gtk.Window window { get { return (Gtk.Window)view;}}
     public GameState game_state { get; set; }
     public Dimensions dimensions { get; set; }
@@ -38,8 +35,6 @@ public class Gnonograms.Controller : GLib.Object {
     private Model model;
     private Solver? solver;
     private SimpleRandomGameGenerator? generator;
-    private GLib.Settings? settings = null;
-    private GLib.Settings? saved_state = null;
     private Gnonograms.History history;
     public string current_game_path { get; private set; default = ""; }
     private string saved_games_folder;
@@ -73,15 +68,6 @@ public class Gnonograms.Controller : GLib.Object {
         notify["current_game_path"].connect (() => {
             view.update_title ();
         });
-
-        if (SettingsSchemaSource.get_default ().lookup (SETTINGS_SCHEMA_ID, true) != null &&
-            SettingsSchemaSource.get_default ().lookup (SAVED_STATE_SCHEMA_ID, true) != null) {
-
-            settings = new Settings (SETTINGS_SCHEMA_ID);
-            saved_state = new Settings (SAVED_STATE_SCHEMA_ID);
-        } else {
-            warning ("not found one of the schemas");
-        }
 
         var data_home_folder_current = Path.build_path (
             Path.DIR_SEPARATOR_S,

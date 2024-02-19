@@ -1,6 +1,6 @@
 app-id: com.github.jeremypw.gnonograms
 runtime: io.elementary.Platform
-runtime-version: '7'
+runtime-version: 'daily'
 sdk: io.elementary.Sdk
 command: com.github.jeremypw.gnonograms
 finish-args:

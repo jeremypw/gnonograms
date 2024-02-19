@@ -52,6 +52,24 @@
             Fade clue if corresponding region is completed without definite error.
           </description>
         </key>
+
+        <key type="s" name="filled-color">
+          <default>"#180297"</default>
+          <summary>Color of filled cell when solving</summary>
+          <description>
+            The color used to mark a filled cell when solving a gnonogram puzzle.
+            Defaults to Gnonograms Purple.
+          </description>
+        </key>
+
+        <key type="s" name="empty-color">
+          <default>"#ffff00"</default>
+          <summary>Color of empty cell when solving</summary>
+          <description>
+            The color used to mark a empty cell when solving a gnonogram puzzle.
+            Defaults to yellow
+          </description>
+        </key>
     </schema>
 
     <schema path="/com/github/jeremypw/gnonograms/saved-state/" id="com.github.jeremypw.gnonograms.saved-state" gettext-domain="com.github.jeremypw.gnonograms">

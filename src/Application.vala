@@ -16,8 +16,11 @@
  *
  *  Author: Jeremy Wootten <jeremywootten@gmail.com>
  */
+namespace Gnonograms {
+    public GLib.Settings saved_state;
+    public GLib.Settings settings;
 
-public class Gnonograms.App : Gtk.Application {
+public class App : Gtk.Application {
     private Controller controller;
 
     public App () {
@@ -32,6 +35,9 @@ public class Gnonograms.App : Gtk.Application {
         GLib.Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALEDIR);
         GLib.Intl.bind_textdomain_codeset (Config.GETTEXT_PACKAGE, "UTF-8");
         GLib.Intl.textdomain (Config.GETTEXT_PACKAGE);
+
+        saved_state = new GLib.Settings (Config.APP_ID + ".saved-state");
+        settings = new GLib.Settings (Config.APP_ID + ".settings");
 
         SimpleAction quit_action = new SimpleAction ("quit", null);
         quit_action.activate.connect (() => {
@@ -92,4 +98,5 @@ public static int main (string[] args) {
 
     var app = new Gnonograms.App ();
     return app.run (args);
+}
 }

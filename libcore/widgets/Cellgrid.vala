@@ -92,7 +92,18 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         colors = new Gdk.RGBA[2, 3];
         grid_color.parse (Gnonograms.GRID_COLOR);
         cell_pattern_type = CellPatternType.CELL;
-        set_colors ();
+        // Set default colors
+        set_colors_for_state (
+            GameState.SETTING,
+            Gnonograms.SETTING_FILLED_COLOR,
+            Gnonograms.SETTING_EMPTY_COLOR
+        );
+
+        set_colors_for_state (
+            GameState.SOLVING,
+            Gnonograms.settings.get_string ("filled-color"),
+            Gnonograms.settings.get_string ("empty-color")
+        );
 
         var motion_controller = new Gtk.EventControllerMotion ();
         add_controller (motion_controller);
@@ -138,16 +149,16 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         size_updated ();
     }
 
-    private void set_colors () {
-        int setting = (int)GameState.SETTING;
-        colors[setting, (int)CellState.UNKNOWN].parse (Gnonograms.UNKNOWN_COLOR);
-        colors[setting, (int)CellState.EMPTY].parse (Gnonograms.SETTING_EMPTY_COLOR);
-        colors[setting, (int)CellState.FILLED].parse (Gnonograms.SETTING_FILLED_COLOR);
-
-        int solving = (int)GameState.SOLVING;
-        colors[solving, (int)CellState.UNKNOWN].parse (Gnonograms.UNKNOWN_COLOR);
-        colors[solving, (int)CellState.EMPTY].parse (Gnonograms.SOLVING_EMPTY_COLOR);
-        colors[solving, (int)CellState.FILLED].parse (Gnonograms.SOLVING_FILLED_COLOR);
+    public void set_colors_for_state (
+        GameState gs,
+        string filled_color,
+        string empty_color,
+        string unknown_color = Gnonograms.UNKNOWN_COLOR
+    ) {
+        var setting = (int) gs;
+        colors[setting, (int) CellState.UNKNOWN].parse (unknown_color);
+        colors[setting, (int) CellState.EMPTY].parse (empty_color);
+        colors[setting, (int) CellState.FILLED].parse (filled_color);
     }
 
     private void size_updated () {
