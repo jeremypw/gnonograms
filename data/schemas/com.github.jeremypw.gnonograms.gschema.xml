@@ -54,7 +54,7 @@
         </key>
 
         <key type="s" name="filled-color">
-          <default>"#180297"</default>
+          <default>"rgb(24,18,151)"</default>
           <summary>Color of filled cell when solving</summary>
           <description>
             The color used to mark a filled cell when solving a gnonogram puzzle.
@@ -63,7 +63,7 @@
         </key>
 
         <key type="s" name="empty-color">
-          <default>"#ffff00"</default>
+          <default>"rgb(255,255,0)"</default>
           <summary>Color of empty cell when solving</summary>
           <description>
             The color used to mark a empty cell when solving a gnonogram puzzle.
