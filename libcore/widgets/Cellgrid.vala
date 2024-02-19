@@ -92,18 +92,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         colors = new Gdk.RGBA[2, 3];
         grid_color.parse (Gnonograms.GRID_COLOR);
         cell_pattern_type = CellPatternType.CELL;
-        // Set default colors
-        set_colors_for_state (
-            GameState.SETTING,
-            Gnonograms.SETTING_FILLED_COLOR,
-            Gnonograms.SETTING_EMPTY_COLOR
-        );
-
-        set_colors_for_state (
-            GameState.SOLVING,
-            Gnonograms.settings.get_string ("filled-color"),
-            Gnonograms.settings.get_string ("empty-color")
-        );
+        set_colors ();
 
         var motion_controller = new Gtk.EventControllerMotion ();
         add_controller (motion_controller);
@@ -132,11 +121,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         view.notify["cell-size"].connect (size_updated);
         view.controller.notify["dimensions"].connect (size_updated);
         view.controller.notify["game-state"].connect (() => {
-            var gs = view.controller.game_state;
-            unknown_color = colors[(int)gs, (int)CellState.UNKNOWN];
-            fill_color = colors[(int)gs, (int)CellState.FILLED];
-            empty_color = colors[(int)gs, (int)CellState.EMPTY];
-            cell_pattern_type = CellPatternType.UNDEFINED; /* Causes refresh of existing pattern */
+            on_game_state_changed ();
         });
 
         view.model.changed.connect (() => {
@@ -149,16 +134,24 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         size_updated ();
     }
 
-    public void set_colors_for_state (
-        GameState gs,
-        string filled_color,
-        string empty_color,
-        string unknown_color = Gnonograms.UNKNOWN_COLOR
-    ) {
-        var setting = (int) gs;
-        colors[setting, (int) CellState.UNKNOWN].parse (unknown_color);
-        colors[setting, (int) CellState.EMPTY].parse (empty_color);
-        colors[setting, (int) CellState.FILLED].parse (filled_color);
+    public void set_colors () {
+        var setting = (int) GameState.SETTING;
+        colors[setting, (int) CellState.UNKNOWN].parse (Gnonograms.UNKNOWN_COLOR);
+        colors[setting, (int) CellState.EMPTY].parse (Gnonograms.SETTING_EMPTY_COLOR);
+        colors[setting, (int) CellState.FILLED].parse (Gnonograms.SETTING_FILLED_COLOR);
+        setting = (int) GameState.SOLVING;
+        colors[setting, (int) CellState.UNKNOWN].parse (Gnonograms.UNKNOWN_COLOR);
+        colors[setting, (int) CellState.EMPTY].parse (settings.get_string ("empty-color"));
+        colors[setting, (int) CellState.FILLED].parse (settings.get_string ("filled-color"));
+        on_game_state_changed ();
+    }
+
+    private void on_game_state_changed () {
+        var gs = view.controller.game_state;
+        unknown_color = colors[(int)gs, (int)CellState.UNKNOWN];
+        fill_color = colors[(int)gs, (int)CellState.FILLED];
+        empty_color = colors[(int)gs, (int)CellState.EMPTY];
+        cell_pattern_type = CellPatternType.UNDEFINED; /* Causes refresh of existing pattern */
     }
 
     private void size_updated () {

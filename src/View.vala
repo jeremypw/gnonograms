@@ -267,12 +267,22 @@ warning ("WITH DEBUGGING");
             controller.generator_grade = app_popover.grade;
             controller.dimensions = {app_popover.columns, app_popover.rows};
             controller.game_name = app_popover.title; // Must come after changing dimensions
+            settings.set_string ("filled-color", app_popover.filled_color);
+            settings.set_string ("empty-color", app_popover.empty_color);
+            // Wait for settings to update
+            Idle.add (() => {
+                cell_grid.set_colors ();
+                cell_grid.queue_draw (); 
+                return Source.REMOVE;
+            });
         });
         app_popover.show.connect (() => { /* Allow parent to set values first */
             app_popover.grade = controller.generator_grade;
             app_popover.rows = controller.dimensions.height;
             app_popover.columns = controller.dimensions.width;
             app_popover.title = controller.game_name;
+            app_popover.filled_color = settings.get_string ("filled-color");
+            app_popover.empty_color = settings.get_string ("empty-color");
         });
 
         var menu_image =  new Gtk.Image.from_icon_name ("open-menu") {

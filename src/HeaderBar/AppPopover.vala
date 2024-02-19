@@ -23,6 +23,8 @@ public class Gnonograms.AppPopover : Gtk.Popover {
     private Gtk.SpinButton row_setting;
     private Gtk.SpinButton column_setting;
     private Gtk.Entry title_setting;
+    private Gtk.ColorDialogButton filled_color_setting;
+    private Gtk.ColorDialogButton empty_color_setting;
 
     public Difficulty grade {
         get {
@@ -64,7 +66,34 @@ public class Gnonograms.AppPopover : Gtk.Popover {
         }
     }
 
+    public string filled_color {
+        owned get {
+            return filled_color_setting.get_rgba ().to_string ();
+        }
+
+        set {
+            Gdk.RGBA color = {};
+            if (color.parse (value)) {
+                filled_color_setting.set_rgba (color);
+            }
+        }
+    }
+
+    public string empty_color {
+        owned get {
+            return empty_color_setting.get_rgba ().to_string ();
+        }
+
+        set {
+            Gdk.RGBA color = {};
+            if (color.parse (value)) {
+                empty_color_setting.set_rgba (color);
+            }
+        }
+    }
+
     construct {
+        autohide = false;
         grade_setting = new Gtk.ComboBoxText ();
         foreach (Difficulty d in Difficulty.all_human ()) {
             grade_setting.append (((uint)d).to_string (), d.to_string ());
@@ -94,6 +123,9 @@ public class Gnonograms.AppPopover : Gtk.Popover {
             placeholder_text = _("Enter title of game here")
         };
 
+        filled_color_setting = new Gtk.ColorDialogButton (new Gtk.ColorDialog ());
+        empty_color_setting = new Gtk.ColorDialogButton (new Gtk.ColorDialog ());
+
         var settings_grid = new Gtk.Grid () {
             orientation = Gtk.Orientation.VERTICAL,
             row_spacing = 12,
@@ -109,6 +141,10 @@ public class Gnonograms.AppPopover : Gtk.Popover {
         settings_grid.attach (row_setting, 1, 2, 1);
         settings_grid.attach (new Gtk.Label (_("Columns:")), 0, 3, 1);
         settings_grid.attach (column_setting, 1, 3, 1);
+        settings_grid.attach (new Gtk.Label (_("Filled Color:")), 0, 4, 1);
+        settings_grid.attach (filled_color_setting, 1, 4, 1);
+        settings_grid.attach (new Gtk.Label (_("Empty Color:")), 0, 5, 1);
+        settings_grid.attach (empty_color_setting, 1, 5, 1);
 
         var cancel_button = new Gtk.Button.with_label (_("Cancel"));
         var apply_button = new Gtk.Button.with_label (_("Apply"));
