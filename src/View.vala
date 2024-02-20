@@ -186,8 +186,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     }
 
     construct {
-        resizable = false;
-
+        set_default_size (900, 700);
         var granite_settings = Granite.Settings.get_default ();
         var gtk_settings = Gtk.Settings.get_default ();
         var prefer_dark = granite_settings.prefers_color_scheme == DARK;
@@ -384,6 +383,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             column_spacing = GRID_COLUMN_SPACING,
             valign = Gtk.Align.END,
             halign = Gtk.Align.END,
+            hexpand = true,
+            vexpand = true
         };
         main_grid.attach (toast_overlay, 0, 0, 1, 1); /* show temporary messages */
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for dimensions.height*/
@@ -490,7 +491,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             calc_cell_size ();
         });
 
-       cell_grid.leave.connect (() => {
+        cell_grid.leave.connect (() => {
             row_clue_box.unhighlight_all ();
             column_clue_box.unhighlight_all ();
         });
@@ -517,46 +518,24 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         });
 
         cell_grid.stop_drawing.connect (stop_painting);
+        notify["default-width"].connect (calc_cell_size);
+        notify["default-height"].connect (calc_cell_size);
     }
 
     private void calc_cell_size () {
-        // Update cell-size if required to fit on screen but without changing window size unnecessarily
-        // The dimensions may have increased or decreased so may need to increase or decrease cell size
-        // It is assumed up to 90% of the screen area can be used
+        // Update cell-size if required to fit in window
         var n_cols = controller.dimensions.width;
         var n_rows = controller.dimensions.height;
 
-        var monitor_area = Gdk.Rectangle () {
-            width = 1024,
-            height = 768
-        };
 
-        Gdk.Surface? surface = get_surface ();
-        if (surface != null) {
-            monitor_area = Utils.get_monitor_area (surface);
-        }
+        var grid_width = this.default_width;
+        int header_height, nat;
+        header_bar.measure (VERTICAL, grid_width, out header_height, out nat, null, null);
+        var grid_height = this.default_height - header_height;
+        var max_cell_width = grid_width / (n_cols * (1.3));
 
-        var available_screen_width = monitor_area.width * 0.9 - GRID_BORDER - GRID_COLUMN_SPACING;
-        var max_cell_width = available_screen_width / (n_cols * (1.3));
-        var available_grid_height =
-            (int)(surface.get_height () -
-            header_bar.get_allocated_height () -
-            GRID_BORDER);
-
-        var opt_cell_height = (int)(available_grid_height / (n_rows * (1.4)));
-        var available_screen_height =
-            monitor_area.height * 0.9 -
-            header_bar.get_allocated_height () -
-            GRID_BORDER;
-
-        var max_cell_height = available_screen_height / (n_rows * (1.4));
-
-        var max_cell_size = (int)(double.min (max_cell_width, max_cell_height));
-        if (max_cell_size < cell_size) {
-            cell_size = max_cell_size;
-        } else if (opt_cell_height > 0 && cell_size < opt_cell_height) {
-            cell_size = int.min (max_cell_size, opt_cell_height);
-        }
+        var max_cell_height = grid_height / (n_rows * (1.4));
+        cell_size = (int) (double.min (max_cell_width, max_cell_height)).clamp (8, 128);
     }
 
     public string[] get_clues (bool is_column) {

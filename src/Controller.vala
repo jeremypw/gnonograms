@@ -102,6 +102,11 @@ public class Gnonograms.Controller : GLib.Object {
         }
 
         view.present ();
+        /*
+        * This is very finicky. Bind size after present else set_titlebar gives us bad sizes
+        */
+        saved_state.bind ("window-height", view, "default-height", SettingsBindFlags.DEFAULT);
+        saved_state.bind ("window-width", view, "default-width", SettingsBindFlags.DEFAULT);
 
         bind_property (
             "generator-grade",
@@ -228,11 +233,7 @@ public class Gnonograms.Controller : GLib.Object {
         view.cell_size = 48;
         current_game_path = "";
         if (saved_state != null) {
-            int cell_size = saved_state.get_int ("cell-size");
             current_game_path = saved_state.get_string ("current-game-path");
-            if (cell_size > 0) {
-                view.cell_size = cell_size;
-            }
         }
 
         restore_dimensions ();

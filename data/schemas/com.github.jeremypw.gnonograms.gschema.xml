@@ -81,25 +81,21 @@
           </description>
         </key>
 
-        <key type="(ii)" name="window-position">
-          <default>(0, 0)</default>
-          <summary>Position of the window</summary>
-          <description>
-            The x and y coordinate of the window origin.
-          </description>
+        <key name="window-height" type="i">
+          <default>720</default>
+          <summary>Most recent window height</summary>
+          <description>Most recent window height</description>
+        </key>
+        <key name="window-width" type="i">
+          <default>1024</default>
+          <summary>Most recent window width</summary>
+          <description>Most recent window width</description>
         </key>
         <key type="s" name="current-game-path">
           <default>''</default>
           <summary>Path to game currently being played</summary>
           <description>
             The location where the current game is stored (if it is not an unsaved game).
-          </description>
-        </key>
-        <key type="i" name="cell-size">
-          <default>32</default>
-          <summary>Size of individual cells</summary>
-          <description>
-            The width and height, in pixels, of the square cells making up a puzzle grid).
           </description>
         </key>
     </schema>
