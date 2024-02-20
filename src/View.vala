@@ -532,9 +532,9 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         int header_height, nat;
         header_bar.measure (VERTICAL, grid_width, out header_height, out nat, null, null);
         var grid_height = this.default_height - header_height;
-        var max_cell_width = grid_width / (n_cols * (1.3));
+        var max_cell_width = grid_width / (n_cols * (1.25));
 
-        var max_cell_height = grid_height / (n_rows * (1.4));
+        var max_cell_height = grid_height / (n_rows * (1.35));
         cell_size = (int) (double.min (max_cell_width, max_cell_height)).clamp (8, 128);
     }
 

@@ -19,6 +19,7 @@
 
 public class Gnonograms.ClueBox : Gtk.Box {
     public unowned View view { get; construct; }
+    public int font_size { get; private set; }
     public uint n_cells { get; set; default = 0; } // The number of cells each clue addresses, monitored by clues
     private Gee.ArrayList<Clue> clues;
 
@@ -55,18 +56,14 @@ public class Gnonograms.ClueBox : Gtk.Box {
                 append (clue.label);
             }
 
-            set_size ();
+            // set_size ();
         });
 
         view.notify["cell-size"].connect (set_size);
     }
 
     private void set_size () {
-        if (orientation == HORIZONTAL) {
-            height_request = (int) ((double)(view.controller.dimensions.height * view.cell_size) / 3.0);
-        } else {
-            width_request = (int) ((double) (view.controller.dimensions.width * view.cell_size) / 3.0);
-        }
+        font_size = (int) ((double) view.cell_size * 0.525);
     }
 
     public string[] get_clue_texts () {

@@ -56,19 +56,9 @@ class Gnonograms.Clue : Object {
 
         text = "0";
 
-        label.realize.connect_after (() => {
-            _fontsize = (int)((double)cluebox.view.cell_size * 0.4);
-            update_markup ();
-        });
-
-        cluebox.notify["n_cells"].connect (() => {
-            update_tooltip ();
-        });
-
-        cluebox.view.notify["cell-size"].connect (() => {
-            _fontsize = (int)((double)cluebox.view.cell_size * 0.4);
-            update_markup ();
-        });
+        label.realize.connect_after (update_markup);
+        cluebox.notify["n_cells"].connect (update_tooltip);
+        cluebox.notify["font-size"].connect (update_markup);
     }
 
     public void highlight (bool is_highlight) {
@@ -214,12 +204,12 @@ class Gnonograms.Clue : Object {
     }
 
     private void update_markup () {
-        label.set_markup ("<span font='%i'>".printf (_fontsize) + get_markup () + "</span>");
+        label.set_markup ("<span font='%i'>".printf (cluebox.font_size) + get_markup () + "</span>");
         update_tooltip ();
     }
 
     private void update_tooltip () {
-        label.set_tooltip_markup ("<span font='%i'>".printf (_fontsize) +
+        label.set_tooltip_markup ("<span font='%i'>".printf (cluebox.font_size) +
             _("Freedom = %u").printf (cluebox.n_cells - Utils.blockextent_from_clue (_text)) +
             "</span>"
         );
