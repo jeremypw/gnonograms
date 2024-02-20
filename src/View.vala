@@ -139,9 +139,15 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     static construct {
         app = (Gtk.Application)(Application.get_default ());
 #if WITH_DEBUGGING
-warning ("WITH DEBUGGING");
-        view_action_entries += ActionEntry () { name = ACTION_DEBUG_ROW, activate = action_debug_row };
-        view_action_entries += ActionEntry () { name = ACTION_DEBUG_COL, activate = action_debug_col };
+        warning ("WITH DEBUGGING");
+        view_action_entries += ActionEntry () {
+            name = ACTION_DEBUG_ROW, 
+            activate = action_debug_row
+        };
+        view_action_entries += ActionEntry () { 
+            name = ACTION_DEBUG_COL, 
+            activate = action_debug_col 
+        };
 #endif
         action_accelerators.set (ACTION_UNDO, "<Ctrl>Z");
         action_accelerators.set (ACTION_REDO, "<Ctrl><Shift>Z");
@@ -181,19 +187,15 @@ warning ("WITH DEBUGGING");
 
     construct {
         resizable = false;
+
         var granite_settings = Granite.Settings.get_default ();
         var gtk_settings = Gtk.Settings.get_default ();
-
-        if (gtk_settings != null && granite_settings != null) {
-            gtk_settings.gtk_application_prefer_dark_theme =
-                granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
-
-            granite_settings.notify["prefers-color-scheme"].connect (() => {
-                gtk_settings.gtk_application_prefer_dark_theme =
-                    granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
-            });
-        }
-
+        var prefer_dark = granite_settings.prefers_color_scheme == DARK;
+        gtk_settings.gtk_application_prefer_dark_theme = prefer_dark;
+        granite_settings.notify["prefers-color-scheme"].connect (() => {
+            prefer_dark = granite_settings.prefers_color_scheme == DARK;
+            gtk_settings.gtk_application_prefer_dark_theme = prefer_dark;
+        });
 
         var view_actions = new GLib.SimpleActionGroup ();
         view_actions.add_action_entries (view_action_entries, this);
@@ -290,7 +292,9 @@ warning ("WITH DEBUGGING");
         };
         menu_button = new Gtk.MenuButton () {
             tooltip_markup = Granite.markup_accel_tooltip (
-                app.get_accels_for_action (ACTION_PREFIX + ACTION_OPTIONS), _("Options")
+                app.get_accels_for_action (
+                    ACTION_PREFIX + ACTION_OPTIONS), 
+                    _("Options")
             ),
             child = menu_image,
             has_frame = false
@@ -458,9 +462,11 @@ warning ("WITH DEBUGGING");
         });
 
         notify["can-go-back"].connect (() => {
-            check_correct_button.sensitive = can_go_back && controller.game_state == GameState.SOLVING;
+            check_correct_button.sensitive = can_go_back &&
+                                             controller.game_state == GameState.SOLVING;
             undo_button.sensitive = can_go_back;
-            restart_destructive |= can_go_back; /* May be destructive even if no history (e.g. after automatic solve) */
+            /* May be destructive even if no history (e.g. after automatic solve) */
+            restart_destructive |= can_go_back; 
         });
 
         notify["can-go-forward"].connect (() => {
@@ -491,10 +497,16 @@ warning ("WITH DEBUGGING");
 
         cell_grid.start_drawing.connect ((button, state, double_click) => {
             if (double_click || button == Gdk.BUTTON_MIDDLE) {
-                drawing_with_state = controller.game_state == SOLVING ? CellState.UNKNOWN : CellState.EMPTY;
+                if (controller.game_state == SOLVING) {
+                    drawing_with_state = CellState.UNKNOWN;
+                } else {
+                    drawing_with_state = CellState.EMPTY;
+                }
             } else {
+                var shift = (state & Gdk.ModifierType.SHIFT_MASK) > 0;
                 if (button == Gdk.BUTTON_SECONDARY ||
-                    ((state & Gdk.ModifierType.SHIFT_MASK) > 0) && button == Gdk.BUTTON_PRIMARY) {
+                    button == Gdk.BUTTON_PRIMARY && shift) {
+
                     drawing_with_state = CellState.EMPTY;
                 } else {
                     drawing_with_state = CellState.FILLED;
@@ -526,10 +538,17 @@ warning ("WITH DEBUGGING");
 
         var available_screen_width = monitor_area.width * 0.9 - GRID_BORDER - GRID_COLUMN_SPACING;
         var max_cell_width = available_screen_width / (n_cols * (1.3));
-        var available_grid_height = (int)(surface.get_height () - header_bar.get_allocated_height () - GRID_BORDER);
-        var opt_cell_height = (int)(available_grid_height / (n_rows * (1.4)));
+        var available_grid_height = 
+            (int)(surface.get_height () - 
+            header_bar.get_allocated_height () - 
+            GRID_BORDER);
 
-        var available_screen_height = monitor_area.height * 0.9 - header_bar.get_allocated_height () - GRID_BORDER;
+        var opt_cell_height = (int)(available_grid_height / (n_rows * (1.4)));
+        var available_screen_height = 
+            monitor_area.height * 0.9 - 
+            header_bar.get_allocated_height () - 
+            GRID_BORDER;
+
         var max_cell_height = available_screen_height / (n_rows * (1.4));
 
         var max_cell_size = (int)(double.min (max_cell_width, max_cell_height));
@@ -640,7 +659,11 @@ warning ("WITH DEBUGGING");
         restart_destructive = sensitive && !model.is_blank (controller.game_state);
         undo_button.sensitive = sensitive && can_go_back;
         redo_button.sensitive = sensitive && can_go_forward;
-        check_correct_button.sensitive = sensitive && controller.game_state == GameState.SOLVING && can_go_back;
+        check_correct_button.sensitive = 
+            sensitive && 
+            controller.game_state == GameState.SOLVING && 
+            can_go_back;
+
         hint_button.sensitive = sensitive && controller.game_state == GameState.SOLVING;
         auto_solve_button.sensitive = sensitive;
     }
@@ -673,7 +696,10 @@ warning ("WITH DEBUGGING");
         }
     }
 
-    private void make_move_at_cell (CellState state = drawing_with_state, Cell target = current_cell) {
+    private void make_move_at_cell (
+        CellState state = drawing_with_state, 
+        Cell target = current_cell
+    ) {
         if (target == NULL_CELL) {
             return;
         }
@@ -697,8 +723,14 @@ warning ("WITH DEBUGGING");
         var col = current_cell.col;
 
         if (controller.game_state == GameState.SETTING) {
-            row_clue_box.update_clue_text (row, model.get_label_text_from_solution (row, false));
-            column_clue_box.update_clue_text (col, model.get_label_text_from_solution (col, true));
+            row_clue_box.update_clue_text (
+                row, 
+                model.get_label_text_from_solution (row, false)
+            );
+            column_clue_box.update_clue_text (
+                col, 
+                model.get_label_text_from_solution (col, true)
+            );
         } else {
             update_clue_complete (row, false);
             update_clue_complete (col, true);
@@ -714,12 +746,16 @@ warning ("WITH DEBUGGING");
 
     private uint progress_timeout_id = 0;
     private void schedule_show_progress (Cancellable cancellable) {
-        progress_timeout_id = Timeout.add_full (Priority.HIGH_IDLE, PROGRESS_DELAY_MSEC, () => {
-            progress_indicator.cancellable = cancellable;
-            progress_stack.set_visible_child_name ("Progress");
-            progress_timeout_id = 0;
-            return false;
-        });
+        progress_timeout_id = Timeout.add_full (
+            Priority.HIGH_IDLE, 
+            PROGRESS_DELAY_MSEC, 
+            () => {
+                progress_indicator.cancellable = cancellable;
+                progress_stack.set_visible_child_name ("Progress");
+                progress_timeout_id = 0;
+                return false;
+            }
+        );
     }
 
     private void stop_painting () {
