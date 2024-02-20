@@ -352,11 +352,9 @@ warning ("WITH DEBUGGING");
 
         row_clue_box = new ClueBox (Gtk.Orientation.VERTICAL, this) {
             halign = Gtk.Align.END,
-            vexpand = false
         };
         column_clue_box = new ClueBox (Gtk.Orientation.HORIZONTAL, this) {
             valign = Gtk.Align.END,
-            hexpand = false
         };
         cell_grid = new CellGrid (this) {
             halign = START,
@@ -371,7 +369,6 @@ warning ("WITH DEBUGGING");
         horiz_sizegroup.add_widget (cell_grid);
 
         toast_overlay = new Adw.ToastOverlay () {
-            vexpand = false,
             valign = Gtk.Align.CENTER,
             halign = Gtk.Align.CENTER,
             child = progress_stack
@@ -380,13 +377,12 @@ warning ("WITH DEBUGGING");
         main_grid = new Gtk.Grid () {
             focusable = true, // Needed for key controller to work
             row_spacing = 0,
-            margin_bottom = margin_end = GRID_BORDER,
             column_spacing = GRID_COLUMN_SPACING,
-            valign = Gtk.Align.START,
-            halign = Gtk.Align.START
+            valign = Gtk.Align.END,
+            halign = Gtk.Align.END,
         };
         main_grid.attach (toast_overlay, 0, 0, 1, 1); /* show temporary messages */
-        main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues fordimensions.height*/
+        main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for dimensions.height*/
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
         main_grid.attach (cell_grid, 1, 1, 1, 1);
 
@@ -793,6 +789,7 @@ warning ("WITH DEBUGGING");
             cell_size += (int)delta;
         } else {
             cell_size -= (int)delta;
+            //FIXME This is a hack to fix redrawing the window when the grid gets smaller. For some
             //FIXME This is a hack to fix redrawing the window when the grid gets smaller. For some
             //reason the window only properly redraws when the size increases.  Review for later versions of Gtk4/Elementary
             cell_size -= (int)delta;
