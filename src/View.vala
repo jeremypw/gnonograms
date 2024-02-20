@@ -29,26 +29,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private const string PAINT_EMPTY_ACCEL = "e"; // Must be lower case
     private const string PAINT_UNKNOWN_ACCEL = "x"; // Must be lower case
 
-#if WITH_DEBUGGING
-    public signal void debug_request (uint idx, bool is_column);
-#endif
-
-    public Model model { get; construct; }
-    public Controller controller { get; construct; }
-    public Cell current_cell { get; set; }
-    public Cell previous_cell { get; set; }
-    public Difficulty generator_grade { get; set; }
-    public Difficulty game_grade { get; set; default = Difficulty.UNDEFINED;}
-    public int cell_size { get; set; default = 32; }
-    public string game_name { get { return controller.game_name; } }
-    public bool strikeout_complete { get; set; }
-    public bool readonly { get; set; default = false;}
-    public bool can_go_back { get; set; }
-    public bool can_go_forward { get; set; }
-    public bool restart_destructive { get; set; default = false;}
-
-    public SimpleActionGroup view_actions { get; construct; }
-    public static Gee.MultiMap<string, string> action_accelerators = new Gee.HashMultiMap<string, string> ();
     public const string ACTION_GROUP = "win";
     public const string ACTION_PREFIX = ACTION_GROUP + ".";
     public const string ACTION_UNDO = "action-undo";
@@ -77,6 +57,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     public const string ACTION_DEBUG_ROW = "action-debug-row";
     public const string ACTION_DEBUG_COL = "action-debug-col";
 #endif
+    public static Gee.MultiMap<string, string> action_accelerators;
+    public static Gtk.Application app;
     private static GLib.ActionEntry [] view_action_entries = {
         {ACTION_UNDO, action_undo},
         {ACTION_REDO, action_redo},
@@ -102,7 +84,25 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         {ACTION_OPTIONS, action_options}
     };
 
-    public static Gtk.Application app;
+#if WITH_DEBUGGING
+    public signal void debug_request (uint idx, bool is_column);
+#endif
+
+    public Model model { get; construct; }
+    public Controller controller { get; construct; }
+    public Cell current_cell { get; set; }
+    public Cell previous_cell { get; set; }
+    public Difficulty generator_grade { get; set; }
+    public Difficulty game_grade { get; set; default = Difficulty.UNDEFINED;}
+    public int cell_size { get; set; default = 32; }
+    public string game_name { get { return controller.game_name; } }
+    public bool strikeout_complete { get; set; }
+    public bool readonly { get; set; default = false;}
+    public bool can_go_back { get; set; }
+    public bool can_go_forward { get; set; }
+    public bool restart_destructive { get; set; default = false;}
+    public SimpleActionGroup view_actions { get; construct; }
+
     private ClueBox row_clue_box;
     private ClueBox column_clue_box;
     private CellGrid cell_grid;
@@ -137,6 +137,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     }
 
     static construct {
+        action_accelerators = new Gee.HashMultiMap<string, string> ();
         app = (Gtk.Application)(Application.get_default ());
 #if WITH_DEBUGGING
         warning ("WITH DEBUGGING");
@@ -430,9 +431,21 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         child = main_grid;
 
         var flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
-        bind_property ("restart-destructive", restart_button, "restart-destructive", BindingFlags.SYNC_CREATE);
-        bind_property ("current-cell", cell_grid, "current-cell", BindingFlags.BIDIRECTIONAL);
-        bind_property ("previous-cell", cell_grid, "previous-cell", BindingFlags.BIDIRECTIONAL);
+        bind_property (
+            "restart-destructive",
+            restart_button, "restart-destructive",
+            BindingFlags.SYNC_CREATE
+        );
+        bind_property (
+            "current-cell",
+            cell_grid, "current-cell",
+            BindingFlags.BIDIRECTIONAL
+        );
+        bind_property (
+            "previous-cell",
+            cell_grid, "previous-cell",
+            BindingFlags.BIDIRECTIONAL
+        );
 
         mode_switch.notify["active"].connect (() => {
             controller.game_state = mode_switch.active ? GameState.SOLVING : GameState.SETTING;
@@ -554,11 +567,17 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
     public void update_clues_from_solution () {
         for (int r = 0; r < controller.dimensions.height; r++) {
-            row_clue_box.update_clue_text (r, model.get_label_text_from_solution (r, false));
+            row_clue_box.update_clue_text (
+                r,
+                model.get_label_text_from_solution (r, false)
+            );
         }
 
         for (int c = 0; c < controller.dimensions.width; c++) {
-            column_clue_box.update_clue_text (c, model.get_label_text_from_solution (c, true));
+            column_clue_box.update_clue_text (
+                c,
+                model.get_label_text_from_solution (c, true)
+            );
         }
 
         update_all_labels_completeness ();

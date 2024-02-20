@@ -226,9 +226,13 @@
     }
 
 #if WITH_DEBUGGING
-    public Gee.ArrayQueue<Move> debug (uint idx, bool is_column, string[] row_clues,
-                                       string[] col_clues, My2DCellArray working) {
-
+    public Gee.ArrayQueue<Move> debug (
+        uint idx,
+        bool is_column,
+        string[] row_clues,
+        string[] col_clues,
+        My2DCellArray working
+    ) {
         initialize (row_clues, col_clues, working, null);
 
         var moves = new Gee.ArrayQueue<Move> ();
@@ -259,7 +263,11 @@
     }
 #endif
 
-    public Gee.ArrayQueue<Move> hint (string[] row_clues, string[] col_clues, My2DCellArray working) {
+    public Gee.ArrayQueue<Move> hint (
+        string[] row_clues,
+        string[] col_clues,
+        My2DCellArray working
+    ) {
         initialize (row_clues, col_clues, working, null);
         bool changed = false;
         uint count = 0;
@@ -282,8 +290,8 @@
         }
 
         while (!changed && count < 2 &&
-               state != SolverState.ERROR) { /* May require two passes before a state changes */
-
+               state != SolverState.ERROR
+        ) { /* May require two passes before a state changes */
             changed = false;
             count++;
             foreach (Region r in regions) {
@@ -385,7 +393,6 @@
 
         while (state == SolverState.UNDEFINED) {
             changed_count++;
-
             if (!guesser.next_guess ()) {
                 state = SolverState.NO_SOLUTION;
                 if (best_guess.equal (NULL_CELL)) { // No improvement from last round
@@ -404,7 +411,6 @@
 
             result = yield simple_solver ();
             initial_state = state;
-
             if (initial_state == SolverState.NO_SOLUTION) {
                 empty = solution.count_state (CellState.EMPTY);
                 if (empty < min_empty_cells) {
@@ -421,7 +427,6 @@
             }
 
             contra = result;
-
             /* Try opposite to check whether ambiguous or unique */
             guesser.invert_previous_guess ();
             result = yield simple_solver ();
@@ -475,7 +480,7 @@
                             result = yield simple_solver ();
                             state = SolverState.AMBIGUOUS;
                         }
-                    } else if (initial_state == SolverState.ERROR) { // already checked for too may passes to contradiction.
+                    } else if (initial_state == SolverState.ERROR) {
                         guesser.initialize ();
                         /* Continue from this position */
                         state = SolverState.UNDEFINED;
@@ -534,7 +539,6 @@
     /** Only call if simple solver used **/
     private Difficulty passes_to_grade (uint passes) {
         Difficulty result;
-
         if (passes == 0) {
             result = Difficulty.UNDEFINED;
         } else if (state == SolverState.ADVANCED) {
@@ -665,7 +669,7 @@
                     c++;
                     cdir = 0;
                     rdir = -1;
-                     r--;
+                    r--;
                 } else if (rdir == -1 && r <= turn) { //back across bottom lh edge reached
                     r++;
                     turn++;

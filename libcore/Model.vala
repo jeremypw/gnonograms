@@ -64,7 +64,9 @@ public class Gnonograms.Model : GLib.Object {
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
                 cs = working_data.get_data_from_rc (r, c);
-                if (cs != CellState.UNKNOWN && cs != solution_data.get_data_from_rc (r, c)) {
+                if (cs != CellState.UNKNOWN &&
+                    cs != solution_data.get_data_from_rc (r, c)
+                ) {
                     count++;
                 }
             }
@@ -99,7 +101,10 @@ public class Gnonograms.Model : GLib.Object {
 
     public bool is_blank (GameState state) {
         if (state == GameState.SOLVING) {
-            return count_state (state, CellState.EMPTY) + count_state (state, CellState.FILLED) == 0;
+            var non_blank = count_state (state, CellState.EMPTY) +
+                            count_state (state, CellState.FILLED);
+
+            return non_blank == 0;
         } else {
             return count_state (state, CellState.FILLED) == 0;
         }
@@ -155,7 +160,10 @@ public class Gnonograms.Model : GLib.Object {
         return working_data.data2text (idx, length, is_column);
     }
 
-    public Gee.ArrayList<Block> get_complete_blocks_from_working (uint index, bool is_column) {
+    public Gee.ArrayList<Block> get_complete_blocks_from_working (
+        uint index,
+        bool is_column
+    ) {
         var csa = new CellState[is_column ? rows : cols];
         working_data.get_array (index, is_column, ref csa);
         return Utils.complete_block_array_from_cellstate_array (csa);
@@ -201,7 +209,10 @@ public class Gnonograms.Model : GLib.Object {
         return display_data.get_data_from_rc (r, c);
     }
 
-    private void set_row_data_from_string_array (string[] row_data_strings, My2DCellArray array) {
+    private void set_row_data_from_string_array (
+        string[] row_data_strings,
+        My2DCellArray array
+    ) {
         assert (row_data_strings.length == rows);
         int row = 0;
         foreach (var row_string in row_data_strings) {

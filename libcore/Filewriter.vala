@@ -98,13 +98,15 @@ public class Gnonograms.Filewriter : Object {
 
         var file = File.new_for_commandline_arg (game_path);
         if (file.query_exists () &&
-            !Utils.show_confirm_dialog (_("Overwrite %s").printf (game_path),
-                                        _("This action will destroy contents of that file"))) {
-
+            !Utils.show_confirm_dialog (
+                _("Overwrite %s").printf (game_path),
+                _("This action will destroy contents of that file"))
+        ) {
             throw new IOError.CANCELLED ("File exists");
         }
 
-        stream = FileStream.open (game_path, "w"); /* This requires local path, not a uri */
+        /* @game_path is local path, not a uri */
+        stream = FileStream.open (game_path, "w");
         if (stream == null) {
             throw new IOError.FAILED ("Could not open filestream to %s".printf (game_path));
         }

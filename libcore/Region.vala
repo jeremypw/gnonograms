@@ -100,7 +100,6 @@ public class Gnonograms.Region {
         this.grid = grid;
         uint max_len = uint.max (grid.rows, grid.cols);
         uint max_blocks = max_len / 2 + 2;
-
         status = new CellState[max_len];
         status_backup = new CellState[max_len];
         ranges = new int[max_blocks, 4];
@@ -118,11 +117,9 @@ public class Gnonograms.Region {
         this.is_column = is_column;
         this.n_cells = (int)n_cells;
         this.clue = clue;
-
         temp_status = new CellState[n_cells];
         temp_status2 = new CellState[n_cells];
         int[] clue_blocks = Utils.block_array_from_clue (clue);
-
         n_blocks = clue_blocks.length;
         can_be_empty_pointer = n_blocks; //flag for cell that may be empty
         is_finished_pointer = n_blocks + 1; //flag for finished cell (filled or empty?)
@@ -217,10 +214,8 @@ public class Gnonograms.Region {
          * */
         message = "";
         in_error = false;
-
         // Get external changes
         get_status ();
-
         //Is complete or has a (invalid) change been made by another region
         if (in_error) {
             return false;
@@ -494,7 +489,12 @@ public class Gnonograms.Region {
         while (current_index < n_cells) { //find a filled sub -region
             start_is_capped = false;
             end_is_capped = false;
-            current_index = seek_next_required_status (CellState.FILLED, current_index, n_cells, 1);
+            current_index = seek_next_required_status (
+                CellState.FILLED,
+                current_index,
+                n_cells,
+                1
+            );
 
             if (current_index == n_cells) {
                 break;
@@ -510,9 +510,14 @@ public class Gnonograms.Region {
                 start_is_capped = true; //edge cell
             }
 
-            length = count_consecutive_with_state_from (CellState.FILLED, current_index, true); //current_index not changed
-            int lastcell = current_index + length - 1; //last filled cell in this (partial) block
+            length = count_consecutive_with_state_from (
+                CellState.FILLED,
+                current_index,
+                true //current_index not changed
+            );
 
+            // @lastcell: last filled cell in this (partial) block
+            int lastcell = current_index + length - 1;
             if (lastcell == n_cells - 1 || status[lastcell + 1] == CellState.EMPTY) {
                 end_is_capped = true; //last cell is at edge
             }
@@ -524,8 +529,8 @@ public class Gnonograms.Region {
                 continue;
             } else { //find largest possible owner of this (partial) block
                 int largest = find_largest_possible_block_for_cell (current_index);
-
-                if (largest == length) {//there is **at least one** largest block that fits exactly.
+                //Test if there is **at least one** largest block that fits exactly
+                if (largest == length) {
                     // this region must therefore be complete
                     assign_and_cap_range (current_index, length);
                     current_index += length + 1;
@@ -601,7 +606,8 @@ public class Gnonograms.Region {
                 }
             }
 
-            current_index += length; //move past block  - if reaches here no operations have been performed on block
+            //move past block  - no operations have been performed on block
+            current_index += length;
         }
 
         return changed;
@@ -621,7 +627,8 @@ public class Gnonograms.Region {
                     continue; //is following cell empty?
             }
 
-            if (get_sole_owner (idx) < 0) { // if owner ambiguous, can only deal with single cell gap
+            // if owner ambiguous, can only deal with single cell gap
+            if (get_sole_owner (idx) < 0) {
                 // see if single cell gap which can be marked empty because
                 // to fill it would create a block larger than any permissible.
                 if (status[idx + 2] != CellState.FILLED) {
@@ -629,15 +636,21 @@ public class Gnonograms.Region {
                 }
                 // we have found a one cell gap
                 // calculate total length if gap were to be FILLED.
-                int block_length = count_consecutive_with_state_from (CellState.FILLED, idx + 2, true) +
-                              count_consecutive_with_state_from (CellState.FILLED, idx, false) + 1;
+                int block_length = (
+                    count_consecutive_with_state_from (
+                        CellState.FILLED, idx + 2, true
+                    ) +
+                    count_consecutive_with_state_from (
+                        CellState.FILLED, idx, false
+                    ) + 1
+                );
 
                 bool must_be_empty = true;
 
                 //look for a possible owner at least as long as combined length
                 for (int bl = 0; bl < n_blocks; bl++) {
-
-                    if (tags[idx, bl] && blocks[bl] >= block_length) { //possible owner found  - gap could be filled
+                    //If possible owner found  - gap could be filled
+                    if (tags[idx, bl] && blocks[bl] >= block_length) {
                         must_be_empty = false;
                         break;
                     }
@@ -692,13 +705,11 @@ public class Gnonograms.Region {
                     total_count = count_to_the_left + count_to_the_right;
 
                     if (total_count == 2) {
-
                         for (int i = 0; i < n_blocks; i++) {
-
                             if (tags[ptr, i] && blocks[i] <= length_to_the_right) {
-
                                 if (tags[idx, i] && blocks[i] <= length_to_the_left) {
-                                    must_not_be_empty = true; // only one block fits in both sides
+                                    // only one block fits in both sides
+                                    must_not_be_empty = true;
                                 }
                             }
                         }
@@ -713,7 +724,8 @@ public class Gnonograms.Region {
                 }
 
                 idx += 2; //skip gap
-            } else { //only one possible owner of first FILLED cell
+            } else {
+                //only one possible owner of first FILLED cell
                 int cell1 = idx; //start of gap
                 idx++;
 
@@ -727,7 +739,9 @@ public class Gnonograms.Region {
                 } else { //if start and end of gap have same owner, fill in the gap.
                     int owner = have_same_owner (cell1, idx);
                     if (owner >= 0) {
-                        changed = set_range_owner (owner, cell1, idx - cell1 + 1, true, false) || changed;
+                        changed = changed || set_range_owner (
+                            owner, cell1, idx - cell1 + 1, true, false
+                        );
                     }
 
                     idx--;
@@ -765,7 +779,8 @@ public class Gnonograms.Region {
                 }
 
                 int s = idx; //first cell with block i as possible owner
-                int l = count_contiguous_with_same_owner_from (i, idx); //length of contiguous cells having this block (i) as a possible owner.
+                //length of contiguous cells having this block (i) as a possible owner.
+                int l = count_contiguous_with_same_owner_from (i, idx);
 
                 if (l < blocks[i]) {
                     remove_block_from_range (i, s, l, 1); //block cannot be here
@@ -801,7 +816,6 @@ public class Gnonograms.Region {
         int end = start + length - 1;
 
         for (int i = 0; i < n_blocks; i++) {
-
             if (completed_blocks[i]) {
                 continue;
             }
@@ -845,7 +859,6 @@ public class Gnonograms.Region {
 
             //remove as possible owner blocks between first and last that are wrong length
             for (int i = first + 1; i < last; i++) {
-
                 if (blocks[i] == length) {
                     continue;
                 }
@@ -977,12 +990,18 @@ public class Gnonograms.Region {
         //current_index points to cell on the edge
         if (status[current_index] == CellState.FILLED) {
             //first cell is FILLED. Can complete whole block
-            return set_block_complete_and_cap (current_block_number, current_index, direction);
+            return set_block_complete_and_cap (
+                current_block_number,
+                current_index,
+                direction
+            );
         } else { // see if filled cell in range of first block and complete after that
             int start_of_edge = current_index;
             int start_of_filling = -1;
             int block_length = blocks[current_block_number];
-            int blocklimit = (dir? current_index + block_length : current_index - block_length);
+            int blocklimit = dir?
+                             current_index + block_length :
+                             current_index - block_length;
 
             if (blocklimit < -1 && blocklimit > n_cells) {
                 in_error = true;
@@ -990,7 +1009,12 @@ public class Gnonograms.Region {
                 return false;
             }
 
-            current_index = seek_next_required_status (CellState.FILLED, current_index, blocklimit, direction);
+            current_index = seek_next_required_status (
+                CellState.FILLED,
+                current_index,
+                blocklimit,
+                direction
+            );
 
             if (current_index != blocklimit) {
                 start_of_filling = current_index;
@@ -1014,7 +1038,9 @@ public class Gnonograms.Region {
                 // an unfilled cell found. FILL cells beyond first FILLED cells.
                 // remove block from out of range of first filled cell.
 
-                while (current_index != blocklimit && status[current_index] == CellState.FILLED) {
+                while (current_index != blocklimit &&
+                       status[current_index] == CellState.FILLED
+                ) {
                     set_cell_owner (current_index, current_block_number, true, false);
                     set_cell_empty (start_of_edge);
                     changed = true;
@@ -1034,7 +1060,11 @@ public class Gnonograms.Region {
                     current_index = start_of_filling + (dir ? block_length : -block_length);
 
                     if (current_index >= 0 && current_index < n_cells) {
-                        remove_block_from_cell_to_end (current_block_number, current_index, direction);
+                        remove_block_from_cell_to_end (
+                            current_block_number,
+                            current_index,
+                            direction
+                        );
                     }
                 }
 
@@ -1050,7 +1080,6 @@ public class Gnonograms.Region {
         //starting point is set in current_index and current_block_number before calling.
         bool dir = (direction == FORWARDS);
         int loop_step = dir ? 1 : -1;
-
         for (int i = current_index; (i >= 0 && i < n_cells); i += loop_step) {
             if (status[i] == CellState.EMPTY) {
                 continue;
@@ -1058,9 +1087,13 @@ public class Gnonograms.Region {
 
             //now pointing at first cell of filled or unknown block after edge
             if (tags[i, is_finished_pointer]) { //skip to end of finished block
-                i += (dir ? blocks[current_block_number] - 1 : 1 - blocks[current_block_number]);
+                i += (dir ?
+                      blocks[current_block_number] - 1 :
+                      1 - blocks[current_block_number]
+                );
                 //now pointing at last cell of filled block
-                var next_block = current_block_number + loop_step; //Increment or decrement current block as appropriate
+                var next_block = current_block_number + loop_step;
+                //Increment or decrement current block as appropriate
                 if (next_block >= 0 || next_block < n_blocks - 1) {
                     current_block_number = next_block;
                 } else {
@@ -1079,20 +1112,21 @@ public class Gnonograms.Region {
         // blocks may have been marked completed  - thereby reducing available ranges
         int[] available_blocks = get_blocks_available ();
         int bl = available_blocks.length;
-
         if (bl == 0) {
             return false;
         }
 
-        //update ranges with currently available ranges (can contain only unknown  and incomplete cells)
+        // update ranges with currently available ranges
+        // (can contain only unknown  and incomplete cells)
         int n_available_ranges = count_available_ranges (false);
         if (n_available_ranges == 0) {
             return false;
         }
 
-        int[,] block_start = new int[bl, 2]; //range number and offset of earliest start point
-        int[,] block_end = new int[bl, 2]; //range number and offset of latest end point
-
+        //range number and offset of earliest start point
+        int[,] block_start = new int[bl, 2];
+        //range number and offset of latest end point
+        int[,] block_end = new int[bl, 2];
         //find earliest start point of each block (treating ranges as all unknown cells)
         int rng = 0;
         int offset = 0;
@@ -1102,11 +1136,9 @@ public class Gnonograms.Region {
 
         for (int b = 0; b < bl; b++) {//for each available block
             length = blocks[available_blocks[b]]; //get its length
-
             if (ranges[rng, 1] < (length + offset)) {//cannot fit in current range
                 rng++;
                 offset = 0; //skip to start of next range
-
                 while (rng < n_available_ranges && ranges[rng, 1] < length) {
                     rng++; //keep skipping if too small
                 }
@@ -1119,7 +1151,6 @@ public class Gnonograms.Region {
             //look for collision with filled cell
             ptr = ranges[rng, 0] + offset + length; //cell after end of block
             start = ptr;
-
             while (ptr < n_cells && !tags[ptr, can_be_empty_pointer]) {
                 ptr++;
                 offset++;
@@ -1133,14 +1164,11 @@ public class Gnonograms.Region {
         //carry out same process in reverse to get latest end points
         rng = n_available_ranges - 1;
         offset = 0; //start at end of last range NB offset now counts from end
-
         for (int b = bl - 1; b >= 0; b--) { //start at last block
             length = blocks[available_blocks[b]]; //get length
-
             if (ranges[rng, 1] < (length + offset)) { //doesn't fit
                 rng --;
                 offset = 0;
-
                 while (rng >= 0 && ranges[rng, 1] < length) {
                     rng --; //keep skipping if too small
                 }
@@ -1151,9 +1179,9 @@ public class Gnonograms.Region {
             }
 
             //look for collision with filled cell
-            ptr = ranges[rng, 0] + ranges[rng, 1] - (offset + length) - 1; //cell before beginning of block
+            //cell before beginning of block
+            ptr = ranges[rng, 0] + ranges[rng, 1] - (offset + length) - 1;
             start = ptr;
-
             while (ptr >= 0 && !tags[ptr, can_be_empty_pointer]) {
                 ptr --;
                 offset++;
@@ -1194,7 +1222,8 @@ public class Gnonograms.Region {
                 remove_block_from_range (available_blocks[b], start, length, 1);
             }
 
-            for (int r = n_available_ranges - 1; r > block_end[b, 0]; r--) { //ranges after possible
+            //ranges after possible
+            for (int r = n_available_ranges - 1; r > block_end[b, 0]; r--) {
                 remove_block_from_range (available_blocks[b], ranges[r, 0], ranges[r, 1], 1);
             }
         }
@@ -1220,16 +1249,12 @@ public class Gnonograms.Region {
         for (int rng = 0; rng < n_ranges; rng++) {
             start = ranges[rng, 0];
             length = ranges[rng, 1];
-
             for (idx = start; idx < start + length; idx++) {
                 int count = 0;
                 int impossible = 0;
-
                 for (int b = 0; b < n_blocks; b++) {
-
                     if (tags[idx, b]) {
                         count++;
-
                         if (blocks[b] != length) {
                             tags[idx, b] = false;
                             impossible++;
@@ -1238,9 +1263,12 @@ public class Gnonograms.Region {
                 }
 
                 if (count == impossible) {
-                    record_error ("capped range audit",
-                                  "start %i len %i, n_blocks %u count %i, impossible %i filled cell with no owners"
-                                  .printf (start, length, n_blocks, count, impossible));
+                    record_error (
+                        "capped range audit",
+                        "start %i len %i, n_blocks %u count %i, impossible %i filled cell with no owners".printf (
+                            start, length, n_blocks, count, impossible
+                        )
+                    );
                     return false;
                 }
             }
@@ -1250,14 +1278,15 @@ public class Gnonograms.Region {
     }
 
     private bool available_filled_subregion_audit () {
-        //test whether there is an unambiguous distribution of available blocks amongs available filled subregions.
+        //test whether there is an unambiguous distribution of available blocks
+        //amongst available filled subregions.
 
         int idx = 0;
         int start = 0;
         int end = n_cells;
         int region_count = 0;
-        Range[] available_subregions = new Range[n_cells / 2]; //start and end of each subregion
-
+        //start and end of each subregion
+        Range[] available_subregions = new Range[n_cells / 2];
         while (idx < n_cells) {
             if (status[idx] != CellState.FILLED) {
                 idx++;
@@ -1265,7 +1294,6 @@ public class Gnonograms.Region {
             }
 
             region_count++;
-
             if (region_count <= n_blocks) {
                 start = idx;
             } else {
@@ -1292,7 +1320,6 @@ public class Gnonograms.Region {
         //now see how many blocks could fit here;
         int[] available_blocks = get_blocks_available ();
         int n_available_blocks = available_blocks.length;
-
         if (region_count > n_available_blocks) {
             return false;
         }
@@ -1307,7 +1334,6 @@ public class Gnonograms.Region {
 
         for (int i = 0; i < n_available_blocks; i++) {
             bl = available_blocks[i];
-
             if (!tags[first_start, bl]) {
                 available_blocks[i] = -1;
                 block_count --;
@@ -1318,7 +1344,6 @@ public class Gnonograms.Region {
 
         for (int i = n_available_blocks - 1; i >= 0; i --) {
             bl = available_blocks[i];
-
             if (bl >= 0 && !tags[last_end, bl]) {
                 available_blocks[i] = -1;
                 block_count --;
@@ -1334,7 +1359,6 @@ public class Gnonograms.Region {
         int[] candidates = new int[block_count];
         int candidates_count = 0;
         int combined_length = 0;
-
         for (int i = 0; i < n_available_blocks; i++) {
             if (available_blocks[i] < 0) {
                 continue;
@@ -1345,24 +1369,21 @@ public class Gnonograms.Region {
             }
         }
 
-        combined_length += (candidates_count - 1); //allow for gap of at least 1 between blocks
+        //allow for gap of at least 1 between blocks
+        combined_length += (candidates_count - 1);
 
-        // for unambiguous assignment all sub regions must be separated by more than
+        // for unambiguous assignment, all sub regions must be separated by more than
         // the combined length of the candidate blocks and gaps
         int overall_length = last_end - first_start + 1;
-
         if (overall_length < combined_length) {
             return false;
         }
 
         //consecutive regions must be separated so one block cannot cover both
         //either by finished cell or by distance
-
         for (int ar = 0; ar < region_count - 1; ar++) {
-            bool regions_are_separate = false;
-
+            var regions_are_separate = false;
             for (int i = available_subregions[ar].end; i < available_subregions[ar + 1].start; i++) {
-
                 if (tags[i, is_finished_pointer]) {
                     regions_are_separate = true;
                     break;
@@ -1375,7 +1396,6 @@ public class Gnonograms.Region {
                 start = available_subregions[ar].start;
                 end = available_subregions[ar + 1].end;
                 length = end - start + 1;
-
                 if (length <= blocks[candidates[ar]] || length <= blocks[candidates[ar + 1]]) {
                     return false; //too close
                 }
@@ -1408,7 +1428,6 @@ public class Gnonograms.Region {
         // increments/decrements idx until cell of required state
         // or end of range found.
         // returns idx of cell with status cs if found else limit
-
         if (limit < -1 || limit > n_cells) {
             in_error = true;
             message = "limit < -1 || limit > n_cells";
@@ -1422,7 +1441,6 @@ public class Gnonograms.Region {
         }
 
         for (int i = idx; i != limit; i += direction) {
-
             if (status[i] == cs) {
                 return i;
             }
@@ -1434,17 +1452,13 @@ public class Gnonograms.Region {
     private int count_consecutive_with_state_from (int cs, int idx, bool forwards) {
         // count how may consecutive cells of state cs starting at given
         // index idx (inclusive of starting cell)
-
         int count = 0;
-
         if (forwards && idx >= 0) {
-
             while (idx < n_cells && status[idx] == cs) {
                 count++;
                 idx++;
             }
         } else if (!forwards && idx < n_cells) {
-
             while (idx >= 0 && status[idx] == cs) {
                 count++;
                 idx--;
@@ -1460,9 +1474,7 @@ public class Gnonograms.Region {
     private int count_contiguous_with_same_owner_from (int owner, int idx) {
         // count how may consecutive cells with owner possible starting
         // at given index idx?
-
         int count = 0;
-
         if (idx >= 0) {
             while (idx < n_cells && tags[idx, owner] && !tags[idx, is_finished_pointer]) {
                 count++;
@@ -1488,7 +1500,6 @@ public class Gnonograms.Region {
         int start = 0;
         int length = 0;
         int idx = 0;
-
         //skip to start of first range;
         while (idx < n_cells && tags[idx, is_finished_pointer]) {
             idx++;
@@ -1500,9 +1511,7 @@ public class Gnonograms.Region {
             ranges[range, 0] = start;
             ranges[range, 2] = 0;
             ranges[range, 3] = 0;
-
             while (idx < n_cells && !tags[idx, is_finished_pointer]) {
-
                 if (!tags[idx, can_be_empty_pointer]) {
                     ranges[range, 2]++; //FILLED
                 } else {
@@ -1531,11 +1540,8 @@ public class Gnonograms.Region {
 
     private bool match_clue () {
         //only called when region is completed. Checks whether number of blocks is correct
-
         int count = 0, idx = 0, blk_ptr = 0, blk_counter = 0;
-
         while (idx < n_cells) {
-
             while (idx < n_cells && status[idx] == CellState.EMPTY) {
                 idx++;
             }
@@ -1572,12 +1578,10 @@ public class Gnonograms.Region {
 
     private int count_capped_ranges () {
         // determine location of capped ranges of filled cells (not marked complete) and store in ranges[, ]
-
         int range = 0;
         int start = 0;
         int length = 0;
         int idx = 0;
-
         while (idx < n_cells && status[idx] != CellState.FILLED) {
             idx++; //skip to beginning of first range
         }
@@ -1588,21 +1592,19 @@ public class Gnonograms.Region {
             ranges[range, 0] = start;
             ranges[range, 2] = 0; //not used
             ranges[range, 3] = 0; //not used
-
             while (idx < n_cells && status[idx] == CellState.FILLED) {
                 idx++;
                 length++;
             }
 
             if ((start == 0 || status[start - 1] == CellState.EMPTY) &&
-                (idx == n_cells || status[idx] == CellState.EMPTY)) { //capped
-
+                (idx == n_cells || status[idx] == CellState.EMPTY)
+            ) { //capped
                 ranges[range, 1] = length;
                 range++;
             }
 
             idx++;
-
             while (idx < n_cells && status[idx] != CellState.FILLED) {
                 idx++; //skip to beginning of next range
             }
@@ -1613,9 +1615,7 @@ public class Gnonograms.Region {
 
     private int count_possible_owners_and_can_be_empty (int cell) {
         // how many possible owners?  Does include can be empty tag!
-
         int count = 0;
-
         if (is_invalid_data (cell)) {
             in_error = true;
             message = "count_possible_owners_and_can_be_empty 1";
@@ -1641,9 +1641,7 @@ public class Gnonograms.Region {
 
     private int count_cell_state (int cs) {
         //how many times does state cs occur in range.
-
         int count = 0;
-
         for (int i = 0; i < n_cells; i++) {
             if (status[i] == cs) {
                 count++;
@@ -1655,9 +1653,7 @@ public class Gnonograms.Region {
 
     private int[] get_blocks_available () {
         //array of incomplete block indexes
-
         int[] blocks = {};
-
         for (int i = 0; i < n_blocks; i++) {
             if (!completed_blocks[i]) {
                 blocks += i;
@@ -1670,19 +1666,15 @@ public class Gnonograms.Region {
     private int have_same_owner (int cell1, int cell2) {
         //checks if both the same single possible owner.
         //return owner if same owner else  -1
-
         int count = 0;
         int owner = -1;
         bool tmp;
-
         if (cell1 < 0 || cell1 >= n_cells || cell2 < 0 || cell2 >= n_cells) {
             in_error = true;
             message = "have_same_owner";
         } else {
-
             for (int i = 0; i < n_blocks; i++) {
                 tmp = tags[cell1, i];
-
                 if (count > 1 || (tmp != tags[cell2, i])) {
                     owner = -1;
                     break;
@@ -1699,12 +1691,9 @@ public class Gnonograms.Region {
     private int get_sole_owner (int cell) {
         // if only one possible owner (if not empty) then return owner index
         // else return -1.
-
         int count = 0;
         int owner = -1;
-
         for (int i = 0; i < n_blocks; i++) {
-
             if (tags[cell, i]) {
                 owner = i;
                 count++;
@@ -1721,7 +1710,6 @@ public class Gnonograms.Region {
     private bool fix_block_in_range (int block, int start, int length) {
         // block must be limited to range
         var changed = false;
-
         if (is_invalid_data (start, block, length)) {
             in_error = true;
             message = "fix_block_in_range";
@@ -1748,11 +1736,8 @@ public class Gnonograms.Region {
 
     private int find_largest_possible_block_for_cell (int cell) {
         // find the largest incomplete block possible for given cell
-
         int maxsize = -1;
-
         for (int i = 0; i < n_blocks; i++) {
-
             if (!tags[cell, i]) {
                 continue; // not possible
             }
@@ -1769,9 +1754,7 @@ public class Gnonograms.Region {
 
     private int find_smallest_possible_block_for_cell (int cell) {
         // find the smallest incomplete block possible for given cell
-
         int minsize = 9999;
-
         for (int i = 0; i < n_blocks; i++) {
             if (!tags[cell, i]) {
                 continue; // not possible
@@ -1797,10 +1780,8 @@ public class Gnonograms.Region {
         //bi-directional forward = 1 backward  = -1
         //if reverse direction then equivalent forward range is used
         //only changes tags
-
         int length = direction > 0 ? n_cells - start : start + 1;
         start = direction > 0 ? start : 0;
-
         if (length > 0) {
             remove_block_from_range (block, start, length, 1);
         }
@@ -1811,7 +1792,6 @@ public class Gnonograms.Region {
         //bi-directional forward = 1 backward  = -1
         //if reverse direction then equivalent forward range is used
         //only changes tags
-
         if (direction < 0) {
             start = start - length + 1;
         }
@@ -1820,7 +1800,6 @@ public class Gnonograms.Region {
             in_error = true;
             message = "remove_block_from_range";
         } else {
-
             for (int i = start; i < start + length; i++) {
                 tags[i, block] = false;
             }
@@ -1831,7 +1810,6 @@ public class Gnonograms.Region {
         //returns true  - always changes a cell status if not in error
         bool changed = false;
         int length = blocks[block];
-
         if (direction < 0) {
             start = start - length + 1;
         }
@@ -1850,7 +1828,6 @@ public class Gnonograms.Region {
 
         completed_blocks[block] = true;
         set_range_owner (block, start, length, true, false);
-
         if (start > 0 && !tags[start - 1, is_finished_pointer]) {
             changed = true;
             set_cell_empty (start - 1);
@@ -1868,7 +1845,6 @@ public class Gnonograms.Region {
         //taking into account minimum distance between blocks.
         // constrain the preceding blocks if this are at least two
         int l;
-
         if (block > 1) { //at least third block
             l = 0;
 
@@ -1881,7 +1857,6 @@ public class Gnonograms.Region {
         // constrain the following blocks if there are at least two
         if (block < n_blocks - 2) {
             l = 0;
-
             for (int bl = block + 2; bl <= n_blocks - 1; bl++) {
                 l = l + blocks[bl - 1] + 1; // length of exclusion zone for this block
                 remove_block_from_range (bl, start + length + 1, l, 1);
@@ -1893,14 +1868,12 @@ public class Gnonograms.Region {
 
     private bool set_range_owner (int owner, int start, int length, bool exclusive, bool can_be_empty) {
         bool changed = false;
-
         if (is_invalid_data (start, owner, length)) {
             in_error = true;
             message = "set_range_owner 1";
             return false;
         } else {
             int blocklength = blocks[owner];
-
             for (int cell = start; cell < start + length; cell++) {
                 set_cell_owner (cell, owner, exclusive, can_be_empty);
             }
@@ -1914,25 +1887,21 @@ public class Gnonograms.Region {
                 }
 
                 int bstart = int.min (start - 1, start + length - blocklength);
-
                 if (bstart >= 0) {
                     remove_block_from_cell_to_end (owner, bstart - 1, -1);
                 }
 
                 int bend = int.max (start + length, start + blocklength);
-
                 if (bend < n_cells) {
                     remove_block_from_cell_to_end (owner, bend, 1);
                 }
 
                 int earliestend = start + length;
-
                 for (int bl = n_blocks - 1; bl > owner; bl --) { //following blocks cannot be earlier
                     remove_block_from_cell_to_end (bl, earliestend, -1);
                 }
 
                 int lateststart = start - 1;
-
                 for (int bl = 0; bl < owner; bl++) { //preceding blocks cannot be later
                     remove_block_from_cell_to_end (bl, lateststart, 1);
                 }
@@ -1946,15 +1915,19 @@ public class Gnonograms.Region {
         //exclusive  - cant be any other block here
         //can be empty  - self evident
         bool changed = false;
-
         if (is_invalid_data (cell, owner)) {
-            record_error ("set_cell_owner",
-                          "invalid data %i, %i, %s, %s"
-                          .printf (cell, owner, exclusive.to_string (), can_be_empty.to_string ()));
-
+            record_error (
+                "set_cell_owner",
+                "invalid data %i, %i, %s, %s".printf (
+                    cell, owner, exclusive.to_string (), can_be_empty.to_string ()
+                )
+            );
         } else if (status[cell] == CellState.EMPTY) {// do nothing  - not necessarily an error
         } else if (status[cell] == CellState.COMPLETED && tags[cell, owner] == false) {
-            record_error ("set_cell_owner", "contradiction cell " + cell.to_string () + " filled but cannot be owner");
+            record_error (
+                "set_cell_owner",
+                "contradiction cell " + cell.to_string () + " filled but cannot be owner"
+            );
         } else {
             if (exclusive) {
                 for (int i = 0; i < n_blocks; i++) {
@@ -1982,7 +1955,6 @@ public class Gnonograms.Region {
         } else if (is_cell_filled (cell)) {
             record_error ("set_cell_empty", "cell " + cell.to_string () + " is filled");
         } else {
-
             for (int i = 0; i < n_blocks; i++) {
                 tags[cell, i] = false;
             }
@@ -2019,28 +1991,30 @@ public class Gnonograms.Region {
 
     private bool totals_changed () {
         //has number of filled or unknown cells changed?
-
         bool changed = false;
         int _unknown = count_cell_state (CellState.UNKNOWN);
         int _filled = count_cell_state (CellState.FILLED);
         int _completed = count_cell_state (CellState.COMPLETED);
-
         if (_unknown != this.unknown) {
             changed = true;
             this.unknown = _unknown;
             this.filled = _filled;
-
             if (_filled + _completed > block_total) {
-                record_error ("totals changed",
-                             ("too many filled cells filled %i, completed %i, block total %i")
-                             .printf (_filled, _completed, block_total));
+                record_error (
+                    "totals changed",
+                    "too many filled cells filled %i, completed %i, block total %i".printf (
+                        _filled, _completed, block_total
+                    )
+                );
 
             } else if (this.unknown == 0) {
                 if (_filled + _completed < block_total) {
-                    record_error ("totals changed",
-                                 ("too few filled cells filled %i, completed %i, block total %i")
-                                 .printf (_filled, _completed, block_total));
-
+                    record_error (
+                        "totals changed",
+                        "too few filled cells filled %i, completed %i, block total %i".printf (
+                            _filled, _completed, block_total
+                        )
+                    );
                 } else if (match_clue ()) {
                     this.is_completed = true;
                 } else {
@@ -2056,26 +2030,27 @@ public class Gnonograms.Region {
 
     private void get_status () {
         //transfers cell statuses from grid to internal range status array
-
         grid.get_array (index, is_column, ref temp_status);
-
         for (int i = 0; i < n_cells; i++) {
-
             switch (temp_status[i]) {
-
                 case CellState.EMPTY :
                     if (!tags[i, can_be_empty_pointer]) {
-                        record_error ("get_status", "cell " + i.to_string () + " cannot be empty");
+                        record_error (
+                            "get_status",
+                            "cell " + i.to_string () + " cannot be empty"
+                        );
                     } else {
                         status[i] = CellState.EMPTY;
                     }
 
                     break;
-
                 case CellState.FILLED :
                     //dont overwrite COMPLETE status
                     if (status[i] == CellState.EMPTY) {
-                        record_error ("get_status", "cell " + i.to_string () + " cannot be filled");
+                        record_error (
+                            "get_status",
+                            "cell " + i.to_string () + " cannot be filled"
+                        );
                     }
 
                     if (status[i] == CellState.UNKNOWN) {
@@ -2083,7 +2058,6 @@ public class Gnonograms.Region {
                     }
 
                     break;
-
                 default:
                     break;
             }
@@ -2095,7 +2069,8 @@ public class Gnonograms.Region {
     private void put_status () {
         //use temp_status2 to ovoid overwriting original input  - needed for debugging
         for (int i = 0; i < n_cells; i++) {
-            temp_status2[i] = (status[i] == CellState.COMPLETED ? CellState.FILLED : status[i]);
+            temp_status2[i] = status[i] == CellState.COMPLETED ?
+                              CellState.FILLED : status[i];
         }
 
         grid.set_array (index, is_column, temp_status2);
@@ -2139,7 +2114,8 @@ public class Gnonograms.Region {
             }
 
             if (!tags[i, can_be_empty_pointer]) { //cannot be EMPTY
-                status[i] = (tags[i, is_finished_pointer] ? CellState.COMPLETED : CellState.FILLED);
+                status[i] = tags[i, is_finished_pointer] ?
+                            CellState.COMPLETED : CellState.FILLED;
                 continue;
             }
 
@@ -2153,7 +2129,8 @@ public class Gnonograms.Region {
 
     private void record_error (string method, string errmessage) {
         in_error = true;
-        message = "%s Region %u Record error in %s : %s \n"
-                  .printf (is_column ? "COL" : "ROW", index, method, errmessage);
+        message = "%s Region %u Record error in %s : %s \n".printf (
+            is_column ? "COL" : "ROW", index, method, errmessage
+        );
     }
 }

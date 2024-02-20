@@ -52,6 +52,7 @@
             };
             cancel_button.child = img;
             cancel_button.add_css_class ("warn");
+            cancel_button.add_css_class ("flat");
             img.add_css_class ("warn");
 
             append (cancel_button);

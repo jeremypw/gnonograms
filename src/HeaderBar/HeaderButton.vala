@@ -34,9 +34,4 @@
             child = image;
             add_css_class ("flat");
         }
-
-        construct {
-
-        }
-
     }

@@ -240,11 +240,12 @@ namespace Gnonograms.Utils {
         return sb.str;
     }
 
-    private static int show_dlg (string primary_text,
-                                Gtk.MessageType type,
-                                string? secondary_text,
-                                Gtk.Window? parent) {
-
+    private static int show_dlg (
+        string primary_text,
+        Gtk.MessageType type,
+        string? secondary_text,
+        Gtk.Window? parent
+    ) {
         string icon_name = "";
         var buttons = Gtk.ButtonsType.CLOSE;
         switch (type) {
@@ -269,9 +270,11 @@ namespace Gnonograms.Utils {
                 assert_not_reached ();
         }
 
-        var dialog = new Granite.MessageDialog.with_image_from_icon_name (primary_text,
-                                                                          secondary_text ?? "",
-                                                                          icon_name, buttons);
+        var dialog = new Granite.MessageDialog.with_image_from_icon_name (
+            primary_text,
+            secondary_text ?? "",
+            icon_name, buttons
+        );
 
         dialog.set_transient_for (parent);
         if (type == Gtk.MessageType.QUESTION) {
@@ -290,17 +293,19 @@ namespace Gnonograms.Utils {
         return response;
     }
 
-    public static void show_error_dialog (string primary_text,
-                                          string? secondary_text = null,
-                                          Gtk.Window? parent = null) {
-
+    public static void show_error_dialog (
+        string primary_text,
+        string? secondary_text = null,
+        Gtk.Window? parent = null
+    ) {
         show_dlg (primary_text, Gtk.MessageType.ERROR, secondary_text, parent);
     }
 
-    public static bool show_confirm_dialog (string primary_text,
-                                            string? secondary_text = null,
-                                            Gtk.Window? parent = null) {
-
+    public static bool show_confirm_dialog (
+        string primary_text,
+        string? secondary_text = null,
+        Gtk.Window? parent = null
+    ) {
         var response = show_dlg (
             primary_text,
             Gtk.MessageType.QUESTION,
@@ -310,13 +315,15 @@ namespace Gnonograms.Utils {
         return response == Gtk.ResponseType.YES;
     }
 
-    public static string? get_open_save_path (Gtk.Window? parent,
-                                             string dialogname,
-                                             bool save,
-                                             string start_folder_path,
-                                             string basename) {
+    public static string? get_open_save_path (
+        Gtk.Window? parent,
+        string dialogname,
+        bool save,
+        string start_folder_path,
+        string basename
+    ) {
         string? file_path = null;
-        string button_label = save ? _("Save") : _("Open");
+        var button_label = save ? _("Save") : _("Open");
         var gtk_action = save ? Gtk.FileChooserAction.SAVE : Gtk.FileChooserAction.OPEN;
         var dialog = new Gtk.FileChooserNative (
             dialogname,
@@ -358,9 +365,9 @@ namespace Gnonograms.Utils {
         return file_path;
     }
 
-    public Gdk.Rectangle get_monitor_area (Gdk.Surface surface) {
-        var display = Gdk.Display.get_default ();
-        var monitor = display.get_monitor_at_surface (surface);
-        return monitor.get_geometry ();
-    }
+    // public Gdk.Rectangle get_monitor_area (Gdk.Surface surface) {
+    //     var display = Gdk.Display.get_default ();
+    //     var monitor = display.get_monitor_at_surface (surface);
+    //     return monitor.get_geometry ();
+    // }
 }

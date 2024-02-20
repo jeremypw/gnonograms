@@ -20,7 +20,8 @@
 public class Gnonograms.ClueBox : Gtk.Box {
     public unowned View view { get; construct; }
     public int font_size { get; private set; }
-    public uint n_cells { get; set; default = 0; } // The number of cells each clue addresses, monitored by clues
+    // The number of cells each clue addresses, monitored by clues
+    public uint n_cells { get; set; default = 0; }
     private Gee.ArrayList<Clue> clues;
 
     public ClueBox (Gtk.Orientation _orientation, View view) {
@@ -48,6 +49,7 @@ public class Gnonograms.ClueBox : Gtk.Box {
             foreach (var clue in clues) {
                 remove (clue.label);
             }
+
             clues.clear ();
             n_cells = new_n_cells;
             for (int index = 0; index < new_n_clues; index++) {
@@ -55,8 +57,6 @@ public class Gnonograms.ClueBox : Gtk.Box {
                 clues.add (clue);
                 append (clue.label);
             }
-
-            // set_size ();
         });
 
         view.notify["cell-size"].connect (set_size);

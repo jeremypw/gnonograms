@@ -310,7 +310,7 @@ public class Gnonograms.Filereader : Object {
         return true;
     }
 
-    /** First four lines of description must be in order @name, @date, @score (difficulty or grade).
+    /** First four lines of description must be in order @name, @date, @score
       * Missing data must be represented by blank lines.
     **/
     private bool get_game_description (string? body) {
