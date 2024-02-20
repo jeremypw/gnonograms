@@ -323,15 +323,16 @@ warning ("WITH DEBUGGING");
         };
         grade_label.add_css_class (Granite.STYLE_CLASS_H4_LABEL);
 
-        progress_stack = new Gtk.Stack ();
+        progress_stack = new Gtk.Stack () {
+            halign = Gtk.Align.CENTER,
+        };
         progress_stack.add_named (progress_indicator, "Progress");
-        progress_stack.add_named (grade_label, "Grade");
-        progress_stack.add_named (new Gtk.Label (""), "None");
-        progress_stack.set_visible_child_name ("None");
+        progress_stack.add_named (title_label, "Title");
+        progress_stack.set_visible_child_name ("Title");
 
         header_bar = new Gtk.HeaderBar () {
             show_title_buttons = true,
-            title_widget = title_label,
+            title_widget = progress_stack,
             can_focus = false
         };
         header_bar.add_css_class ("gnonograms-header");
@@ -370,8 +371,7 @@ warning ("WITH DEBUGGING");
 
         toast_overlay = new Adw.ToastOverlay () {
             valign = Gtk.Align.CENTER,
-            halign = Gtk.Align.CENTER,
-            child = progress_stack
+            halign = Gtk.Align.CENTER
         };
 
         main_grid = new Gtk.Grid () {
@@ -387,7 +387,8 @@ warning ("WITH DEBUGGING");
         main_grid.attach (cell_grid, 1, 1, 1, 1);
 
         var scroll_controller = new Gtk.EventControllerScroll (
-            Gtk.EventControllerScrollFlags.VERTICAL | Gtk.EventControllerScrollFlags.DISCRETE
+            Gtk.EventControllerScrollFlags.VERTICAL |
+            Gtk.EventControllerScrollFlags.DISCRETE
         );
 
         main_grid.add_controller (scroll_controller);
