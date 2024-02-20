@@ -141,12 +141,12 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 #if WITH_DEBUGGING
         warning ("WITH DEBUGGING");
         view_action_entries += ActionEntry () {
-            name = ACTION_DEBUG_ROW, 
+            name = ACTION_DEBUG_ROW,
             activate = action_debug_row
         };
-        view_action_entries += ActionEntry () { 
-            name = ACTION_DEBUG_COL, 
-            activate = action_debug_col 
+        view_action_entries += ActionEntry () {
+            name = ACTION_DEBUG_COL,
+            activate = action_debug_col
         };
 #endif
         action_accelerators.set (ACTION_UNDO, "<Ctrl>Z");
@@ -274,7 +274,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             // Wait for settings to update
             Idle.add (() => {
                 cell_grid.set_colors ();
-                cell_grid.queue_draw (); 
+                cell_grid.queue_draw ();
                 return Source.REMOVE;
             });
         });
@@ -287,13 +287,13 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             app_popover.empty_color = settings.get_string ("empty-color");
         });
 
-        var menu_image =  new Gtk.Image.from_icon_name ("open-menu") {
+        var menu_image = new Gtk.Image.from_icon_name ("open-menu") {
             pixel_size = 32
         };
         menu_button = new Gtk.MenuButton () {
             tooltip_markup = Granite.markup_accel_tooltip (
                 app.get_accels_for_action (
-                    ACTION_PREFIX + ACTION_OPTIONS), 
+                    ACTION_PREFIX + ACTION_OPTIONS),
                     _("Options")
             ),
             child = menu_image,
@@ -466,7 +466,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
                                              controller.game_state == GameState.SOLVING;
             undo_button.sensitive = can_go_back;
             /* May be destructive even if no history (e.g. after automatic solve) */
-            restart_destructive |= can_go_back; 
+            restart_destructive |= can_go_back;
         });
 
         notify["can-go-forward"].connect (() => {
@@ -538,15 +538,15 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
         var available_screen_width = monitor_area.width * 0.9 - GRID_BORDER - GRID_COLUMN_SPACING;
         var max_cell_width = available_screen_width / (n_cols * (1.3));
-        var available_grid_height = 
-            (int)(surface.get_height () - 
-            header_bar.get_allocated_height () - 
+        var available_grid_height =
+            (int)(surface.get_height () -
+            header_bar.get_allocated_height () -
             GRID_BORDER);
 
         var opt_cell_height = (int)(available_grid_height / (n_rows * (1.4)));
-        var available_screen_height = 
-            monitor_area.height * 0.9 - 
-            header_bar.get_allocated_height () - 
+        var available_screen_height =
+            monitor_area.height * 0.9 -
+            header_bar.get_allocated_height () -
             GRID_BORDER;
 
         var max_cell_height = available_screen_height / (n_rows * (1.4));
@@ -659,9 +659,9 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         restart_destructive = sensitive && !model.is_blank (controller.game_state);
         undo_button.sensitive = sensitive && can_go_back;
         redo_button.sensitive = sensitive && can_go_forward;
-        check_correct_button.sensitive = 
-            sensitive && 
-            controller.game_state == GameState.SOLVING && 
+        check_correct_button.sensitive =
+            sensitive &&
+            controller.game_state == GameState.SOLVING &&
             can_go_back;
 
         hint_button.sensitive = sensitive && controller.game_state == GameState.SOLVING;
@@ -697,7 +697,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     }
 
     private void make_move_at_cell (
-        CellState state = drawing_with_state, 
+        CellState state = drawing_with_state,
         Cell target = current_cell
     ) {
         if (target == NULL_CELL) {
@@ -724,11 +724,11 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
         if (controller.game_state == GameState.SETTING) {
             row_clue_box.update_clue_text (
-                row, 
+                row,
                 model.get_label_text_from_solution (row, false)
             );
             column_clue_box.update_clue_text (
-                col, 
+                col,
                 model.get_label_text_from_solution (col, true)
             );
         } else {
@@ -747,8 +747,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private uint progress_timeout_id = 0;
     private void schedule_show_progress (Cancellable cancellable) {
         progress_timeout_id = Timeout.add_full (
-            Priority.HIGH_IDLE, 
-            PROGRESS_DELAY_MSEC, 
+            Priority.HIGH_IDLE,
+            PROGRESS_DELAY_MSEC,
             () => {
                 progress_indicator.cancellable = cancellable;
                 progress_stack.set_visible_child_name ("Progress");

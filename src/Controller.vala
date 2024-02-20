@@ -103,11 +103,28 @@ public class Gnonograms.Controller : GLib.Object {
 
         view.present ();
 
-        bind_property ("generator-grade", view, "generator-grade", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
-        bind_property ("is-readonly", view, "readonly", BindingFlags.SYNC_CREATE);
+        bind_property (
+            "generator-grade",
+            view, "generator-grade",
+            BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL
+        );
+        bind_property (
+            "is-readonly",
+            view, "readonly",
+            BindingFlags.SYNC_CREATE
+        );
 
-        history.bind_property ("can-go-back", view, "can-go-back", BindingFlags.SYNC_CREATE);
-        history.bind_property ("can-go-forward", view, "can-go-forward", BindingFlags.SYNC_CREATE);
+        history.bind_property (
+            "can-go-back",
+            view,
+            "can-go-back",
+            BindingFlags.SYNC_CREATE
+        );
+        history.bind_property (
+            "can-go-forward",
+            view, "can-go-forward",
+            BindingFlags.SYNC_CREATE
+        );
 
         restore_game.begin ((obj, res) => {
             if (!restore_game.end (res)) {
@@ -301,7 +318,11 @@ public class Gnonograms.Controller : GLib.Object {
         game_state = GameState.UNDEFINED;
         clear_history ();
         try {
-            reader = new Filereader (window, Environment.get_user_special_dir (UserDirectory.DOCUMENTS), game);
+            reader = new Filereader (
+                window,
+                Environment.get_user_special_dir (UserDirectory.DOCUMENTS),
+                game
+            );
         } catch (GLib.Error e) {
             if (!(e is IOError.CANCELLED)) {
                 var basename = game != null ? game.get_basename () : _("game");
@@ -450,7 +471,7 @@ public class Gnonograms.Controller : GLib.Object {
         /* Check if puzzle finished */
         if (game_state == GameState.SOLVING && !model.solution_is_blank () && model.is_finished) {
             if (model.count_errors () == 0) {
-                ///TRANSLATORS: "Correct" is used as an adjective, indicating that a correct (valid) solution has been found.
+///TRANSLATORS: "Correct" is used as an adjective, indicating that a correct (valid) solution has been found.
                 view.send_notification (_("Correct solution"));
             } else if (model.working_matches_clues ()) {
                 view.send_notification (_("Alternative solution found"));
@@ -556,7 +577,10 @@ public class Gnonograms.Controller : GLib.Object {
     }
 #endif
 
-    private async SolverState start_solving (bool copy_to_working = false, bool copy_to_solution = false) {
+    private async SolverState start_solving (
+        bool copy_to_working = false,
+        bool copy_to_solution = false
+    ) {
         /* Try as hard as possible to find solution, regardless of grade setting */
         var state = SolverState.UNDEFINED;
         var cancellable = new Cancellable ();
