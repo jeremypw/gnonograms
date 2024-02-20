@@ -20,7 +20,6 @@
 class Gnonograms.Clue : Object {
     public Gtk.Label label { get; construct; }
     public unowned ClueBox cluebox { get; construct; }
-    private int _fontsize;
 
     private string _text; /* text of clue in horizontal form */
     public string text {
