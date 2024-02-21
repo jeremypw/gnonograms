@@ -804,11 +804,11 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     }
 
     private void action_save () {
-        controller.save_game ();
+        controller.save_game.begin ();
     }
 
     private void action_save_as () {
-        controller.save_game_as ();
+        controller.save_game_as.begin ();
     }
 
     private void action_zoom_in () {

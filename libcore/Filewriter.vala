@@ -45,7 +45,7 @@ public class Gnonograms.Filewriter : Object {
                        string[] row_clues,
                        string[] col_clues,
                        History? history,
-                       bool save_solution) throws IOError {
+                       bool save_solution) {
 
         Object (
             name: _(UNTITLED_NAME),
@@ -64,10 +64,11 @@ public class Gnonograms.Filewriter : Object {
     }
 
     /*** Writes minimum information required for valid game file ***/
-    public void write_game_file (string? save_dir_path = null,
-                                 string? path = null,
-                                 string? _name = null) throws IOError {
-
+    public async void write_game_file (
+        string? save_dir_path = null,
+        string? path = null,
+        string? _name = null
+    ) throws Error {
         if (_name != null) {
             name = _name;
         } else {
@@ -75,12 +76,16 @@ public class Gnonograms.Filewriter : Object {
         }
 
         if (path == null || path.length <= 4) {
-            game_path = Utils.get_open_save_path (parent,
+            var game_file = yield Utils.get_open_save_file (parent,
                 _("Name and save this puzzle"),
                 true,
                 save_dir_path,
                 name
             );
+
+            if (game_file != null) {
+                game_path = game_file.get_path ();
+            }
         } else {
             game_path = path;
         }
@@ -164,16 +169,16 @@ public class Gnonograms.Filewriter : Object {
     }
 
     /*** Writes complete information to reload game state ***/
-    public void write_position_file (string? save_dir_path = null,
+    public async void write_position_file (string? save_dir_path = null,
                                      string? path = null,
-                                     string? name = null) throws IOError {
+                                     string? name = null) throws Error {
         if (working == null) {
             throw (new IOError.NOT_INITIALIZED ("No working grid to save"));
         } else if (game_state == GameState.UNDEFINED) {
             throw (new IOError.NOT_INITIALIZED ("No game state to save"));
         }
 
-        write_game_file (save_dir_path, path, name );
+        yield write_game_file (save_dir_path, path, name );
         stream.printf ("[Working grid]\n");
         stream.printf (working.to_string ());
         stream.printf ("[State]\n");

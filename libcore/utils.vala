@@ -315,54 +315,36 @@ namespace Gnonograms.Utils {
         return response == Gtk.ResponseType.YES;
     }
 
-    public static string? get_open_save_path (
+    public static async File? get_open_save_file (
         Gtk.Window? parent,
         string dialogname,
         bool save,
         string start_folder_path,
         string basename
-    ) {
-        string? file_path = null;
+    ) throws Error {
         var button_label = save ? _("Save") : _("Open");
-        var gtk_action = save ? Gtk.FileChooserAction.SAVE : Gtk.FileChooserAction.OPEN;
-        var dialog = new Gtk.FileChooserNative (
-            dialogname,
-            parent,
-            gtk_action,
-            button_label,
-            _("Cancel")
-        );
+        var dialog = new Gtk.FileDialog () {
+            title = dialogname,
+            accept_label = button_label,
+            initial_folder = File.new_for_path (start_folder_path),
+            initial_name = basename,
+            modal = true
+
+        };
 
         dialog.set_modal (true);
-        try {
-            if (save) {
-                dialog.set_current_folder (File.new_for_path (start_folder_path));
-                if (basename != null) {
-                    dialog.set_current_name (basename);
-                }
-            } else {
-                try {
-                    dialog.set_current_folder (File.new_for_path (start_folder_path));
-                } catch (Error e) {
-                    warning ("Error setting current folder: %s", e.message);
-                }
-            }
-        } catch (Error e) {
-            warning ("Error configuring FileChooser dialog: %s", e.message);
+        File? result = null;
+        if (save) {
+            result = yield (dialog.save (parent, null));
+        } else {
+            result = yield (dialog.save (parent, null));
         }
 
-        dialog.response.connect ((response) => {
-            if (response == Gtk.ResponseType.ACCEPT) {
-                file_path = dialog.get_file ().get_path ();
-            }
-
-            dialog.destroy ();
-        });
-
-        dialog.show ();
 
 
-        return file_path;
+
+
+        return result;
     }
 
     // public Gdk.Rectangle get_monitor_area (Gdk.Surface surface) {

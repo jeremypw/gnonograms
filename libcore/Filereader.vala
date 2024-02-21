@@ -53,11 +53,15 @@ public class Gnonograms.Filereader : Object {
         }
     }
 
-    public Filereader (Gtk.Window? parent, string? load_dir_path, File? game) throws GLib.IOError {
-        Object (game_file: game);
-
+    public async void read (
+        Gtk.Window? parent,
+        string? load_dir_path,
+        File? game
+    ) throws Error {
         if (game == null) {
-            game_file = get_load_game_file (parent, load_dir_path);
+            game_file = yield get_load_game_file (parent, load_dir_path);
+        } else {
+            game_file = game;
         }
 
         if (game_file == null) {
@@ -73,11 +77,13 @@ public class Gnonograms.Filereader : Object {
         }
 
         parse_gnonogram_game_file (stream);
-
     }
 
-    private File? get_load_game_file (Gtk.Window? parent, string? load_dir_path) {
-        string? path = Utils.get_open_save_path (
+    private async File? get_load_game_file (
+        Gtk.Window? parent,
+        string? load_dir_path
+    ) throws Error {
+        return yield Utils.get_open_save_file (
             parent,
             _("Choose a puzzle"),
             false,
@@ -85,11 +91,6 @@ public class Gnonograms.Filereader : Object {
             ""
         );
 
-        if (path == null || path == "") {
-            return null;
-        } else {
-            return File.new_for_path (path);
-        }
     }
 
     private void parse_gnonogram_game_file (DataInputStream stream) throws GLib.IOError {
