@@ -19,7 +19,7 @@
 public class Gnonograms.AppPopover : Gtk.Popover {
     public signal void apply_settings ();
 
-    private Gtk.ComboBoxText grade_setting;
+    private Gtk.DropDown grade_setting;
     private Gtk.SpinButton row_setting;
     private Gtk.SpinButton column_setting;
     private Gtk.Entry title_setting;
@@ -28,11 +28,16 @@ public class Gnonograms.AppPopover : Gtk.Popover {
 
     public Difficulty grade {
         get {
-            return (Difficulty)(int.parse (grade_setting.get_active_id ()));
+            return (Difficulty) (grade_setting.get_selected ());
         }
 
         set {
-            grade_setting.active_id = ((uint)value).clamp (MIN_GRADE, Difficulty.MAXIMUM).to_string ();
+            grade_setting.set_selected (
+                ((uint) value).clamp (
+                    MIN_GRADE,
+                    Difficulty.MAXIMUM
+                )
+            );
         }
     }
 
@@ -94,10 +99,7 @@ public class Gnonograms.AppPopover : Gtk.Popover {
 
     construct {
         autohide = false;
-        grade_setting = new Gtk.ComboBoxText ();
-        foreach (Difficulty d in Difficulty.all_human ()) {
-            grade_setting.append (((uint)d).to_string (), d.to_string ());
-        }
+        grade_setting = new Gtk.DropDown.from_strings (Difficulty.all_human ());
 
         row_setting = new Gtk.SpinButton (
             new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),

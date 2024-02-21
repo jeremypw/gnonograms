@@ -58,8 +58,15 @@ namespace Gnonograms {
             }
         }
 
-        public static Difficulty[] all_human () {
-            return { EASY, MODERATE, HARD, CHALLENGING, ADVANCED, MAXIMUM };
+        public static string[] all_human () {
+            return {
+                EASY.to_string (),
+                MODERATE.to_string (),
+                HARD.to_string (),
+                CHALLENGING.to_string (),
+                ADVANCED.to_string (),
+                MAXIMUM.to_string ()
+            };
         }
     }
 
