@@ -11,7 +11,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private const int GRID_BORDER = 6;
     private const int GRID_COLUMN_SPACING = 6;
     private const double TYPICAL_MAX_BLOCKS_RATIO = 0.3;
-    private const double ZOOM_RATIO = 0.05;
+    private const int WINDOW_INCREMENT = 8;
     private const uint PROGRESS_DELAY_MSEC = 500;
     private const string PAINT_FILL_ACCEL = "f"; // Must be lower case
     private const string PAINT_EMPTY_ACCEL = "e"; // Must be lower case
@@ -21,8 +21,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     public const string ACTION_PREFIX = ACTION_GROUP + ".";
     public const string ACTION_UNDO = "action-undo";
     public const string ACTION_REDO = "action-redo";
-    public const string ACTION_ZOOM_IN = "action-zoom-in";
-    public const string ACTION_ZOOM_OUT = "action-zoom-out";
+    // public const string ACTION_ZOOM_IN = "action-zoom-in";
+    // public const string ACTION_ZOOM_OUT = "action-zoom-out";
     public const string ACTION_CURSOR_UP = "action-cursor_up";
     public const string ACTION_CURSOR_DOWN = "action-cursor_down";
     public const string ACTION_CURSOR_LEFT = "action-cursor_left";
@@ -50,8 +50,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private static GLib.ActionEntry [] view_action_entries = {
         {ACTION_UNDO, action_undo},
         {ACTION_REDO, action_redo},
-        {ACTION_ZOOM_IN, action_zoom_in},
-        {ACTION_ZOOM_OUT, action_zoom_out},
         {ACTION_CURSOR_UP, action_cursor_up},
         {ACTION_CURSOR_DOWN, action_cursor_down},
         {ACTION_CURSOR_LEFT, action_cursor_left},
@@ -144,11 +142,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         action_accelerators.set (ACTION_CURSOR_DOWN, "Down");
         action_accelerators.set (ACTION_CURSOR_LEFT, "Left");
         action_accelerators.set (ACTION_CURSOR_RIGHT, "Right");
-        action_accelerators.set (ACTION_ZOOM_IN, "<Ctrl>plus");
-        action_accelerators.set (ACTION_ZOOM_IN, "<Ctrl>equal");
-        action_accelerators.set (ACTION_ZOOM_IN, "<Ctrl>KP_Add");
-        action_accelerators.set (ACTION_ZOOM_OUT, "<Ctrl>minus");
-        action_accelerators.set (ACTION_ZOOM_OUT, "<Ctrl>KP_Subtract");
         action_accelerators.set (ACTION_SETTING_MODE, "<Ctrl>1");
         action_accelerators.set (ACTION_SOLVING_MODE, "<Ctrl>2");
         action_accelerators.set (ACTION_GENERATING_MODE, "<Ctrl>3");
@@ -380,30 +373,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
         main_grid.attach (cell_grid, 1, 1, 1, 1);
 
-        var scroll_controller = new Gtk.EventControllerScroll (
-            Gtk.EventControllerScrollFlags.VERTICAL |
-            Gtk.EventControllerScrollFlags.DISCRETE
-        );
 
-        main_grid.add_controller (scroll_controller);
-        scroll_controller.scroll.connect ((dx, dy) => {
-            var modifiers = scroll_controller.get_current_event_state ();
-            if ((modifiers & Gdk.ModifierType.CONTROL_MASK) > 0) {
-                    Idle.add (() => {
-                        if (dy > 0.0) {
-                             action_zoom_in ();
-                        } else {
-                            action_zoom_out ();
-                        }
 
-                        return Source.REMOVE;
-                    });
-
-                return Gdk.EVENT_STOP;
-            }
-
-            return Gdk.EVENT_PROPAGATE;
-        });
 
         var key_controller = new Gtk.EventControllerKey ();
         main_grid.add_controller (key_controller);
@@ -799,29 +770,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         controller.save_game_as.begin ();
     }
 
-    private void action_zoom_in () {
-        change_cell_size (true);
-    }
-    private void action_zoom_out () {
-        change_cell_size (false);
-    }
-
-    private void change_cell_size (bool increase) {
-        var delta = double.max (ZOOM_RATIO * cell_size, 1.0);
-        if (increase) {
-            cell_size += (int)delta;
-        } else {
-            cell_size -= (int)delta;
-            //FIXME This is a hack to fix redrawing the window when the grid gets smaller. For some
-            //FIXME This is a hack to fix redrawing the window when the grid gets smaller. For some
-            //reason the window only properly redraws when the size increases.  Review for later versions of Gtk4/Elementary
-            cell_size -= (int)delta;
-            Idle.add (() => {
-                cell_size += (int)delta;
-                return Source.REMOVE;
-            });
-        }
-    }
 
     private void action_check_errors () {
         if (controller.rewind_until_correct () == 0) {
