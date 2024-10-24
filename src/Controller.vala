@@ -11,6 +11,24 @@ public class Gnonograms.Controller : GLib.Object {
     public Gtk.Window window { get { return (Gtk.Window)view;}}
     public GameState game_state { get; set; }
     public Dimensions dimensions { get; set; }
+    public uint rows {
+        get {
+            return dimensions.height;
+        }
+
+        set {
+            dimensions.height = value.clamp (5, 50);
+        }
+    }
+    public uint columns {
+        get {
+            return dimensions.width;
+        }
+
+        set {
+            dimensions.width = value.clamp (5, 50);
+        }
+    }
 
     public Difficulty generator_grade { get; set; }
     public string game_name { get; set; }

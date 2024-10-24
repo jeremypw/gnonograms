@@ -106,7 +106,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         });
 
         view.notify["cell-size"].connect (size_updated);
-        view.controller.notify["dimensions"].connect (size_updated);
+        // view.controller.notify["dimensions"].connect (size_updated);
         view.controller.notify["game-state"].connect (() => {
             on_game_state_changed ();
         });
@@ -119,18 +119,28 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         });
 
         size_updated ();
+
+        settings.changed["filled-color"].connect (set_colors);
+        settings.changed["empty-color"].connect (set_colors);
+        settings.changed["rows"].connect (size_updated);
+        settings.changed["columns"].connect (size_updated);
     }
 
     public void set_colors () {
-        var setting = (int) GameState.SETTING;
-        colors[setting, (int) CellState.UNKNOWN].parse (Gnonograms.UNKNOWN_COLOR);
-        colors[setting, (int) CellState.EMPTY].parse (Gnonograms.SETTING_EMPTY_COLOR);
-        colors[setting, (int) CellState.FILLED].parse (Gnonograms.SETTING_FILLED_COLOR);
-        setting = (int) GameState.SOLVING;
-        colors[setting, (int) CellState.UNKNOWN].parse (Gnonograms.UNKNOWN_COLOR);
-        colors[setting, (int) CellState.EMPTY].parse (settings.get_string ("empty-color"));
-        colors[setting, (int) CellState.FILLED].parse (settings.get_string ("filled-color"));
-        on_game_state_changed ();
+        // Ensure settings have updated
+        Idle.add (() => {
+            var setting = (int) GameState.SETTING;
+            colors[setting, (int) CellState.UNKNOWN].parse (Gnonograms.UNKNOWN_COLOR);
+            colors[setting, (int) CellState.EMPTY].parse (Gnonograms.SETTING_EMPTY_COLOR);
+            colors[setting, (int) CellState.FILLED].parse (Gnonograms.SETTING_FILLED_COLOR);
+            setting = (int) GameState.SOLVING;
+            colors[setting, (int) CellState.UNKNOWN].parse (Gnonograms.UNKNOWN_COLOR);
+            colors[setting, (int) CellState.EMPTY].parse (settings.get_string ("empty-color"));
+            colors[setting, (int) CellState.FILLED].parse (settings.get_string ("filled-color"));
+            on_game_state_changed ();
+            queue_draw ();
+            return Source.REMOVE;
+        });
     }
 
     private void on_game_state_changed () {
@@ -142,14 +152,20 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     }
 
     private void size_updated () {
-        rows = (int)view.controller.dimensions.height;
-        cols = (int)view.controller.dimensions.width;
-        cell_width = view.cell_size;
-        cell_height = view.cell_size;
-        /* Cause refresh of existing pattern */
-        highlight_pattern = new CellPattern.highlight (cell_width, cell_height);
-        content_width = cols * view.cell_size + (int)MINOR_GRID_LINE_WIDTH;
-        content_height = rows * view.cell_size + (int)MINOR_GRID_LINE_WIDTH;
+        Idle.add (() => {
+            rows = (int)settings.get_uint ("rows");
+            cols = (int)settings.get_uint ("columns");
+            // rows = (int)view.controller.dimensions.height;
+            // cols = (int)view.controller.dimensions.width;
+            cell_width = view.cell_size;
+            cell_height = view.cell_size;
+            /* Cause refresh of existing pattern */
+            highlight_pattern = new CellPattern.highlight (cell_width, cell_height);
+            content_width = cols * view.cell_size + (int)MINOR_GRID_LINE_WIDTH;
+            content_height = rows * view.cell_size + (int)MINOR_GRID_LINE_WIDTH;
+            queue_draw ();
+            return Source.REMOVE;
+        });
     }
 
     private void draw_func (Gtk.DrawingArea drawing_area, Cairo.Context cr, int x, int y) {

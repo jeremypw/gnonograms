@@ -232,55 +232,37 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             ACTION_PREFIX + ACTION_HINT,
             _("Suggest next move")
         );
-        auto_solve_button = new HeaderButton (
-            "system",
-            ACTION_PREFIX + ACTION_SOLVE,
-            _("Solve by Computer")
-        );
+        // auto_solve_button = new HeaderButton (
+        //     "system",
+        //     ACTION_PREFIX + ACTION_SOLVE,
+        //     _("Solve by Computer")
+        // );
         generate_button = new HeaderButton (
             "list-add",
             ACTION_PREFIX + ACTION_GENERATING_MODE,
             _("Generate New Puzzle")
         );
 
-        var app_popover = new AppPopover () {
+
+        var app_popover = new AppPopover (controller) {
             has_arrow = false
         };
-        app_popover.apply_settings.connect (() => {
-            controller.generator_grade = app_popover.grade;
-            controller.dimensions = {app_popover.columns, app_popover.rows};
-            controller.game_name = app_popover.title; // Must come after changing dimensions
-            settings.set_string ("filled-color", app_popover.filled_color);
-            settings.set_string ("empty-color", app_popover.empty_color);
-            // Wait for settings to update
-            Idle.add (() => {
-                cell_grid.set_colors ();
-                cell_grid.queue_draw ();
-                return Source.REMOVE;
-            });
-        });
-        app_popover.show.connect (() => { /* Allow parent to set values first */
-            app_popover.grade = controller.generator_grade;
-            app_popover.rows = controller.dimensions.height;
-            app_popover.columns = controller.dimensions.width;
-            app_popover.title = controller.game_name;
-            app_popover.filled_color = settings.get_string ("filled-color");
-            app_popover.empty_color = settings.get_string ("empty-color");
-        });
 
-        var menu_image = new Gtk.Image.from_icon_name ("open-menu") {
-            pixel_size = 32
-        };
+
+        // var menu_image = new Gtk.Image.from_icon_name ("open-menu") {
+        //     pixel_size = 32
+        // };
         menu_button = new Gtk.MenuButton () {
             tooltip_markup = Granite.markup_accel_tooltip (
                 app.get_accels_for_action (
                     ACTION_PREFIX + ACTION_OPTIONS),
                     _("Options")
             ),
-            child = menu_image,
-            has_frame = false
+            icon_name = "open-menu-symbolic",
+            can_focus = false,
+            valign = Gtk.Align.CENTER,
+            popover = (new AppPopover (controller))
         };
-        menu_button.set_popover (app_popover);
 
         // Unable to set markup on Granite.ModeSwitch so fake a Granite accelerator tooltip for now.
         mode_switch = new Granite.ModeSwitch.from_icon_name (
