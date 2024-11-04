@@ -10,25 +10,13 @@ public class Gnonograms.Controller : GLib.Object {
 
     public Gtk.Window window { get { return (Gtk.Window)view;}}
     public GameState game_state { get; set; }
-    public Dimensions dimensions { get; set; }
-    public uint rows {
+    public Dimensions dimensions {
         get {
-            return dimensions.height;
-        }
-
-        set {
-            dimensions.height = value.clamp (5, 50);
+            return {columns, rows};
         }
     }
-    public uint columns {
-        get {
-            return dimensions.width;
-        }
-
-        set {
-            dimensions.width = value.clamp (5, 50);
-        }
-    }
+    public uint rows { get; set;}
+    public uint columns { get; set; }
 
     public Difficulty generator_grade { get; set; }
     public string game_name { get; set; }
@@ -66,7 +54,11 @@ public class Gnonograms.Controller : GLib.Object {
             }
         });
 
-        notify["dimensions"].connect (() => {
+        notify["columns"].connect (() => {
+            solver = new Solver (dimensions);
+            game_name = _(UNTITLED_NAME);
+        });
+        notify["rows"].connect (() => {
             solver = new Solver (dimensions);
             game_name = _(UNTITLED_NAME);
         });
@@ -246,12 +238,11 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     private void restore_dimensions () {
-        dimensions = { 15, 10 }; /* Fallback dimensions */
+        columns = 15;
+        rows = 10;
         if (settings != null) {
-            dimensions = {
-                settings.get_uint ("columns").clamp (10, 50),
-                settings.get_uint ("rows").clamp (10, 50)
-            };
+            columns = settings.get_uint ("columns").clamp (10, 50);
+            rows = settings.get_uint ("rows").clamp (10, 50);
         }
     }
 
@@ -386,7 +377,8 @@ public class Gnonograms.Controller : GLib.Object {
                 reader.err_msg = (_("Dimensions too small"));
                 return false;
             } else {
-                dimensions = {reader.cols, reader.rows};
+                columns = reader.cols;
+                rows = reader.rows;
             }
         } else {
             reader.err_msg = (_("Dimensions missing"));
@@ -645,4 +637,7 @@ public class Gnonograms.Controller : GLib.Object {
 
         view.end_working ();
     }
+
+    public void increase_fontsize () {}
+    public void decrease_fontsize () {}
 }

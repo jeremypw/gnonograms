@@ -5,60 +5,13 @@
  * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
 public class Gnonograms.AppPopover : Gtk.Popover {
-    public signal void apply_settings ();
-
-    private Gtk.DropDown grade_setting;
     private Gtk.SpinButton row_setting;
     private Gtk.SpinButton column_setting;
     private Gtk.Entry title_setting;
     private Gtk.ColorDialogButton filled_color_setting;
     private Gtk.ColorDialogButton empty_color_setting;
 
-    // public Difficulty grade {
-    //     get {
-    //         return (Difficulty) (grade_setting.get_selected ());
-    //     }
-
-    //     set {
-    //         grade_setting.set_selected (
-    //             ((uint) value).clamp (
-    //                 MIN_GRADE,
-    //                 Difficulty.MAXIMUM
-    //             )
-    //         );
-    //     }
-    // }
-
-    // public uint rows {
-    //     get {
-    //         return (uint)(row_setting.@value);
-    //     }
-
-    //     set {
-    //         row_setting.@value = value;
-    //     }
-    // }
-
-    // public uint columns {
-    //     get {
-    //         return (uint)(column_setting.@value);
-    //     }
-
-    //     set {
-    //         column_setting.@value = value;
-    //     }
-    // }
-
-    // public string title {
-    //     get {
-    //         return title_setting.text;
-    //     }
-
-    //     set {
-    //         title_setting.text = value;
-    //     }
-    // }
-
+    public Difficulty grade { get; set; }
     public string filled_color { get; set; }
     public string empty_color { get; set; }
 
@@ -70,86 +23,67 @@ public class Gnonograms.AppPopover : Gtk.Popover {
         );
     }
     construct {
-        grade_setting = new Gtk.DropDown.from_strings (Difficulty.all_human ());
-
-        row_setting = new Gtk.SpinButton (
-            new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),
-            5.0,
-            0
-        ) {
-            snap_to_ticks = true,
-            orientation = Gtk.Orientation.HORIZONTAL,
-            width_chars = 3,
-        };
-
-        column_setting = new Gtk.SpinButton (
-            new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),
-            5.0,
-            0
-        ) {
-            snap_to_ticks = true,
-            orientation = Gtk.Orientation.HORIZONTAL,
-            width_chars = 3,
-        };
-
-        title_setting = new Gtk.Entry () {
-            placeholder_text = _("Enter title of game here")
-        };
-
-        filled_color_setting = new Gtk.ColorDialogButton (new Gtk.ColorDialog ());
-        empty_color_setting = new Gtk.ColorDialogButton (new Gtk.ColorDialog ());
-
-        var settings_grid = new Gtk.Grid () {
-            orientation = Gtk.Orientation.VERTICAL,
-            row_spacing = 12,
-            column_spacing = 12,
-            margin_start = margin_end = margin_top = 12,
-            margin_bottom = 24
-        };
-        settings_grid.attach (new Gtk.Label (_("Name:")), 0, 0, 1);
-        settings_grid.attach (title_setting, 1, 0, 3);
-        settings_grid.attach (new Gtk.Label (_("Difficulty:")), 0, 1, 1);
-        settings_grid.attach (grade_setting, 1, 1, 3);
-        settings_grid.attach (new Gtk.Label (_("Rows:")), 0, 2, 1);
-        settings_grid.attach (row_setting, 1, 2, 1);
-        settings_grid.attach (new Gtk.Label (_("Columns:")), 0, 3, 1);
-        settings_grid.attach (column_setting, 1, 3, 1);
-        settings_grid.attach (new Gtk.Label (_("Filled Color:")), 0, 4, 1);
-        settings_grid.attach (filled_color_setting, 1, 4, 1);
-        settings_grid.attach (new Gtk.Label (_("Empty Color:")), 0, 5, 1);
-        settings_grid.attach (empty_color_setting, 1, 5, 1);
-
-        var main_widget = new Gtk.Box (Gtk.Orientation.VERTICAL, 6);
-        main_widget.append (settings_grid);
-
-        child = main_widget;
-
-        // Could not get bind with mapping to work with RGBA property
-        filled_color_setting.notify["rgba"].connect (() => {
-            var color = filled_color_setting.get_rgba ();
-            filled_color = color.to_string ();
-        });
-        notify["filled-color"].connect (() => {
-            var color = Gdk.RGBA () {};
-            color.parse (filled_color);
-            filled_color_setting.set_rgba (color);
+        var zoom_out_button = new Gtk.Button.from_icon_name ("zoom-out-symbolic");
+        zoom_out_button.tooltip_markup = Granite.markup_accel_tooltip (
+            {"<Ctrl>minus"},
+            _("Zoom Out")
+        );
+        zoom_out_button.clicked.connect (() => {
+            controller.decrease_fontsize ();
         });
 
-        empty_color_setting.notify["rgba"].connect (() => {
-            var color = empty_color_setting.get_rgba ();
-            empty_color = color.to_string ();
-        });
-        notify["empty-color"].connect (() => {
-            var color = Gdk.RGBA () {};
-            color.parse (empty_color);
-            empty_color_setting.set_rgba (color);
+        var zoom_in_button = new Gtk.Button.from_icon_name ("zoom-in-symbolic");
+        zoom_in_button.tooltip_markup = Granite.markup_accel_tooltip (
+            {"<Ctrl>plus"},
+            _("Zoom In")
+        );
+        zoom_in_button.clicked.connect (() => {
+            controller.increase_fontsize ();
         });
 
-        settings.bind ("grade", grade_setting, "selected", DEFAULT);
-        settings.bind ("filled-color", this, "filled-color", DEFAULT);
-        settings.bind ("empty-color", this, "empty-color", DEFAULT);
-        settings.bind ("rows", this, "rows", DEFAULT);
-        settings.bind ("columns", column_setting, "columns", DEFAULT);
-        settings.bind ("rows", row_setting, "value", DEFAULT);
+        var font_size_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0) {
+            homogeneous = true,
+            hexpand = true,
+            margin_top = 12,
+            margin_start = 12,
+            margin_end = 12,
+        };
+        font_size_box.add_css_class (Granite.STYLE_CLASS_LINKED);
+        font_size_box.append (zoom_out_button);
+        font_size_box.append (zoom_in_button);
+
+        var title_entry = new Gtk.Entry () {
+            placeholder_text = _("Enter title of game here"),
+            margin_top = 12,
+        };
+
+        var preferences_button = new Gtk.Button () {
+            margin_top = 3,
+            margin_bottom = 3
+        };
+        preferences_button.add_css_class (Granite.STYLE_CLASS_FLAT);
+        preferences_button.child = new Gtk.Label (_("Preferences")) {
+            xalign = 0.0f
+        };
+        preferences_button.clicked.connect (() => {
+            popdown ();
+            var dialog = new Dialogs.Preferences ((Gtk.Window)get_ancestor (typeof (Gtk.Window)));
+            dialog.response.connect (() => {
+                dialog.destroy ();
+            });
+            dialog.present ();
+        });
+
+        var menu_separator = new Gtk.Separator (Gtk.Orientation.HORIZONTAL) {
+            margin_top = 6
+        };
+
+        var settings_box = new Gtk.Box (VERTICAL, 0);
+        settings_box.append (font_size_box);
+        settings_box.append (title_entry);
+        settings_box.append (menu_separator);
+        settings_box.append (preferences_button);
+
+        child = settings_box;
     }
 }

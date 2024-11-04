@@ -244,14 +244,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         );
 
 
-        var app_popover = new AppPopover (controller) {
-            has_arrow = false
-        };
+        var app_popover = new AppPopover (controller);
 
-
-        // var menu_image = new Gtk.Image.from_icon_name ("open-menu") {
-        //     pixel_size = 32
-        // };
         menu_button = new Gtk.MenuButton () {
             tooltip_markup = Granite.markup_accel_tooltip (
                 app.get_accels_for_action (
@@ -259,9 +253,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
                     _("Options")
             ),
             icon_name = "open-menu-symbolic",
-            can_focus = false,
             valign = Gtk.Align.CENTER,
-            popover = (new AppPopover (controller))
+            popover = new AppPopover (controller)
         };
 
         // Unable to set markup on Granite.ModeSwitch so fake a Granite accelerator tooltip for now.
@@ -299,8 +292,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
         header_bar = new Gtk.HeaderBar () {
             show_title_buttons = true,
-            title_widget = progress_stack,
-            can_focus = false
+            title_widget = progress_stack
         };
         header_bar.add_css_class ("gnonograms-header");
         header_bar.pack_start (load_game_button);
@@ -354,9 +346,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for dimensions.height*/
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
         main_grid.attach (cell_grid, 1, 1, 1, 1);
-
-
-
 
         var key_controller = new Gtk.EventControllerKey ();
         main_grid.add_controller (key_controller);
@@ -441,10 +430,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             update_all_labels_completeness ();
         });
 
-        controller.notify["dimensions"].connect (() => {
-            calc_cell_size ();
-        });
-
         cell_grid.leave.connect (() => {
             row_clue_box.unhighlight_all ();
             column_clue_box.unhighlight_all ();
@@ -472,24 +457,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         });
 
         cell_grid.stop_drawing.connect (stop_painting);
-        notify["default-width"].connect (calc_cell_size);
-        notify["default-height"].connect (calc_cell_size);
-    }
-
-    private void calc_cell_size () {
-        // Update cell-size if required to fit in window
-        var n_cols = controller.dimensions.width;
-        var n_rows = controller.dimensions.height;
-
-
-        var grid_width = this.default_width;
-        int header_height, nat;
-        header_bar.measure (VERTICAL, grid_width, out header_height, out nat, null, null);
-        var grid_height = this.default_height - header_height;
-        var max_cell_width = grid_width / (n_cols * (1.25));
-
-        var max_cell_height = grid_height / (n_rows * (1.35));
-        cell_size = (int) (double.min (max_cell_width, max_cell_height)).clamp (8, 128);
     }
 
     public string[] get_clues (bool is_column) {

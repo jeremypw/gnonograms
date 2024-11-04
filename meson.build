@@ -16,13 +16,6 @@ endif
 i18n = import ('i18n')
 gnome = import('gnome')
 
-# Currently no custom resources for Gtk4 version.  Thinking-head icon not used
-# gresource = gnome.compile_resources(
-#     'gresource',
-#     'data/gresource.xml',
-#     source_dir: 'data'
-# )
-
 config_data = configuration_data()
 config_data.set_quoted('LOCALEDIR', join_paths(get_option('prefix'), get_option('localedir')))
 config_data.set_quoted('GETTEXT_PACKAGE', meson.project_name())
@@ -54,6 +47,7 @@ executable (
     'src/HeaderBar/AppPopover.vala',
     'src/services/RandomPatternGenerator.vala',
     'src/services/RandomGameGenerator.vala',
+    'src/Dialogs/PreferencesDialog.vala',
     'libcore/widgets/Cluebox.vala',
     'libcore/widgets/Clue.vala',
     'libcore/widgets/Cellgrid.vala',
@@ -69,18 +63,8 @@ executable (
     'libcore/Enums.vala',
     'libcore/Structs.vala',
     'libcore/Constants.vala',
-# <<<<<<< HEAD
-#      config_file,
-
-#     dependencies : [
-#         dependency('granite-7'),
-#         dependency('libadwaita-1')
-#     ],
-
-# =======
     config_file,
     dependencies : gnonogram_deps,
-# >>>>>>> master
     install: true
 )
 
