@@ -23,8 +23,16 @@ public class Gnonograms.Model : GLib.Object {
     private My2DCellArray solution_data { get; set; }
     private My2DCellArray working_data { get; set; }
 
-    private uint rows = 0;
-    private uint cols = 0;
+    private uint rows { 
+        get {
+            return controller.rows;
+        }
+    }
+    private uint cols { 
+        get {
+            return controller.columns;
+        }
+    }
 
     public Model (Controller controller) {
         Object (
@@ -33,17 +41,22 @@ public class Gnonograms.Model : GLib.Object {
     }
 
     construct {
-        controller.notify["dimensions"].connect (() => {
-            rows = controller.dimensions.height;
-            cols = controller.dimensions.width;
-            solution_data = new My2DCellArray (controller.dimensions, CellState.EMPTY);
-            working_data = new My2DCellArray (controller.dimensions, CellState.UNKNOWN);
-            changed ();
-        });
-
+        make_data_arrays ();
+        controller.notify["rows"].connect (on_changed_dimensions);
+        controller.notify["columns"].connect (on_changed_dimensions);
         controller.notify["game-state"].connect (() => {
             changed ();
         });
+    }
+
+    private void on_changed_dimensions () {
+        make_data_arrays ();
+        changed ();
+    }
+    
+    private void make_data_arrays () {
+        solution_data = new My2DCellArray (controller.dimensions, CellState.EMPTY);
+        working_data = new My2DCellArray (controller.dimensions, CellState.UNKNOWN);
     }
 
     public int count_errors () {

@@ -5,10 +5,38 @@
  * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
 namespace Gnonograms {
+    public const string ACTION_GROUP = "win";
+    public const string ACTION_PREFIX = ACTION_GROUP + ".";
+    public const string ACTION_UNDO = "action-undo";
+    public const string ACTION_REDO = "action-redo";
+    // public const string ACTION_ZOOM_IN = "action-zoom-in";
+    // public const string ACTION_ZOOM_OUT = "action-zoom-out";
+    public const string ACTION_CURSOR_UP = "action-cursor_up";
+    public const string ACTION_CURSOR_DOWN = "action-cursor_down";
+    public const string ACTION_CURSOR_LEFT = "action-cursor_left";
+    public const string ACTION_CURSOR_RIGHT = "action-cursor_right";
+    public const string ACTION_SETTING_MODE = "action-setting-mode";
+    public const string ACTION_SOLVING_MODE = "action-solving-mode";
+    public const string ACTION_GENERATING_MODE = "action-generating-mode";
+    public const string ACTION_OPEN = "action-open";
+    public const string ACTION_SAVE = "action-save";
+    public const string ACTION_SAVE_AS = "action-save-as";
+    public const string ACTION_PAINT_FILLED = "action-paint-filled";
+    public const string ACTION_PAINT_EMPTY = "action-paint-empty";
+    public const string ACTION_PAINT_UNKNOWN = "action-paint-unknown";
+    public const string ACTION_CHECK_ERRORS = "action-check-errors";
+    public const string ACTION_RESTART = "action-restart";
+    public const string ACTION_SOLVE = "action-solve";
+    public const string ACTION_HINT = "action-hint";
+    public const string ACTION_OPTIONS = "action-options";
+#if WITH_DEBUGGING
+    public const string ACTION_DEBUG_ROW = "action-debug-row";
+    public const string ACTION_DEBUG_COL = "action-debug-col";
+#endif
     public GLib.Settings saved_state;
     public GLib.Settings settings;
-
-public class App : Gtk.Application {
+    
+    public class App : Gtk.Application {
     private Controller controller;
 
     public App () {

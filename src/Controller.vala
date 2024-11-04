@@ -92,8 +92,8 @@ public class Gnonograms.Controller : GLib.Object {
         );
 
         if (saved_state != null && settings != null) {
-            saved_state.bind ("mode", this, "game_state", SettingsBindFlags.DEFAULT);
-            settings.bind ("grade", this, "generator_grade", SettingsBindFlags.DEFAULT);
+            saved_state.bind ("mode", this, "game-state", SettingsBindFlags.DEFAULT);
+            settings.bind ("grade", this, "generator-grade", SettingsBindFlags.DEFAULT);
             settings.bind ("clue-help", view, "strikeout-complete", SettingsBindFlags.DEFAULT);
         } else {
             restore_settings ();

@@ -17,34 +17,34 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private const string PAINT_EMPTY_ACCEL = "e"; // Must be lower case
     private const string PAINT_UNKNOWN_ACCEL = "x"; // Must be lower case
 
-    public const string ACTION_GROUP = "win";
-    public const string ACTION_PREFIX = ACTION_GROUP + ".";
-    public const string ACTION_UNDO = "action-undo";
-    public const string ACTION_REDO = "action-redo";
-    // public const string ACTION_ZOOM_IN = "action-zoom-in";
-    // public const string ACTION_ZOOM_OUT = "action-zoom-out";
-    public const string ACTION_CURSOR_UP = "action-cursor_up";
-    public const string ACTION_CURSOR_DOWN = "action-cursor_down";
-    public const string ACTION_CURSOR_LEFT = "action-cursor_left";
-    public const string ACTION_CURSOR_RIGHT = "action-cursor_right";
-    public const string ACTION_SETTING_MODE = "action-setting-mode";
-    public const string ACTION_SOLVING_MODE = "action-solving-mode";
-    public const string ACTION_GENERATING_MODE = "action-generating-mode";
-    public const string ACTION_OPEN = "action-open";
-    public const string ACTION_SAVE = "action-save";
-    public const string ACTION_SAVE_AS = "action-save-as";
-    public const string ACTION_PAINT_FILLED = "action-paint-filled";
-    public const string ACTION_PAINT_EMPTY = "action-paint-empty";
-    public const string ACTION_PAINT_UNKNOWN = "action-paint-unknown";
-    public const string ACTION_CHECK_ERRORS = "action-check-errors";
-    public const string ACTION_RESTART = "action-restart";
-    public const string ACTION_SOLVE = "action-solve";
-    public const string ACTION_HINT = "action-hint";
-    public const string ACTION_OPTIONS = "action-options";
-#if WITH_DEBUGGING
-    public const string ACTION_DEBUG_ROW = "action-debug-row";
-    public const string ACTION_DEBUG_COL = "action-debug-col";
-#endif
+//     public const string ACTION_GROUP = "win";
+//     public const string ACTION_PREFIX = ACTION_GROUP + ".";
+//     public const string ACTION_UNDO = "action-undo";
+//     public const string ACTION_REDO = "action-redo";
+//     // public const string ACTION_ZOOM_IN = "action-zoom-in";
+//     // public const string ACTION_ZOOM_OUT = "action-zoom-out";
+//     public const string ACTION_CURSOR_UP = "action-cursor_up";
+//     public const string ACTION_CURSOR_DOWN = "action-cursor_down";
+//     public const string ACTION_CURSOR_LEFT = "action-cursor_left";
+//     public const string ACTION_CURSOR_RIGHT = "action-cursor_right";
+//     public const string ACTION_SETTING_MODE = "action-setting-mode";
+//     public const string ACTION_SOLVING_MODE = "action-solving-mode";
+//     public const string ACTION_GENERATING_MODE = "action-generating-mode";
+//     public const string ACTION_OPEN = "action-open";
+//     public const string ACTION_SAVE = "action-save";
+//     public const string ACTION_SAVE_AS = "action-save-as";
+//     public const string ACTION_PAINT_FILLED = "action-paint-filled";
+//     public const string ACTION_PAINT_EMPTY = "action-paint-empty";
+//     public const string ACTION_PAINT_UNKNOWN = "action-paint-unknown";
+//     public const string ACTION_CHECK_ERRORS = "action-check-errors";
+//     public const string ACTION_RESTART = "action-restart";
+//     public const string ACTION_SOLVE = "action-solve";
+//     public const string ACTION_HINT = "action-hint";
+//     public const string ACTION_OPTIONS = "action-options";
+// #if WITH_DEBUGGING
+//     public const string ACTION_DEBUG_ROW = "action-debug-row";
+//     public const string ACTION_DEBUG_COL = "action-debug-col";
+// #endif
     public static Gee.MultiMap<string, string> action_accelerators;
     public static Gtk.Application app;
     private static GLib.ActionEntry [] view_action_entries = {
@@ -103,9 +103,9 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private Gtk.Label title_label;
     private Gtk.Label grade_label;
     private Gtk.Button generate_button;
-    private Gtk.Button load_game_button;
-    private Gtk.Button save_game_button;
-    private Gtk.Button save_game_as_button;
+    // private Gtk.Button load_game_button;
+    // private Gtk.Button save_game_button;
+    // private Gtk.Button save_game_as_button;
     private Gtk.Button undo_button;
     private Gtk.Button redo_button;
     private Gtk.Button check_correct_button;
@@ -189,21 +189,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             app.set_accels_for_action (ACTION_PREFIX + action, accels_array);
         }
 
-        load_game_button = new HeaderButton (
-            "document-open",
-            ACTION_PREFIX + ACTION_OPEN,
-            _("Load Game")
-        );
-        save_game_button = new HeaderButton (
-            "document-save",
-            ACTION_PREFIX + ACTION_SAVE,
-            _("Save Game")
-        );
-        save_game_as_button = new HeaderButton (
-            "document-save-as",
-            ACTION_PREFIX + ACTION_SAVE_AS,
-            _("Save Game to Different File")
-        );
+
         undo_button = new HeaderButton (
             "edit-undo-symbolic",
             ACTION_PREFIX + ACTION_UNDO,
@@ -295,17 +281,18 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             title_widget = progress_stack
         };
         header_bar.add_css_class ("gnonograms-header");
-        header_bar.pack_start (load_game_button);
-        header_bar.pack_start (save_game_button);
-        header_bar.pack_start (save_game_as_button);
+        // header_bar.pack_start (load_game_button);
+        // header_bar.pack_start (save_game_button);
+        // header_bar.pack_start (save_game_as_button);
+        header_bar.pack_start (generate_button);
         header_bar.pack_start (restart_button);
         header_bar.pack_start (undo_button);
         header_bar.pack_start (redo_button);
         header_bar.pack_start (check_correct_button);
         header_bar.pack_end (menu_button);
-        header_bar.pack_end (generate_button);
+        // header_bar.pack_end (generate_button);
         header_bar.pack_end (mode_switch);
-        header_bar.pack_end (auto_solve_button);
+        // header_bar.pack_end (auto_solve_button);
         header_bar.pack_end (hint_button);
 
         set_titlebar (header_bar);
@@ -401,9 +388,9 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             update_title ();
         });
 
-        notify["readonly"].connect (() => {
-            save_game_button.sensitive = readonly;
-        });
+        // notify["readonly"].connect (() => {
+        //     save_game_button.sensitive = readonly;
+        // });
 
         notify["can-go-back"].connect (() => {
             check_correct_button.sensitive = can_go_back &&
@@ -559,9 +546,9 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private void set_buttons_sensitive (bool sensitive) {
         generate_button.sensitive = controller.game_state != GameState.GENERATING;
         mode_switch.sensitive = sensitive;
-        load_game_button.sensitive = sensitive;
-        save_game_button.sensitive = sensitive;
-        save_game_as_button.sensitive = sensitive;
+        // load_game_button.sensitive = sensitive;
+        // save_game_button.sensitive = sensitive;
+        // save_game_as_button.sensitive = sensitive;
         restart_destructive = sensitive && !model.is_blank (controller.game_state);
         undo_button.sensitive = sensitive && can_go_back;
         redo_button.sensitive = sensitive && can_go_forward;
@@ -571,7 +558,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             can_go_back;
 
         hint_button.sensitive = sensitive && controller.game_state == GameState.SOLVING;
-        auto_solve_button.sensitive = sensitive;
+        // auto_solve_button.sensitive = sensitive;
     }
 
     private void highlight_labels (Cell c, bool is_highlight) {
