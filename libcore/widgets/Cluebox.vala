@@ -6,7 +6,7 @@
  */
 public class Gnonograms.ClueBox : Gtk.Box {
     public unowned View view { get; construct; }
-    public double font_size { get; set; }
+    // public double font_size { get; set; }
     // The number of cells each clue addresses, monitored by clues
     public uint n_cells { get; set; default = 0; }
     private Gee.ArrayList<Clue> clues;
@@ -35,10 +35,10 @@ public class Gnonograms.ClueBox : Gtk.Box {
         clues = new Gee.ArrayList<Clue> ();
         view.controller.notify ["rows"].connect (on_dimensions_changed);
         view.controller.notify ["columns"].connect (on_dimensions_changed);
-        view.bind_property ("font-size", this, "font-size");
 
         on_dimensions_changed ();
     }
+
 
     private void on_dimensions_changed () {
         if (width == 0 || height == 0) {

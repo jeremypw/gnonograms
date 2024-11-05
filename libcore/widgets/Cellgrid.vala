@@ -46,10 +46,10 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     private const double MINOR_GRID_LINE_WIDTH = 1.0;
     private Gdk.RGBA[, ] colors;
 
-    private int rows = 0;
-    private int cols = 0;
+    private uint rows = 5;
+    private uint cols = 5;
     private bool dirty = false; /* Whether a redraw is needed */
-    private double cell_size; /* Width and Height of cell */
+    private double cell_size = 6.0; /* Width and Height of cell */
 
     private Gdk.RGBA grid_color;
     private Gdk.RGBA fill_color;
@@ -117,15 +117,12 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             }
         });
 
-        view.notify["default-width"].connect (update_allocation);
-        view.notify["default-height"].connect (update_allocation);
-
         settings.changed["filled-color"].connect (set_colors);
         settings.changed["empty-color"].connect (set_colors);
-        settings.changed["rows"].connect (size_updated);
-        settings.changed["columns"].connect (size_updated);
+        view.controller.notify["rows"].connect (size_updated);
+        view.controller.notify["columns"].connect (size_updated);
 
-        update_allocation ();
+        size_updated ();
     }
 
     public void set_colors () {
@@ -153,27 +150,30 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         cell_pattern_type = CellPatternType.UNDEFINED; /* Causes refresh of existing pattern */
     }
 
-    private void update_allocation () {
-        var alloc = Gtk.Allocation () {
-            width = (int)((double)view.default_width * 0.66),
-            height = (int)((double)view.default_height * 0.66)
-        };
-        content_width = alloc.width;
-        content_height = alloc.height;
-        size_updated ();
+    public override void size_allocate (int w, int h, int bl) {
+        if (cols > 0 && rows > 0) {
+            content_width = w;
+            content_height = h;
+            size_updated ();
+        }
+
+        warning ("content %i, %i", content_width, content_height);
+        base.size_allocate (w, h, bl);
     }
+
     private void size_updated () {
-        Idle.add (() => {
-            rows = (int)settings.get_uint ("rows");
-            cols = (int)settings.get_uint ("columns");
-            var cell_width = content_width / cols;
-            var cell_height = content_height / rows;
-            cell_size = int.min (cell_width, cell_height);
+        rows = view.controller.rows;
+        cols = view.controller.columns;
+        warning ("SIZE UPDATED %u, %u", rows, cols);
+        if (rows > 0 && cols > 0) {
+            var cell_width = (double) (content_width / cols);
+            var cell_height = (double) (content_height / rows);
+            cell_size = double.min (cell_width, cell_height);
+            warning ("cell size %f", cell_size);
             /* Cause refresh of existing pattern */
             highlight_pattern = new CellPattern.highlight (cell_size, cell_size);
             queue_draw ();
-            return Source.REMOVE;
-        });
+        }
     }
 
     private void draw_func (Gtk.DrawingArea drawing_area, Cairo.Context cr, int x, int y) {

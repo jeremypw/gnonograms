@@ -262,27 +262,24 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         set_titlebar (header_bar);
 
         row_clue_box = new ClueBox (Gtk.Orientation.VERTICAL, this) {
-            halign = Gtk.Align.END,
+            halign = Gtk.Align.END
         };
         column_clue_box = new ClueBox (Gtk.Orientation.HORIZONTAL, this) {
-            valign = Gtk.Align.END,
+            valign = Gtk.Align.END
         };
-        cell_grid = new CellGrid (this) {
-            halign = START,
-            valign = START
-        };
+        cell_grid = new CellGrid (this);
 
         toast_overlay = new Adw.ToastOverlay () {
             valign = Gtk.Align.CENTER,
             halign = Gtk.Align.CENTER,
-            hexpand = false,
-            vexpand = false
         };
 
         main_grid = new Gtk.Grid () {
             focusable = true, // Needed for key controller to work
             row_spacing = 0,
-            column_spacing = GRID_COLUMN_SPACING
+            column_spacing = GRID_COLUMN_SPACING,
+            hexpand = false,
+            vexpand = false
         };
         main_grid.attach (toast_overlay, 0, 0, 1, 1); /* show temporary messages */
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for dimensions.height*/
