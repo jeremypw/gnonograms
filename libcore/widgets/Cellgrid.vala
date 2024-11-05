@@ -9,7 +9,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     public signal void stop_drawing ();
     public signal void leave ();
 
-    public View view { get; construct; }
+    public unowned View view { get; construct; }
     public Cell current_cell { get; set; }
     public Cell previous_cell { get; set; }
     public bool frozen { get; set; }
@@ -49,8 +49,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     private int rows = 0;
     private int cols = 0;
     private bool dirty = false; /* Whether a redraw is needed */
-    private double cell_width; /* Width of cell including frame */
-    private double cell_height; /* Height of cell including frame */
+    private double cell_size; /* Width and Height of cell */
 
     private Gdk.RGBA grid_color;
     private Gdk.RGBA fill_color;
@@ -75,6 +74,8 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     }
 
     construct {
+        hexpand = true;
+        vexpand = true;
         _current_cell = NULL_CELL;
         colors = new Gdk.RGBA[2, 3];
         grid_color.parse (Gnonograms.GRID_COLOR);
@@ -105,8 +106,6 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             queue_draw ();
         });
 
-        view.notify["cell-size"].connect (size_updated);
-        // view.controller.notify["dimensions"].connect (size_updated);
         view.controller.notify["game-state"].connect (() => {
             on_game_state_changed ();
         });
@@ -118,12 +117,15 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             }
         });
 
-        size_updated ();
+        view.notify["default-width"].connect (update_allocation);
+        view.notify["default-height"].connect (update_allocation);
 
         settings.changed["filled-color"].connect (set_colors);
         settings.changed["empty-color"].connect (set_colors);
         settings.changed["rows"].connect (size_updated);
         settings.changed["columns"].connect (size_updated);
+
+        update_allocation ();
     }
 
     public void set_colors () {
@@ -151,18 +153,24 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         cell_pattern_type = CellPatternType.UNDEFINED; /* Causes refresh of existing pattern */
     }
 
+    private void update_allocation () {
+        var alloc = Gtk.Allocation () {
+            width = (int)((double)view.default_width * 0.66),
+            height = (int)((double)view.default_height * 0.66)
+        };
+        content_width = alloc.width;
+        content_height = alloc.height;
+        size_updated ();
+    }
     private void size_updated () {
         Idle.add (() => {
             rows = (int)settings.get_uint ("rows");
             cols = (int)settings.get_uint ("columns");
-            // rows = (int)view.controller.dimensions.height;
-            // cols = (int)view.controller.dimensions.width;
-            cell_width = view.cell_size;
-            cell_height = view.cell_size;
+            var cell_width = content_width / cols;
+            var cell_height = content_height / rows;
+            cell_size = int.min (cell_width, cell_height);
             /* Cause refresh of existing pattern */
-            highlight_pattern = new CellPattern.highlight (cell_width, cell_height);
-            content_width = cols * view.cell_size + (int)MINOR_GRID_LINE_WIDTH;
-            content_height = rows * view.cell_size + (int)MINOR_GRID_LINE_WIDTH;
+            highlight_pattern = new CellPattern.highlight (cell_size, cell_size);
             queue_draw ();
             return Source.REMOVE;
         });
@@ -197,8 +205,8 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             previous_pointer_y = y;
         }
         /* Calculate which cell the pointer is over */
-        uint r = ((uint)((y) / cell_height));
-        uint c = ((uint)(x / cell_width));
+        uint r = ((uint)((y) / cell_size));
+        uint c = ((uint)(x / cell_size));
         if (r >= rows || c >= cols) {
             return;
         }
@@ -220,13 +228,13 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         // Draw minor grid lines
         double y1 = MINOR_GRID_LINE_WIDTH;
         double x1 = MINOR_GRID_LINE_WIDTH;
-        double x2 = x1 + cols * view.cell_size;
-        double y2 = y1 + rows * view.cell_size;
+        double x2 = x1 + cols * cell_size;
+        double y2 = y1 + rows * cell_size;
         while (y1 < y2) {
             cr.move_to (x1, y1);
             cr.line_to (x2, y1);
             cr.stroke ();
-            y1 += view.cell_size;
+            y1 += cell_size;
         }
 
         y1 = MINOR_GRID_LINE_WIDTH;
@@ -235,14 +243,14 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             cr.move_to (x1, y1);
             cr.line_to (x1, y2);
             cr.stroke ();
-            x1 += view.cell_size;
+            x1 += cell_size;
         }
 
         // Draw inner major grid lines
         cr.set_line_width (MAJOR_GRID_LINE_WIDTH);
         x1 = MINOR_GRID_LINE_WIDTH;
         while (y1 < y2) {
-            y1 += 5.0 * view.cell_size;
+            y1 += 5.0 * cell_size;
             cr.move_to (x1, y1);
             cr.line_to (x2, y1);
             cr.stroke ();
@@ -250,7 +258,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
 
         y1 = MINOR_GRID_LINE_WIDTH;
         while (x1 < x2) {
-            x1 += 5.0 * view.cell_size;
+            x1 += 5.0 * cell_size;
             cr.move_to (x1, y1);
             cr.line_to (x1, y2);
             cr.stroke ();
@@ -279,8 +287,8 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             return;
         }
 
-        double x = cell.col * cell_width;
-        double y = cell.row * cell_height;
+        double x = cell.col * cell_size;
+        double y = cell.row * cell_size;
         CellPattern cell_pattern;
         switch (cell.state) {
             case CellState.EMPTY:
@@ -299,7 +307,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         cr.save ();
         cell_pattern.move_to (x, y); /* Not needed for plain fill, but may use a pattern later */
         cr.set_line_width (0.0);
-        cr.rectangle (x, y, cell_width, cell_height);
+        cr.rectangle (x, y, cell_size, cell_size);
         cr.set_source (cell_pattern.pattern);
         cr.fill ();
         cr.restore ();
@@ -308,7 +316,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             cr.save ();
             /* Ensure highlight centred and slightly overlapping grid */
             highlight_pattern.move_to (x, y);
-            cr.rectangle (x, y, cell_width, cell_width);
+            cr.rectangle (x, y, cell_size, cell_size);
             cr.clip ();
             cr.set_source (highlight_pattern.pattern);
             cr.set_operator (Cairo.Operator.OVER);
@@ -322,27 +330,6 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         current_cell = NULL_CELL;
         leave ();
         return;
-    }
-
-    public override void measure (
-        Gtk.Orientation orientation,
-        int for_size,
-        out int minimum,
-        out int natural,
-        out int minimum_baseline,
-        out int natural_baseline
-    ) {
-        if (orientation == HORIZONTAL) {
-            minimum = (int)(cell_width * cols);
-            natural = minimum;
-            minimum_baseline = -1;
-            natural_baseline = -1;
-        } else {
-            minimum = (int)(cell_height * rows);
-            natural = minimum;
-            minimum_baseline = -1;
-            natural_baseline = -1;
-        }
     }
 
     private class CellPattern {
