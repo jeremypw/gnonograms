@@ -259,10 +259,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         column_clue_box = new ClueBox (Gtk.Orientation.HORIZONTAL, this);
         cell_grid = new CellGrid (this);
 
-        toast_overlay = new Adw.ToastOverlay () {
-            valign = Gtk.Align.CENTER,
-            halign = Gtk.Align.CENTER,
-        };
+
 
         main_grid = new Gtk.Grid () {
             focusable = true, // Needed for key controller to work
@@ -274,7 +271,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             margin_bottom = 6
         };
 
-        main_grid.attach (toast_overlay, 0, 0, 1, 1); /* show temporary messages */
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for dimensions.height*/
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
         main_grid.attach (cell_grid, 1, 1, 1, 1);
@@ -290,7 +286,11 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             return;
         });
 
-        child = main_grid;
+        toast_overlay = new Adw.ToastOverlay () {
+            child = main_grid
+        };
+
+        child = toast_overlay;
 
         var flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
         bind_property (
