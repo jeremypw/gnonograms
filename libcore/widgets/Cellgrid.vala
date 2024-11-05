@@ -168,8 +168,9 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         }
         // Allow to shrink
         minimum = 0;
-        minimum_baseline = 0;
-        natural_baseline = 0;
+        // Must not set baseline on non-text widget
+        minimum_baseline = -1;
+        natural_baseline = -1;
     }
 
     private void draw_func (Gtk.DrawingArea drawing_area, Cairo.Context cr, int x, int y) {
