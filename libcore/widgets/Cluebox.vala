@@ -24,7 +24,6 @@ public class Gnonograms.ClueBox : Gtk.Box {
 
     construct {
         homogeneous = true;
-        spacing = 0;
 
         clues = new Gee.ArrayList<Clue> ();
         view.controller.notify ["rows"].connect (on_dimensions_changed);

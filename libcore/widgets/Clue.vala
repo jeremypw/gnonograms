@@ -37,9 +37,7 @@ class Gnonograms.Clue : Object {
             xalign = _vertical_text ? (float)0.5 : (float)1.0,
             yalign = vertical_text ? (float)1.0 : (float)0.5,
             has_tooltip = true,
-            use_markup = true,
-            hexpand = false,
-            vexpand = false
+            use_markup = true
         };
 
         text = "0";
