@@ -228,7 +228,6 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     private void restore_settings () {
-        view.cell_size = 48;
         current_game_path = "";
         if (saved_state != null) {
             current_game_path = saved_state.get_string ("current-game-path");
