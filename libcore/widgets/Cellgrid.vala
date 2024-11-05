@@ -220,10 +220,10 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         cr.set_line_width (MINOR_GRID_LINE_WIDTH);
 
         // Draw minor grid lines
-        double y1 = MINOR_GRID_LINE_WIDTH;
-        double x1 = MINOR_GRID_LINE_WIDTH;
-        double x2 = x1 + view.controller.columns * cell_width;
-        double y2 = y1 + view.controller.rows * cell_height;
+        double y1 = 0;
+        double x1 = 0;
+        double x2 = content_width - 1;
+        double y2 = content_height - 1;
         while (y1 < y2) {
             cr.move_to (x1, y1);
             cr.line_to (x2, y1);
@@ -231,8 +231,8 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             y1 += cell_height;
         }
 
-        y1 = MINOR_GRID_LINE_WIDTH;
-        // x1 = MINOR_GRID_LINE_WIDTH;
+        y1 = 0;
+
         while (x1 < x2) {
             cr.move_to (x1, y1);
             cr.line_to (x1, y2);
@@ -240,38 +240,46 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             x1 += cell_width;
         }
 
+        x1 = 0;
+
         // Draw inner major grid lines
         cr.set_line_width (MAJOR_GRID_LINE_WIDTH);
-        x1 = MINOR_GRID_LINE_WIDTH;
+        var increment = 5.0 * cell_height;
+        y1 = increment;
         while (y1 < y2) {
-            y1 += 5.0 * cell_height;
             cr.move_to (x1, y1);
             cr.line_to (x2, y1);
             cr.stroke ();
+            y1 += increment;
         }
 
         y1 = MINOR_GRID_LINE_WIDTH;
+        increment = 5.0 * cell_width;
+        x1 = increment;
         while (x1 < x2) {
-            x1 += 5.0 * cell_width;
             cr.move_to (x1, y1);
             cr.line_to (x1, y2);
             cr.stroke ();
+            x1 += increment;
         }
 
         // Draw frame
         cr.set_line_width (MINOR_GRID_LINE_WIDTH);
-        y1 = 0;
-        x1 = 0;
+        y1 = MINOR_GRID_LINE_WIDTH;
+        x1 = MINOR_GRID_LINE_WIDTH;
         cr.move_to (x1, y1);
-        cr.line_to (x2, y1);
+        cr.line_to (x2 - x1, y1);
         cr.stroke ();
 
-        cr.line_to (x2, y2);
+        cr.move_to (x2 - x1, y1);
+        cr.line_to (x2 - x1, y2 - y1);
         cr.stroke ();
 
-        cr.line_to (x1, y2);
+        cr.move_to (x2 - x1, y2 - y1);
+        cr.line_to (x1, y2 - y1);
         cr.stroke ();
 
+        cr.move_to (x1, y2 - y1);
         cr.line_to (x1, y1);
         cr.stroke ();
     }
@@ -328,7 +336,6 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
 
     private class CellPattern : GLib.Object {
         public Cairo.Pattern pattern;
-        // public double size { get; private set; }
         public double width { get; construct; }
         public double height { get; construct; }
         private double red;
