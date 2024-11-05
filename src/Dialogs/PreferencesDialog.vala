@@ -48,5 +48,10 @@ public class Gnonograms.Dialogs.Preferences : Granite.Dialog {
 
         settings.bind ("columns", column_setting, "value", DEFAULT);
         settings.bind ("rows", row_setting, "value", DEFAULT);
+
+        grade_setting.selected = settings.get_enum ("grade");
+        grade_setting.notify["selected"].connect (() => {
+            settings.set_enum ("grade", (Difficulty)(grade_setting.selected));
+        });
     }
 }
