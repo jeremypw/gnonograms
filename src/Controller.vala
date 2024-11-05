@@ -58,6 +58,7 @@ public class Gnonograms.Controller : GLib.Object {
             solver = new Solver (dimensions);
             game_name = _(UNTITLED_NAME);
         });
+
         notify["rows"].connect (() => {
             solver = new Solver (dimensions);
             game_name = _(UNTITLED_NAME);
@@ -91,13 +92,12 @@ public class Gnonograms.Controller : GLib.Object {
             Gnonograms.UNSAVED_FILENAME
         );
 
-        if (saved_state != null && settings != null) {
-            saved_state.bind ("mode", this, "game-state", SettingsBindFlags.DEFAULT);
-            settings.bind ("grade", this, "generator-grade", SettingsBindFlags.DEFAULT);
-            settings.bind ("clue-help", view, "strikeout-complete", SettingsBindFlags.DEFAULT);
-        } else {
-            restore_settings ();
-        }
+        saved_state.bind ("mode", this, "game-state", SettingsBindFlags.DEFAULT);
+        saved_state.bind ("current-game-path", this, "current-game-path", SettingsBindFlags.DEFAULT);
+        settings.bind ("grade", this, "generator-grade", SettingsBindFlags.DEFAULT);
+        settings.bind ("clue-help", view, "strikeout-complete", SettingsBindFlags.DEFAULT);
+        settings.bind ("rows", this, "rows", SettingsBindFlags.DEFAULT);
+        settings.bind ("columns", this, "columns", SettingsBindFlags.DEFAULT);
 
         view.present ();
         /*
@@ -133,7 +133,7 @@ public class Gnonograms.Controller : GLib.Object {
             if (!restore_game.end (res)) {
                 /* Error normally thrown if running without installing */
                 warning ("Restoring game failed");
-                restore_dimensions ();
+                // restore_dimensions ();
                 new_game ();
             }
         });
@@ -227,24 +227,6 @@ public class Gnonograms.Controller : GLib.Object {
         }
     }
 
-    private void restore_settings () {
-        current_game_path = "";
-        if (saved_state != null) {
-            current_game_path = saved_state.get_string ("current-game-path");
-        }
-
-        restore_dimensions ();
-    }
-
-    private void restore_dimensions () {
-        columns = 15;
-        rows = 10;
-        if (settings != null) {
-            columns = settings.get_uint ("columns").clamp (10, 50);
-            rows = settings.get_uint ("rows").clamp (10, 50);
-        }
-    }
-
     private async bool restore_game () {
         if (temporary_game_path != null) {
             var current_game_file = File.new_for_path (temporary_game_path);
@@ -306,8 +288,6 @@ public class Gnonograms.Controller : GLib.Object {
         load_game_async.begin (game, (obj, res) => {
             if (!load_game_async.end (res)) {
                 warning ("Load game failed");
-                current_game_path = "";
-                restore_dimensions ();
                 new_or_random_game ();
             }
         });
