@@ -265,8 +265,15 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         };
 
         main_grid = new Gtk.Grid () {
-            focusable = true // Needed for key controller to work
+            focusable = true, // Needed for key controller to work
+            row_spacing = 6,
+            column_spacing = 6,
+            margin_start = 6,
+            margin_end = 6,
+            margin_top = 6,
+            margin_bottom = 6
         };
+
         main_grid.attach (toast_overlay, 0, 0, 1, 1); /* show temporary messages */
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for dimensions.height*/
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
