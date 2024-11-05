@@ -6,23 +6,17 @@
  */
 namespace Gnonograms {
     public enum Difficulty {
-        TRIVIAL = 0,
-        VERY_EASY = 1,
-        EASY = 2,
-        MODERATE = 3,
-        HARD = 4 ,
-        CHALLENGING = 5,
-        ADVANCED = 6,
-        MAXIMUM = 7, /* Max grade for generated puzzles (possibly ambiguous)*/
-        COMPUTER = 8, /* Grade for requested computer solving */
+        EASY = 0,
+        MODERATE = 1,
+        HARD = 2 ,
+        CHALLENGING = 3,
+        ADVANCED = 4,
+        MAXIMUM = 5, /* Max grade for generated puzzles (possibly ambiguous)*/
+        COMPUTER = 9, /* Grade for requested computer solving */
         UNDEFINED = 99;
 
         public string to_string () {
             switch (this) {
-                case Difficulty.TRIVIAL:
-                    return _("Trivial");
-                case Difficulty.VERY_EASY:
-                    return _("Very Easy");
                 case Difficulty.EASY:
                     return _("Easy");
                 case Difficulty.MODERATE:

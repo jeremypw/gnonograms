@@ -162,8 +162,6 @@
         advanced_only = false;
         human_only = true;
         switch (grade) {
-            case Difficulty.TRIVIAL:
-            case Difficulty.VERY_EASY:
             case Difficulty.EASY:
             case Difficulty.MODERATE:
             case Difficulty.HARD:

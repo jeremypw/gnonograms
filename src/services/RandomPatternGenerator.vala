@@ -66,8 +66,6 @@ public class Gnonograms.RandomPatternGenerator : Object {
         edge_bias = 0;
 
         switch (grade) {
-            case Difficulty.TRIVIAL:
-            case Difficulty.VERY_EASY:
             case Difficulty.EASY:
                     threshold = 60;
                     min_freedom = 1;
