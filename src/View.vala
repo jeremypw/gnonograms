@@ -6,12 +6,6 @@
  */
 
 public class Gnonograms.View : Gtk.ApplicationWindow {
-    private const double USABLE_MONITOR_HEIGHT = 0.85;
-    private const double USABLE_MONITOR_WIDTH = 0.95;
-    private const int GRID_BORDER = 6;
-    private const int GRID_COLUMN_SPACING = 6;
-    private const double TYPICAL_MAX_BLOCKS_RATIO = 0.3;
-    private const int WINDOW_INCREMENT = 8;
     private const uint PROGRESS_DELAY_MSEC = 500;
     private const string PAINT_FILL_ACCEL = "f"; // Must be lower case
     private const string PAINT_EMPTY_ACCEL = "e"; // Must be lower case
@@ -277,7 +271,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         main_grid = new Gtk.Grid () {
             focusable = true, // Needed for key controller to work
             row_spacing = 0,
-            column_spacing = GRID_COLUMN_SPACING,
+            column_spacing = 6,
             hexpand = false,
             vexpand = false
         };
