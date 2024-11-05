@@ -25,7 +25,7 @@ public class Gnonograms.Controller : GLib.Object {
      * must be "Saved As" - which by default is writable. */
     public bool is_readonly { get; set; default = false;}
 
-    private View view;
+    public unowned View view {get; construct; }
     private Model model;
     private Solver? solver;
     private SimpleRandomGameGenerator? generator;

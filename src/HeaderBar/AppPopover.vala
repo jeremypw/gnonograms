@@ -72,8 +72,12 @@ public class Gnonograms.AppPopover : Gtk.Popover {
 
         preferences_button.clicked.connect (() => {
             popdown ();
-            var dialog = new Dialogs.Preferences ((Gtk.Window)get_ancestor (typeof (Gtk.Window)));
+            var dialog = new Dialogs.Preferences () {
+                transient_for = controller.view,
+                title = _("Preferences")
+            };
             dialog.response.connect (() => {
+                // Changes mediated by settings schema
                 dialog.destroy ();
             });
             dialog.present ();

@@ -7,12 +7,6 @@
 
 public class Gnonograms.Dialogs.Preferences : Granite.Dialog {
 
-    public Preferences (Gtk.Window? parent) {
-        Object (
-            title: _("Preferences"),
-            transient_for: parent
-        );
-    }
 
     construct {
         var grade_setting = new Gtk.DropDown.from_strings ( Difficulty.all_human ());
