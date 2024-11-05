@@ -46,7 +46,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     public Cell previous_cell { get; set; }
     public Difficulty generator_grade { get; set; }
     public Difficulty game_grade { get; set; default = Difficulty.UNDEFINED;}
-    public double font_size { get; set; default = 10.0; }
+    public double font_size { get; set; default = 12.0; }
     public string game_name { get { return controller.game_name; } }
     public bool strikeout_complete { get; set; }
     public bool readonly { get; set; default = false;}
@@ -80,8 +80,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     public View (Model _model, Controller controller) {
         Object (
             model: _model,
-            controller: controller,
-            title: _("Gnonograms")
+            controller: controller
         );
     }
 
@@ -131,6 +130,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     }
 
     construct {
+        title = _("Gnonograms");
         set_default_size (900, 700);
         var granite_settings = Granite.Settings.get_default ();
         var gtk_settings = Gtk.Settings.get_default ();
@@ -151,7 +151,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
             app.set_accels_for_action (ACTION_PREFIX + action, accels_array);
         }
-
 
         undo_button = new HeaderButton (
             "edit-undo-symbolic",
@@ -191,7 +190,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             ACTION_PREFIX + ACTION_GENERATING_MODE,
             _("Generate New Puzzle")
         );
-
 
         var app_popover = new AppPopover (controller);
 
@@ -255,12 +253,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
         set_titlebar (header_bar);
 
-        row_clue_box = new ClueBox (Gtk.Orientation.VERTICAL, this) {
-            halign = Gtk.Align.END
-        };
-        column_clue_box = new ClueBox (Gtk.Orientation.HORIZONTAL, this) {
-            valign = Gtk.Align.END
-        };
+        row_clue_box = new ClueBox (Gtk.Orientation.VERTICAL, this);
+        column_clue_box = new ClueBox (Gtk.Orientation.HORIZONTAL, this);
         cell_grid = new CellGrid (this);
 
         toast_overlay = new Adw.ToastOverlay () {
@@ -269,11 +263,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         };
 
         main_grid = new Gtk.Grid () {
-            focusable = true, // Needed for key controller to work
-            row_spacing = 0,
-            column_spacing = 6,
-            hexpand = false,
-            vexpand = false
+            focusable = true // Needed for key controller to work
         };
         main_grid.attach (toast_overlay, 0, 0, 1, 1); /* show temporary messages */
         main_grid.attach (row_clue_box, 0, 1, 1, 1); /* Clues for dimensions.height*/

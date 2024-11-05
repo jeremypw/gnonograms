@@ -10,11 +10,6 @@ public class Gnonograms.ClueBox : Gtk.Box {
     // The number of cells each clue addresses, monitored by clues
     public uint n_cells { get; set; default = 0; }
     private Gee.ArrayList<Clue> clues;
-    private uint width {
-        get {
-            return view.controller.columns;
-        }
-    }
     private uint height {
         get {
             return view.controller.rows;
@@ -41,17 +36,17 @@ public class Gnonograms.ClueBox : Gtk.Box {
 
 
     private void on_dimensions_changed () {
-        if (width == 0 || height == 0) {
+        if (view.controller.columns == 0 || view.controller.rows == 0) {
             return;
         }
 
         var new_n_clues = orientation == Gtk.Orientation.HORIZONTAL ?
-                                          width :
-                                          height;
+                                          view.controller.columns :
+                                          view.controller.rows;
 
         var new_n_cells = orientation == Gtk.Orientation.HORIZONTAL ?
-                                         height :
-                                         width;
+                                         view.controller.rows :
+                                         view.controller.columns;
         foreach (var clue in clues) {
             remove (clue.label);
         }
