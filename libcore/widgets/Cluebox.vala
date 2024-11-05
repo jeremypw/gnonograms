@@ -6,51 +6,63 @@
  */
 public class Gnonograms.ClueBox : Gtk.Box {
     public unowned View view { get; construct; }
-    public int font_size { get; private set; }
+    public double font_size { get; set; }
     // The number of cells each clue addresses, monitored by clues
     public uint n_cells { get; set; default = 0; }
     private Gee.ArrayList<Clue> clues;
+    private uint width {
+        get {
+            return view.controller.columns;
+        }
+    }
+    private uint height {
+        get {
+            return view.controller.rows;
+        }
+    }
 
     public ClueBox (Gtk.Orientation _orientation, View view) {
         Object (
             view: view,
-            homogeneous: true,
-            spacing: 0,
-            hexpand: _orientation == Gtk.Orientation.HORIZONTAL ? false : true,
-            vexpand: _orientation == Gtk.Orientation.HORIZONTAL ? true : false,
             orientation: _orientation
         );
     }
 
     construct {
+        homogeneous = true;
+        spacing = 0;
+
         clues = new Gee.ArrayList<Clue> ();
-        view.controller.notify ["dimensions"].connect (() => {
-            var new_n_clues = orientation == Gtk.Orientation.HORIZONTAL ?
-                                              view.controller.dimensions.width :
-                                              view.controller.dimensions.height;
+        view.controller.notify ["rows"].connect (on_dimensions_changed);
+        view.controller.notify ["columns"].connect (on_dimensions_changed);
+        view.bind_property ("font-size", this, "font-size");
 
-            var new_n_cells = orientation == Gtk.Orientation.HORIZONTAL ?
-                                             view.controller.dimensions.height :
-                                             view.controller.dimensions.width;
-
-            foreach (var clue in clues) {
-                remove (clue.label);
-            }
-
-            clues.clear ();
-            n_cells = new_n_cells;
-            for (int index = 0; index < new_n_clues; index++) {
-                var clue = new Clue (orientation == Gtk.Orientation.HORIZONTAL, this);
-                clues.add (clue);
-                append (clue.label);
-            }
-        });
-
-        view.notify["cell-size"].connect (set_size);
+        on_dimensions_changed ();
     }
 
-    private void set_size () {
-        font_size = (int) ((double) view.cell_size * 0.525);
+    private void on_dimensions_changed () {
+        if (width == 0 || height == 0) {
+            return;
+        }
+
+        var new_n_clues = orientation == Gtk.Orientation.HORIZONTAL ?
+                                          width :
+                                          height;
+
+        var new_n_cells = orientation == Gtk.Orientation.HORIZONTAL ?
+                                         height :
+                                         width;
+        foreach (var clue in clues) {
+            remove (clue.label);
+        }
+
+        clues.clear ();
+        n_cells = new_n_cells;
+        for (int index = 0; index < new_n_clues; index++) {
+            var clue = new Clue (orientation, this);
+            clues.add (clue);
+            append (clue.label);
+        }
     }
 
     public string[] get_clue_texts () {

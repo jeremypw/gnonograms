@@ -25,9 +25,9 @@ class Gnonograms.Clue : Object {
 
     private Gee.List<Block> clue_blocks; // List of blocks based on clue
 
-    public Clue (bool _vertical_text, ClueBox cluebox) {
+    public Clue (Gtk.Orientation orientation, ClueBox cluebox) {
         Object (
-            vertical_text: _vertical_text,
+            vertical_text: orientation == Gtk.Orientation.HORIZONTAL,
             cluebox: cluebox
         );
     }
@@ -190,12 +190,12 @@ class Gnonograms.Clue : Object {
     }
 
     private void update_markup () {
-        label.set_markup ("<span font='%i'>".printf (cluebox.font_size) + get_markup () + "</span>");
+        label.set_markup ("<span font='%f'>".printf (cluebox.font_size) + get_markup () + "</span>");
         update_tooltip ();
     }
 
     private void update_tooltip () {
-        label.set_tooltip_markup ("<span font='%i'>".printf (cluebox.font_size) +
+        label.set_tooltip_markup ("<span font='%f'>".printf (cluebox.font_size) +
             _("Freedom = %u").printf (cluebox.n_cells - Utils.blockextent_from_clue (_text)) +
             "</span>"
         );
