@@ -18,7 +18,8 @@ public class Gnonograms.AppPopover : Gtk.Popover {
             _("Zoom Out")
         );
         zoom_out_button.clicked.connect (() => {
-            controller.decrease_fontsize ();
+            var current_font_scale = settings.get_int ("font-scaling");
+            settings.set_int ("font-scaling", current_font_scale - 10);
         });
 
         var zoom_in_button = new Gtk.Button.from_icon_name ("zoom-in-symbolic");
@@ -27,7 +28,24 @@ public class Gnonograms.AppPopover : Gtk.Popover {
             _("Zoom In")
         );
         zoom_in_button.clicked.connect (() => {
-            controller.increase_fontsize ();
+            var current_font_scale = settings.get_int ("font-scaling");
+            settings.set_int ("font-scaling", current_font_scale + 10);
+        });
+
+        var zoom_default_button = new Gtk.Button () {
+            label = settings.get_int ("font-scaling").to_string () + "%"
+        };
+
+        zoom_default_button.tooltip_markup = Granite.markup_accel_tooltip (
+            {"<Ctrl>0"},
+            _("Zoom Default")
+        );
+        zoom_default_button.clicked.connect (() => {
+            var current_font_scale = settings.get_int ("font-scaling");
+            settings.set_int ("font-scaling", 100);
+        });
+        settings.changed["font-scaling"].connect (() => {
+            zoom_default_button.label = settings.get_int ("font-scaling").to_string () + "%";
         });
 
         var font_size_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0) {
@@ -39,6 +57,7 @@ public class Gnonograms.AppPopover : Gtk.Popover {
         };
         font_size_box.add_css_class (Granite.STYLE_CLASS_LINKED);
         font_size_box.append (zoom_out_button);
+        font_size_box.append (zoom_default_button);
         font_size_box.append (zoom_in_button);
 
         var title_entry = new Gtk.Entry () {

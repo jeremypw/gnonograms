@@ -6,7 +6,6 @@
  */
 public class Gnonograms.ClueBox : Gtk.Box {
     public unowned View view { get; construct; }
-    // public double font_size { get; set; }
     // The number of cells each clue addresses, monitored by clues
     public uint n_cells { get; set; default = 0; }
     private Gee.ArrayList<Clue> clues;

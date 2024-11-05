@@ -30,7 +30,7 @@ public class Gnonograms.Controller : GLib.Object {
     private Solver? solver;
     private SimpleRandomGameGenerator? generator;
     private Gnonograms.History history;
-    public string current_game_path { get; private set; default = ""; }
+    public string current_game_path { get; set; default = ""; }
     private string saved_games_folder;
     private string? temporary_game_path = null;
 

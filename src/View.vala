@@ -46,7 +46,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     public Cell previous_cell { get; set; }
     public Difficulty generator_grade { get; set; }
     public Difficulty game_grade { get; set; default = Difficulty.UNDEFINED;}
-    public double font_size { get; set; default = 12.0; }
+    public int font_scaling { get; set; default = 100; } // Percentage font scaling for clue labels
     public string game_name { get { return controller.game_name; } }
     public bool strikeout_complete { get; set; }
     public bool readonly { get; set; default = false;}
@@ -140,6 +140,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             prefer_dark = granite_settings.prefers_color_scheme == DARK;
             gtk_settings.gtk_application_prefer_dark_theme = prefer_dark;
         });
+
+        settings.bind ("font-scaling", this, "font-scaling", SettingsBindFlags.DEFAULT);
 
         var view_actions = new GLib.SimpleActionGroup ();
         view_actions.add_action_entries (view_action_entries, this);
