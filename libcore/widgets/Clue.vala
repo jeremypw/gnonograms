@@ -25,9 +25,9 @@ class Gnonograms.Clue : Object {
 
     private Gee.List<Block> clue_blocks; // List of blocks based on clue
 
-    public Clue (Gtk.Orientation orientation, ClueBox cluebox) {
+    public Clue (bool _vertical_text, ClueBox cluebox) {
         Object (
-            vertical_text: orientation == Gtk.Orientation.HORIZONTAL,
+            vertical_text: _vertical_text,
             cluebox: cluebox
         );
     }

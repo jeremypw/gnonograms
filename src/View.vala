@@ -255,8 +255,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
         set_titlebar (header_bar);
 
-        row_clue_box = new ClueBox (Gtk.Orientation.VERTICAL, this);
-        column_clue_box = new ClueBox (Gtk.Orientation.HORIZONTAL, this);
+        row_clue_box = new ClueBox (this, false);
+        column_clue_box = new ClueBox (this, true);
         cell_grid = new CellGrid (this);
 
 

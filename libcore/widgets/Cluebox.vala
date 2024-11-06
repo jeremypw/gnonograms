@@ -4,58 +4,79 @@
  *
  * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
-public class Gnonograms.ClueBox : Gtk.Box {
-    public unowned View view { get; construct; }
-    // The number of cells each clue addresses, monitored by clues
-    public uint n_cells { get; set; default = 0; }
-    private Gee.ArrayList<Clue> clues;
-    private uint height {
-        get {
-            return view.controller.rows;
-        }
+public class Gnonograms.ClueBox : Gtk.Widget {
+    static construct {
+        set_layout_manager_type (typeof (Gtk.BinLayout));
     }
 
-    public ClueBox (Gtk.Orientation _orientation, View view) {
+    public const double WINDOW_CLUEBOX_RATIO = 0.3; // For simplicity give labelboxes fixed ratio of window dimensions
+    public unowned View view { get; construct; }
+    public bool holds_column_clues { get; construct; }
+    // The number of cells each clue addresses, monitored by clues
+    public uint n_cells { get; set; default = 0; }
+
+    private Gee.ArrayList<Clue> clues;
+    public ClueBox (View _view, bool _holds_column_clues) {
         Object (
-            view: view,
-            orientation: _orientation
+            view: _view,
+            holds_column_clues: _holds_column_clues
         );
     }
 
     construct {
-        homogeneous = true;
+        var orientation = holds_column_clues ? Gtk.Orientation.HORIZONTAL : Gtk.Orientation.VERTICAL;
+        var layout = new Gtk.BoxLayout (orientation) {
+            homogeneous = true,
+            spacing = 0
+        };
+        set_layout_manager (layout);
 
         clues = new Gee.ArrayList<Clue> ();
-        view.controller.notify ["rows"].connect (on_dimensions_changed);
-        view.controller.notify ["columns"].connect (on_dimensions_changed);
 
-        on_dimensions_changed ();
+        if (holds_column_clues) {
+            set_minimum_height ();
+            view.notify["default-height"].connect (set_minimum_height);
+            view.controller.notify ["columns"].connect (add_remove_clues);
+        } else {
+            set_minimum_width ();
+            view.notify["default-width"].connect (set_minimum_width);
+            view.controller.notify ["rows"].connect (add_remove_clues);
+        }
     }
 
 
-    private void on_dimensions_changed () {
-        if (view.controller.columns == 0 || view.controller.rows == 0) {
-            return;
+    private void add_remove_clues () {
+        var new_n_clues = holds_column_clues ? view.controller.columns : view.controller.rows;
+        var new_n_cells = holds_column_clues ? view.controller.rows : view.controller.columns;
+
+        if (n_cells != new_n_cells) {
+            n_cells = new_n_cells;
         }
 
-        var new_n_clues = orientation == Gtk.Orientation.HORIZONTAL ?
-                                          view.controller.columns :
-                                          view.controller.rows;
+        if (clues.size != new_n_clues) {
+            foreach (var clue in clues) {
+                clue.label.unparent ();
+                clue.label.destroy ();
+            }
 
-        var new_n_cells = orientation == Gtk.Orientation.HORIZONTAL ?
-                                         view.controller.rows :
-                                         view.controller.columns;
-        foreach (var clue in clues) {
-            remove (clue.label);
-        }
+            clues.clear ();
 
-        clues.clear ();
-        n_cells = new_n_cells;
-        for (int index = 0; index < new_n_clues; index++) {
-            var clue = new Clue (orientation, this);
-            clues.add (clue);
-            append (clue.label);
+            for (int index = 0; index < new_n_clues; index++) {
+                var clue = new Clue (holds_column_clues, this);
+                clues.add (clue);
+                clue.label.set_parent (this);
+            }
         }
+    }
+
+    private void set_minimum_width () {
+        var width = (double) view.default_width * WINDOW_CLUEBOX_RATIO;
+        set_size_request ((int) width, -1);
+    }
+
+    private void set_minimum_height () {
+        var height = (double) view.default_height * WINDOW_CLUEBOX_RATIO;
+        set_size_request (-1, (int) height);
     }
 
     public string[] get_clue_texts () {
