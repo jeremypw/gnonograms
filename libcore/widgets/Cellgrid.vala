@@ -45,8 +45,8 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     private const double MINOR_GRID_LINE_WIDTH = 1.0;
     private Gdk.RGBA[, ] colors;
 
-    private double cell_width; /* Width and Height of cell including frame */
-    private double cell_height; /* Width and Height of cell including frame */
+    public int cell_width { get; private set; } /* Width and Height of cell including frame */
+    public int cell_height { get; private set; }/* Width and Height of cell including frame */
     private bool dirty = false; /* Whether a redraw is needed */
 
 
@@ -148,29 +148,40 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     }
 
     public override void size_allocate (int w, int h, int bl) {
-        if (view.controller.rows > 0 && view.controller.columns > 0) {
-            content_width = w;
-            content_height = h;
-            cell_width = (double) w / (double) view.controller.columns;
-            cell_height = (double) h / (double) view.controller.rows;
+        var r = (double) view.controller.rows;
+        var c = (double) view.controller.columns;
+        var dw = (double) w;
+        var dh = (double) h;
+
+        double height, width;
+        if (r > 0 && c > 0) {
+            if (r > c) {
+                height = dh;
+                width = dh * c / r;
+            } else if (c < r) {
+                width = dw;
+                height = dw * r / c;
+            } else if (h > w) {
+                width = dw;
+                height = dw * r / c;
+            } else {
+                height = dh;
+                width = dh * c / r;
+            }
+
+            // Hack needed to allow window to be shrunk
+            width -= 10.0;
+            height -= 10.0;
+
+            cell_width = (int) (width / c);
+            cell_height = (int) (height / r);
+
+            content_width = cell_width * (int) view.controller.columns;
+            content_height = cell_height * (int) view.controller.rows;
+
             /* Cause refresh of existing pattern */
             highlight_pattern = new CellPattern.highlight (cell_width, cell_height);
         }
-
-        base.size_allocate (w, h, bl);
-    }
-
-    public override void measure (Gtk.Orientation orientation, int for_size, out int minimum, out int natural, out int minimum_baseline, out int natural_baseline) {
-        if (orientation == Gtk.Orientation.HORIZONTAL) {
-            natural = content_width;
-        } else {
-            natural = content_height;
-        }
-        // Allow to shrink
-        minimum = 0;
-        // Must not set baseline on non-text widget
-        minimum_baseline = -1;
-        natural_baseline = -1;
     }
 
     private void draw_func (Gtk.DrawingArea drawing_area, Cairo.Context cr, int x, int y) {

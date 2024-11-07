@@ -45,6 +45,20 @@ class Gnonograms.Clue : Object {
         label.realize.connect_after (update_markup);
         cluebox.notify["n_cells"].connect (update_tooltip);
         cluebox.view.notify["font-scaling"].connect (update_markup);
+        cluebox.notify["cell-size"].connect (update_size_request);
+
+        update_size_request ();
+    }
+
+    private void update_size_request () {
+        var size = cluebox.cell_size;
+        if (vertical_text) {
+                label.width_request =  (int) size;
+                label.height_request = (int) (size * (double) cluebox.n_cells / 3.0);
+        } else {
+                label.height_request = (int) size;
+                label.width_request = (int) (size * (double) cluebox.n_cells / 3.0);
+        }
     }
 
     public void highlight (bool is_highlight) {
@@ -221,7 +235,12 @@ class Gnonograms.Clue : Object {
 
             attrib = "<span weight='%s' strikethrough='%s'>".printf (weight, strikethrough);
             sb.append (attrib);
-            sb.append (clue_block.length.to_string ());
+            if (vertical_text) {
+                sb.append (" " + clue_block.length.to_string () + " ");
+            } else {
+                sb.append (clue_block.length.to_string ());
+            }
+
             sb.append ("</span>");
             if (vertical_text) {
                 sb.append ("\n");

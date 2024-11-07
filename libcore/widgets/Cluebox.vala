@@ -6,7 +6,7 @@
  */
 public class Gnonograms.ClueBox : Gtk.Widget {
     static construct {
-        set_layout_manager_type (typeof (Gtk.BinLayout));
+        set_layout_manager_type (typeof (Gtk.BoxLayout));
     }
 
     public const double WINDOW_CLUEBOX_RATIO = 0.3; // For simplicity give labelboxes fixed ratio of window dimensions
@@ -14,6 +14,7 @@ public class Gnonograms.ClueBox : Gtk.Widget {
     public bool holds_column_clues { get; construct; }
     // The number of cells each clue addresses, monitored by clues
     public uint n_cells { get; set; default = 0; }
+    public double cell_size { get; set; }
 
     private Gee.ArrayList<Clue> clues;
     public ClueBox (View _view, bool _holds_column_clues) {
@@ -26,7 +27,7 @@ public class Gnonograms.ClueBox : Gtk.Widget {
     construct {
         var orientation = holds_column_clues ? Gtk.Orientation.HORIZONTAL : Gtk.Orientation.VERTICAL;
         var layout = new Gtk.BoxLayout (orientation) {
-            homogeneous = true,
+            homogeneous = false,
             spacing = 0
         };
         set_layout_manager (layout);
@@ -34,12 +35,8 @@ public class Gnonograms.ClueBox : Gtk.Widget {
         clues = new Gee.ArrayList<Clue> ();
 
         if (holds_column_clues) {
-            set_minimum_height ();
-            view.notify["default-height"].connect (set_minimum_height);
             view.controller.notify ["columns"].connect (add_remove_clues);
         } else {
-            set_minimum_width ();
-            view.notify["default-width"].connect (set_minimum_width);
             view.controller.notify ["rows"].connect (add_remove_clues);
         }
     }
@@ -67,16 +64,6 @@ public class Gnonograms.ClueBox : Gtk.Widget {
                 clue.label.set_parent (this);
             }
         }
-    }
-
-    private void set_minimum_width () {
-        var width = (double) view.default_width * WINDOW_CLUEBOX_RATIO;
-        set_size_request ((int) width, -1);
-    }
-
-    private void set_minimum_height () {
-        var height = (double) view.default_height * WINDOW_CLUEBOX_RATIO;
-        set_size_request (-1, (int) height);
     }
 
     public string[] get_clue_texts () {

@@ -259,7 +259,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         column_clue_box = new ClueBox (this, true);
         cell_grid = new CellGrid (this);
 
-
+        cell_grid.bind_property ("cell-width", column_clue_box, "cell-size");
+        cell_grid.bind_property ("cell-height", row_clue_box, "cell-size");
 
         main_grid = new Gtk.Grid () {
             focusable = true, // Needed for key controller to work
