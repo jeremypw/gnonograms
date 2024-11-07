@@ -148,12 +148,13 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     }
 
     public override void size_allocate (int w, int h, int bl) {
+        // Avoid unwanted rounding
         var r = (double) view.controller.rows;
         var c = (double) view.controller.columns;
         var dw = (double) w;
         var dh = (double) h;
-
         double height, width;
+        // Optimise fit in availabel space, keeping square cells
         if (r > 0 && c > 0) {
             if (r > c) {
                 height = dh;
@@ -170,12 +171,14 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             }
 
             // Hack needed to allow window to be shrunk
-            width -= 10.0;
-            height -= 10.0;
+            width -= 6.0;
+            height -= 6.0;
 
+            // Cell width and height should be the same but leave separate for now.
             cell_width = (int) (width / c);
             cell_height = (int) (height / r);
 
+            // Ensure content dimensions exact multiple of cell dimensions
             content_width = cell_width * (int) view.controller.columns;
             content_height = cell_height * (int) view.controller.rows;
 
