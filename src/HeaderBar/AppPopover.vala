@@ -68,20 +68,7 @@ public class Gnonograms.AppPopover : Gtk.Popover {
         var load_game_button = new PopoverButton (_("Load"), ACTION_PREFIX + ACTION_OPEN);
         var save_game_button = new PopoverButton (_("Save"), ACTION_PREFIX + ACTION_SAVE);
         var save_as_game_button = new PopoverButton (_("Save to Different File"), ACTION_PREFIX + ACTION_SAVE_AS);
-        var preferences_button = new PopoverButton (_("Preferences"));
-
-        preferences_button.clicked.connect (() => {
-            popdown ();
-            var dialog = new Dialogs.Preferences () {
-                transient_for = controller.view,
-                title = _("Preferences")
-            };
-            dialog.response.connect (() => {
-                // Changes mediated by settings schema
-                dialog.destroy ();
-            });
-            dialog.present ();
-        });
+        var preferences_button = new PopoverButton (_("Preferences"), ACTION_PREFIX + ACTION_PREFERENCES);
 
         var settings_box = new Gtk.Box (VERTICAL, 3);
         settings_box.append (font_size_box);
@@ -97,10 +84,13 @@ public class Gnonograms.AppPopover : Gtk.Popover {
     }
 
     private class PopoverButton : Gtk.Button {
-        public PopoverButton (string label, string? action_name = null) {
+        public string text { get; construct; }
+        public string detailed_action { get; construct; }
+
+        public PopoverButton (string _text, string? _action_name = null) {
             Object (
-                child: new Gtk.Label (label) {xalign = 0.0f},
-                action_name: action_name
+                text: _text,
+                detailed_action: _action_name // Assigning directly to Gtk.Button.action_name doesnt work for some reason
             );
         }
 
@@ -108,6 +98,20 @@ public class Gnonograms.AppPopover : Gtk.Popover {
             margin_top = 3;
             margin_bottom = 3;
             add_css_class (Granite.STYLE_CLASS_FLAT);
+            set_action_name (detailed_action);
+            if (text != null && detailed_action != null) {
+                var accels = ((Gtk.Application) Application.get_default ()).get_accels_for_action (detailed_action);
+                if (accels != null) {
+                warning ("got accels");
+                    child = new Granite.AccelLabel (text, accels[0]);
+                    return;
+                } else {
+                    warning ("No accels for %s", detailed_action);
+                }
+            }
+
+            warning ("fallback");
+            child = new Gtk.Label (text);
         }
     }
 }

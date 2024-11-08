@@ -33,7 +33,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         {ACTION_RESTART, action_restart},
         {ACTION_SOLVE, action_solve},
         {ACTION_HINT, action_hint},
-        {ACTION_OPTIONS, action_options}
+        {ACTION_OPTIONS, action_options},
+        {ACTION_PREFERENCES, action_preferences}
     };
 
 #if WITH_DEBUGGING
@@ -67,12 +68,12 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private Adw.ToastOverlay toast_overlay;
     private Gtk.Stack progress_stack;
     private Gtk.Label title_label;
-    private Gtk.Label grade_label;
     private Gtk.Button generate_button;
     private Gtk.Button undo_button;
     private Gtk.Button redo_button;
     private Gtk.Button check_correct_button;
     private Gtk.Button hint_button;
+    private AppPopover app_popover;
     // private Gtk.Button auto_solve_button;
     private Gtk.Button restart_button;
     private uint drawing_with_key;
@@ -122,6 +123,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         action_accelerators.set (ACTION_SOLVE, "<Alt>S");
         action_accelerators.set (ACTION_OPTIONS, "F10");
         action_accelerators.set (ACTION_OPTIONS, "Menu");
+        action_accelerators.set (ACTION_PREFERENCES, "<Ctrl>P");
 #if WITH_DEBUGGING
         action_accelerators.set (ACTION_DEBUG_ROW, "<Alt>R");
         action_accelerators.set (ACTION_DEBUG_COL, "<Alt>C");
@@ -193,7 +195,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             _("Generate New Puzzle")
         );
 
-        var app_popover = new AppPopover (controller);
+        app_popover = new AppPopover (controller);
 
         menu_button = new Gtk.MenuButton () {
             tooltip_markup = Granite.markup_accel_tooltip (
@@ -203,7 +205,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             ),
             icon_name = "open-menu-symbolic",
             valign = Gtk.Align.CENTER,
-            popover = new AppPopover (controller)
+            popover = app_popover
         };
 
         // Unable to set markup on Granite.ModeSwitch so fake a Granite accelerator tooltip for now.
@@ -225,12 +227,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             xalign = 0.5f
         };
         title_label.add_css_class (Granite.STYLE_CLASS_H3_LABEL);
-
-        grade_label = new Gtk.Label ("Easy") {
-            use_markup = true,
-            xalign = 0.5f
-        };
-        grade_label.add_css_class (Granite.STYLE_CLASS_H4_LABEL);
 
         progress_stack = new Gtk.Stack () {
             halign = Gtk.Align.CENTER,
@@ -449,7 +445,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         }
 
         if (game_grade != Difficulty.UNDEFINED) {
-            progress_stack.set_visible_child_name ("Grade");
+            progress_stack.set_visible_child_name ("Title");
         } else {
             progress_stack.set_visible_child_name ("None");
         }
@@ -481,9 +477,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     public void update_title () {
         title_label.label = game_name;
         title_label.tooltip_text = controller.current_game_path;
-        grade_label.label = game_grade.to_string ();
         if (game_grade != Difficulty.UNDEFINED) {
-            progress_stack.set_visible_child_name ("Grade");
+            progress_stack.set_visible_child_name ("Title");
         } else {
             progress_stack.set_visible_child_name ("None");
         }
@@ -617,6 +612,19 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
     private void action_options () {
         menu_button.activate ();
+    }
+
+    private void action_preferences () {
+        app_popover.popdown ();
+        var dialog = new Dialogs.Preferences () {
+            transient_for = this,
+            title = _("Preferences")
+        };
+        dialog.response.connect (() => {
+            // Changes mediated by settings schema
+            dialog.destroy ();
+        });
+        dialog.present ();
     }
 
 #if WITH_DEBUGGING

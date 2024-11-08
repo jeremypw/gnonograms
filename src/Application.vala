@@ -29,13 +29,16 @@ namespace Gnonograms {
     public const string ACTION_SOLVE = "action-solve";
     public const string ACTION_HINT = "action-hint";
     public const string ACTION_OPTIONS = "action-options";
+    public const string ACTION_OPTIONS_ACCEL = "";
+
+    public const string ACTION_PREFERENCES = "action-preferences";
 #if WITH_DEBUGGING
     public const string ACTION_DEBUG_ROW = "action-debug-row";
     public const string ACTION_DEBUG_COL = "action-debug-col";
 #endif
     public GLib.Settings saved_state;
     public GLib.Settings settings;
-    
+
     public class App : Gtk.Application {
     private Controller controller;
 

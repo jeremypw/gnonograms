@@ -170,7 +170,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
                 width = dh * c / r;
             }
 
-            // Hack needed to allow window to be shrunk
+            // Hack needed to allow window to be shrunk and create bottom/end margins
             width -= 6.0;
             height -= 6.0;
 

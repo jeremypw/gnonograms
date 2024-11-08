@@ -6,9 +6,9 @@
  */
 
 public class Gnonograms.Dialogs.Preferences : Granite.Dialog {
-
-
     construct {
+        set_default_size (100, 300);
+        resizable = false;
         var grade_setting = new Gtk.DropDown.from_strings ( Difficulty.all_human ());
         var row_setting = new Gtk.SpinButton (
             new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),
