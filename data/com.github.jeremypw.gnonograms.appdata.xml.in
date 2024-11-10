@@ -19,6 +19,24 @@
     <category>Game</category>
     <category>LogicGame</category>
   </categories>
+    <screenshots>
+      <screenshot type="default">
+        <caption>Solving a puzzle</caption>
+        <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/GnonogramsSolvingLight.png</image>
+      </screenshot>
+      <screenshot>
+        <caption>Solving a puzzle (dark variant)</caption>
+        <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/GnonogramsSolvingDark.png</image>
+      </screenshot>
+      <screenshot>
+        <caption>Designing a puzzle</caption>
+        <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/GnonogramsDesigningLight.png</image>
+      </screenshot>
+      <screenshot>
+        <caption>Designing a puzzle (dark variant)</caption>
+        <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/GnonogramsDesigningDark.png</image>
+      </screenshot>
+    </screenshots>
   <releases>
     <release version="2.1.2" date="2022-06-20" urgency="low">
       <description>
@@ -202,24 +220,6 @@
       <binary>com.github.jeremypw.gnonograms</binary>
       <library>libgnonograms-core</library>
     </provides>
-    <screenshots>
-      <screenshot type="default">
-        <caption>Manually solving a puzzle</caption>
-        <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/GnonogramsSolvingLight.png</image>
-      </screenshot>
-      <screenshot>
-        <caption>Manually solving a puzzle</caption>
-        <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/GnonogramsSolvingDark.png</image>
-      </screenshot>
-      <screenshot>
-        <caption>Manually solving a puzzle</caption>
-        <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/GnonogramsDesigningLight.png</image>
-      </screenshot>
-      <screenshot>
-        <caption>Manually solving a puzzle</caption>
-        <image>https://raw.githubusercontent.com/jeremypw/gnonograms/master/data/screenshots/GnonogramsDesigningDark.png</image>
-      </screenshot>
-    </screenshots>
   <developer_name>Jeremy Paul Wootten</developer_name>
   <url type="homepage">https://github.com/jeremypw/gnonograms</url>
   <url type="bugtracker">https://github.com/jeremypw/gnonograms/issues</url>
