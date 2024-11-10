@@ -142,8 +142,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             gtk_settings.gtk_application_prefer_dark_theme = prefer_dark;
         });
 
-        settings.bind ("font-scaling", this, "font-scaling", SettingsBindFlags.DEFAULT);
-
         var view_actions = new GLib.SimpleActionGroup ();
         view_actions.add_action_entries (view_action_entries, this);
         insert_action_group (ACTION_GROUP, view_actions);
@@ -240,13 +238,14 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         };
         header_bar.add_css_class ("gnonograms-header");
         header_bar.pack_start (generate_button);
+        header_bar.pack_start (hint_button);
         header_bar.pack_start (restart_button);
         header_bar.pack_start (undo_button);
         header_bar.pack_start (redo_button);
         header_bar.pack_start (check_correct_button);
         header_bar.pack_end (menu_button);
         header_bar.pack_end (mode_switch);
-        header_bar.pack_end (hint_button);
+
 
         set_titlebar (header_bar);
 
