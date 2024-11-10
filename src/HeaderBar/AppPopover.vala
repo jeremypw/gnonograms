@@ -21,6 +21,7 @@ public class Gnonograms.AppPopover : Gtk.Popover {
         var save_game_button = new PopoverButton (_("Save"), ACTION_PREFIX + ACTION_SAVE);
         var save_as_game_button = new PopoverButton (_("Save to Different File"), ACTION_PREFIX + ACTION_SAVE_AS);
         var preferences_button = new PopoverButton (_("Preferences"), ACTION_PREFIX + ACTION_PREFERENCES);
+        var solve_button = new PopoverButton (_("Solve"), ACTION_PREFIX + ACTION_SOLVE);
 
         var settings_box = new Gtk.Box (VERTICAL, 3);
         settings_box.append (title_entry);
@@ -28,6 +29,8 @@ public class Gnonograms.AppPopover : Gtk.Popover {
         settings_box.append (load_game_button);
         settings_box.append (save_game_button);
         settings_box.append (save_as_game_button);
+        settings_box.append (new Gtk.Separator (Gtk.Orientation.HORIZONTAL));
+        settings_box.append (solve_button);
         settings_box.append (new Gtk.Separator (Gtk.Orientation.HORIZONTAL));
         settings_box.append (preferences_button);
 
