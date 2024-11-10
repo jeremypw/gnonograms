@@ -68,14 +68,6 @@
             Defaults to yellow
           </description>
         </key>
-
-        <key type="i" name="font-scaling">
-          <default>100</default>
-          <summary>Scaling of label text</summary>
-          <description>
-            The size of the clue label text relative to system text.
-          </description>
-        </key>
     </schema>
 
     <schema path="/com/github/jeremypw/gnonograms/saved-state/" id="com.github.jeremypw.gnonograms.saved-state" gettext-domain="com.github.jeremypw.gnonograms">

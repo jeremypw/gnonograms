@@ -45,8 +45,8 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     private const double MINOR_GRID_LINE_WIDTH = 1.0;
     private Gdk.RGBA[, ] colors;
 
-    public int cell_width { get; private set; } /* Width and Height of cell including frame */
-    public int cell_height { get; private set; }/* Width and Height of cell including frame */
+    public double cell_width { get; private set; } /* Width and Height of cell including frame */
+    public double cell_height { get; private set; }/* Width and Height of cell including frame */
     private bool dirty = false; /* Whether a redraw is needed */
 
 
@@ -148,43 +148,38 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     }
 
     public override void size_allocate (int w, int h, int bl) {
-        // Avoid unwanted rounding
         var r = (double) view.controller.rows;
         var c = (double) view.controller.columns;
-        var dw = (double) w;
-        var dh = (double) h;
-        double height, width;
-        // Optimise fit in availabel space, keeping square cells
-        if (r > 0 && c > 0) {
-            if (r > c) {
-                height = dh;
-                width = dh * c / r;
-            } else if (c < r) {
-                width = dw;
-                height = dw * r / c;
-            } else if (h > w) {
-                width = dw;
-                height = dw * r / c;
-            } else {
-                height = dh;
-                width = dh * c / r;
-            }
-
-            // Hack needed to allow window to be shrunk and create bottom/end margins
-            width -= 6.0;
-            height -= 6.0;
-
-            // Cell width and height should be the same but leave separate for now.
-            cell_width = (int) (width / c);
-            cell_height = (int) (height / r);
-
-            // Ensure content dimensions exact multiple of cell dimensions
-            content_width = cell_width * (int) view.controller.columns;
-            content_height = cell_height * (int) view.controller.rows;
-
-            /* Cause refresh of existing pattern */
-            highlight_pattern = new CellPattern.highlight (cell_width, cell_height);
+        // Need to allow window to be shrunk and create bottom/end margins
+        var dw = (double) w - c - 12;
+        var dh = (double) h - r - 12;
+        if (r == 0 || c == 0) {
+            return;
         }
+        var width_for_height = dh * c / r;
+        var height_for_width = dw * r / c;
+        //Calculate content dimensions, optimise fit in available space, keeping square cells
+        double height, width;
+        if (width_for_height > dw) {
+            width = dw;
+            height = height_for_width;
+        } else if (height_for_width > dh) {
+            height = dh;
+            width = width_for_height;
+        } else {
+            height = dh;
+            width = dw;
+        }
+
+        // Cell width and height should be the same but leave separate for now.
+        cell_width = width / c;
+        cell_height = height / r;
+
+        content_width = (int) width;
+        content_height = (int) height;
+
+        /* Cause refresh of existing pattern */
+        highlight_pattern = new CellPattern.highlight (cell_width, cell_height);
     }
 
     private void draw_func (Gtk.DrawingArea drawing_area, Cairo.Context cr, int x, int y) {
@@ -233,54 +228,51 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         cr.set_antialias (Cairo.Antialias.NONE);
         cr.set_line_width (MINOR_GRID_LINE_WIDTH);
 
+        var r = view.controller.rows;
+        var c = view.controller.columns;
+        var w = cell_width;
+        var h = cell_height;
         // Draw minor grid lines
-        double y1 = 0;
-        double x1 = 0;
-        double x2 = content_width - 1;
-        double y2 = content_height - 1;
-        while (y1 < y2) {
-            cr.move_to (x1, y1);
+        var x2 = w * c;
+        var y2 = h * r;
+        // Draw horizontal lines
+        for (int cell = 0; cell < r; cell++) {
+            var y1 = cell * h;
+            cr.move_to (0, y1);
             cr.line_to (x2, y1);
             cr.stroke ();
-            y1 += cell_height;
         }
 
-        y1 = 0;
-
-        while (x1 < x2) {
-            cr.move_to (x1, y1);
+        // Draw vertical lines
+        for (int cell = 0; cell < c; cell++) {
+            var x1 = cell * w;
+            cr.move_to (x1, 0);
             cr.line_to (x1, y2);
             cr.stroke ();
-            x1 += cell_width;
         }
-
-        x1 = 0;
 
         // Draw inner major grid lines
         cr.set_line_width (MAJOR_GRID_LINE_WIDTH);
-        var increment = 5.0 * cell_height;
-        y1 = increment;
-        while (y1 < y2) {
-            cr.move_to (x1, y1);
+        // Draw horizontal lines
+        for (int cell = 5; cell < r; cell += 5) {
+            var y1 = cell * h;
+            cr.move_to (0, y1);
             cr.line_to (x2, y1);
             cr.stroke ();
-            y1 += increment;
         }
 
-        y1 = MINOR_GRID_LINE_WIDTH;
-        increment = 5.0 * cell_width;
-        x1 = increment;
-        while (x1 < x2) {
-            cr.move_to (x1, y1);
+        // Draw vertical lines
+        for (int cell = 5; cell < c; cell += 5) {
+            var x1 = cell * w;
+            cr.move_to (x1, 0);
             cr.line_to (x1, y2);
             cr.stroke ();
-            x1 += increment;
         }
 
         // Draw frame
         cr.set_line_width (MINOR_GRID_LINE_WIDTH);
-        y1 = MINOR_GRID_LINE_WIDTH;
-        x1 = MINOR_GRID_LINE_WIDTH;
+        var y1 = MINOR_GRID_LINE_WIDTH;
+        var x1 = MINOR_GRID_LINE_WIDTH;
         cr.move_to (x1, y1);
         cr.line_to (x2 - x1, y1);
         cr.stroke ();
@@ -382,7 +374,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
 
         construct {
             var r = double.min (width, height) / 2.0;
-            var surface = new Cairo.ImageSurface (Cairo.Format.ARGB32, (int)width, (int)height);
+            var surface = new Cairo.ImageSurface (Cairo.Format.ARGB32, (int)width , (int)height);
             var context = new Cairo.Context (surface);
             context.set_source_rgb (0.0, 0.0, 0.0);
             context.rectangle (0, 0, width, height);

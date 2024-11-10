@@ -12,54 +12,6 @@ public class Gnonograms.AppPopover : Gtk.Popover {
         );
     }
     construct {
-        var zoom_out_button = new Gtk.Button.from_icon_name ("zoom-out-symbolic");
-        zoom_out_button.tooltip_markup = Granite.markup_accel_tooltip (
-            {"<Ctrl>minus"},
-            _("Zoom Out")
-        );
-        zoom_out_button.clicked.connect (() => {
-            var current_font_scale = settings.get_int ("font-scaling");
-            settings.set_int ("font-scaling", current_font_scale - 10);
-        });
-
-        var zoom_in_button = new Gtk.Button.from_icon_name ("zoom-in-symbolic");
-        zoom_in_button.tooltip_markup = Granite.markup_accel_tooltip (
-            {"<Ctrl>plus"},
-            _("Zoom In")
-        );
-        zoom_in_button.clicked.connect (() => {
-            var current_font_scale = settings.get_int ("font-scaling");
-            settings.set_int ("font-scaling", current_font_scale + 10);
-        });
-
-        var zoom_default_button = new Gtk.Button () {
-            label = settings.get_int ("font-scaling").to_string () + "%"
-        };
-
-        zoom_default_button.tooltip_markup = Granite.markup_accel_tooltip (
-            {"<Ctrl>0"},
-            _("Zoom Default")
-        );
-        zoom_default_button.clicked.connect (() => {
-            var current_font_scale = settings.get_int ("font-scaling");
-            settings.set_int ("font-scaling", 100);
-        });
-        settings.changed["font-scaling"].connect (() => {
-            zoom_default_button.label = settings.get_int ("font-scaling").to_string () + "%";
-        });
-
-        var font_size_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0) {
-            homogeneous = true,
-            hexpand = true,
-            margin_top = 12,
-            margin_start = 12,
-            margin_end = 12,
-        };
-        font_size_box.add_css_class (Granite.STYLE_CLASS_LINKED);
-        font_size_box.append (zoom_out_button);
-        font_size_box.append (zoom_default_button);
-        font_size_box.append (zoom_in_button);
-
         var title_entry = new Gtk.Entry () {
             placeholder_text = _("Enter title of game here"),
             margin_top = 12,
@@ -71,7 +23,6 @@ public class Gnonograms.AppPopover : Gtk.Popover {
         var preferences_button = new PopoverButton (_("Preferences"), ACTION_PREFIX + ACTION_PREFERENCES);
 
         var settings_box = new Gtk.Box (VERTICAL, 3);
-        settings_box.append (font_size_box);
         settings_box.append (title_entry);
         settings_box.append (new Gtk.Separator (Gtk.Orientation.HORIZONTAL));
         settings_box.append (load_game_button);

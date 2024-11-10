@@ -9,12 +9,13 @@ public class Gnonograms.ClueBox : Gtk.Widget {
         set_layout_manager_type (typeof (Gtk.BoxLayout));
     }
 
-    public const double WINDOW_CLUEBOX_RATIO = 0.3; // For simplicity give labelboxes fixed ratio of window dimensions
+    const int PIX_TO_PANGO_FONT = 1024 / 2;
+
     public unowned View view { get; construct; }
     public bool holds_column_clues { get; construct; }
-    // The number of cells each clue addresses, monitored by clues
-    public uint n_cells { get; set; default = 0; }
+    public uint n_cells { get; set; default = 0; }// The number of cells each clue addresses, monitored by clues
     public double cell_size { get; set; }
+    public Pango.FontDescription font_desc { get; set; }
 
     private Gee.ArrayList<Clue> clues;
     public ClueBox (View _view, bool _holds_column_clues) {
@@ -32,15 +33,51 @@ public class Gnonograms.ClueBox : Gtk.Widget {
         };
         set_layout_manager (layout);
 
+        margin_bottom = holds_column_clues ? 0 : 6;
+        margin_end = holds_column_clues ? 6 : 0;
         clues = new Gee.ArrayList<Clue> ();
+        font_desc = Pango.FontDescription.from_string ("Arial 10");
+        var mode = holds_column_clues ? Gtk.SizeGroupMode.HORIZONTAL : Gtk.SizeGroupMode.VERTICAL;
 
         if (holds_column_clues) {
+            hexpand = false;
             view.controller.notify ["columns"].connect (add_remove_clues);
         } else {
+            vexpand = false;
             view.controller.notify ["rows"].connect (add_remove_clues);
         }
-    }
 
+        notify["cell-size"].connect (() => {
+            font_desc.set_absolute_size (cell_size * PIX_TO_PANGO_FONT);
+            var index = 0.0;
+            var size = (int) cell_size;
+            var diff = cell_size - (double) size;
+            var shortfall = 0.0;
+            // Assign label widths to match grid lines as closely as possible.
+            // As the cell dimensions are non-integral we have to vary the (integral) label widths
+            foreach (Clue clue in clues) {
+                var makeup = 0;
+                if (shortfall >= 1.0) {
+                    makeup = 1;
+                    shortfall-= 1.0;
+                }
+
+                var label = clue.label;
+                if (holds_column_clues) {
+                    label.width_request =  size + makeup;
+                    label.height_request = (int) (cell_size * (double) n_cells / 3.0);
+                } else {
+                    label.height_request = size + makeup;
+                    label.width_request = (int) (cell_size * (double) n_cells / 3.0);
+                }
+
+                index++;
+                shortfall += diff;
+            }
+        });
+
+
+    }
 
     private void add_remove_clues () {
         var new_n_clues = holds_column_clues ? view.controller.columns : view.controller.rows;

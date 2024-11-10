@@ -103,8 +103,13 @@ public class Gnonograms.Controller : GLib.Object {
         /*
         * This is very finicky. Bind size after present else set_titlebar gives us bad sizes
         */
-        saved_state.bind ("window-height", view, "default-height", SettingsBindFlags.DEFAULT);
-        saved_state.bind ("window-width", view, "default-width", SettingsBindFlags.DEFAULT);
+
+        // TODO limit related to actual monitor dimensions
+        view.default_height = saved_state.get_int ("window-height").clamp (64, 768);
+        view.default_width = saved_state.get_int ("window-width").clamp (128, 1024);
+
+        saved_state.bind ("window-height", view, "default-height", SettingsBindFlags.SET);
+        saved_state.bind ("window-width", view, "default-width", SettingsBindFlags.SET);
 
         bind_property (
             "generator-grade",

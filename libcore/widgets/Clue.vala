@@ -37,28 +37,13 @@ class Gnonograms.Clue : Object {
             xalign = _vertical_text ? (float)0.5 : (float)1.0,
             yalign = vertical_text ? (float)1.0 : (float)0.5,
             has_tooltip = true,
-            use_markup = true
+            use_markup = true,
         };
 
         text = "0";
 
         label.realize.connect_after (update_markup);
-        cluebox.notify["n_cells"].connect (update_tooltip);
-        cluebox.view.notify["font-scaling"].connect (update_markup);
-        cluebox.notify["cell-size"].connect (update_size_request);
-
-        update_size_request ();
-    }
-
-    private void update_size_request () {
-        var size = cluebox.cell_size;
-        if (vertical_text) {
-                label.width_request =  (int) size;
-                label.height_request = (int) (size * (double) cluebox.n_cells / 3.0);
-        } else {
-                label.height_request = (int) size;
-                label.width_request = (int) (size * (double) cluebox.n_cells / 3.0);
-        }
+        cluebox.notify["cell-size"].connect (update_markup);
     }
 
     public void highlight (bool is_highlight) {
@@ -204,12 +189,12 @@ class Gnonograms.Clue : Object {
     }
 
     private void update_markup () {
-        label.set_markup ("<span size='%i%%'>".printf (cluebox.view.font_scaling) + get_markup () + "</span>");
+        label.set_markup ("<span font_desc='%s'>".printf (cluebox.font_desc.to_string ()) + get_markup () + "</span>");
         update_tooltip ();
     }
 
     private void update_tooltip () {
-        label.set_tooltip_markup ("<span size='%i%%'>".printf (cluebox.view.font_scaling) +
+        label.set_tooltip_markup ("<span font_desc='%s'>".printf (cluebox.font_desc.to_string ()) +
             _("Freedom = %u").printf (cluebox.n_cells - Utils.blockextent_from_clue (_text)) +
             "</span>"
         );
