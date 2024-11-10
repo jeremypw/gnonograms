@@ -76,7 +76,6 @@ public class Gnonograms.Filereader : Object {
             load_dir_path,
             ""
         );
-
     }
 
     private void parse_gnonogram_game_file (DataInputStream stream) throws GLib.IOError {

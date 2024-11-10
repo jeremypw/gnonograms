@@ -325,7 +325,7 @@ namespace Gnonograms.Utils {
         if (save) {
             result = yield (dialog.save (parent, null));
         } else {
-            result = yield (dialog.save (parent, null));
+            result = yield (dialog.open (parent, null));
         }
 
 
