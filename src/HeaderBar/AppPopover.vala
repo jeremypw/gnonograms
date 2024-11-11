@@ -17,6 +17,7 @@ public class Gnonograms.AppPopover : Gtk.Popover {
             margin_top = 12,
         };
 
+        controller.bind_property ("game-name", title_entry, "text", BIDIRECTIONAL | SYNC_CREATE);
         var load_game_button = new PopoverButton (_("Load"), ACTION_PREFIX + ACTION_OPEN);
         var save_game_button = new PopoverButton (_("Save"), ACTION_PREFIX + ACTION_SAVE);
         var save_as_game_button = new PopoverButton (_("Save to Different File"), ACTION_PREFIX + ACTION_SAVE_AS);
