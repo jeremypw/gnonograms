@@ -42,6 +42,7 @@ executable (
     'src/Controller.vala',
     'src/View.vala',
     'src/HeaderBar/HeaderButton.vala',
+    'src/HeaderBar/PopoverButton.vala',
     'src/HeaderBar/ProgressIndicator.vala',
     'src/HeaderBar/RestartButton.vala',
     'src/HeaderBar/AppPopover.vala',

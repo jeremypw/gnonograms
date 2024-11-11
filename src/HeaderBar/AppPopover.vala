@@ -40,32 +40,4 @@ public class Gnonograms.AppPopover : Gtk.Popover {
 
         child = settings_box;
     }
-
-    private class PopoverButton : Gtk.Button {
-        public string text { get; construct; }
-        public string detailed_action { get; construct; }
-
-        public PopoverButton (string _text, string? _action_name = null) {
-            Object (
-                text: _text,
-                detailed_action: _action_name // Assigning directly to Gtk.Button.action_name doesnt work for some reason
-            );
-        }
-
-        construct {
-            margin_top = 3;
-            margin_bottom = 3;
-            add_css_class (Granite.STYLE_CLASS_FLAT);
-            set_action_name (detailed_action);
-            if (text != null && detailed_action != null) {
-                var accels = ((Gtk.Application) Application.get_default ()).get_accels_for_action (detailed_action);
-                if (accels != null) {
-                    child = new Granite.AccelLabel (text, accels[0]);
-                    return;
-                } 
-            }
-
-            child = new Gtk.Label (text);
-        }
-    }
 }
