@@ -60,15 +60,11 @@ public class Gnonograms.AppPopover : Gtk.Popover {
             if (text != null && detailed_action != null) {
                 var accels = ((Gtk.Application) Application.get_default ()).get_accels_for_action (detailed_action);
                 if (accels != null) {
-                warning ("got accels");
                     child = new Granite.AccelLabel (text, accels[0]);
                     return;
-                } else {
-                    warning ("No accels for %s", detailed_action);
-                }
+                } 
             }
 
-            warning ("fallback");
             child = new Gtk.Label (text);
         }
     }
