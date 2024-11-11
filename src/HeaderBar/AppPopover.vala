@@ -23,7 +23,10 @@ public class Gnonograms.AppPopover : Gtk.Popover {
         var preferences_button = new PopoverButton (_("Preferences"), ACTION_PREFIX + ACTION_PREFERENCES);
         var solve_button = new PopoverButton (_("Solve"), ACTION_PREFIX + ACTION_SOLVE);
 
-        var settings_box = new Gtk.Box (VERTICAL, 3);
+        var settings_box = new Gtk.Box (VERTICAL, 3) {
+            margin_start = 12,
+            margin_end = 12,
+        };
         settings_box.append (title_entry);
         settings_box.append (new Gtk.Separator (Gtk.Orientation.HORIZONTAL));
         settings_box.append (load_game_button);
