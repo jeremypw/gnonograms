@@ -10,6 +10,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private const string PAINT_FILL_ACCEL = "f"; // Must be lower case
     private const string PAINT_EMPTY_ACCEL = "e"; // Must be lower case
     private const string PAINT_UNKNOWN_ACCEL = "x"; // Must be lower case
+    private const uint DARK = Granite.Settings.ColorScheme.DARK;
 
     public static Gee.MultiMap<string, string> action_accelerators;
     public static Gtk.Application app;
@@ -133,15 +134,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     construct {
         title = _("Gnonograms");
         set_default_size (900, 700);
-        var granite_settings = Granite.Settings.get_default ();
-        var gtk_settings = Gtk.Settings.get_default ();
-        var prefer_dark = granite_settings.prefers_color_scheme == DARK;
-        gtk_settings.gtk_application_prefer_dark_theme = prefer_dark;
-        granite_settings.notify["prefers-color-scheme"].connect (() => {
-            prefer_dark = granite_settings.prefers_color_scheme == DARK;
-            gtk_settings.gtk_application_prefer_dark_theme = prefer_dark;
-        });
-
         var view_actions = new GLib.SimpleActionGroup ();
         view_actions.add_action_entries (view_action_entries, this);
         insert_action_group (ACTION_GROUP, view_actions);
@@ -384,6 +376,14 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         });
 
         cell_grid.stop_drawing.connect (stop_painting);
+
+        update_style ();
+        settings.changed["follow-system-style"].connect (() => {
+            update_style ();
+        });
+        settings.changed["prefer-dark-style"].connect (() => {
+            update_style ();
+        });
     }
 
     public string[] get_clues (bool is_column) {
@@ -723,4 +723,41 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
         make_move_at_cell ();
     }
+
+    // Code based largely on elementary Code app
+        private ulong color_scheme_listener_handler_id = 0;
+        private void update_style () {
+            var gtk_settings = Gtk.Settings.get_default ();
+            var granite_settings = Granite.Settings.get_default ();
+            var following_system = settings.get_boolean ("follow-system-style");
+            disconnect_color_scheme_preference_listener (following_system);
+            if (following_system) {
+                gtk_settings.gtk_application_prefer_dark_theme = (
+                    granite_settings.prefers_color_scheme == DARK
+                );
+                color_scheme_listener_handler_id = granite_settings.notify["prefers-color-scheme"].connect (() => {
+                    gtk_settings.gtk_application_prefer_dark_theme = (
+                        granite_settings.prefers_color_scheme == DARK
+                    );
+                });
+            } else {
+                gtk_settings.gtk_application_prefer_dark_theme = settings.get_boolean ("prefer-dark-style");
+                color_scheme_listener_handler_id = settings.notify["prefers-dark-style"].connect (() => {
+                    gtk_settings.gtk_application_prefer_dark_theme = settings.get_boolean ("prefer-dark-style");
+                });
+            }
+        }
+
+        private void disconnect_color_scheme_preference_listener (bool following_system) {
+            if (color_scheme_listener_handler_id != 0) {
+                if (following_system) {
+                    var granite_settings = Granite.Settings.get_default ();
+                    granite_settings.disconnect (color_scheme_listener_handler_id);
+                } else {
+                    settings.disconnect (color_scheme_listener_handler_id);
+                }
+
+                color_scheme_listener_handler_id = 0;
+            }
+        }
 }

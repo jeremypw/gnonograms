@@ -68,6 +68,23 @@
             Defaults to yellow
           </description>
         </key>
+
+        <key type="b" name="follow-system-style">
+          <default>true</default>
+          <summary>Whether to follow system appearance style</summary>
+          <description>
+            Whether to follow system 'prefers-dark' style setting or to use
+            the application preference.
+          </description>
+        </key>
+
+        <key type="b" name="prefer-dark-style">
+          <default>false</default>
+          <summary>Prefer dark style</summary>
+          <description>
+            Whether to use a dark style when not following the system style
+          </description>
+        </key>
     </schema>
 
     <schema path="/com/github/jeremypw/gnonograms/saved-state/" id="com.github.jeremypw.gnonograms.saved-state" gettext-domain="com.github.jeremypw.gnonograms">

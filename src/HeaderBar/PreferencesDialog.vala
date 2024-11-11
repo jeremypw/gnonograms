@@ -75,7 +75,7 @@ public class Gnonograms.PreferencesDialog : Granite.Dialog {
         };
 
         var color_mode_switch = new Granite.ModeSwitch.from_icon_name (
-            "weather-clear-symbolic", 
+            "weather-clear-symbolic",
             "weather-clear-night-symbolic"
         ) {
             primary_icon_tooltip_text = _("Light"),
@@ -87,8 +87,8 @@ public class Gnonograms.PreferencesDialog : Granite.Dialog {
         var color_revealer = new Gtk.Revealer ();
         color_revealer.set_child (color_mode_preference);
         follow_system_switchmodelbutton.bind_property (
-            "active", 
-            color_revealer, "reveal-child", 
+            "active",
+            color_revealer, "reveal-child",
             INVERT_BOOLEAN | SYNC_CREATE
         );
 
@@ -114,5 +114,19 @@ public class Gnonograms.PreferencesDialog : Granite.Dialog {
         grade_setting.notify["selected"].connect (() => {
             settings.set_enum ("grade", (Difficulty)(grade_setting.selected));
         });
+
+        settings.bind (
+            "follow-system-style",
+            follow_system_switchmodelbutton,
+            "active",
+            SettingsBindFlags.DEFAULT
+        );
+
+        settings.bind (
+            "prefer-dark-style",
+            color_mode_switch,
+            "active",
+            SettingsBindFlags.DEFAULT
+        );
     }
 }
