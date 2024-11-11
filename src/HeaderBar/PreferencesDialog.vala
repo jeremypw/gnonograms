@@ -45,12 +45,10 @@ public class Gnonograms.PreferencesDialog : Granite.Dialog {
         var empty_color = settings.get_string ("empty-color");
         var rgba = Gdk.RGBA ();
         if (rgba.parse (empty_color)) {
-            warning ("empty_colorr setting  is %s", rgba.to_string ());
             empty_color_button.set_rgba (rgba);
         }
 
         empty_color_button.notify["rgba"].connect (() => {
-            warning ("empty color now %s", empty_color_button.get_rgba ().to_string ());
             settings.set_string ("empty-color", empty_color_button.get_rgba ().to_string ());
         });
         var empty_color_preference = new PreferenceRow (_("Color of empty cells"), empty_color_button);
@@ -70,19 +68,41 @@ public class Gnonograms.PreferencesDialog : Granite.Dialog {
             settings.set_string ("filled-color", filled_color_button.get_rgba ().to_string ());
         });
 
+        var filled_color_preference = new PreferenceRow (_("Color of filled cells"), filled_color_button);
 
-        var main_box = new Gtk.Box (VERTICAL, 12) {
-            margin_start = 12,
-            margin_end = 12
+        var follow_system_switchmodelbutton = new Granite.SwitchModelButton (_("Follow System Style")) {
+            margin_top = 3
         };
 
-        var filled_color_preference = new PreferenceRow (_("Color of filled cells"), filled_color_button);
+        var color_mode_switch = new Granite.ModeSwitch.from_icon_name (
+            "weather-clear-symbolic", 
+            "weather-clear-night-symbolic"
+        ) {
+            primary_icon_tooltip_text = _("Light"),
+            secondary_icon_tooltip_text = _("Dark")
+        };
+        var color_mode_preference = new PreferenceRow (_("Color Style"), color_mode_switch) {
+            margin_start = margin_start + 12
+        };
+        var color_revealer = new Gtk.Revealer ();
+        color_revealer.set_child (color_mode_preference);
+        follow_system_switchmodelbutton.bind_property (
+            "active", 
+            color_revealer, "reveal-child", 
+            INVERT_BOOLEAN | SYNC_CREATE
+        );
+
+        var main_box = new Gtk.Box (VERTICAL, 12) {
+            margin_start = 12
+        };
 
         main_box.append (grade_preference);
         main_box.append (row_preference);
         main_box.append (column_preference);
         main_box.append (filled_color_preference);
         main_box.append (empty_color_preference);
+        main_box.append (follow_system_switchmodelbutton);
+        main_box.append (color_revealer);
 
         get_content_area ().append (main_box);
         add_button (_("Close"), Gtk.ResponseType.APPLY);
