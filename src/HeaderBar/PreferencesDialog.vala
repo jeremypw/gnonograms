@@ -5,7 +5,7 @@
  * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-public class Gnonograms.Dialogs.Preferences : Granite.Dialog {
+public class Gnonograms.PreferencesDialog : Granite.Dialog {
     construct {
         set_default_size (400, 100);
         resizable = false;
@@ -94,34 +94,5 @@ public class Gnonograms.Dialogs.Preferences : Granite.Dialog {
         grade_setting.notify["selected"].connect (() => {
             settings.set_enum ("grade", (Difficulty)(grade_setting.selected));
         });
-    }
-
-    private class PreferenceRow : Gtk.Box {
-        public string text { get; construct; }
-        public Gtk.Widget widget { get; construct; }
-        public PreferenceRow (string text, Gtk.Widget setting_widget) {
-            Object (
-                text: text,
-                widget: setting_widget
-            );
-        }
-
-        construct {
-            orientation = Gtk.Orientation.HORIZONTAL;
-            margin_top = 3;
-            margin_bottom = 6;
-            spacing = 12;
-            hexpand = true;
-
-            var label = new Gtk.Label (text) {
-                halign = Gtk.Align.START
-            };
-
-            widget.halign = Gtk.Align.END;
-            widget.hexpand = true;
-
-            append (label);
-            append (widget);
-        }
     }
 }

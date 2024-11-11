@@ -614,7 +614,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
     private void action_preferences () {
         app_popover.popdown ();
-        var dialog = new Dialogs.Preferences () {
+        var dialog = new PreferencesDialog () {
             transient_for = this,
             title = _("Preferences")
         };
