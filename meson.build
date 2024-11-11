@@ -53,6 +53,7 @@ executable (
     'libcore/widgets/Cluebox.vala',
     'libcore/widgets/Clue.vala',
     'libcore/widgets/Cellgrid.vala',
+    'libcore/widgets/CellPattern.vala',
     'libcore/utils.vala',
     'libcore/Model.vala',
     'libcore/My2DCellArray.vala',
