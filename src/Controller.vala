@@ -95,7 +95,6 @@ public class Gnonograms.Controller : GLib.Object {
         saved_state.bind ("mode", this, "game-state", SettingsBindFlags.DEFAULT);
         saved_state.bind ("current-game-path", this, "current-game-path", SettingsBindFlags.DEFAULT);
         settings.bind ("grade", this, "generator-grade", SettingsBindFlags.DEFAULT);
-        settings.bind ("clue-help", view, "strikeout-complete", SettingsBindFlags.DEFAULT);
         settings.bind ("rows", this, "rows", SettingsBindFlags.DEFAULT);
         settings.bind ("columns", this, "columns", SettingsBindFlags.DEFAULT);
 

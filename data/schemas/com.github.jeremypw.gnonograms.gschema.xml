@@ -41,16 +41,6 @@
           </description>
         </key>
 
-        <key type="b" name="clue-help">
-          <default>true</default>
-          <summary>Visual hints in clues</summary>
-          <description>
-            Use strikethrough for each contiguous completed block from edge in clue label.
-            Mark clue in red if there is a definite error in the corresponding region.
-            Fade clue if corresponding region is completed without definite error.
-          </description>
-        </key>
-
         <key type="s" name="filled-color">
           <default>"rgba(24,18,151,1.0)"</default>
           <summary>Color of filled cell when solving</summary>

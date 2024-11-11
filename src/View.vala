@@ -49,7 +49,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     public Difficulty generator_grade { get; set; }
     public Difficulty game_grade { get; set; default = Difficulty.UNDEFINED;}
     public string game_name { get { return controller.game_name; } }
-    public bool strikeout_complete { get; set; }
     public bool readonly { get; set; default = false;}
     public bool can_go_back { get; set; }
     public bool can_go_forward { get; set; }
@@ -345,10 +344,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             }
         });
 
-        notify["strikeout-complete"].connect (() => {
-            update_all_labels_completeness ();
-        });
-
         cell_grid.leave.connect (() => {
             row_clue_box.unhighlight_all ();
             column_clue_box.unhighlight_all ();
@@ -516,7 +511,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private void update_clue_complete (uint idx, bool is_col) {
         var lbox = is_col ? column_clue_box : row_clue_box;
 
-        if (controller.game_state == GameState.SOLVING && strikeout_complete) {
+        if (controller.game_state == GameState.SOLVING) {
             var blocks = Gee.List.empty<Block> ();
             blocks = model.get_complete_blocks_from_working (idx, is_col);
             lbox.update_clue_complete (idx, blocks);
