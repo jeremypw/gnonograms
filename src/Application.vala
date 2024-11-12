@@ -30,6 +30,9 @@ namespace Gnonograms {
     public const string ACTION_HINT = "action-hint";
     public const string ACTION_OPTIONS = "action-options";
     public const string ACTION_OPTIONS_ACCEL = "";
+    public const string ACTION_ZOOM_SMALLER = "action-zoom-smaller";
+    public const string ACTION_ZOOM_DEFAULT = "action-zoom-default";
+    public const string ACTION_ZOOM_LARGER = "action-zoom-larger";
 
     public const string ACTION_PREFERENCES = "action-preferences";
 #if WITH_DEBUGGING

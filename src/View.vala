@@ -7,6 +7,8 @@
 
 public class Gnonograms.View : Gtk.ApplicationWindow {
     private const uint PROGRESS_DELAY_MSEC = 500;
+    private const int DEFAULT_WIDTH = 900;
+    private const int DEFAULT_HEIGHT = 700;
     private const string PAINT_FILL_ACCEL = "f"; // Must be lower case
     private const string PAINT_EMPTY_ACCEL = "e"; // Must be lower case
     private const string PAINT_UNKNOWN_ACCEL = "x"; // Must be lower case
@@ -35,7 +37,10 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         {ACTION_SOLVE, action_solve},
         {ACTION_HINT, action_hint},
         {ACTION_OPTIONS, action_options},
-        {ACTION_PREFERENCES, action_preferences}
+        {ACTION_PREFERENCES, action_preferences},
+        {ACTION_ZOOM_SMALLER, action_zoom_smaller},
+        {ACTION_ZOOM_DEFAULT, action_zoom_default},
+        {ACTION_ZOOM_LARGER, action_zoom_larger}
     };
 
 #if WITH_DEBUGGING
@@ -123,6 +128,10 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         action_accelerators.set (ACTION_OPTIONS, "F10");
         action_accelerators.set (ACTION_OPTIONS, "Menu");
         action_accelerators.set (ACTION_PREFERENCES, "<Ctrl>P");
+        action_accelerators.set (ACTION_ZOOM_LARGER, "<Ctrl>plus");
+        action_accelerators.set (ACTION_ZOOM_LARGER, "<Ctrl>equal");
+        action_accelerators.set (ACTION_ZOOM_DEFAULT, "<Ctrl>0");
+        action_accelerators.set (ACTION_ZOOM_SMALLER, "<Ctrl>minus");
 #if WITH_DEBUGGING
         action_accelerators.set (ACTION_DEBUG_ROW, "<Alt>R");
         action_accelerators.set (ACTION_DEBUG_COL, "<Alt>C");
@@ -132,7 +141,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
     construct {
         title = _("Gnonograms");
-        set_default_size (900, 700);
+        set_default_size (DEFAULT_WIDTH, DEFAULT_HEIGHT);
         var view_actions = new GLib.SimpleActionGroup ();
         view_actions.add_action_entries (view_action_entries, this);
         insert_action_group (ACTION_GROUP, view_actions);
@@ -650,6 +659,24 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         controller.save_game_as.begin ();
     }
 
+    private void action_zoom_larger () {
+        var current_width = this.default_width;
+        this.default_width = current_width + current_width / 10;
+        var current_height = this.default_height;
+        this.default_height = current_height + current_height / 10;
+    }
+
+    private void action_zoom_smaller () {
+        var current_width = this.default_width;
+        this.default_width = current_width - current_width / 10;
+        var current_height = this.default_height;
+        this.default_height = current_height - current_height / 10;
+    }
+
+    private void action_zoom_default () {
+        this.default_width = DEFAULT_WIDTH;
+        this.default_height = DEFAULT_HEIGHT;
+    }
 
     private void action_check_errors () {
         if (controller.rewind_until_correct () == 0) {
