@@ -47,7 +47,10 @@ public class Gnonograms.ClueBox : Gtk.Widget {
             view.controller.notify ["rows"].connect (add_remove_clues);
         }
 
-        notify["cell-size"].connect (() => {
+        notify["cell-size"].connect (update_size_request);
+    }
+
+    private void update_size_request () {
             font_desc.set_absolute_size (cell_size * PIX_TO_PANGO_FONT);
             var index = 0.0;
             var size = (int) cell_size;
@@ -55,6 +58,7 @@ public class Gnonograms.ClueBox : Gtk.Widget {
             var shortfall = 0.0;
             // Assign label widths to match grid lines as closely as possible.
             // As the cell dimensions are non-integral we have to vary the (integral) label widths
+            var box_size = 0;
             foreach (Clue clue in clues) {
                 var makeup = 0;
                 if (shortfall >= 1.0) {
@@ -65,18 +69,21 @@ public class Gnonograms.ClueBox : Gtk.Widget {
                 var label = clue.label;
                 if (holds_column_clues) {
                     label.width_request =  size + makeup;
-                    label.height_request = (int) (cell_size * (double) n_cells / 3.0);
+                    box_size += label.width_request;
                 } else {
                     label.height_request = size + makeup;
-                    label.width_request = (int) (cell_size * (double) n_cells / 3.0);
+                    box_size += label.height_request;
                 }
 
                 index++;
                 shortfall += diff;
             }
-        });
 
-
+            if (holds_column_clues) {
+                set_size_request (box_size, (int) (cell_size / 2.0 * (n_cells / 3 + 2)));
+            } else {
+                set_size_request ((int) (cell_size / 2.0 * (n_cells / 3 + 2)), box_size);
+            }
     }
 
     private void add_remove_clues () {
@@ -101,6 +108,8 @@ public class Gnonograms.ClueBox : Gtk.Widget {
                 clue.label.set_parent (this);
             }
         }
+
+        update_size_request ();
     }
 
     public string[] get_clue_texts () {

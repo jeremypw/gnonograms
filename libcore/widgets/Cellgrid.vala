@@ -175,8 +175,8 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         cell_width = width / c;
         cell_height = height / r;
 
-        content_width = (int) width;
-        content_height = (int) height;
+        content_width = (int) (width + 0.99);
+        content_height = (int) (height + 0.99);
 
         /* Cause refresh of existing pattern */
         highlight_pattern = new CellPattern.highlight (cell_width, cell_height);
