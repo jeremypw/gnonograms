@@ -10,3 +10,8 @@ insert_final_newline = true
 max_line_length = 80
 tab_width = 4
 
+[*.ui]
+tab_width = 2
+
+[*.xml]
+tab_width = 2
