@@ -40,7 +40,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         {ACTION_PREFERENCES, action_preferences},
         {ACTION_ZOOM_SMALLER, action_zoom_smaller},
         {ACTION_ZOOM_DEFAULT, action_zoom_default},
-        {ACTION_ZOOM_LARGER, action_zoom_larger}
+        {ACTION_ZOOM_LARGER, action_zoom_larger},
+        {ACTION_SHORTCUT_WINDOW, action_shortcut_window}
     };
 
 #if WITH_DEBUGGING
@@ -135,6 +136,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 #if WITH_DEBUGGING
         action_accelerators.set (ACTION_DEBUG_ROW, "<Alt>R");
         action_accelerators.set (ACTION_DEBUG_COL, "<Alt>C");
+        action_accelerators.set (ACTION_SHORTCUT_WINDOW, "F1");
 #endif
 
     }
@@ -676,6 +678,11 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private void action_zoom_default () {
         this.default_width = DEFAULT_WIDTH;
         this.default_height = DEFAULT_HEIGHT;
+    }
+
+    private void action_shortcut_window () {
+        var helper = new ShortcutHelper ();
+        helper.show_window ();
     }
 
     private void action_check_errors () {

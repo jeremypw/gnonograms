@@ -50,6 +50,8 @@ executable (
     'src/HeaderBar/PreferenceRow.vala',
     'src/services/RandomPatternGenerator.vala',
     'src/services/RandomGameGenerator.vala',
+    'src/services/ShortcutHelper.vala',
+    'src/ui/shortcuthelper.ui.vala',
     'libcore/widgets/Cluebox.vala',
     'libcore/widgets/Clue.vala',
     'libcore/widgets/Cellgrid.vala',
