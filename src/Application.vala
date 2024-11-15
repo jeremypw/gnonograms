@@ -34,7 +34,9 @@ namespace Gnonograms {
     public const string ACTION_ZOOM_DEFAULT = "action-zoom-default";
     public const string ACTION_ZOOM_LARGER = "action-zoom-larger";
     public const string ACTION_SHORTCUT_WINDOW = "action-shortcut-window";
+    public const string ACTION_ABOUT_WINDOW = "action-about-dialog";
     public const string ACTION_PREFERENCES = "action-preferences";
+
 #if WITH_DEBUGGING
     public const string ACTION_DEBUG_ROW = "action-debug-row";
     public const string ACTION_DEBUG_COL = "action-debug-col";

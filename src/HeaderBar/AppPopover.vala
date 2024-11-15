@@ -64,6 +64,7 @@ public class Gnonograms.AppPopover : Gtk.Popover {
         var solve_button = new PopoverButton (_("Solve"), ACTION_PREFIX + ACTION_SOLVE);
 
         var shortcut_button = new PopoverButton (_("Keyboard Shortcuts"), ACTION_PREFIX + ACTION_SHORTCUT_WINDOW);
+        var about_button = new PopoverButton (_("About Gnonograms"), ACTION_PREFIX + ACTION_ABOUT_WINDOW);
 
         var settings_box = new Gtk.Box (VERTICAL, 3) {
             margin_start = 12,
@@ -81,7 +82,7 @@ public class Gnonograms.AppPopover : Gtk.Popover {
         settings_box.append (new Gtk.Separator (Gtk.Orientation.HORIZONTAL));
         settings_box.append (preferences_button);
         settings_box.append (shortcut_button);
-        // settings_box.append (about_button);
+        settings_box.append (about_button);
 
         child = settings_box;
     }

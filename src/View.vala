@@ -41,7 +41,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         {ACTION_ZOOM_SMALLER, action_zoom_smaller},
         {ACTION_ZOOM_DEFAULT, action_zoom_default},
         {ACTION_ZOOM_LARGER, action_zoom_larger},
-        {ACTION_SHORTCUT_WINDOW, action_shortcut_window}
+        {ACTION_SHORTCUT_WINDOW, action_shortcut_window},
+        {ACTION_ABOUT_WINDOW, action_about_dialog}
     };
 
 #if WITH_DEBUGGING
@@ -682,9 +683,25 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     }
 
     private void action_shortcut_window () {
-warning ("action shortcut window");
         var helper = new ShortcutHelper ();
         helper.show_window ();
+    }
+
+    private void action_about_dialog () {
+        Gtk.show_about_dialog (
+            this,
+            "authors", new string[1] {"Jeremy Wootten"},
+            "comments", _("An implementation of the Japanese logic puzzle \"Nonograms\" written in Vala, allowing the user to solve computer generated puzzles or design their own."),
+            "copyright", _("2010-2024 Jeremy Wootten"),
+            "license_type", Gtk.License.LGPL_2_1,
+            "logo_icon_name", "com.github.jeremypw.gnonograms",
+            "program_name", _("Gnonograms"),
+            "translator_credits", "NathanBnm (French)\n André Barata (Portuguese)\n Heimen Stoffels (Dutch)",
+            "version", "4.0.0",
+            "website", "https://github.com/jeremypw/gnonograms",
+            "website_label", "Source Code",
+            null
+        );
     }
 
     private void action_check_errors () {
