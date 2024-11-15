@@ -123,7 +123,7 @@ namespace Gnonograms {
             </child>
             <child>
               <object class="GtkShortcutsShortcut">
-                <property name="accelerator">&lt;Ctrl&gt;K</property>
+                <property name="accelerator">&lt;Ctrl&gt;K F1</property>
                 <property name="title" translatable="yes">Show Keyboard Shortcuts</property>
               </object>
             </child>
