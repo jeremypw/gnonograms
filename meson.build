@@ -1,7 +1,7 @@
 project (
     'com.github.jeremypw.gnonograms',
     'vala', 'c',
-    version: '2.1.2',
+    version: '4.0.0',
     meson_version: '>= 0.58.0'
 )
 
@@ -30,7 +30,7 @@ config_file = configure_file(
 gnonogram_deps = [
     dependency('glib-2.0'),
     dependency('gobject-2.0'),
-    dependency('gtk4'),
+    dependency('gtk4', version: '>=4.10'),
     dependency('gee-0.8', version: '>=0.8.5'),
     dependency('granite-7'),
     dependency('libadwaita-1')
