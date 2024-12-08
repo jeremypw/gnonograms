@@ -74,7 +74,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private Gtk.Button check_correct_button;
     private Gtk.Button hint_button;
     private AppPopover app_popover;
-    // private Gtk.Button auto_solve_button;
+    private Gtk.Button auto_solve_button;
     private Gtk.Button restart_button;
     private uint drawing_with_key;
     private uint paint_fill_key = Gdk.keyval_from_name ("f");
@@ -179,11 +179,11 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             ACTION_PREFIX + ACTION_HINT,
             _("Suggest next move")
         );
-        // auto_solve_button = new HeaderButton (
-        //     "system",
-        //     ACTION_PREFIX + ACTION_SOLVE,
-        //     _("Solve by Computer")
-        // );
+        auto_solve_button = new HeaderButton (
+            "computer-symbolic",
+            ACTION_PREFIX + ACTION_SOLVE,
+            _("Solve by Computer")
+        );
         generate_button = new HeaderButton (
             "list-add",
             ACTION_PREFIX + ACTION_GENERATING_MODE,
@@ -243,6 +243,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         header_bar.pack_start (check_correct_button);
         header_bar.pack_end (menu_button);
         header_bar.pack_end (mode_switch);
+        header_bar.pack_end (auto_solve_button);
 
 
         set_titlebar (header_bar);
@@ -510,7 +511,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             can_go_back;
 
         hint_button.sensitive = sensitive && controller.game_state == GameState.SOLVING;
-        // auto_solve_button.sensitive = sensitive;
+        auto_solve_button.sensitive = controller.game_state == GameState.SETTING;
     }
 
     private void highlight_labels (Cell c, bool is_highlight) {
