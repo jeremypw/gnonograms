@@ -22,7 +22,7 @@ config_data.set_quoted('GETTEXT_PACKAGE', meson.project_name())
 config_data.set_quoted('VERSION', meson.project_version())
 config_data.set_quoted('APP_ID', meson.project_name())
 config_file = configure_file(
-    input: 'src/Config.vala.in',
+    input: 'Config.vala.in',
     output: '@BASENAME@',
     configuration: config_data
 )
@@ -41,33 +41,40 @@ executable (
     'src/Application.vala',
     'src/Controller.vala',
     'src/View.vala',
+    'src/Model.vala',
+
     'src/HeaderBar/HeaderButton.vala',
     'src/HeaderBar/PopoverButton.vala',
     'src/HeaderBar/ProgressIndicator.vala',
     'src/HeaderBar/RestartButton.vala',
     'src/HeaderBar/AppPopover.vala',
-    'src/HeaderBar/PreferencesDialog.vala',
     'src/HeaderBar/PreferenceRow.vala',
+
+    'src/dialogs/PreferencesDialog.vala',
+
+    'src/ui/shortcuthelper.ui.vala',
+
+    'src/widgets/Cluebox.vala',
+    'src/widgets/Clue.vala',
+    'src/widgets/Cellgrid.vala',
+    'src/widgets/CellPattern.vala',
+
+    'src/objects/My2DCellArray.vala',
+    'src/objects/Region.vala',
+    'src/objects/Move.vala',
+
     'src/services/RandomPatternGenerator.vala',
     'src/services/RandomGameGenerator.vala',
     'src/services/ShortcutHelper.vala',
-    'src/ui/shortcuthelper.ui.vala',
-    'libcore/widgets/Cluebox.vala',
-    'libcore/widgets/Clue.vala',
-    'libcore/widgets/Cellgrid.vala',
-    'libcore/widgets/CellPattern.vala',
-    'libcore/utils.vala',
-    'libcore/Model.vala',
-    'libcore/My2DCellArray.vala',
-    'libcore/Region.vala',
-    'libcore/Solver.vala',
-    'libcore/Filereader.vala',
-    'libcore/Filewriter.vala',
-    'libcore/Move.vala',
-    'libcore/History.vala',
-    'libcore/Enums.vala',
-    'libcore/Structs.vala',
-    'libcore/Constants.vala',
+    'src/services/Solver.vala',
+    'src/services/Filereader.vala',
+    'src/services/Filewriter.vala',
+    'src/services/History.vala',
+
+    'src/misc/utils.vala',
+    'src/misc/Enums.vala',
+    'src/misc/Structs.vala',
+    'src/misc/Constants.vala',
     config_file,
     dependencies : gnonogram_deps,
     install: true
