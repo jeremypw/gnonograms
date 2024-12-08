@@ -28,7 +28,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         {ACTION_SAVE_AS, action_save_as},
         {ACTION_CHECK_ERRORS, action_check_errors},
         {ACTION_RESTART, action_restart},
-        {ACTION_SOLVE, action_solve},
+        {ACTION_COMPUTER_SOLVE, action_computer_solve},
         {ACTION_HINT, action_hint},
         {ACTION_OPTIONS, action_options},
         {ACTION_PREFERENCES, action_preferences},
@@ -120,7 +120,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         action_accelerators.set (ACTION_RESTART, "<Ctrl>R");
         action_accelerators.set (ACTION_HINT, "F9");
         action_accelerators.set (ACTION_HINT, "<Ctrl>H");
-        action_accelerators.set (ACTION_SOLVE, "<Alt>S");
+        action_accelerators.set (ACTION_COMPUTER_SOLVE, "<Alt>S");
         action_accelerators.set (ACTION_OPTIONS, "F10");
         action_accelerators.set (ACTION_OPTIONS, "Menu");
         action_accelerators.set (ACTION_PREFERENCES, "<Ctrl>P");
@@ -181,7 +181,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         );
         auto_solve_button = new HeaderButton (
             "computer-symbolic",
-            ACTION_PREFIX + ACTION_SOLVE,
+            ACTION_PREFIX + ACTION_COMPUTER_SOLVE,
             _("Solve by Computer")
         );
         generate_button = new HeaderButton (
@@ -618,7 +618,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         }
     }
 
-    private void action_solve () {
+    private void action_computer_solve () requires (controller.game_state == GameState.SETTING) {
         controller.computer_solve ();
     }
 

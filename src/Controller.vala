@@ -532,7 +532,6 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     public void computer_solve () {
-        game_state = GameState.SOLVING;
         start_solving.begin (true);
     }
 
@@ -600,17 +599,6 @@ public class Gnonograms.Controller : GLib.Object {
         }
 
         view.game_grade = diff;
-        if (solver.state.solved ()) {
-            game_state = GameState.SOLVING;
-            if (copy_to_solution) {
-                model.copy_to_solution_data (solver.grid);
-            }
-        }
-
-        if (copy_to_working) {
-            model.copy_to_working_data (solver.grid);
-        }
-
         view.end_working ();
         return state;
     }

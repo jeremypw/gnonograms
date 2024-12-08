@@ -30,7 +30,7 @@ namespace Gnonograms {
     public const string ACTION_SAVE_AS = "action-save-as";
     public const string ACTION_CHECK_ERRORS = "action-check-errors";
     public const string ACTION_RESTART = "action-restart";
-    public const string ACTION_SOLVE = "action-solve";
+    public const string ACTION_COMPUTER_SOLVE = "action-solve";
     public const string ACTION_HINT = "action-hint";
     public const string ACTION_OPTIONS = "action-options";
     public const string ACTION_OPTIONS_ACCEL = "";
