@@ -228,6 +228,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         };
         progress_stack.add_named (progress_indicator, "Progress");
         progress_stack.add_named (title_label, "Title");
+        progress_stack.add_named (new Gtk.Label (""), "None");
         progress_stack.set_visible_child_name ("Title");
 
         header_bar = new Gtk.HeaderBar () {
