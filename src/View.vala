@@ -182,7 +182,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         auto_solve_button = new HeaderButton (
             "computer-symbolic",
             ACTION_PREFIX + ACTION_COMPUTER_SOLVE,
-            _("Solve by Computer")
+            _("Check whether design is solvable")
         );
         generate_button = new HeaderButton (
             "list-add",
