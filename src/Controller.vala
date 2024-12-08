@@ -65,7 +65,10 @@ public class Gnonograms.Controller : GLib.Object {
             view.update_title ();
         });
         notify["rows"].connect (on_dimensions_changed);
-        notify["columns"].connect (on_dimensions_changed);
+        notify["columns"].connect (on_dimensions_changed);        
+        notify["game-state"].connect (() => {
+            app.game_state_changed (game_state);
+        });
 
         var data_home_folder_current = Path.build_path (
             Path.DIR_SEPARATOR_S,
