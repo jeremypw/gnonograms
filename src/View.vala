@@ -167,7 +167,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             _("Check for Errors")
         );
         restart_button = new RestartButton (
-            "view-refresh",
+            "view-refresh-symbolic",
             ACTION_PREFIX + ACTION_RESTART,
             _("Start again")
         ) {
@@ -175,7 +175,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             margin_start = 12,
         };
         hint_button = new HeaderButton (
-            "help-contents",
+            "help-contents-symbolic",
             ACTION_PREFIX + ACTION_HINT,
             _("Suggest next move")
         );
