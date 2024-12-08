@@ -7,6 +7,7 @@
 
 public class Gnonograms.Controller : GLib.Object {
     public signal void quit_app ();
+    // public signal void changed_dimensions (uint rows, uint cols);
 
     public Gtk.Window window { get { return (Gtk.Window)view;}}
     public GameState game_state { get; set; }
@@ -38,6 +39,7 @@ public class Gnonograms.Controller : GLib.Object {
     public string current_game_path { get; set; default = ""; }
     private string saved_games_folder;
     private string? temporary_game_path = null;
+    private Gnonograms.App app = (Gnonograms.App) (Application.get_default ());
 
     construct {
         game_name = _(UNTITLED_NAME);
@@ -59,12 +61,11 @@ public class Gnonograms.Controller : GLib.Object {
             }
         });
 
-        notify["columns"].connect (on_dimensions_changed);
-        notify["rows"].connect (on_dimensions_changed);
-
         notify["current_game_path"].connect (() => {
             view.update_title ();
         });
+        notify["rows"].connect (on_dimensions_changed);
+        notify["columns"].connect (on_dimensions_changed);
 
         var data_home_folder_current = Path.build_path (
             Path.DIR_SEPARATOR_S,
@@ -144,9 +145,7 @@ public class Gnonograms.Controller : GLib.Object {
     private void on_dimensions_changed () {
         solver = new Solver (dimensions);
         game_name = _(UNTITLED_NAME);
-        
-        model.on_dimensions_changed (rows, columns);
-        view.on_dimensions_changed (rows, columns);
+        app.dimensions_changed (rows, columns);
     }
 
     private void new_or_random_game () {

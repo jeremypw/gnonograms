@@ -39,8 +39,8 @@ public class Gnonograms.Model : GLib.Object {
 
     construct {
         make_data_arrays ();
-        // controller.notify["rows"].connect (on_changed_dimensions);
-        // controller.notify["columns"].connect (on_changed_dimensions);
+        var app = (Gnonograms.App) Application.get_default ();
+        app.dimensions_changed.connect (on_dimensions_changed);
         controller.notify["game-state"].connect (() => {
             changed ();
         });

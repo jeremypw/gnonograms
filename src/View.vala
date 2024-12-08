@@ -138,6 +138,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     }
 
     construct {
+        var app = (Gnonograms.App) Application.get_default ();
         title = _("Gnonograms");
         set_default_size (DEFAULT_WIDTH, DEFAULT_HEIGHT);
         var view_actions = new GLib.SimpleActionGroup ();
@@ -363,6 +364,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             update_title ();
         });
 
+        app.dimensions_changed.connect (on_dimensions_changed);
+
         // notify["readonly"].connect (() => {
         //     save_game_button.sensitive = readonly;
         // });
@@ -425,14 +428,14 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     }
 
     public void update_clues_from_solution () {
-        for (int r = 0; r < controller.dimensions.height; r++) {
+        for (int r = 0; r < controller.rows; r++) {
             row_clue_box.update_clue_text (
                 r,
                 model.get_label_text_from_solution (r, false)
             );
         }
 
-        for (int c = 0; c < controller.dimensions.width; c++) {
+        for (int c = 0; c < controller.columns; c++) {
             column_clue_box.update_clue_text (
                 c,
                 model.get_label_text_from_solution (c, true)

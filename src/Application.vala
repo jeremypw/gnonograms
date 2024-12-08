@@ -48,8 +48,13 @@ namespace Gnonograms {
     public GLib.Settings saved_state;
     public GLib.Settings settings;
 
+
+
     public class App : Gtk.Application {
     private Controller controller;
+
+    public signal void game_state_changed (GameState gs);
+    public signal void dimensions_changed (uint rows, uint cols);
 
     public App () {
         Object (

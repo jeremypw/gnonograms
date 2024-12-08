@@ -72,6 +72,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     }
 
     construct {
+        var app = ((Gnonograms.App)(Application.get_default ()));
         hexpand = true;
         vexpand = true;
         _current_cell = NULL_CELL;
@@ -91,9 +92,8 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             queue_draw ();
         });
 
-        view.controller.notify["game-state"].connect (() => {
-            on_game_state_changed ();
-        });
+        app.game_state_changed.connect (on_game_state_changed);
+        app.dimensions_changed.connect (on_dimensions_changed);
 
         view.model.changed.connect (() => {
             if (!dirty) {
@@ -104,8 +104,6 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
 
         settings.changed["filled-color"].connect (set_colors);
         settings.changed["empty-color"].connect (set_colors);
-        // view.controller.notify["rows"].connect (queue_allocate);
-        // view.controller.notify["columns"].connect (queue_allocate);
     }
 
     public void on_dimensions_changed (uint rows, uint cols) {
@@ -125,14 +123,19 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             colors[setting, (int) CellState.UNKNOWN].parse (Gnonograms.UNKNOWN_COLOR);
             colors[setting, (int) CellState.EMPTY].parse (settings.get_string ("empty-color"));
             colors[setting, (int) CellState.FILLED].parse (settings.get_string ("filled-color"));
-            on_game_state_changed ();
+            update_colors ();
             queue_draw ();
             return Source.REMOVE;
         });
     }
 
-    private void on_game_state_changed () {
-        var gs = view.controller.game_state;
+    private GameState gs;
+    private void on_game_state_changed (GameState gs) {
+        this.gs = gs;
+        update_colors ();
+    }
+    
+    private void update_colors () {
         unknown_color = colors[(int)gs, (int)CellState.UNKNOWN];
         fill_color = colors[(int)gs, (int)CellState.FILLED];
         empty_color = colors[(int)gs, (int)CellState.EMPTY];
