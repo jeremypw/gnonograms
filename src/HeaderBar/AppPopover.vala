@@ -20,6 +20,35 @@ public class Gnonograms.AppPopover : Gtk.Popover {
         };
         controller.bind_property ("game-name", title_entry, "text", BIDIRECTIONAL | SYNC_CREATE);
 
+        var grade_setting = new Gtk.DropDown.from_strings ( Difficulty.all_human ());
+        var grade_preference = new PreferenceRow (_("Degree of difficulty"), grade_setting);
+
+        var row_setting = new Gtk.SpinButton (
+            new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),
+            5.0,
+            0
+        ) {
+            snap_to_ticks = true,
+            orientation = Gtk.Orientation.HORIZONTAL,
+            width_chars = 3,
+        };
+
+        var row_preference = new PreferenceRow (_("Rows"), row_setting);
+
+        var column_setting = new Gtk.SpinButton (
+            new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),
+            5.0,
+            0
+        ) {
+            snap_to_ticks = true,
+            orientation = Gtk.Orientation.HORIZONTAL,
+            width_chars = 3
+        };
+
+        var column_preference = new PreferenceRow (_("Columns"), column_setting);
+        //TODO Add Clue help switch
+
+
         var load_game_button = new PopoverButton (_("Load"), ACTION_PREFIX + ACTION_OPEN);
         var save_game_button = new PopoverButton (_("Save"), ACTION_PREFIX + ACTION_SAVE);
         var save_as_game_button = new PopoverButton (_("Save to Different File"), ACTION_PREFIX + ACTION_SAVE_AS);
@@ -32,6 +61,9 @@ public class Gnonograms.AppPopover : Gtk.Popover {
             margin_end = 12,
         };
         settings_box.append (title_entry);
+        settings_box.append (grade_preference);
+        settings_box.append (row_preference);
+        settings_box.append (column_preference);
         settings_box.append (new Gtk.Separator (Gtk.Orientation.HORIZONTAL));
         settings_box.append (load_game_button);
         settings_box.append (save_game_button);
@@ -42,5 +74,13 @@ public class Gnonograms.AppPopover : Gtk.Popover {
         settings_box.append (about_button);
 
         child = settings_box;
+
+        settings.bind ("columns", column_setting, "value", DEFAULT);
+        settings.bind ("rows", row_setting, "value", DEFAULT);
+
+        grade_setting.selected = settings.get_enum ("grade");
+        grade_setting.notify["selected"].connect (() => {
+            settings.set_enum ("grade", (Difficulty)(grade_setting.selected));
+        });
     }
 }
