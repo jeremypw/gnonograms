@@ -5,6 +5,13 @@
  * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
 namespace Gnonograms {
+    public enum GameState {
+        SETTING,
+        SOLVING,
+        GENERATING,
+        UNDEFINED = 99;
+    }
+
     public const string ACTION_GROUP = "win";
     public const string ACTION_PREFIX = ACTION_GROUP + ".";
     public const string ACTION_UNDO = "action-undo";

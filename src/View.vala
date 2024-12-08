@@ -293,6 +293,27 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             }
         });
 
+        var button_controller = new Gtk.GestureClick ();
+        button_controller.set_button (0); // Listen to any button
+        main_grid.add_controller (button_controller);
+        button_controller.pressed.connect ((n_press, x, y) => {
+            var button = button_controller.get_current_button ();
+            var shift = (SHIFT_MASK in button_controller.get_current_event_state ());
+            var set_unknown = (n_press == 2 || button == Gdk.BUTTON_MIDDLE);
+            var set_empty = (button == Gdk.BUTTON_SECONDARY || button == Gdk.BUTTON_PRIMARY && shift);
+
+            if (set_unknown) { // Clear current cell
+                drawing_with_state = controller.is_solving ? CellState.UNKNOWN : CellState.EMPTY;
+            } else { // Paint current cell
+                drawing_with_state = set_empty ? CellState.EMPTY : CellState.FILLED;
+            }
+
+            make_move_at_cell ();
+        });
+        button_controller.released.connect ((n_press, x, y) => {
+            stop_painting ();
+        });
+
         toast_overlay = new Adw.ToastOverlay () {
             child = main_grid
         };
@@ -371,29 +392,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             row_clue_box.unhighlight_all ();
             column_clue_box.unhighlight_all ();
         });
-
-        cell_grid.start_drawing.connect ((button, state, double_click) => {
-            if (double_click || button == Gdk.BUTTON_MIDDLE) {
-                if (controller.game_state == SOLVING) {
-                    drawing_with_state = CellState.UNKNOWN;
-                } else {
-                    drawing_with_state = CellState.EMPTY;
-                }
-            } else {
-                var shift = (state & Gdk.ModifierType.SHIFT_MASK) > 0;
-                if (button == Gdk.BUTTON_SECONDARY ||
-                    button == Gdk.BUTTON_PRIMARY && shift) {
-
-                    drawing_with_state = CellState.EMPTY;
-                } else {
-                    drawing_with_state = CellState.FILLED;
-                }
-            }
-
-            make_move_at_cell ();
-        });
-
-        cell_grid.stop_drawing.connect (stop_painting);
 
         update_style ();
         settings.changed["follow-system-style"].connect (() => {

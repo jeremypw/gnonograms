@@ -51,13 +51,6 @@ namespace Gnonograms {
         }
     }
 
-    public enum GameState {
-        SETTING,
-        SOLVING,
-        GENERATING,
-        UNDEFINED = 99;
-    }
-
     public enum CellState {
         UNKNOWN,
         EMPTY,

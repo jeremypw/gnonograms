@@ -15,6 +15,11 @@ public class Gnonograms.Controller : GLib.Object {
             return {columns, rows};
         }
     }
+
+    public bool is_solving {
+        get { return game_state == SOLVING; }
+    }
+
     public uint rows { get; set;}
     public uint columns { get; set; }
 

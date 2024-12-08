@@ -5,8 +5,6 @@
  * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
 public class Gnonograms.CellGrid : Gtk.DrawingArea {
-    public signal void start_drawing (uint button, Gdk.ModifierType state, bool double_click);
-    public signal void stop_drawing ();
     public signal void leave ();
 
     public unowned View view { get; construct; }
@@ -85,19 +83,6 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         add_controller (motion_controller);
         motion_controller.motion.connect (on_pointer_moved);
         motion_controller.leave.connect (on_leave_notify);
-
-        var button_controller = new Gtk.GestureClick ();
-        button_controller.set_button (0); // Listen to any button
-        add_controller (button_controller);
-        button_controller.pressed.connect ((n_press, x, y) => {
-            start_drawing (
-                button_controller.get_current_button (),
-                button_controller.get_current_event_state (),
-                n_press > 1);
-        });
-        button_controller.released.connect ((n_press, x, y) => {
-            stop_drawing ();
-        });
 
         set_draw_func (draw_func);
 
