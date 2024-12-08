@@ -20,7 +20,7 @@ public class Gnonograms.Controller : GLib.Object {
         get { return game_state == SOLVING; }
     }
 
-    public uint rows { get; set;}
+    public uint rows { get; set; }
     public uint columns { get; set; }
 
     public Difficulty generator_grade { get; set; }
@@ -59,15 +59,8 @@ public class Gnonograms.Controller : GLib.Object {
             }
         });
 
-        notify["columns"].connect (() => {
-            solver = new Solver (dimensions);
-            game_name = _(UNTITLED_NAME);
-        });
-
-        notify["rows"].connect (() => {
-            solver = new Solver (dimensions);
-            game_name = _(UNTITLED_NAME);
-        });
+        notify["columns"].connect (on_dimensions_changed);
+        notify["rows"].connect (on_dimensions_changed);
 
         notify["current_game_path"].connect (() => {
             view.update_title ();
@@ -146,6 +139,14 @@ public class Gnonograms.Controller : GLib.Object {
                 new_game ();
             }
         });
+    }
+
+    private void on_dimensions_changed () {
+        solver = new Solver (dimensions);
+        game_name = _(UNTITLED_NAME);
+        
+        model.on_dimensions_changed (rows, columns);
+        view.on_dimensions_changed (rows, columns);
     }
 
     private void new_or_random_game () {

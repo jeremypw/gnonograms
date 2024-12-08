@@ -23,14 +23,11 @@ public class Gnonograms.Model : GLib.Object {
     private My2DCellArray solution_data { get; set; }
     private My2DCellArray working_data { get; set; }
 
-    private uint rows {
+    private uint rows = 5;
+    private uint cols = 5;
+    private Dimensions dimensions {
         get {
-            return controller.rows;
-        }
-    }
-    private uint cols {
-        get {
-            return controller.columns;
+            return { cols, rows };
         }
     }
 
@@ -42,21 +39,23 @@ public class Gnonograms.Model : GLib.Object {
 
     construct {
         make_data_arrays ();
-        controller.notify["rows"].connect (on_changed_dimensions);
-        controller.notify["columns"].connect (on_changed_dimensions);
+        // controller.notify["rows"].connect (on_changed_dimensions);
+        // controller.notify["columns"].connect (on_changed_dimensions);
         controller.notify["game-state"].connect (() => {
             changed ();
         });
     }
 
-    private void on_changed_dimensions () {
+    public void on_dimensions_changed (uint rows, uint cols) {
+        this.rows = rows;
+        this.cols = cols;
         make_data_arrays ();
-        changed ();
+        // changed ();
     }
 
     private void make_data_arrays () {
-        solution_data = new My2DCellArray (controller.dimensions, CellState.EMPTY);
-        working_data = new My2DCellArray (controller.dimensions, CellState.UNKNOWN);
+        solution_data = new My2DCellArray (dimensions, CellState.EMPTY);
+        working_data = new My2DCellArray (dimensions, CellState.UNKNOWN);
     }
 
     public int count_errors () {
@@ -243,13 +242,13 @@ public class Gnonograms.Model : GLib.Object {
     }
 
     public My2DCellArray copy_working_data () {
-        var grid = new My2DCellArray (controller.dimensions, CellState.UNKNOWN);
+        var grid = new My2DCellArray (dimensions, CellState.UNKNOWN);
         grid.copy (working_data);
         return grid;
     }
 
     public My2DCellArray copy_solution_data () {
-        var grid = new My2DCellArray (controller.dimensions, CellState.UNKNOWN);
+        var grid = new My2DCellArray (dimensions, CellState.UNKNOWN);
         grid.copy (solution_data);
         return grid;
     }

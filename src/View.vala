@@ -249,8 +249,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
         set_titlebar (header_bar);
 
-        row_clue_box = new ClueBox (this, false);
-        column_clue_box = new ClueBox (this, true);
+        row_clue_box = new ClueBox (false);
+        column_clue_box = new ClueBox (true);
         cell_grid = new CellGrid (this);
 
         cell_grid.bind_property ("cell-width", column_clue_box, "cell-size");
@@ -402,6 +402,12 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         settings.changed["prefer-dark-style"].connect (() => {
             update_style ();
         });
+    }
+
+    public void on_dimensions_changed (uint rows, uint cols) {
+        row_clue_box.on_dimensions_changed (rows, cols);
+        column_clue_box.on_dimensions_changed (rows, cols);
+        cell_grid.on_dimensions_changed (rows, cols);
     }
 
     public string[] get_clues (bool is_column) {

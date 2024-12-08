@@ -11,16 +11,14 @@ public class Gnonograms.ClueBox : Gtk.Widget {
 
     const int PIX_TO_PANGO_FONT = 1024 / 2;
 
-    public unowned View view { get; construct; }
     public bool holds_column_clues { get; construct; }
     public uint n_cells { get; set; default = 0; }// The number of cells each clue addresses, monitored by clues
     public double cell_size { get; set; }
     public Pango.FontDescription font_desc { get; set; }
 
     private Gee.ArrayList<Clue> clues;
-    public ClueBox (View _view, bool _holds_column_clues) {
+    public ClueBox (bool _holds_column_clues) {
         Object (
-            view: _view,
             holds_column_clues: _holds_column_clues
         );
     }
@@ -41,10 +39,10 @@ public class Gnonograms.ClueBox : Gtk.Widget {
 
         if (holds_column_clues) {
             hexpand = false;
-            view.controller.notify ["columns"].connect (add_remove_clues);
+            // view.controller.notify ["columns"].connect (add_remove_clues);
         } else {
             vexpand = false;
-            view.controller.notify ["rows"].connect (add_remove_clues);
+            // view.controller.notify ["rows"].connect (add_remove_clues);
         }
 
         notify["cell-size"].connect (update_size_request);
@@ -86,9 +84,9 @@ public class Gnonograms.ClueBox : Gtk.Widget {
             }
     }
 
-    private void add_remove_clues () {
-        var new_n_clues = holds_column_clues ? view.controller.columns : view.controller.rows;
-        var new_n_cells = holds_column_clues ? view.controller.rows : view.controller.columns;
+    public void on_dimensions_changed (uint rows, uint cols) {
+        var new_n_clues = holds_column_clues ? cols : rows;
+        var new_n_cells = holds_column_clues ? rows : cols;
 
         if (n_cells != new_n_cells) {
             n_cells = new_n_cells;

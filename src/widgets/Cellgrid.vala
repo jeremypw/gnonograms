@@ -47,7 +47,8 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     public double cell_height { get; private set; }/* Width and Height of cell including frame */
     private bool dirty = false; /* Whether a redraw is needed */
 
-
+    private uint rows = 5;
+    private uint cols = 5;
     private Gdk.RGBA grid_color;
     private Gdk.RGBA fill_color;
     private Gdk.RGBA empty_color;
@@ -103,8 +104,14 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
 
         settings.changed["filled-color"].connect (set_colors);
         settings.changed["empty-color"].connect (set_colors);
-        view.controller.notify["rows"].connect (queue_allocate);
-        view.controller.notify["columns"].connect (queue_allocate);
+        // view.controller.notify["rows"].connect (queue_allocate);
+        // view.controller.notify["columns"].connect (queue_allocate);
+    }
+
+    public void on_dimensions_changed (uint rows, uint cols) {
+        this.rows = rows;
+        this.cols = cols;
+        queue_allocate ();
     }
 
     public void set_colors () {
@@ -133,8 +140,8 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     }
 
     public override void size_allocate (int w, int h, int bl) {
-        var r = (double) view.controller.rows;
-        var c = (double) view.controller.columns;
+        var r = (double) rows;
+        var c = (double) cols;
         // Need to allow window to be shrunk and create bottom/end margins
         var dw = (double) w - c - 12;
         var dh = (double) h - r - 12;
@@ -213,8 +220,8 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         cr.set_antialias (Cairo.Antialias.NONE);
         cr.set_line_width (MINOR_GRID_LINE_WIDTH);
 
-        var r = view.controller.rows;
-        var c = view.controller.columns;
+        var r = rows;
+        var c = cols;
         var w = cell_width;
         var h = cell_height;
         // Draw minor grid lines
