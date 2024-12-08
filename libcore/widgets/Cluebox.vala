@@ -68,7 +68,7 @@ public class Gnonograms.ClueBox : Gtk.Widget {
 
                 var label = clue.label;
                 if (holds_column_clues) {
-                    label.width_request =  size + makeup;
+                    label.width_request = size + makeup;
                     box_size += label.width_request;
                 } else {
                     label.height_request = size + makeup;

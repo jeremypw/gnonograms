@@ -23,12 +23,12 @@ public class Gnonograms.Model : GLib.Object {
     private My2DCellArray solution_data { get; set; }
     private My2DCellArray working_data { get; set; }
 
-    private uint rows { 
+    private uint rows {
         get {
             return controller.rows;
         }
     }
-    private uint cols { 
+    private uint cols {
         get {
             return controller.columns;
         }
@@ -53,7 +53,7 @@ public class Gnonograms.Model : GLib.Object {
         make_data_arrays ();
         changed ();
     }
-    
+
     private void make_data_arrays () {
         solution_data = new My2DCellArray (controller.dimensions, CellState.EMPTY);
         working_data = new My2DCellArray (controller.dimensions, CellState.UNKNOWN);

@@ -1,5 +1,5 @@
 namespace Gnonograms {
-    const string shortcuthelper_ui = """
+    const string SHORTCUT_HELPER_UI = """
 <interface>
   <object class="GtkShortcutsWindow" id="shortcuts-window">
     <property name="modal">1</property>

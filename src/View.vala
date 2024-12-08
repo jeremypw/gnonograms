@@ -280,7 +280,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             } else if (keyval == paint_unknown_key) {
                 paint_unknown ();
             } else {
-                return false;;
+                return false;
             }
 
             return true;

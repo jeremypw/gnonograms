@@ -9,10 +9,10 @@
     private Gtk.ShortcutsWindow window;
 
     construct {
-        var builder = new Gtk.Builder.from_string (shortcuthelper_ui, -1);
+        var builder = new Gtk.Builder.from_string (SHORTCUT_HELPER_UI, -1);
         window = (Gtk.ShortcutsWindow) builder.get_object ("shortcuts-window");
     }
-    
+
     public void show_window () {
         window.present ();
     }

@@ -4,7 +4,7 @@
  *
  * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
- 
+
  public class ShortcutHelper : Object {
-     
+
  }

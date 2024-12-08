@@ -25,7 +25,7 @@ public class Gnonograms.PopoverButton : Gtk.Button {
             if (accels != null) {
                 child = new Granite.AccelLabel (text, accels[0]);
                 return;
-            } 
+            }
         }
 
         child = new Gtk.Label (text);
