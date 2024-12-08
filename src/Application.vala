@@ -21,9 +21,6 @@ namespace Gnonograms {
     public const string ACTION_OPEN = "action-open";
     public const string ACTION_SAVE = "action-save";
     public const string ACTION_SAVE_AS = "action-save-as";
-    public const string ACTION_PAINT_FILLED = "action-paint-filled";
-    public const string ACTION_PAINT_EMPTY = "action-paint-empty";
-    public const string ACTION_PAINT_UNKNOWN = "action-paint-unknown";
     public const string ACTION_CHECK_ERRORS = "action-check-errors";
     public const string ACTION_RESTART = "action-restart";
     public const string ACTION_SOLVE = "action-solve";

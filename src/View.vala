@@ -9,9 +9,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private const uint PROGRESS_DELAY_MSEC = 500;
     private const int DEFAULT_WIDTH = 900;
     private const int DEFAULT_HEIGHT = 700;
-    private const string PAINT_FILL_ACCEL = "f"; // Must be lower case
-    private const string PAINT_EMPTY_ACCEL = "e"; // Must be lower case
-    private const string PAINT_UNKNOWN_ACCEL = "x"; // Must be lower case
     private const uint DARK = Granite.Settings.ColorScheme.DARK;
 
     public static Gee.MultiMap<string, string> action_accelerators;
@@ -29,9 +26,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         {ACTION_OPEN, action_open},
         {ACTION_SAVE, action_save},
         {ACTION_SAVE_AS, action_save_as},
-        {ACTION_PAINT_FILLED, action_paint_filled},
-        {ACTION_PAINT_EMPTY, action_paint_empty},
-        {ACTION_PAINT_UNKNOWN, action_paint_unknown},
         {ACTION_CHECK_ERRORS, action_check_errors},
         {ACTION_RESTART, action_restart},
         {ACTION_SOLVE, action_solve},
@@ -83,6 +77,9 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     // private Gtk.Button auto_solve_button;
     private Gtk.Button restart_button;
     private uint drawing_with_key;
+    private uint paint_fill_key = Gdk.keyval_from_name ("f");
+    private uint paint_empty_key = Gdk.keyval_from_name ("e");
+    private uint paint_unknown_key = Gdk.keyval_from_name ("x");
 
     public View (Model _model, Controller controller) {
         Object (
@@ -118,9 +115,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         action_accelerators.set (ACTION_OPEN, "<Ctrl>O");
         action_accelerators.set (ACTION_SAVE, "<Ctrl>S");
         action_accelerators.set (ACTION_SAVE_AS, "<Ctrl><Shift>S");
-        action_accelerators.set (ACTION_PAINT_FILLED, PAINT_FILL_ACCEL);
-        action_accelerators.set (ACTION_PAINT_EMPTY, PAINT_EMPTY_ACCEL);
-        action_accelerators.set (ACTION_PAINT_UNKNOWN, PAINT_UNKNOWN_ACCEL);
         action_accelerators.set (ACTION_CHECK_ERRORS, "F7");
         action_accelerators.set (ACTION_RESTART, "F5");
         action_accelerators.set (ACTION_RESTART, "<Ctrl>R");
@@ -277,12 +271,26 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         var key_controller = new Gtk.EventControllerKey ();
         main_grid.add_controller (key_controller);
 
-        key_controller.key_released.connect ((keyval, keycode, state) => {
-            if (Gdk.keyval_to_lower (keyval) == drawing_with_key) {
-                stop_painting ();
+        key_controller.key_pressed.connect ((keyval, keycode, state) => {
+            warning ("key pressed");
+            if (keyval == paint_fill_key) {
+                paint_filled ();
+            } else if (keyval == paint_empty_key) {
+                paint_empty ();
+            } else if (keyval == paint_unknown_key) {
+                paint_unknown ();
+            } else {
+                return false;;
             }
 
-            return;
+            return true;
+        });
+
+        key_controller.key_released.connect ((keyval, keycode, state) => {
+            warning ("key released");
+            if (keyval == drawing_with_key) {
+                stop_painting ();
+            }
         });
 
         toast_overlay = new Adw.ToastOverlay () {
@@ -352,7 +360,9 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             highlight_labels (previous_cell, false);
             highlight_labels (current_cell, true);
 
-            if (current_cell != NULL_CELL && drawing_with_state != CellState.UNDEFINED) {
+            if (current_cell != NULL_CELL &&
+                drawing_with_state != CellState.UNDEFINED) {
+
                 make_move_at_cell ();
             }
         });
@@ -728,12 +738,15 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             return;
         }
 
-        Cell target = {current_cell.row + row_delta,
-                       current_cell.col + col_delta,
-                       CellState.UNDEFINED
-                      };
+        Cell target = {
+            current_cell.row + row_delta,
+            current_cell.col + col_delta,
+            CellState.UNDEFINED
+        };
 
-        if (target.row >= controller.dimensions.height || target.col >= controller.dimensions.width) {
+        if (target.row >= controller.dimensions.height ||
+            target.col >= controller.dimensions.width) {
+
             return;
         }
 
@@ -750,17 +763,18 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         controller.game_state = GameState.GENERATING;
     }
 
-    private void action_paint_filled () {
+    private void paint_filled () {
         paint_cell_state (CellState.FILLED);
-        drawing_with_key = Gdk.keyval_from_name (PAINT_FILL_ACCEL);
+        drawing_with_key = paint_fill_key;
     }
-    private void action_paint_empty () {
+    private void paint_empty () {
         paint_cell_state (CellState.EMPTY);
-        drawing_with_key = Gdk.keyval_from_name (PAINT_EMPTY_ACCEL);
+        drawing_with_key = paint_empty_key;
     }
-    private void action_paint_unknown () {
+
+    private void paint_unknown () {
         paint_cell_state (CellState.UNKNOWN);
-        drawing_with_key = Gdk.keyval_from_name (PAINT_UNKNOWN_ACCEL);
+        drawing_with_key = paint_unknown_key;
     }
     private void paint_cell_state (CellState cs) {
         if (cs == CellState.UNKNOWN && controller.game_state != GameState.SOLVING) {
