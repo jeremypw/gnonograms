@@ -9,7 +9,7 @@ public class Gnonograms.Filewriter : Object {
     public History? history { get; construct; }
     public Gtk.Window? parent { get; construct; }
     public Difficulty difficulty { get; set; default = Difficulty.UNDEFINED;}
-    public GameState game_state { get; set; default = GameState.UNDEFINED;}
+    public GameState game_state { get; set; }
     public My2DCellArray? solution { get; set; default = null;}
     public My2DCellArray? working { get; set; default = null;}
     public uint rows { get; construct; }
@@ -160,8 +160,6 @@ public class Gnonograms.Filewriter : Object {
                                      string? name = null) throws Error {
         if (working == null) {
             throw (new IOError.NOT_INITIALIZED ("No working grid to save"));
-        } else if (game_state == GameState.UNDEFINED) {
-            throw (new IOError.NOT_INITIALIZED ("No game state to save"));
         }
 
         yield write_game_file (save_dir_path, path, name );

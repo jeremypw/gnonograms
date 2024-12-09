@@ -145,7 +145,7 @@ namespace Gnonograms.Utils {
 
     public string block_string_from_cellstate_array (CellState[] cellstates) {
         StringBuilder sb = new StringBuilder ("");
-        CellState count_state = CellState.UNDEFINED;
+        CellState count_state = CellState.INVALID;
         int count = 0, blocks = 0;
         bool counting = false;
         foreach (var state in cellstates) {
@@ -156,16 +156,15 @@ namespace Gnonograms.Utils {
                         blocks++;
                     } else if (count_state == CellState.UNKNOWN) {
                         sb.append ("?" + BLOCKSEPARATOR);
-
                     }
 
                     counting = false;
-                    count_state = CellState.UNDEFINED;
+                    count_state = CellState.INVALID;
                     count = 0;
 
                     break;
                 case CellState.FILLED:
-                    if (count_state == CellState.UNDEFINED) {
+                    if (count_state == CellState.INVALID) {
                         count = 0;
                         counting = true;
                     } else if (count_state == CellState.UNKNOWN) {
@@ -178,7 +177,7 @@ namespace Gnonograms.Utils {
 
                     break;
                 case CellState.UNKNOWN:
-                    if (count_state == CellState.UNDEFINED) {
+                    if (count_state == CellState.INVALID) {
                         counting = true;
                     } else if (count_state == CellState.FILLED) {
                         sb.append (count.to_string () + BLOCKSEPARATOR);
@@ -199,7 +198,9 @@ namespace Gnonograms.Utils {
         } else if (count_state == CellState.UNKNOWN) {
             sb.append ("?" + BLOCKSEPARATOR);
             blocks++;
-        } if (blocks == 0) {
+        } 
+        
+        if (blocks == 0) {
             sb.append ("0");
         } else {
             sb.truncate (sb.len - BLOCKSEPARATOR.length); // remove trailing seperator
@@ -212,7 +213,7 @@ namespace Gnonograms.Utils {
         CellState[] cs = {};
         string[] blocks = remove_blank_lines (s.split_set (BLOCKSEPARATOR));
         foreach (var block in blocks) {
-            cs += (CellState)(int.parse (block)).clamp (0, CellState.UNDEFINED);
+            cs += (CellState)(int.parse (block)).clamp (0, CellState.INVALID);
         }
 
         return cs;

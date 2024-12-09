@@ -8,7 +8,7 @@ public class Gnonograms.Filereader : Object {
     public string err_msg = "";
 
     public File? game_file { get; set; default = null;}
-    public GameState state { get; private set; default = GameState.UNDEFINED;}
+    public GameState state { get; private set; }
 
     public int rows { get; private set; default = 0;}
     public int cols { get; private set; default = 0;}

@@ -51,13 +51,13 @@ namespace Gnonograms {
         }
     }
 
-    public enum CellState {
-        UNKNOWN,
-        EMPTY,
-        FILLED,
-        COMPLETED,
-        UNDEFINED;
-    }
+    // public enum CellState {
+    //     UNKNOWN,
+    //     EMPTY,
+    //     FILLED,
+    //     COMPLETED,
+    //     UNDEFINED;
+    // }
 
     public enum SolverState {
         ERROR = 0,

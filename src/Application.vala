@@ -9,7 +9,7 @@ namespace Gnonograms {
         SETTING,
         SOLVING,
         GENERATING,
-        UNDEFINED = 99;
+        LOAD_SAVE;
     }
 
     public const string ACTION_GROUP = "win";

@@ -26,44 +26,44 @@ public class Gnonograms.Block {
     }
 }
 
-public struct Gnonograms.Cell {
-    public uint row;
-    public uint col;
-    public CellState state;
+// public struct Gnonograms.Cell {
+//     public uint row;
+//     public uint col;
+//     public CellState state;
 
-    public bool same_coords (Cell c) {
-        return (this.row == c.row && this.col == c.col);
-    }
+//     public bool same_coords (Cell c) {
+//         return (this.row == c.row && this.col == c.col);
+//     }
 
-    public bool equal (Cell b) {
-        return (
-            this.row == b.row &&
-            this.col == b.col &&
-            this.state == b.state
-        );
+//     public bool equal (Cell b) {
+//         return (
+//             this.row == b.row &&
+//             this.col == b.col &&
+//             this.state == b.state
+//         );
 
-    }
+//     }
 
-    public Cell inverse () {
-        Cell c = {row, col, CellState.UNKNOWN };
+//     public Cell inverse () {
+//         Cell c = {row, col, CellState.UNKNOWN };
 
-        if (this.state == CellState.EMPTY) {
-            c.state = CellState.FILLED;
-        } else {
-            c.state = CellState.EMPTY;
-        }
+//         if (this.state == CellState.EMPTY) {
+//             c.state = CellState.FILLED;
+//         } else {
+//             c.state = CellState.EMPTY;
+//         }
 
-        return c;
-    }
+//         return c;
+//     }
 
-    public Cell clone () {
-        return { row, col, state };
-    }
+//     public Cell clone () {
+//         return { row, col, state };
+//     }
 
-    public string to_string () {
-        return "Row %u, Col %u, State %s".printf (row, col, state.to_string ());
-    }
-}
+//     public string to_string () {
+//         return "Row %u, Col %u, State %s".printf (row, col, state.to_string ());
+//     }
+// }
 
 public struct Gnonograms.Dimensions {
     uint width;

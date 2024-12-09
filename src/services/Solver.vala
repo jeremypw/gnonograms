@@ -268,7 +268,7 @@
                     var row = r.is_column ? i : r.index;
                     var col = r.is_column ? r.index : i;
                     Cell c = {row, col, r_state};
-                    moves.add (new Move (c, csa[i]));
+                    moves.add (new Move.from_cell (c, csa[i]));
                     changed = true;
                 }
             }
@@ -300,7 +300,7 @@
                             var row = r.is_column ? i : r.index;
                             var col = r.is_column ? r.index : i;
                             Cell c = {row, col, r_state};
-                            moves.add (new Move (c, csa[i]));
+                            moves.add (new Move.from_cell (c, csa[i]));
                             break;
                         }
                     }
@@ -373,19 +373,19 @@
         int empty = 0;
         int min_empty_cells = int.MAX;
         int changed_count = 0;
-        Cell best_guess = NULL_CELL;
+        Cell? best_guess = null;
         state = SolverState.UNDEFINED;
 
         while (state == SolverState.UNDEFINED) {
             changed_count++;
             if (!guesser.next_guess ()) {
                 state = SolverState.NO_SOLUTION;
-                if (best_guess.equal (NULL_CELL)) { // No improvement from last round
+                if (best_guess == null) { // No improvement from last round
                     break;
                 } else {
                     grid.set_data_from_cell (best_guess);
                     guesser = new Guesser (grid, false);
-                    best_guess = NULL_CELL;
+                    best_guess = null;
                     changed_count = 0;
                     if (!guesser.next_guess ()) {
                         warning ("No next guess");

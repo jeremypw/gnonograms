@@ -4,12 +4,70 @@
  *
  * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
+
+public enum Gnonograms.CellState {
+    UNKNOWN,
+    EMPTY,
+    FILLED,
+    COMPLETED,
+    INVALID
+}
+
+public struct Gnonograms.Cell {
+    public uint row;
+    public uint col;
+    public CellState state;
+
+    public bool same_coords (Cell c) {
+        return (this.row == c.row && this.col == c.col);
+    }
+
+    public bool equal (Cell? b) {
+        return (
+            b != null &&
+            this.row == b.row &&
+            this.col == b.col &&
+            this.state == b.state
+        );
+
+    }
+
+    public bool same_place (Cell? b) {
+        return (
+            b != null &&
+            this.row == b.row &&
+            this.col == b.col
+        );
+
+    }
+
+    public Cell inverse () {
+        Cell c = {row, col, CellState.UNKNOWN };
+
+        if (this.state == CellState.EMPTY) {
+            c.state = CellState.FILLED;
+        } else {
+            c.state = CellState.EMPTY;
+        }
+
+        return c;
+    }
+
+    public Cell clone () {
+        return { row, col, state };
+    }
+
+    public string to_string () {
+        return "Row %u, Col %u, State %s".printf (row, col, state.to_string ());
+    }
+}
+
 public class Gnonograms.CellGrid : Gtk.DrawingArea {
     public signal void leave ();
 
     public unowned View view { get; construct; }
-    public Cell current_cell { get; set; }
-    public Cell previous_cell { get; set; }
+    public Cell? current_cell { get; set; }
+    public Cell? previous_cell { get; set; }
     public bool frozen { get; set; }
     public bool draw_only { get; set; default = false;}
     /* Could have more options for cell pattern*/
@@ -75,7 +133,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         var app = ((Gnonograms.App)(Application.get_default ()));
         hexpand = true;
         vexpand = true;
-        _current_cell = NULL_CELL;
+        current_cell = null;
         colors = new Gdk.RGBA[2, 3];
         grid_color.parse (Gnonograms.GRID_COLOR);
         cell_pattern_type = CellPatternType.CELL;
@@ -177,13 +235,18 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         highlight_pattern = new CellPattern.highlight (cell_width, cell_height);
     }
 
-    private void draw_func (Gtk.DrawingArea drawing_area, Cairo.Context cr, int x, int y) {
+    private void draw_func (
+        Gtk.DrawingArea drawing_area, 
+        Cairo.Context cr, 
+        int x, 
+        int y
+    ) {
+    
         dirty = false;
-
         if (array != null) {
             /* Note, even tho' array holds CellStates, its iterator returns Cells */
-            foreach (Cell c in array) {
-                bool highlight = (c.row == current_cell.row && c.col == current_cell.col);
+            foreach (Cell? c in array) {
+                bool highlight = c.same_place (current_cell);
                 draw_cell (cr, c, highlight);
             }
         }
@@ -211,7 +274,11 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         /* Construct cell beneath pointer */
         Cell cell = {r, c, array.get_data_from_rc (r, c)};
         if (!cell.equal (current_cell)) {
-            previous_cell = current_cell.clone ();
+            if (current_cell == null) {
+                previous_cell = null;
+            } else {
+                previous_cell = current_cell.clone ();
+            }
             current_cell = cell.clone ();
         }
 
@@ -329,8 +396,8 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     }
 
     private void on_leave_notify () {
-        previous_cell = NULL_CELL;
-        current_cell = NULL_CELL;
+        previous_cell = null;
+        current_cell = null;
         leave ();
         return;
     }

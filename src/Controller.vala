@@ -51,8 +51,14 @@ public class Gnonograms.Controller : GLib.Object {
 #if WITH_DEBUGGING
         view.debug_request.connect (on_debug_request);
 #endif
+        app.game_state_changed.connect ((gs) => {
+            if (gs != game_state) {
+                game_state = gs;
+            }
+        });
+        
         notify["game-state"].connect (() => {
-            if (game_state != GameState.UNDEFINED) { /* Do not clear on save */
+            if (game_state != GameState.LOAD_SAVE) { /* Do not clear on save */
                 clear_history ();
             }
 
@@ -65,7 +71,7 @@ public class Gnonograms.Controller : GLib.Object {
             view.update_title ();
         });
         notify["rows"].connect (on_dimensions_changed);
-        notify["columns"].connect (on_dimensions_changed);        
+        notify["columns"].connect (on_dimensions_changed);
         notify["game-state"].connect (() => {
             app.game_state_changed (game_state);
         });
@@ -182,7 +188,8 @@ public class Gnonograms.Controller : GLib.Object {
 
     private void new_game () {
         clear ();
-        game_state = GameState.SETTING;
+        app.game_state_changed (SETTING);
+        // game_state = GameState.SETTING;
         game_name = _(UNTITLED_NAME);
     }
 
@@ -201,23 +208,25 @@ public class Gnonograms.Controller : GLib.Object {
         view.show_working (cancellable, (_("Generating")));
         generator.generate.begin ((obj, res) => {
             var success = generator.generate.end (res);
+            GameState new_game_state;
             if (success) {
-                    model.set_solution_from_array (generator.get_solution ());
-                    game_state = GameState.SOLVING;
-                    view.update_clues_from_solution ();
-                    view.game_grade = generator.solution_grade;
+                model.set_solution_from_array (generator.get_solution ());
+                new_game_state = GameState.SOLVING;
+                view.update_clues_from_solution ();
+                view.game_grade = generator.solution_grade;
+            } else {
+                clear ();
+                new_game_state = GameState.SETTING;
+                if (cancellable.is_cancelled ()) {
+                   view.send_notification (_("Game generation was cancelled"));
                 } else {
-                    clear ();
-                    game_state = GameState.SETTING;
-                    if (cancellable.is_cancelled ()) {
-                       view.send_notification (_("Game generation was cancelled"));
-                    } else {
-                        view.send_notification (_("Failed to generate game of required grade"));
-                    }
+                    view.send_notification (_("Failed to generate game of required grade"));
                 }
+            }
 
-                view.end_working ();
-                generator = null;
+            app.game_state_changed (new_game_state);
+            view.end_working ();
+            generator = null;
         });
     }
 
@@ -240,6 +249,7 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     private async bool restore_game () {
+    warning ("restore game");
         if (temporary_game_path != null) {
             var current_game_file = File.new_for_path (temporary_game_path);
             return yield load_game_async (current_game_file);
@@ -251,7 +261,7 @@ public class Gnonograms.Controller : GLib.Object {
     private async string? write_game (string? path, bool save_state = false) {
         Filewriter? file_writer = null;
         var gs = game_state;
-        game_state = GameState.UNDEFINED;
+        app.game_state_changed (LOAD_SAVE);
         file_writer = new Filewriter (
             window,
             dimensions,
@@ -259,11 +269,12 @@ public class Gnonograms.Controller : GLib.Object {
             view.get_clues (true),
             history,
             !model.solution_is_blank ()
-        );
+        ) {
+            difficulty = view.game_grade,
+            game_state = this.game_state,
+            working = model.copy_working_data ()
+        };
 
-        file_writer.difficulty = view.game_grade;
-        file_writer.game_state = gs;
-        file_writer.working = model.copy_working_data ();
         if (file_writer.save_solution) {
             file_writer.solution = model.copy_solution_data ();
         }
@@ -290,7 +301,7 @@ public class Gnonograms.Controller : GLib.Object {
 
             return null;
         } finally {
-            game_state = gs;
+            app.game_state_changed (gs);
         }
 
         return file_writer.game_path;
@@ -308,8 +319,7 @@ public class Gnonograms.Controller : GLib.Object {
     private async bool load_game_async (File? game) {
         Filereader? reader = null;
         var gs = game_state;
-
-        game_state = GameState.UNDEFINED;
+        app.game_state_changed (LOAD_SAVE);
         clear_history ();
         reader = new Filereader ();
         try {
@@ -337,15 +347,16 @@ public class Gnonograms.Controller : GLib.Object {
 
             return false;
         } finally {
-            game_state = gs;
+            app.game_state_changed (gs);
         }
 
         if (reader.valid && (yield load_common (reader))) {
-            if (reader.state != GameState.UNDEFINED) {
-                game_state = reader.state;
-            } else {
-                game_state = GameState.SOLVING;
-            }
+            // if (reader.state != GameState.UNDEFINED) {
+                // game_state = reader.state;
+                app.game_state_changed (reader.state);
+            // } else {
+            //     game_state = GameState.SOLVING;
+            // }
 
             history.from_string (reader.moves);
             if (history.can_go_back) {
@@ -531,6 +542,7 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     public void open_game () {
+    warning ("Controller: open game");
         load_game_async.begin (null); /* Filereader will request load location */
     }
 

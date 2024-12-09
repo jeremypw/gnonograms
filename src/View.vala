@@ -45,38 +45,41 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
     public Model model { get; construct; }
     public Controller controller { get; construct; }
-    public Cell current_cell { get; set; }
-    public Cell previous_cell { get; set; }
+    public SimpleActionGroup view_actions { get; construct; }
+
+    public Cell? current_cell { get; set; }
+    public Cell? previous_cell { get; set; }
     public Difficulty generator_grade { get; set; }
-    public Difficulty game_grade { get; set; default = Difficulty.UNDEFINED;}
+    public Difficulty game_grade { get; set; }
     public string game_name { get { return controller.game_name; } }
     public bool readonly { get; set; default = false;}
     public bool can_go_back { get; set; }
     public bool can_go_forward { get; set; }
     public bool restart_destructive { get; set; default = false;}
-    public SimpleActionGroup view_actions { get; construct; }
+
 
     private ClueBox row_clue_box;
     private ClueBox column_clue_box;
     private CellGrid cell_grid;
-    private ProgressIndicator progress_indicator;
+
     private Gtk.MenuButton menu_button;
-    private CellState drawing_with_state = UNDEFINED;
-    private Gtk.HeaderBar header_bar;
-    private Granite.ModeSwitch mode_switch;
+
+    private HeaderBarFactory headerbar_factory;
+    // private Granite.ModeSwitch mode_switch;
     private Gtk.Grid main_grid;
     private Adw.ToastOverlay toast_overlay;
-    private Gtk.Stack progress_stack;
-    private Gtk.Label title_label;
-    private Gtk.Button generate_button;
-    private Gtk.Button undo_button;
-    private Gtk.Button redo_button;
-    private Gtk.Button check_correct_button;
-    private Gtk.Button hint_button;
-    private AppPopover app_popover;
-    private Gtk.Button auto_solve_button;
-    private Gtk.Button restart_button;
-    private uint drawing_with_key;
+
+
+    // private Gtk.Button generate_button;
+    // private Gtk.Button undo_button;
+    // private Gtk.Button redo_button;
+    // private Gtk.Button check_correct_button;
+    // private Gtk.Button hint_button;
+    // private AppPopover app_popover;
+    // private Gtk.Button auto_solve_button;
+    // private Gtk.Button restart_button;
+    private uint drawing_with_key = 0;
+    private CellState drawing_with_state = INVALID;
     private uint paint_fill_key = Gdk.keyval_from_name ("f");
     private uint paint_empty_key = Gdk.keyval_from_name ("e");
     private uint paint_unknown_key = Gdk.keyval_from_name ("x");
@@ -152,103 +155,9 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             app.set_accels_for_action (ACTION_PREFIX + action, accels_array);
         }
 
-        undo_button = new HeaderButton (
-            "edit-undo-symbolic",
-            ACTION_PREFIX + ACTION_UNDO,
-            _("Undo Last Move")
-        );
-        redo_button = new HeaderButton (
-            "edit-redo-symbolic",
-            ACTION_PREFIX + ACTION_REDO,
-            _("Redo Last Move")
-        );
-        check_correct_button = new HeaderButton (
-            "media-seek-backward-symbolic",
-            ACTION_PREFIX + ACTION_CHECK_ERRORS,
-            _("Check for Errors")
-        );
-        restart_button = new RestartButton (
-            "view-refresh-symbolic",
-            ACTION_PREFIX + ACTION_RESTART,
-            _("Start again")
-        ) {
-            margin_end = 12,
-            margin_start = 12,
-        };
-        hint_button = new HeaderButton (
-            "help-contents-symbolic",
-            ACTION_PREFIX + ACTION_HINT,
-            _("Suggest next move")
-        );
-        auto_solve_button = new HeaderButton (
-            "computer-symbolic",
-            ACTION_PREFIX + ACTION_COMPUTER_SOLVE,
-            _("Check whether design is solvable")
-        );
-        generate_button = new HeaderButton (
-            "list-add",
-            ACTION_PREFIX + ACTION_GENERATING_MODE,
-            _("Generate New Puzzle")
-        );
+        headerbar_factory = new HeaderBarFactory (this);
 
-        app_popover = new AppPopover (controller);
-
-        menu_button = new Gtk.MenuButton () {
-            tooltip_markup = Granite.markup_accel_tooltip (
-                app.get_accels_for_action (
-                    ACTION_PREFIX + ACTION_OPTIONS),
-                    _("Options")
-            ),
-            icon_name = "open-menu-symbolic",
-            valign = Gtk.Align.CENTER,
-            popover = app_popover
-        };
-
-        // Unable to set markup on Granite.ModeSwitch so fake a Granite accelerator tooltip for now.
-        mode_switch = new Granite.ModeSwitch.from_icon_name (
-            "edit-symbolic",
-            "system-run-symbolic"
-        ) {
-            margin_end = 12,
-            margin_start = 12,
-            valign = Gtk.Align.CENTER,
-            primary_icon_tooltip_text = "%s\n%s".printf (_("Edit a Game"), "Ctrl + 1"),
-            secondary_icon_tooltip_text = "%s\n%s".printf (_("Manually Solve"), "Ctrl + 2")
-        };
-
-        progress_indicator = new ProgressIndicator ();
-
-        title_label = new Gtk.Label ("Gnonograms") {
-            use_markup = true,
-            xalign = 0.5f
-        };
-        title_label.add_css_class (Granite.STYLE_CLASS_H3_LABEL);
-
-        progress_stack = new Gtk.Stack () {
-            halign = Gtk.Align.CENTER,
-        };
-        progress_stack.add_named (progress_indicator, "Progress");
-        progress_stack.add_named (title_label, "Title");
-        progress_stack.add_named (new Gtk.Label (""), "None");
-        progress_stack.set_visible_child_name ("Title");
-
-        header_bar = new Gtk.HeaderBar () {
-            show_title_buttons = true,
-            title_widget = progress_stack
-        };
-        header_bar.add_css_class ("gnonograms-header");
-        header_bar.pack_start (generate_button);
-        header_bar.pack_start (hint_button);
-        header_bar.pack_start (restart_button);
-        header_bar.pack_start (undo_button);
-        header_bar.pack_start (redo_button);
-        header_bar.pack_start (check_correct_button);
-        header_bar.pack_end (menu_button);
-        header_bar.pack_end (mode_switch);
-        header_bar.pack_end (auto_solve_button);
-
-
-        set_titlebar (header_bar);
+        set_titlebar (headerbar_factory.get_headerbar ());
 
         row_clue_box = new ClueBox (false);
         column_clue_box = new ClueBox (true);
@@ -324,11 +233,14 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         child = toast_overlay;
 
         var flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
-        bind_property (
-            "restart-destructive",
-            restart_button, "restart-destructive",
-            BindingFlags.SYNC_CREATE
-        );
+        // bind_property (
+        //     "restart-destructive",
+        //     restart_button, "restart-destructive",
+        //     BindingFlags.SYNC_CREATE
+        // );
+        current_cell = Cell () { row = 0, col = 0, state = UNKNOWN };
+        previous_cell = current_cell.clone ();
+
         bind_property (
             "current-cell",
             cell_grid, "current-cell",
@@ -340,54 +252,31 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             BindingFlags.BIDIRECTIONAL
         );
 
-        mode_switch.notify["active"].connect (() => {
-            controller.game_state = mode_switch.active ? GameState.SOLVING : GameState.SETTING;
-        });
-
         controller.notify["game-state"].connect (() => {
-            if (controller.game_state != GameState.UNDEFINED) {
-                update_all_labels_completeness ();
-            }
-
-            // Avoid updating header bar while generating otherwise generation will be cancelled.
-            // Headerbar will update when generation finished.
-            if (controller.game_state != GameState.GENERATING) {
+            update_all_labels_completeness ();
+            // // Avoid updating header bar while generating otherwise generation will be cancelled.
+            // // Headerbar will update when generation finished.
+            // if (controller.game_state != GameState.GENERATING) {
                 update_header_bar ();
-            }
+            // }
         });
 
-        controller.notify["game-name"].connect (() => {
-            update_title ();
-        });
+        controller.notify["game-name"].connect (update_title);
 
-        notify["game-grade"].connect (() => {
-            update_title ();
-        });
 
         app.dimensions_changed.connect (on_dimensions_changed);
 
         // notify["readonly"].connect (() => {
         //     save_game_button.sensitive = readonly;
         // });
-
-        notify["can-go-back"].connect (() => {
-            check_correct_button.sensitive = can_go_back &&
-                                             controller.game_state == GameState.SOLVING;
-            undo_button.sensitive = can_go_back;
-            /* May be destructive even if no history (e.g. after automatic solve) */
-            restart_destructive |= can_go_back;
-        });
-
-        notify["can-go-forward"].connect (() => {
-            redo_button.sensitive = can_go_forward;
-        });
-
+        notify["game-grade"].connect (update_title);
+        notify["can-go-back"].connect (on_can_go_changed);
+        notify["can-go-forward"].connect (on_can_go_changed);
         notify["current-cell"].connect (() => {
             highlight_labels (previous_cell, false);
             highlight_labels (current_cell, true);
-
-            if (current_cell != NULL_CELL &&
-                drawing_with_state != CellState.UNDEFINED) {
+            if (current_cell != null &&
+                drawing_with_state != CellState.INVALID) {
 
                 make_move_at_cell ();
             }
@@ -445,10 +334,10 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         update_all_labels_completeness ();
     }
 
-    public void make_move (Move m) {
-        if (!m.is_null ()) {
-            update_current_and_model (m.cell.state, m.cell);
-        }
+    public void make_move (Move m) requires (m.is_valid ()) {
+        // if (!m.is_null ()) {
+        update_current_and_model (m.cell.state, m.cell);
+        // }
     }
 
     public void send_notification (string text) {
@@ -457,75 +346,75 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
     public void show_working (Cancellable cancellable, string text = "") {
         cell_grid.frozen = true; // Do not show model updates
-        progress_indicator.text = text;
         schedule_show_progress (cancellable);
+        headerbar_factory.show_working (text);
     }
 
     public void end_working () {
         cell_grid.frozen = false; // Show model updates again
-
         if (progress_timeout_id > 0) {
             Source.remove (progress_timeout_id);
             progress_timeout_id = 0;
         }
 
-        if (game_grade != Difficulty.UNDEFINED) {
-            progress_stack.set_visible_child_name ("Title");
-        } else {
-            progress_stack.set_visible_child_name ("None");
-        }
+        headerbar_factory.hide_progress (game_grade);
 
         update_all_labels_completeness ();
         update_header_bar ();
     }
 
     private void update_header_bar () {
-        mode_switch.active = controller.game_state != GameState.SETTING;
+        var gs = controller.game_state;
+        restart_destructive = !model.is_blank (gs);
+        headerbar_factory.update (gs);
+        // mode_switch.active = controller.game_state != GameState.SETTING;
 
-        switch (controller.game_state) {
-            case GameState.SETTING:
-                set_buttons_sensitive (true);
-                break;
-            case GameState.SOLVING:
-                set_buttons_sensitive (true);
+        // switch (controller.game_state) {
+        //     case GameState.SETTING:
+        //         set_buttons_sensitive (true);
+        //         break;
+        //     case GameState.SOLVING:
+        //         set_buttons_sensitive (true);
 
-                break;
-            case GameState.GENERATING:
-                set_buttons_sensitive (false);
+        //         break;
+        //     case GameState.GENERATING:
+        //         set_buttons_sensitive (false);
 
-                break;
-            default:
-                break;
-        }
+        //         break;
+        //     default:
+        //         break;
+        // }
     }
 
     public void update_title () {
-        title_label.label = game_name;
-        title_label.tooltip_text = controller.current_game_path;
-        if (game_grade != Difficulty.UNDEFINED) {
-            progress_stack.set_visible_child_name ("Title");
-        } else {
-            progress_stack.set_visible_child_name ("None");
-        }
+        headerbar_factory.update_title (game_name, controller.current_game_path, game_grade);
     }
 
-    private void set_buttons_sensitive (bool sensitive) {
-        generate_button.sensitive = controller.game_state != GameState.GENERATING;
-        mode_switch.sensitive = sensitive;
-        restart_destructive = sensitive && !model.is_blank (controller.game_state);
-        undo_button.sensitive = sensitive && can_go_back;
-        redo_button.sensitive = sensitive && can_go_forward;
-        check_correct_button.sensitive =
-            sensitive &&
-            controller.game_state == GameState.SOLVING &&
-            can_go_back;
-
-        hint_button.sensitive = sensitive && controller.game_state == GameState.SOLVING;
-        auto_solve_button.sensitive = controller.game_state == GameState.SETTING;
+    private void on_can_go_changed () {
+        headerbar_factory.on_can_go_changed (can_go_forward, can_go_back);
     }
 
-    private void highlight_labels (Cell c, bool is_highlight) {
+    // private void set_buttons_sensitive (bool sensitive) {
+        // generate_button.sensitive = controller.game_state != GameState.GENERATING;
+        // mode_switch.sensitive = sensitive;
+        // restart_destructive = sensitive && !model.is_blank (controller.game_state);
+        // undo_button.sensitive = sensitive && can_go_back;
+        // redo_button.sensitive = sensitive && can_go_forward;
+        // check_correct_button.sensitive =
+        //     sensitive &&
+        //     controller.game_state == GameState.SOLVING &&
+        //     can_go_back;
+
+        // hint_button.sensitive = sensitive && controller.game_state == GameState.SOLVING;
+        // auto_solve_button.sensitive = controller.game_state == GameState.SETTING;
+    // }
+
+    private void highlight_labels (Cell? c, bool is_highlight) {
         /* If c is NULL_CELL then will unhighlight all labels */
+        if (c == null) {
+            return;
+        }
+
         row_clue_box.highlight (c.row, is_highlight);
         column_clue_box.highlight (c.col, is_highlight);
     }
@@ -554,12 +443,12 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
     private void make_move_at_cell (
         CellState state = drawing_with_state,
-        Cell target = current_cell
-    ) {
-        if (target == NULL_CELL) {
-            return;
-        }
-
+        Cell? target = current_cell
+    ) requires (target != null) {
+        // if (target == NULL_CELL) {
+        //     return;
+        // }
+warning ("make move at cell");
         var prev_state = model.get_data_for_cell (target);
         var cell = update_current_and_model (state, target);
 
@@ -606,8 +495,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             Priority.HIGH_IDLE,
             PROGRESS_DELAY_MSEC,
             () => {
-                progress_indicator.cancellable = cancellable;
-                progress_stack.set_visible_child_name ("Progress");
+                headerbar_factory.show_progress (cancellable);
                 progress_timeout_id = 0;
                 return false;
             }
@@ -615,7 +503,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     }
 
     private void stop_painting () {
-        drawing_with_state = CellState.UNDEFINED;
+        drawing_with_state = CellState.INVALID;
         drawing_with_key = 0;
     }
 
@@ -640,7 +528,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     }
 
     private void action_preferences () {
-        app_popover.popdown ();
+        headerbar_factory.popdown_menus ();
         var dialog = new PreferencesDialog () {
             transient_for = this,
             title = _("Preferences")
@@ -742,19 +630,19 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         move_cursor (0, 1);
     }
     private void move_cursor (int row_delta, int col_delta) {
-        if (current_cell == NULL_CELL) {
-            update_current_cell ({0, 0, CellState.UNDEFINED});
+        if (current_cell == null) {
+            update_current_cell ({ 0, 0, CellState.INVALID });
             return;
         }
 
-        Cell target = {
-            current_cell.row + row_delta,
-            current_cell.col + col_delta,
-            CellState.UNDEFINED
+        var target = Cell () {
+            row = current_cell.row + row_delta,
+            col = current_cell.col + col_delta,
+            state = CellState.INVALID
         };
 
-        if (target.row >= controller.dimensions.height ||
-            target.col >= controller.dimensions.width) {
+        if (target.row >= controller.rows ||
+            target.col >= controller.columns) {
 
             return;
         }
