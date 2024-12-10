@@ -97,7 +97,14 @@ public class Gnonograms.HeaderBarFactory : Object {
         };
 
         mode_switch.notify["active"].connect (() => {
-            app.game_state_changed (mode_switch.active ? GameState.SOLVING : GameState.SETTING);
+            if (mode_switch.active) {
+                warning ("solving");
+                mode_switch.activate_action (ACTION_PREFIX + ACTION_SOLVING_MODE, null);
+            } else {
+            warning ("setting");
+                mode_switch.activate_action (ACTION_PREFIX + ACTION_SETTING_MODE, null);
+            }
+            // app.game_state_changed (mode_switch.active ? GameState.SOLVING : GameState.SETTING);
             // controller.game_state = mode_switch.active ? GameState.SOLVING : GameState.SETTING;
         });
         
@@ -145,7 +152,7 @@ public class Gnonograms.HeaderBarFactory : Object {
     }
 
     public void on_game_state_changed (GameState gs) {
-warning ("headerbar update");
+// warning ("headerbar update");
         if (gs == GENERATING) {
             generate_button.sensitive = false;
             return;
@@ -178,7 +185,7 @@ warning ("headerbar update");
     }
     
     public void on_can_go_changed (bool forward, bool back) {
-    warning ("Headbar_factory: on can go changed");
+    // warning ("Headbar_factory: on can go changed");
         check_correct_button.sensitive = back;
         undo_button.sensitive = back;
         redo_button.sensitive = forward;

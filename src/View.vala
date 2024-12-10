@@ -251,14 +251,15 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             BindingFlags.BIDIRECTIONAL
         );
 
-        controller.notify["game-state"].connect (() => {
-            var gs = controller.game_state;
+        app.game_state_changed.connect ((gs) => {
+        // controller.notify["game-state"].connect (() => {
             update_all_labels_completeness ();
             // // Avoid updating header bar while generating otherwise generation will be cancelled.
             // // Headerbar will update when generation finished.
             // if (controller.game_state != GameState.GENERATING) {
             restart_destructive = !model.is_blank (gs);
             headerbar_factory.on_game_state_changed (gs);
+
             // update_header_bar (gs);
             // }
         });
@@ -394,7 +395,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     }
 
     public void on_can_go_changed (bool forward, bool back) {
-        warning ("on can go changed");
+        // warning ("on can go changed");
         headerbar_factory.on_can_go_changed (forward, back);
     }
 
@@ -655,13 +656,15 @@ warning ("make move at cell");
     }
 
     private void action_setting_mode () {
-        controller.game_state = GameState.SETTING;
+        controller.change_mode (SETTING);
     }
     private void action_solving_mode () {
-        controller.game_state = GameState.SOLVING;
+        // controller.game_state = GameState.SOLVING;
+        controller.change_mode (SOLVING);
     }
     private void action_generating_mode () {
-        controller.game_state = GameState.GENERATING;
+        // controller.game_state = GameState.GENERATING;
+        controller.change_mode (GENERATING);
     }
 
     private void paint_filled () {

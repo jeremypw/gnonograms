@@ -10,7 +10,7 @@ public class Gnonograms.Controller : GLib.Object {
     // public signal void changed_dimensions (uint rows, uint cols);
 
     public Gtk.Window window { get { return (Gtk.Window)view;}}
-    public GameState game_state { get; set; }
+    public GameState game_state { get; private set; }
     public Dimensions dimensions {
         get {
             return {columns, rows};
@@ -36,13 +36,13 @@ public class Gnonograms.Controller : GLib.Object {
     private Solver? solver;
     private SimpleRandomGameGenerator? generator;
     private Gnonograms.History history;
-    public bool can_go_back { 
+    public bool can_go_back {
         get {
             return history.can_go_back;
         }
     }
       // private set; }
-    public bool can_go_forward { 
+    public bool can_go_forward {
         get {
             return history.can_go_forward;
         }
@@ -63,20 +63,21 @@ public class Gnonograms.Controller : GLib.Object {
 #if WITH_DEBUGGING
         view.debug_request.connect (on_debug_request);
 #endif
-        app.game_state_changed.connect ((gs) => {
-            if (gs != game_state) {
-                game_state = gs;
-            }
-        });
-        
-        notify["game-state"].connect (() => {
-            if (game_state != GameState.LOAD_SAVE) { /* Do not clear on save */
-                clear_history ();
-            }
+        // app.game_state_changed.connect ((gs) => {
+        //     if (gs != game_state) {
+        //         game_state = gs;
+        //     }
+        // });
 
-            if (game_state == GameState.GENERATING) {
-                on_new_random_request ();
-            }
+        notify["game-state"].connect (() => {
+            warning ("notify gamestate - now %s", game_state.to_string ());
+            // if (game_state != GameState.LOAD_SAVE) { /* Do not clear on save */
+            //     clear_history ();
+            // }
+
+            // if (game_state == GameState.GENERATING) {
+            //     on_new_random_request ();
+            // }
         });
 
         notify["current_game_path"].connect (() => {
