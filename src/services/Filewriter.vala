@@ -23,7 +23,6 @@ public class Gnonograms.Filewriter : Object {
     public string license { get; set; default = "";}
     public bool is_readonly { get; set; default = true;}
 
-
     private FileStream? stream;
 
     public Filewriter (Gtk.Window? parent,
@@ -55,7 +54,6 @@ public class Gnonograms.Filewriter : Object {
         string? path = null,
         string? _name = null
     ) throws Error {
-    warning ("writer write game");
         if (_name != null) {
             name = _name;
         } else {
@@ -97,17 +95,13 @@ public class Gnonograms.Filewriter : Object {
             throw new IOError.CANCELLED ("File exists");
         }
 
-warning ("game path %s", game_path);
         /* @game_path is local path, not a uri */
         stream = FileStream.open (game_path, "w");
-warning ("opened stream");
         if (stream == null) {
-        warning ("stream is null");
             throw new IOError.FAILED ("Could not open filestream to %s".printf (game_path));
         }
 
         if (name == null || name.length == 0) {
-        warning ("No name");
             throw new IOError.NOT_INITIALIZED ("No name to save");
         }
 
@@ -123,7 +117,6 @@ warning ("opened stream");
         }
 
         if (rows == 0 || cols == 0) {
-        warning ("no dimensions");
             throw new IOError.NOT_INITIALIZED ("No dimensions to save");
         }
 
@@ -132,12 +125,10 @@ warning ("opened stream");
         stream.printf ("%u\n", cols);
 
         if (row_clues.length == 0 || col_clues.length == 0) {
-        warning ("no clues");
             throw new IOError.NOT_INITIALIZED ("No clues to save");
         }
 
         if (row_clues.length != rows || col_clues.length != cols) {
-        warning ("mismatch");
             throw new IOError.NOT_INITIALIZED ("Clues do not match dimensions");
         }
 
@@ -151,11 +142,8 @@ warning ("opened stream");
             stream.printf ("%s\n", s);
         }
 
-warning ("flush");
         stream.flush ();
 
-warning ("solution is %s", solution != null ? "NOT null" : "null");
-warning ("save_solution is %s", save_solution.to_string ());
         if (solution != null && save_solution) {
             stream.printf ("[Solution grid]\n");
             stream.printf ("%s", solution.to_string ());
@@ -163,7 +151,6 @@ warning ("save_solution is %s", save_solution.to_string ());
 
         stream.printf ("[Locked]\n");
         stream.printf (is_readonly.to_string () + "\n");
-warning ("End of write game file");
     }
 
     /*** Writes complete information to reload game state ***/
@@ -173,17 +160,15 @@ warning ("End of write game file");
         string? name = null
     ) throws Error {
         if (working == null) {
-        warning ("No working grid");
             throw (new IOError.NOT_INITIALIZED ("No working grid to save"));
         }
-warning ("write position ");
+
         yield write_game_file (save_dir_path, path, name );
-warning ("after write game file");
+
         stream.printf ("[Working grid]\n");
         stream.printf (working.to_string ());
         stream.printf ("[State]\n");
         stream.printf (state.to_string () + "\n");
-warning ("write state %s", state.to_string ());
         if (name != _(UNTITLED_NAME)) {
             stream.printf ("[Original path]\n");
             stream.printf (game_path.to_string () + "\n");
@@ -195,6 +180,5 @@ warning ("write state %s", state.to_string ());
         }
 
         stream.flush ();
-warning ("end of write position");
     }
 }

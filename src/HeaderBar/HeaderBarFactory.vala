@@ -22,7 +22,6 @@ public class Gnonograms.HeaderBarFactory : Object {
     private AppPopover app_popover;
     private Gtk.Button auto_solve_button;
     private Gtk.Button restart_button;
-    // private App  app = (App)(Application.get_default ());
 
     public HeaderBarFactory (Gnonograms.View view) {
         Object (
@@ -99,16 +98,12 @@ public class Gnonograms.HeaderBarFactory : Object {
 
         mode_switch.notify["active"].connect (() => {
             if (mode_switch.active) {
-                warning ("solving");
                 mode_switch.activate_action (ACTION_PREFIX + ACTION_SOLVING_MODE, null);
             } else {
-            warning ("setting");
                 mode_switch.activate_action (ACTION_PREFIX + ACTION_SETTING_MODE, null);
             }
-            // app.game_state_changed (mode_switch.active ? GameState.SOLVING : GameState.SETTING);
-            // controller.game_state = mode_switch.active ? GameState.SOLVING : GameState.SETTING;
         });
-        
+
         progress_indicator = new ProgressIndicator ();
 
         title_label = new Gtk.Label ("Gnonograms") {
@@ -153,7 +148,6 @@ public class Gnonograms.HeaderBarFactory : Object {
     }
 
     public void on_game_state_changed (GameState gs) {
-warning ("headerbar game state changed to %s", gs.to_string ());
         if (gs == GENERATING) {
             generate_button.sensitive = false;
             return;
@@ -168,14 +162,6 @@ warning ("headerbar game state changed to %s", gs.to_string ());
 
         mode_switch.active = !is_setting;
         mode_switch.sensitive = sensitive;
-        // restart_button.
-        // undo_button.sensitive = sensitive && view.can_go_back;
-        // redo_button.sensitive = sensitive && view.can_go_forward;
-        // check_correct_button.sensitive = (
-        //     sensitive &&
-        //     gs == GameState.SOLVING &&
-        //     view.can_go_back
-        // );
 
         hint_button.sensitive = sensitive && is_solving;
         auto_solve_button.sensitive = is_setting;
@@ -184,26 +170,13 @@ warning ("headerbar game state changed to %s", gs.to_string ());
     public void popdown_menus () {
         app_popover.popdown ();
     }
-    
+
     public void on_can_go_changed (bool forward, bool back) {
-    // warning ("Headbar_factory: on can go changed");
         check_correct_button.sensitive = back;
         undo_button.sensitive = back;
         redo_button.sensitive = forward;
-        
-// -        notify["can-go-back"].connect (() => {
-// -            check_correct_button.sensitive = can_go_back &&
-// -                                             controller.game_state == GameState.SOLVING;
-// -            undo_button.sensitive = can_go_back;
-// -            /* May be destructive even if no history (e.g. after automatic solve) */
-// -            restart_destructive |= can_go_back;
-// -        });
-// -
-// -        notify["can-go-forward"].connect (() => {
-// -            redo_button.sensitive = can_go_forward;
-// -        });
     }
-    
+
     public void update_title (string name, string path, Difficulty grade) {
         title_label.label = name;
         title_label.tooltip_text = path;
@@ -213,11 +186,11 @@ warning ("headerbar game state changed to %s", gs.to_string ());
             progress_stack.set_visible_child_name ("None");
         }
     }
-    
+
     public void show_working (string text) {
         progress_indicator.text = text;
     }
-    
+
     public void hide_progress (Difficulty game_grade) {
         if (game_grade != Difficulty.UNDEFINED) {
             progress_stack.set_visible_child_name ("Title");
@@ -225,7 +198,7 @@ warning ("headerbar game state changed to %s", gs.to_string ());
             progress_stack.set_visible_child_name ("None");
         }
     }
-    
+
     public void show_progress (Cancellable? cancellable) {
         progress_indicator.cancellable = cancellable;
         progress_stack.set_visible_child_name ("Progress");

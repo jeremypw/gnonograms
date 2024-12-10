@@ -16,8 +16,6 @@ namespace Gnonograms {
     public const string ACTION_PREFIX = ACTION_GROUP + ".";
     public const string ACTION_UNDO = "action-undo";
     public const string ACTION_REDO = "action-redo";
-    // public const string ACTION_ZOOM_IN = "action-zoom-in";
-    // public const string ACTION_ZOOM_OUT = "action-zoom-out";
     public const string ACTION_CURSOR_UP = "action-cursor_up";
     public const string ACTION_CURSOR_DOWN = "action-cursor_down";
     public const string ACTION_CURSOR_LEFT = "action-cursor_left";
@@ -48,15 +46,8 @@ namespace Gnonograms {
     public GLib.Settings saved_state;
     public GLib.Settings settings;
 
-
-
     public class App : Gtk.Application {
-    // public GameState game_state { get; private set; default = LOAD_SAVE; }
-
     private Controller controller;
-
-    // public signal void game_state_changed (GameState gs);
-
 
     public App () {
         Object (
@@ -98,12 +89,7 @@ namespace Gnonograms {
     public override void activate () {
         if (controller == null) {
             controller = Controller.get_default ();
-            // controller.quit_app.connect (quit);
             add_window (controller.window);
-            // Only the controller should change the global game state.
-            // controller.notify["game-state"].connect (() => {
-            //     game_state = controller.game_state;
-            // });
         } else {
             controller.window.present ();
         }

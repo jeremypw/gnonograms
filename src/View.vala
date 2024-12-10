@@ -67,39 +67,18 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
     private Controller controller = Controller.get_default ();
     private Model model = Model.get_default ();
-
     private ClueBox row_clue_box;
     private ClueBox column_clue_box;
     private CellGrid cell_grid;
-
     private Gtk.MenuButton menu_button;
-
     private HeaderBarFactory headerbar_factory;
-    // private Granite.ModeSwitch mode_switch;
     private Gtk.Grid main_grid;
     private Adw.ToastOverlay toast_overlay;
-
-
-    // private Gtk.Button generate_button;
-    // private Gtk.Button undo_button;
-    // private Gtk.Button redo_button;
-    // private Gtk.Button check_correct_button;
-    // private Gtk.Button hint_button;
-    // private AppPopover app_popover;
-    // private Gtk.Button auto_solve_button;
-    // private Gtk.Button restart_button;
     private uint drawing_with_key = 0;
     private CellState drawing_with_state = INVALID;
     private uint paint_fill_key = Gdk.keyval_from_name ("f");
     private uint paint_empty_key = Gdk.keyval_from_name ("e");
     private uint paint_unknown_key = Gdk.keyval_from_name ("x");
-    // private App  app = (App)(Application.get_default ());
-    // public View (Model _model, Controller controller) {
-    //     Object (
-    //         model: _model,
-    //         controller: controller
-    //     );
-    // }
 
     private View () {}
 
@@ -192,11 +171,16 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         main_grid.attach (column_clue_box, 1, 0, 1, 1); /* Clues for columns */
         main_grid.attach (cell_grid, 1, 1, 1, 1);
 
+        toast_overlay = new Adw.ToastOverlay () {
+            child = main_grid
+        };
+
+        child = toast_overlay;
+
         var key_controller = new Gtk.EventControllerKey ();
         main_grid.add_controller (key_controller);
 
         key_controller.key_pressed.connect ((keyval, keycode, state) => {
-            warning ("key pressed");
             if (keyval == paint_fill_key) {
                 paint_filled ();
             } else if (keyval == paint_empty_key) {
@@ -211,7 +195,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         });
 
         key_controller.key_released.connect ((keyval, keycode, state) => {
-            warning ("key released");
             if (keyval == drawing_with_key) {
                 stop_painting ();
             }
@@ -221,7 +204,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         button_controller.set_button (0); // Listen to any button
         main_grid.add_controller (button_controller);
         button_controller.pressed.connect ((n_press, x, y) => {
-        // warning ("button press");
             var button = button_controller.get_current_button ();
             var shift = (SHIFT_MASK in button_controller.get_current_event_state ());
             var set_unknown = (n_press == 2 || button == Gdk.BUTTON_MIDDLE);
@@ -239,18 +221,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             stop_painting ();
         });
 
-        toast_overlay = new Adw.ToastOverlay () {
-            child = main_grid
-        };
-
-        child = toast_overlay;
-
-        var flags = BindingFlags.BIDIRECTIONAL | BindingFlags.SYNC_CREATE;
-        // bind_property (
-        //     "restart-destructive",
-        //     restart_button, "restart-destructive",
-        //     BindingFlags.SYNC_CREATE
-        // );
         current_cell = Cell () { row = 0, col = 0, state = UNKNOWN };
         previous_cell = current_cell.clone ();
 
@@ -266,22 +236,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         );
 
         controller.notify["game-state"].connect (on_game_state_changed);
-        // app.game_state_changed.connect ((gs) => {
-        // controller.notify["game-state"].connect (() => {
 
-        // });
-
-        // controller.notify["game-name"].connect (update_title);
-        // app.dimensions_changed.connect (on_dimensions_changed);
-
-        // notify["readonly"].connect (() => {
-        //     save_game_button.sensitive = readonly;
-        // });
-        // notify["game-grade"].connect (update_title);
-        // notify["can-go-back"].connect (on_can_go_changed);
-        // notify["can-go-forward"].connect (on_can_go_changed);
         notify["current-cell"].connect (() => {
-        // warning ("current cell changed");
             highlight_labels (previous_cell, false);
             highlight_labels (current_cell, true);
             if (current_cell != null &&
@@ -308,21 +264,10 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private void on_game_state_changed () {
         var gs = controller.game_state;
         update_all_labels_completeness ();
-        // // Avoid updating header bar while generating otherwise generation will be cancelled.
-        // // Headerbar will update when generation finished.
-        // if (controller.game_state != GameState.GENERATING) {
         restart_destructive = !model.is_blank (gs);
         headerbar_factory.on_game_state_changed (gs);
-
-        // update_header_bar (gs);
-        // }
     }
 
-    // public void on_dimensions_changed (uint rows, uint cols) {
-    //     row_clue_box.on_dimensions_changed (rows, cols);
-    //     column_clue_box.on_dimensions_changed (rows, cols);
-    //     cell_grid.on_dimensions_changed (rows, cols);
-    // }
 
     public string[] get_clues (bool is_column) {
         var label_box = is_column ? column_clue_box : row_clue_box;
@@ -357,9 +302,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     }
 
     public void make_move (Move m) requires (m.is_valid ()) {
-        // if (!m.is_null ()) {
         update_current_and_model (m.cell.state, m.cell);
-        // }
     }
 
     public void send_notification (string text) {
@@ -382,58 +325,17 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         headerbar_factory.hide_progress (game_grade);
 
         update_all_labels_completeness ();
-        // update_header_bar ();
     }
-
-    // private void update_header_bar () {
-    //     var gs = controller.game_state;
-    //     restart_destructive = !model.is_blank (gs);
-    //     headerbar_factory.on_game_state_changed (gs);
-        // mode_switch.active = controller.game_state != GameState.SETTING;
-
-        // switch (controller.game_state) {
-        //     case GameState.SETTING:
-        //         set_buttons_sensitive (true);
-        //         break;
-        //     case GameState.SOLVING:
-        //         set_buttons_sensitive (true);
-
-        //         break;
-        //     case GameState.GENERATING:
-        //         set_buttons_sensitive (false);
-
-        //         break;
-        //     default:
-        //         break;
-        // }
-    // }
 
     public void update_title (string title) {
         headerbar_factory.update_title (game_name, title, game_grade);
     }
 
     public void on_can_go_changed (bool forward, bool back) {
-        // warning ("on can go changed");
         headerbar_factory.on_can_go_changed (forward, back);
     }
 
-    // private void set_buttons_sensitive (bool sensitive) {
-        // generate_button.sensitive = controller.game_state != GameState.GENERATING;
-        // mode_switch.sensitive = sensitive;
-        // restart_destructive = sensitive && !model.is_blank (controller.game_state);
-        // undo_button.sensitive = sensitive && can_go_back;
-        // redo_button.sensitive = sensitive && can_go_forward;
-        // check_correct_button.sensitive =
-        //     sensitive &&
-        //     controller.game_state == GameState.SOLVING &&
-        //     can_go_back;
-
-        // hint_button.sensitive = sensitive && controller.game_state == GameState.SOLVING;
-        // auto_solve_button.sensitive = controller.game_state == GameState.SETTING;
-    // }
-
     private void highlight_labels (Cell? c, bool is_highlight) {
-        /* If c is NULL_CELL then will unhighlight all labels */
         if (c == null) {
             return;
         }
@@ -468,10 +370,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         CellState state = drawing_with_state,
         Cell? target = current_cell
     ) requires (target != null) {
-        // if (target == NULL_CELL) {
-        //     return;
-        // }
-warning ("make move at cell");
         var prev_state = model.get_data_for_cell (target);
         var cell = update_current_and_model (state, target);
 
@@ -703,46 +601,45 @@ warning ("make move at cell");
             return;
         }
 
-warning ("paint cell state");
         drawing_with_state = cs;
 
         make_move_at_cell ();
     }
 
     // Code based largely on elementary Code app
-        private ulong color_scheme_listener_handler_id = 0;
-        private void update_style () {
-            var gtk_settings = Gtk.Settings.get_default ();
-            var granite_settings = Granite.Settings.get_default ();
-            var following_system = settings.get_boolean ("follow-system-style");
-            disconnect_color_scheme_preference_listener (following_system);
-            if (following_system) {
+    private ulong color_scheme_listener_handler_id = 0;
+    private void update_style () {
+        var gtk_settings = Gtk.Settings.get_default ();
+        var granite_settings = Granite.Settings.get_default ();
+        var following_system = settings.get_boolean ("follow-system-style");
+        disconnect_color_scheme_preference_listener (following_system);
+        if (following_system) {
+            gtk_settings.gtk_application_prefer_dark_theme = (
+                granite_settings.prefers_color_scheme == DARK
+            );
+            color_scheme_listener_handler_id = granite_settings.notify["prefers-color-scheme"].connect (() => {
                 gtk_settings.gtk_application_prefer_dark_theme = (
                     granite_settings.prefers_color_scheme == DARK
                 );
-                color_scheme_listener_handler_id = granite_settings.notify["prefers-color-scheme"].connect (() => {
-                    gtk_settings.gtk_application_prefer_dark_theme = (
-                        granite_settings.prefers_color_scheme == DARK
-                    );
-                });
-            } else {
+            });
+        } else {
+            gtk_settings.gtk_application_prefer_dark_theme = settings.get_boolean ("prefer-dark-style");
+            color_scheme_listener_handler_id = settings.notify["prefers-dark-style"].connect (() => {
                 gtk_settings.gtk_application_prefer_dark_theme = settings.get_boolean ("prefer-dark-style");
-                color_scheme_listener_handler_id = settings.notify["prefers-dark-style"].connect (() => {
-                    gtk_settings.gtk_application_prefer_dark_theme = settings.get_boolean ("prefer-dark-style");
-                });
-            }
+            });
         }
+    }
 
-        private void disconnect_color_scheme_preference_listener (bool following_system) {
-            if (color_scheme_listener_handler_id != 0) {
-                if (following_system) {
-                    var granite_settings = Granite.Settings.get_default ();
-                    granite_settings.disconnect (color_scheme_listener_handler_id);
-                } else {
-                    settings.disconnect (color_scheme_listener_handler_id);
-                }
-
-                color_scheme_listener_handler_id = 0;
+    private void disconnect_color_scheme_preference_listener (bool following_system) {
+        if (color_scheme_listener_handler_id != 0) {
+            if (following_system) {
+                var granite_settings = Granite.Settings.get_default ();
+                granite_settings.disconnect (color_scheme_listener_handler_id);
+            } else {
+                settings.disconnect (color_scheme_listener_handler_id);
             }
+
+            color_scheme_listener_handler_id = 0;
         }
+    }
 }

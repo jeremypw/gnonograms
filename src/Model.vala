@@ -29,7 +29,6 @@ public class Gnonograms.Model : GLib.Object {
         }
     }
 
-    // public Controller controller { get; construct; }
     private Controller controller = Controller.get_default ();
 
     private My2DCellArray solution_data { get; set; }
@@ -43,16 +42,10 @@ public class Gnonograms.Model : GLib.Object {
         }
     }
 
-    // public Model (Controller controller) {
-    //     Object (
-    //         controller: controller
-    //     );
-    // }
     private Model () {}
 
     construct {
         make_data_arrays ();
-        // var app = (Gnonograms.App) Application.get_default ();
         controller.dimensions_changed.connect (on_dimensions_changed);
         controller.notify["game-state"].connect (() => {
             changed ();
@@ -63,7 +56,6 @@ public class Gnonograms.Model : GLib.Object {
         this.rows = rows;
         this.cols = cols;
         make_data_arrays ();
-        // changed ();
     }
 
     private void make_data_arrays () {

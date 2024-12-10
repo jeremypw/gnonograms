@@ -14,7 +14,8 @@ public class Gnonograms.AppPopover : Gtk.Popover {
             placeholder_text = _("Enter title of game here"),
             margin_top = 12,
         };
-        controller.bind_property ("game-name", title_entry, "text", BIDIRECTIONAL | SYNC_CREATE);
+        title_entry.bind_property ("text", controller, "game-name", BIDIRECTIONAL);
+
 
         var grade_setting = new Gtk.DropDown.from_strings ( Difficulty.all_human ());
         var grade_preference = new PreferenceRow (_("Degree of difficulty"), grade_setting);
@@ -43,7 +44,6 @@ public class Gnonograms.AppPopover : Gtk.Popover {
 
         var column_preference = new PreferenceRow (_("Columns"), column_setting);
         //TODO Add Clue help switch
-
 
         var load_game_button = new PopoverButton (_("Load"), ACTION_PREFIX + ACTION_OPEN);
         var save_game_button = new PopoverButton (_("Save"), ACTION_PREFIX + ACTION_SAVE);

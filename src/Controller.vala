@@ -5,7 +5,11 @@
  * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
+
+public const string UNTITLED_NAME = N_("Untitled");
+
 public class Gnonograms.Controller : GLib.Object {
+
     public static Controller get_default () {
         if (instance == null) {
             instance = new Controller ();
@@ -22,12 +26,14 @@ public class Gnonograms.Controller : GLib.Object {
     // public signal void changed_dimensions (uint rows, uint cols);
 
     public Gtk.Window window { get { return (Gtk.Window)view;}}
-    public GameState game_state { get; private set; }
-    public uint rows { get; private set; }
-    public uint columns { get; private set; }
-    public Difficulty generator_grade { get; private set; }
-    public string game_name { get; private set; }
-    private string current_game_path { get; private set; default = ""; }
+ // synced with settings so writable
+    public GameState game_state { get; set; }
+    public Difficulty generator_grade { get; set; } // synced with settings
+    public uint rows { get; set; }
+    public uint columns { get; set; }
+    public string game_name { get; set; default = _(UNTITLED_NAME); } // Can be set be App Popover
+    public string current_game_path { get; set; default = ""; }
+
     /* Any game that was not saved by this app is regarded as read only - any alterations
      * must be "Saved As" - which by default is writable. */
     public bool is_readonly { get; private set; default = false;}
@@ -36,18 +42,11 @@ public class Gnonograms.Controller : GLib.Object {
             return history.can_go_back;
         }
     }
-      // private set; }
     public bool can_go_forward {
         get {
             return history.can_go_forward;
         }
     }
-
-
-    // public bool is_solving {
-    //     get { return game_state == SOLVING; }
-    // }
-
     private  View view;
     private Model model;
     private Solver? solver;
@@ -67,35 +66,10 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     construct {
-        game_name = _(UNTITLED_NAME);
-        // model = new Model (this);
-
         history = new History ();
-
-
-        // app.game_state_changed.connect ((gs) => {
-        //     if (gs != game_state) {
-        //         game_state = gs;
-        //     }
-        // });
-
-        notify["game-state"].connect (() => {
-            warning ("notify gamestate - now %s", game_state.to_string ());
-            // if (game_state != GameState.LOAD_SAVE) { /* Do not clear on save */
-            //     clear_history ();
-            // }
-
-            // if (game_state == GameState.GENERATING) {
-            //     on_new_random_request ();
-            // }
-        });
-
 
         notify["rows"].connect (on_dimensions_changed);
         notify["columns"].connect (on_dimensions_changed);
-        // notify["game-state"].connect (() => {
-        //     app.game_state_changed (game_state);
-        // });
 
         var data_home_folder_current = Path.build_path (
             Path.DIR_SEPARATOR_S,
@@ -121,16 +95,17 @@ public class Gnonograms.Controller : GLib.Object {
             Gnonograms.UNSAVED_FILENAME
         );
 
-        saved_state.bind ("mode", this, "game-state", SettingsBindFlags.DEFAULT);
-        saved_state.bind ("current-game-path", this, "current-game-path", SettingsBindFlags.DEFAULT);
-        settings.bind ("grade", this, "generator-grade", SettingsBindFlags.DEFAULT);
-        settings.bind ("rows", this, "rows", SettingsBindFlags.DEFAULT);
-        settings.bind ("columns", this, "columns", SettingsBindFlags.DEFAULT);
+        // saved_state.bind ("mode", this, "game-state", SettingsBindFlags.DEFAULT);
+        // saved_state.bind ("current-game-path", this, "current-game-path", SettingsBindFlags.DEFAULT);
+        // settings.bind ("grade", this, "generator-grade", SettingsBindFlags.DEFAULT);
+        // settings.bind ("rows", this, "rows", SettingsBindFlags.DEFAULT);
+        // settings.bind ("columns", this, "columns", SettingsBindFlags.DEFAULT);
+
         restore_game.begin ((obj, res) => {
             if (!restore_game.end (res)) {
                 /* Error normally thrown if running without installing */
                 warning ("Restoring game failed");
-                // restore_dimensions ();
+                restore_defaults ();
                 new_game ();
             }
         });
@@ -169,9 +144,6 @@ public class Gnonograms.Controller : GLib.Object {
             BindingFlags.SYNC_CREATE
         );
 
-        // notify["current-game-path"].connect (() => {
-        //     view.update_title (game_name);
-        // });
         notify["game-name"].connect (() => {
             view.update_title (game_name);
         });
@@ -181,6 +153,14 @@ public class Gnonograms.Controller : GLib.Object {
         });
     }
 
+    private void restore_defaults () {
+        rows = 10;
+        columns = 15;
+        generator_grade = Difficulty.MODERATE;
+        view.game_grade = Difficulty.UNDEFINED;
+        game_state = GameState.SETTING;
+
+    }
 
     private void on_dimensions_changed () {
         solver = new Solver (dimensions);
@@ -197,7 +177,6 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     public void change_mode (GameState mode) {
-    warning ("change mode");
         switch (mode) {
             case SETTING:
             case SOLVING:
@@ -214,7 +193,6 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     public void prepare_quit () {
-warning ("quit - hold");
         if (solver != null) {
             solver.cancel ();
         }
@@ -223,8 +201,6 @@ warning ("quit - hold");
             app.hold ();
             save_game_state.begin ((obj, res) => {
                 // Always quit for now
-                warning ("save game state end");
-        warning ("release");
                 app.release ();
                 app.quit ();
             });
@@ -243,7 +219,6 @@ warning ("quit - hold");
 
     private void new_game () {
         clear ();
-        // app.game_state_changed (SETTING);
         game_state = GameState.SETTING;
         game_name = _(UNTITLED_NAME);
     }
@@ -288,7 +263,6 @@ warning ("quit - hold");
     }
 
     private async void save_game_state () {
-warning ("save game state");
         if (temporary_game_path != null) {
             try {
                 var current_game_file = File.new_for_path (temporary_game_path);
@@ -307,9 +281,7 @@ warning ("save game state");
     }
 
     private async bool restore_game () {
-    warning ("restore game");
         if (temporary_game_path != null) {
-            warning ("restore temp");
             var current_game_file = File.new_for_path (temporary_game_path);
             return yield load_game_async (current_game_file);
         } else {
@@ -318,7 +290,6 @@ warning ("save game state");
     }
 
     private async string? write_game (string? path, bool save_state = false) {
-warning ("Controller: write game. game state %s", game_state.to_string ());
         Filewriter? file_writer = null;
 
         // app.game_state_changed (LOAD_SAVE);
@@ -344,11 +315,8 @@ warning ("Controller: write game. game state %s", game_state.to_string ());
         game_state = LOAD_SAVE;
         try {
             if (save_state) {
-            warning ("saving state");
                 yield file_writer.write_position_file (saved_games_folder, path, game_name);
-                warning ("after write position file");
             } else {
-            warning ("saving game");
                 yield file_writer.write_game_file (
                     saved_games_folder,
                     path,
@@ -362,8 +330,6 @@ warning ("Controller: write game. game state %s", game_state.to_string ());
                     _("Unable to save %s").printf (basename),
                     e.message
                 );
-            } else {
-            warning ("CANCELLED");
             }
 
             return null;
@@ -375,25 +341,19 @@ warning ("Controller: write game. game state %s", game_state.to_string ());
     }
 
     public void load_game (File? game) {
-warning ("Controller: load game");
         load_game_async.begin (game, (obj, res) => {
             if (!load_game_async.end (res)) {
-                warning ("Load game failed");
                 new_or_random_game ();
-            } else {
-                warning ("loaded game. State %s", game_state.to_string ());
             }
         });
     }
 
     private async bool load_game_async (File? game) {
-warning ("Controller: load game async");
         Filereader? reader = null;
         clear_history ();
         reader = new Filereader ();
         var gs = game_state;
         game_state = LOAD_SAVE;
-        // app.game_state_changed (LOAD_SAVE);
         try {
             yield reader.read (
                 window,
@@ -422,17 +382,7 @@ warning ("Controller: load game async");
         }
 
         if (reader.valid && (yield load_common (reader))) {
-        warning ("Valid and loaded common");
-            // if (reader.state != GameState.UNDEFINED) {
-                // game_state = reader.state;
-            warning ("reader state %s", reader.state.to_string ());
-            // app.game_state_changed (reader.state);
-            // // } else {
             game_state = reader.state;
-            // } else {
-            //     game_state = GameState.SOLVING;
-            // }
-
             history.from_string (reader.moves);
             if (history.can_go_back) {
                 view.make_move (history.get_current_move ());
