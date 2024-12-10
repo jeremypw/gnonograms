@@ -36,6 +36,18 @@ public class Gnonograms.Controller : GLib.Object {
     private Solver? solver;
     private SimpleRandomGameGenerator? generator;
     private Gnonograms.History history;
+    public bool can_go_back { 
+        get {
+            return history.can_go_back;
+        }
+    }
+      // private set; }
+    public bool can_go_forward { 
+        get {
+            return history.can_go_forward;
+        }
+    }
+     // set; }
     public string current_game_path { get; set; default = ""; }
     private string saved_games_folder;
     private string? temporary_game_path = null;
@@ -45,7 +57,7 @@ public class Gnonograms.Controller : GLib.Object {
         game_name = _(UNTITLED_NAME);
         model = new Model (this);
         view = new View (model, this);
-        history = new Gnonograms.History ();
+        history = new History ();
 
         view.close_request.connect (on_view_deleted);
 #if WITH_DEBUGGING
@@ -129,17 +141,9 @@ public class Gnonograms.Controller : GLib.Object {
             BindingFlags.SYNC_CREATE
         );
 
-        history.bind_property (
-            "can-go-back",
-            view,
-            "can-go-back",
-            BindingFlags.SYNC_CREATE
-        );
-        history.bind_property (
-            "can-go-forward",
-            view, "can-go-forward",
-            BindingFlags.SYNC_CREATE
-        );
+        history.can_go_changed.connect ((forward, back) => {
+            view.on_can_go_changed (forward, back);
+        });
 
         restore_game.begin ((obj, res) => {
             if (!restore_game.end (res)) {

@@ -58,6 +58,7 @@ public class Gnonograms.History : GLib.Object {
             return sb.str;
         }
     }
+
     public bool can_go_back { 
         get {
             return !back_stack.empty;
@@ -73,6 +74,8 @@ public class Gnonograms.History : GLib.Object {
 
     private HistoryStack back_stack;
     private HistoryStack forward_stack;
+    
+    public signal void can_go_changed (bool forward, bool back);
 
     construct {
         back_stack = new HistoryStack ();
@@ -87,9 +90,14 @@ public class Gnonograms.History : GLib.Object {
         // });
     }
 
+    private void signal_can_go_changed () {
+        can_go_changed (!forward_stack.empty, !back_stack.empty );
+    }
+    
     public void clear_all () {
         forward_stack.clear ();
         back_stack.clear ();
+        signal_can_go_changed ();
     }
 
     public void record_move (Cell? cell, CellState previous_state) {
@@ -111,11 +119,13 @@ warning ("record move");
         // }
 
         back_stack.push_move (new_move);
+        signal_can_go_changed ();
     }
 
     public Move pop_next_move () {
         Move mv = forward_stack.pop_move ();
         back_stack.push_move (mv);
+        signal_can_go_changed ();
         return mv;
     }
 
@@ -124,6 +134,7 @@ warning ("record move");
         /* Record copy otherwise it will be altered by next line*/
         forward_stack.push_move (mv.clone ());
         mv.cell.state = mv.previous_state;
+        signal_can_go_changed ();
         return mv;
     }
 
@@ -177,6 +188,7 @@ warning ("record move");
             }
         }
 
+        signal_can_go_changed ();
         return true;
     }
 }

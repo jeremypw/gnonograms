@@ -144,7 +144,8 @@ public class Gnonograms.HeaderBarFactory : Object {
         return header_bar;
     }
 
-    public void update (GameState gs) {
+    public void on_game_state_changed (GameState gs) {
+warning ("headerbar update");
         if (gs == GENERATING) {
             generate_button.sensitive = false;
             return;
@@ -160,13 +161,13 @@ public class Gnonograms.HeaderBarFactory : Object {
         mode_switch.active = !is_setting;
         mode_switch.sensitive = sensitive;
         // restart_button.
-        undo_button.sensitive = sensitive && view.can_go_back;
-        redo_button.sensitive = sensitive && view.can_go_forward;
-        check_correct_button.sensitive = (
-            sensitive &&
-            gs == GameState.SOLVING &&
-            view.can_go_back
-        );
+        // undo_button.sensitive = sensitive && view.can_go_back;
+        // redo_button.sensitive = sensitive && view.can_go_forward;
+        // check_correct_button.sensitive = (
+        //     sensitive &&
+        //     gs == GameState.SOLVING &&
+        //     view.can_go_back
+        // );
 
         hint_button.sensitive = sensitive && is_solving;
         auto_solve_button.sensitive = is_setting;

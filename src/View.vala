@@ -53,8 +53,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     public Difficulty game_grade { get; set; }
     public string game_name { get { return controller.game_name; } }
     public bool readonly { get; set; default = false;}
-    public bool can_go_back { get; set; }
-    public bool can_go_forward { get; set; }
     public bool restart_destructive { get; set; default = false;}
 
 
@@ -209,6 +207,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         button_controller.set_button (0); // Listen to any button
         main_grid.add_controller (button_controller);
         button_controller.pressed.connect ((n_press, x, y) => {
+        // warning ("button press");
             var button = button_controller.get_current_button ();
             var shift = (SHIFT_MASK in button_controller.get_current_event_state ());
             var set_unknown = (n_press == 2 || button == Gdk.BUTTON_MIDDLE);
@@ -253,11 +252,14 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         );
 
         controller.notify["game-state"].connect (() => {
+            var gs = controller.game_state;
             update_all_labels_completeness ();
             // // Avoid updating header bar while generating otherwise generation will be cancelled.
             // // Headerbar will update when generation finished.
             // if (controller.game_state != GameState.GENERATING) {
-                update_header_bar ();
+            restart_destructive = !model.is_blank (gs);
+            headerbar_factory.on_game_state_changed (gs);
+            // update_header_bar (gs);
             // }
         });
 
@@ -270,9 +272,10 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         //     save_game_button.sensitive = readonly;
         // });
         notify["game-grade"].connect (update_title);
-        notify["can-go-back"].connect (on_can_go_changed);
-        notify["can-go-forward"].connect (on_can_go_changed);
+        // notify["can-go-back"].connect (on_can_go_changed);
+        // notify["can-go-forward"].connect (on_can_go_changed);
         notify["current-cell"].connect (() => {
+        // warning ("current cell changed");
             highlight_labels (previous_cell, false);
             highlight_labels (current_cell, true);
             if (current_cell != null &&
@@ -360,13 +363,13 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         headerbar_factory.hide_progress (game_grade);
 
         update_all_labels_completeness ();
-        update_header_bar ();
+        // update_header_bar ();
     }
 
-    private void update_header_bar () {
-        var gs = controller.game_state;
-        restart_destructive = !model.is_blank (gs);
-        headerbar_factory.update (gs);
+    // private void update_header_bar () {
+    //     var gs = controller.game_state;
+    //     restart_destructive = !model.is_blank (gs);
+    //     headerbar_factory.on_game_state_changed (gs);
         // mode_switch.active = controller.game_state != GameState.SETTING;
 
         // switch (controller.game_state) {
@@ -384,14 +387,15 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         //     default:
         //         break;
         // }
-    }
+    // }
 
     public void update_title () {
         headerbar_factory.update_title (game_name, controller.current_game_path, game_grade);
     }
 
-    private void on_can_go_changed () {
-        headerbar_factory.on_can_go_changed (can_go_forward, can_go_back);
+    public void on_can_go_changed (bool forward, bool back) {
+        warning ("on can go changed");
+        headerbar_factory.on_can_go_changed (forward, back);
     }
 
     // private void set_buttons_sensitive (bool sensitive) {
@@ -678,6 +682,7 @@ warning ("make move at cell");
             return;
         }
 
+warning ("paint cell state");
         drawing_with_state = cs;
 
         make_move_at_cell ();
