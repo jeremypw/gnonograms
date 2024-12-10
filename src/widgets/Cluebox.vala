@@ -17,6 +17,8 @@ public class Gnonograms.ClueBox : Gtk.Widget {
     public Pango.FontDescription font_desc { get; set; }
 
     private Gee.ArrayList<Clue> clues;
+    private Controller controller = Controller.get_default ();
+
     public ClueBox (bool _holds_column_clues) {
         Object (
             holds_column_clues: _holds_column_clues
@@ -46,6 +48,7 @@ public class Gnonograms.ClueBox : Gtk.Widget {
         }
 
         notify["cell-size"].connect (update_size_request);
+        controller.dimensions_changed.connect (on_dimensions_changed);
     }
 
     private void update_size_request () {

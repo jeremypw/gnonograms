@@ -6,36 +6,31 @@
  */
 
 public class Gnonograms.Controller : GLib.Object {
+    public static Controller get_default () {
+        if (instance == null) {
+            instance = new Controller ();
+            instance.set_model_and_view ();
+        }
+
+        return instance;
+    }
+
+    private static Controller? instance = null;
+
     public signal void quit_app ();
+    public signal void dimensions_changed (uint rows, uint cols);
     // public signal void changed_dimensions (uint rows, uint cols);
 
     public Gtk.Window window { get { return (Gtk.Window)view;}}
     public GameState game_state { get; private set; }
-    public Dimensions dimensions {
-        get {
-            return {columns, rows};
-        }
-    }
-
-    public bool is_solving {
-        get { return game_state == SOLVING; }
-    }
-
-    public uint rows { get; set; }
-    public uint columns { get; set; }
-
-    public Difficulty generator_grade { get; set; }
-    public string game_name { get; set; }
-
+    public uint rows { get; private set; }
+    public uint columns { get; private set; }
+    public Difficulty generator_grade { get; private set; }
+    public string game_name { get; private set; }
+    private string current_game_path { get; private set; default = ""; }
     /* Any game that was not saved by this app is regarded as read only - any alterations
      * must be "Saved As" - which by default is writable. */
-    public bool is_readonly { get; set; default = false;}
-
-    public unowned View view {get; construct; }
-    private Model model;
-    private Solver? solver;
-    private SimpleRandomGameGenerator? generator;
-    private Gnonograms.History history;
+    public bool is_readonly { get; private set; default = false;}
     public bool can_go_back {
         get {
             return history.can_go_back;
@@ -47,24 +42,37 @@ public class Gnonograms.Controller : GLib.Object {
             return history.can_go_forward;
         }
     }
-     // set; }
-    public string current_game_path { get; set; default = ""; }
+
+
+    // public bool is_solving {
+    //     get { return game_state == SOLVING; }
+    // }
+
+    private  View view;
+    private Model model;
+    private Solver? solver;
+    private SimpleRandomGameGenerator? generator;
+    private Gnonograms.History history;
+
     private string saved_games_folder;
     private string? temporary_game_path = null;
     private Gnonograms.App app = (Gnonograms.App) (Application.get_default ());
 
+    private Controller () {}
+
+    private Dimensions dimensions {
+        get {
+            return { columns, rows };
+        }
+    }
+
     construct {
         game_name = _(UNTITLED_NAME);
-        model = new Model (this);
-        view = new View (model, this);
+        // model = new Model (this);
+
         history = new History ();
 
-        view.close_request.connect (() => {
-            return on_delete_request ();
-        });
-#if WITH_DEBUGGING
-        view.debug_request.connect (on_debug_request);
-#endif
+
         // app.game_state_changed.connect ((gs) => {
         //     if (gs != game_state) {
         //         game_state = gs;
@@ -82,14 +90,12 @@ public class Gnonograms.Controller : GLib.Object {
             // }
         });
 
-        notify["current_game_path"].connect (() => {
-            view.update_title ();
-        });
+
         notify["rows"].connect (on_dimensions_changed);
         notify["columns"].connect (on_dimensions_changed);
-        notify["game-state"].connect (() => {
-            app.game_state_changed (game_state);
-        });
+        // notify["game-state"].connect (() => {
+        //     app.game_state_changed (game_state);
+        // });
 
         var data_home_folder_current = Path.build_path (
             Path.DIR_SEPARATOR_S,
@@ -120,16 +126,35 @@ public class Gnonograms.Controller : GLib.Object {
         settings.bind ("grade", this, "generator-grade", SettingsBindFlags.DEFAULT);
         settings.bind ("rows", this, "rows", SettingsBindFlags.DEFAULT);
         settings.bind ("columns", this, "columns", SettingsBindFlags.DEFAULT);
+        restore_game.begin ((obj, res) => {
+            if (!restore_game.end (res)) {
+                /* Error normally thrown if running without installing */
+                warning ("Restoring game failed");
+                // restore_dimensions ();
+                new_game ();
+            }
+        });
+    }
 
+    protected void set_model_and_view () {
+        // Needs to be done after Controller construction complete as they need a controller instance
+        model = Model.get_default ();
+        view = View.get_default ();
+
+        view.close_request.connect (() => {
+            return on_delete_request ();
+        });
+#if WITH_DEBUGGING
+        view.debug_request.connect (on_debug_request);
+#endif
         view.present ();
-        /*
-        * This is very finicky. Bind size after present else set_titlebar gives us bad sizes
-        */
 
         // TODO limit related to actual monitor dimensions
         view.default_height = saved_state.get_int ("window-height").clamp (64, 768);
         view.default_width = saved_state.get_int ("window-width").clamp (128, 1024);
-
+        /*
+        * This is very finicky. Bind size after present else set_titlebar gives us bad sizes
+        */
         saved_state.bind ("window-height", view, "default-height", SettingsBindFlags.SET);
         saved_state.bind ("window-width", view, "default-width", SettingsBindFlags.SET);
 
@@ -144,24 +169,23 @@ public class Gnonograms.Controller : GLib.Object {
             BindingFlags.SYNC_CREATE
         );
 
+        // notify["current-game-path"].connect (() => {
+        //     view.update_title (game_name);
+        // });
+        notify["game-name"].connect (() => {
+            view.update_title (game_name);
+        });
+
         history.can_go_changed.connect ((forward, back) => {
             view.on_can_go_changed (forward, back);
         });
-
-        restore_game.begin ((obj, res) => {
-            if (!restore_game.end (res)) {
-                /* Error normally thrown if running without installing */
-                warning ("Restoring game failed");
-                // restore_dimensions ();
-                new_game ();
-            }
-        });
     }
+
 
     private void on_dimensions_changed () {
         solver = new Solver (dimensions);
         game_name = _(UNTITLED_NAME);
-        app.dimensions_changed (rows, columns);
+        dimensions_changed (rows, columns);
     }
 
     private void new_or_random_game () {

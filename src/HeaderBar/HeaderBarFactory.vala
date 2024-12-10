@@ -22,6 +22,7 @@ public class Gnonograms.HeaderBarFactory : Object {
     private AppPopover app_popover;
     private Gtk.Button auto_solve_button;
     private Gtk.Button restart_button;
+    // private App  app = (App)(Application.get_default ());
 
     public HeaderBarFactory (Gnonograms.View view) {
         Object (
@@ -71,7 +72,7 @@ public class Gnonograms.HeaderBarFactory : Object {
             _("Generate New Puzzle")
         );
 
-        app_popover = new AppPopover (view.controller);
+        app_popover = new AppPopover ();
 
         var menu_button = new Gtk.MenuButton () {
             tooltip_markup = Granite.markup_accel_tooltip (
@@ -152,7 +153,7 @@ public class Gnonograms.HeaderBarFactory : Object {
     }
 
     public void on_game_state_changed (GameState gs) {
-// warning ("headerbar update");
+warning ("headerbar game state changed to %s", gs.to_string ());
         if (gs == GENERATING) {
             generate_button.sensitive = false;
             return;

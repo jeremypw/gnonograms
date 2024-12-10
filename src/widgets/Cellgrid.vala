@@ -65,7 +65,8 @@ public struct Gnonograms.Cell {
 public class Gnonograms.CellGrid : Gtk.DrawingArea {
     public signal void leave ();
 
-    public unowned View view { get; construct; }
+    // public unowned View view { get; construct; }
+    // public Model model { get; construct; }
     public Cell? current_cell { get; set; }
     public Cell? previous_cell { get; set; }
     public bool frozen { get; set; }
@@ -119,18 +120,22 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
 
     private My2DCellArray? array {
         get {
-            return view.model.display_data;
+            return model.display_data;
         }
     }
+    
+    private Controller controller = Controller.get_default ();
+    private Model model = Model.get_default ();
 
-    public CellGrid (View view) {
-        Object (
-            view: view
-        );
-    }
+    // private App app = ((App)(Application.get_default ()));
+
+    // public CellGrid (Model model) {
+    //     Object (
+    //         model: model
+    //     );
+    // }
 
     construct {
-        var app = ((Gnonograms.App)(Application.get_default ()));
         hexpand = true;
         vexpand = true;
         current_cell = null;
@@ -150,10 +155,12 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             queue_draw ();
         });
 
-        app.game_state_changed.connect (on_game_state_changed);
-        app.dimensions_changed.connect (on_dimensions_changed);
+        controller.notify["game-state"].connect (on_game_state_changed);
+        // app.bind_property ("game-state", this, "game-state");
+        // app.game_state_changed.connect (on_game_state_changed);
+        controller.dimensions_changed.connect (on_dimensions_changed);
 
-        view.model.changed.connect (() => {
+        model.changed.connect (() => {
             if (!dirty) {
                 dirty = true;
                 queue_draw ();
@@ -181,19 +188,19 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             colors[setting, (int) CellState.UNKNOWN].parse (Gnonograms.UNKNOWN_COLOR);
             colors[setting, (int) CellState.EMPTY].parse (settings.get_string ("empty-color"));
             colors[setting, (int) CellState.FILLED].parse (settings.get_string ("filled-color"));
-            update_colors ();
+            update_colors (controller.game_state);
             queue_draw ();
             return Source.REMOVE;
         });
     }
 
-    private GameState gs;
-    private void on_game_state_changed (GameState gs) {
-        this.gs = gs;
-        update_colors ();
+    // private GameState gs;
+    private void on_game_state_changed () {
+        // this.gs = gs;
+        update_colors (controller.game_state);
     }
     
-    private void update_colors () {
+    private void update_colors (GameState gs) {
         unknown_color = colors[(int)gs, (int)CellState.UNKNOWN];
         fill_color = colors[(int)gs, (int)CellState.FILLED];
         empty_color = colors[(int)gs, (int)CellState.EMPTY];

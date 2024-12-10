@@ -5,12 +5,8 @@
  * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
 public class Gnonograms.AppPopover : Gtk.Popover {
-    public Controller controller { get; construct; }
-    public AppPopover (Controller controller) {
-        Object (
-            controller: controller
-        );
-    }
+    private Controller controller = Controller.get_default ();
+
     construct {
         var app = (Gtk.Application)(GLib.Application.get_default ());
 

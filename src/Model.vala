@@ -5,6 +5,16 @@
  * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
 public class Gnonograms.Model : GLib.Object {
+    public static Model get_default () {
+        if (instance == null) {
+            instance = new Model ();
+        }
+        
+        return instance;
+    }
+    
+    private static Model? instance;
+    
     public signal void changed ();
 
     public My2DCellArray display_data {
@@ -19,7 +29,9 @@ public class Gnonograms.Model : GLib.Object {
         }
     }
 
-    public Controller controller { get; construct; }
+    // public Controller controller { get; construct; }
+    private Controller controller = Controller.get_default ();
+
     private My2DCellArray solution_data { get; set; }
     private My2DCellArray working_data { get; set; }
 
@@ -31,16 +43,17 @@ public class Gnonograms.Model : GLib.Object {
         }
     }
 
-    public Model (Controller controller) {
-        Object (
-            controller: controller
-        );
-    }
+    // public Model (Controller controller) {
+    //     Object (
+    //         controller: controller
+    //     );
+    // }
+    private Model () {}
 
     construct {
         make_data_arrays ();
-        var app = (Gnonograms.App) Application.get_default ();
-        app.dimensions_changed.connect (on_dimensions_changed);
+        // var app = (Gnonograms.App) Application.get_default ();
+        controller.dimensions_changed.connect (on_dimensions_changed);
         controller.notify["game-state"].connect (() => {
             changed ();
         });

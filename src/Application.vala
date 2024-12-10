@@ -51,10 +51,12 @@ namespace Gnonograms {
 
 
     public class App : Gtk.Application {
+    // public GameState game_state { get; private set; default = LOAD_SAVE; }
+
     private Controller controller;
 
-    public signal void game_state_changed (GameState gs);
-    public signal void dimensions_changed (uint rows, uint cols);
+    // public signal void game_state_changed (GameState gs);
+
 
     public App () {
         Object (
@@ -95,9 +97,13 @@ namespace Gnonograms {
 
     public override void activate () {
         if (controller == null) {
-            controller = new Controller ();
+            controller = Controller.get_default ();
             // controller.quit_app.connect (quit);
             add_window (controller.window);
+            // Only the controller should change the global game state.
+            // controller.notify["game-state"].connect (() => {
+            //     game_state = controller.game_state;
+            // });
         } else {
             controller.window.present ();
         }

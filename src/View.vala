@@ -6,13 +6,22 @@
  */
 
 public class Gnonograms.View : Gtk.ApplicationWindow {
+    public static View get_default () {
+        if (instance == null) {
+            instance = new View ();
+        }
+
+        return instance;
+    }
+
+    private static View? instance = null;
+
     private const uint PROGRESS_DELAY_MSEC = 500;
     private const int DEFAULT_WIDTH = 900;
     private const int DEFAULT_HEIGHT = 700;
     private const uint DARK = Granite.Settings.ColorScheme.DARK;
 
     public static Gee.MultiMap<string, string> action_accelerators;
-    public static Gtk.Application app;
     private static GLib.ActionEntry [] view_action_entries = {
         {ACTION_UNDO, action_undo},
         {ACTION_REDO, action_redo},
@@ -43,8 +52,9 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     public signal void debug_request (uint idx, bool is_column);
 #endif
 
-    public Model model { get; construct; }
-    public Controller controller { get; construct; }
+    // public Model model { get; construct; }
+    // public Controller controller { get; construct; }
+
     public SimpleActionGroup view_actions { get; construct; }
 
     public Cell? current_cell { get; set; }
@@ -55,6 +65,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     public bool readonly { get; set; default = false;}
     public bool restart_destructive { get; set; default = false;}
 
+    private Controller controller = Controller.get_default ();
+    private Model model = Model.get_default ();
 
     private ClueBox row_clue_box;
     private ClueBox column_clue_box;
@@ -81,17 +93,19 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private uint paint_fill_key = Gdk.keyval_from_name ("f");
     private uint paint_empty_key = Gdk.keyval_from_name ("e");
     private uint paint_unknown_key = Gdk.keyval_from_name ("x");
+    // private App  app = (App)(Application.get_default ());
+    // public View (Model _model, Controller controller) {
+    //     Object (
+    //         model: _model,
+    //         controller: controller
+    //     );
+    // }
 
-    public View (Model _model, Controller controller) {
-        Object (
-            model: _model,
-            controller: controller
-        );
-    }
+    private View () {}
 
     static construct {
         action_accelerators = new Gee.HashMultiMap<string, string> ();
-        app = (Gtk.Application)(Application.get_default ());
+
 #if WITH_DEBUGGING
         warning ("WITH DEBUGGING");
         view_action_entries += ActionEntry () {
@@ -159,7 +173,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
         row_clue_box = new ClueBox (false);
         column_clue_box = new ClueBox (true);
-        cell_grid = new CellGrid (this);
+        cell_grid = new CellGrid ();
 
         cell_grid.bind_property ("cell-width", column_clue_box, "cell-size");
         cell_grid.bind_property ("cell-height", row_clue_box, "cell-size");
@@ -214,7 +228,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             var set_empty = (button == Gdk.BUTTON_SECONDARY || button == Gdk.BUTTON_PRIMARY && shift);
 
             if (set_unknown) { // Clear current cell
-                drawing_with_state = controller.is_solving ? CellState.UNKNOWN : CellState.EMPTY;
+                drawing_with_state = controller.game_state == SOLVING ? CellState.UNKNOWN : CellState.EMPTY;
             } else { // Paint current cell
                 drawing_with_state = set_empty ? CellState.EMPTY : CellState.FILLED;
             }
@@ -251,28 +265,19 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             BindingFlags.BIDIRECTIONAL
         );
 
-        app.game_state_changed.connect ((gs) => {
+        controller.notify["game-state"].connect (on_game_state_changed);
+        // app.game_state_changed.connect ((gs) => {
         // controller.notify["game-state"].connect (() => {
-            update_all_labels_completeness ();
-            // // Avoid updating header bar while generating otherwise generation will be cancelled.
-            // // Headerbar will update when generation finished.
-            // if (controller.game_state != GameState.GENERATING) {
-            restart_destructive = !model.is_blank (gs);
-            headerbar_factory.on_game_state_changed (gs);
 
-            // update_header_bar (gs);
-            // }
-        });
+        // });
 
-        controller.notify["game-name"].connect (update_title);
-
-
-        app.dimensions_changed.connect (on_dimensions_changed);
+        // controller.notify["game-name"].connect (update_title);
+        // app.dimensions_changed.connect (on_dimensions_changed);
 
         // notify["readonly"].connect (() => {
         //     save_game_button.sensitive = readonly;
         // });
-        notify["game-grade"].connect (update_title);
+        // notify["game-grade"].connect (update_title);
         // notify["can-go-back"].connect (on_can_go_changed);
         // notify["can-go-forward"].connect (on_can_go_changed);
         notify["current-cell"].connect (() => {
@@ -300,11 +305,24 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         });
     }
 
-    public void on_dimensions_changed (uint rows, uint cols) {
-        row_clue_box.on_dimensions_changed (rows, cols);
-        column_clue_box.on_dimensions_changed (rows, cols);
-        cell_grid.on_dimensions_changed (rows, cols);
+    private void on_game_state_changed () {
+        var gs = controller.game_state;
+        update_all_labels_completeness ();
+        // // Avoid updating header bar while generating otherwise generation will be cancelled.
+        // // Headerbar will update when generation finished.
+        // if (controller.game_state != GameState.GENERATING) {
+        restart_destructive = !model.is_blank (gs);
+        headerbar_factory.on_game_state_changed (gs);
+
+        // update_header_bar (gs);
+        // }
     }
+
+    // public void on_dimensions_changed (uint rows, uint cols) {
+    //     row_clue_box.on_dimensions_changed (rows, cols);
+    //     column_clue_box.on_dimensions_changed (rows, cols);
+    //     cell_grid.on_dimensions_changed (rows, cols);
+    // }
 
     public string[] get_clues (bool is_column) {
         var label_box = is_column ? column_clue_box : row_clue_box;
@@ -313,7 +331,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
     public void update_clues_from_string_array (string[] clues, bool is_column) {
         var clue_box = is_column ? column_clue_box : row_clue_box;
-        var lim = is_column ? controller.dimensions.width : controller.dimensions.height;
+        var lim = is_column ? controller.rows : controller.columns;
 
         for (int i = 0; i < lim; i++) {
             clue_box.update_clue_text (i, clues[i]);
@@ -390,8 +408,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         // }
     // }
 
-    public void update_title () {
-        headerbar_factory.update_title (game_name, controller.current_game_path, game_grade);
+    public void update_title (string title) {
+        headerbar_factory.update_title (game_name, title, game_grade);
     }
 
     public void on_can_go_changed (bool forward, bool back) {
@@ -425,11 +443,11 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     }
 
     private void update_all_labels_completeness () {
-        for (int r = 0; r < controller.dimensions.height; r++) {
+        for (int r = 0; r < controller.rows; r++) {
             update_clue_complete (r, false);
         }
 
-        for (int c = 0; c < controller.dimensions.width; c++) {
+        for (int c = 0; c < controller.columns; c++) {
             update_clue_complete (c, true);
         }
     }
