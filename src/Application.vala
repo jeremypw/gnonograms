@@ -74,8 +74,9 @@ namespace Gnonograms {
 
         SimpleAction quit_action = new SimpleAction ("quit", null);
         quit_action.activate.connect (() => {
+        warning ("quit action");
             if (controller != null) {
-                controller.quit (); /* Will save state */
+                controller.on_delete_request (); /* Will save state */
             }
         });
 
@@ -95,7 +96,7 @@ namespace Gnonograms {
     public override void activate () {
         if (controller == null) {
             controller = new Controller ();
-            controller.quit_app.connect (quit);
+            // controller.quit_app.connect (quit);
             add_window (controller.window);
         } else {
             controller.window.present ();

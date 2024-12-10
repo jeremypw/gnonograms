@@ -59,7 +59,9 @@ public class Gnonograms.Controller : GLib.Object {
         view = new View (model, this);
         history = new History ();
 
-        view.close_request.connect (on_view_deleted);
+        view.close_request.connect (() => {
+            return on_delete_request ();
+        });
 #if WITH_DEBUGGING
         view.debug_request.connect (on_debug_request);
 #endif
@@ -170,18 +172,42 @@ public class Gnonograms.Controller : GLib.Object {
         }
     }
 
-    public void quit () {
+    public void change_mode (GameState mode) {
+    warning ("change mode");
+        switch (mode) {
+            case SETTING:
+            case SOLVING:
+                clear_history ();
+                game_state = mode;
+                break;
+            case GENERATING:
+                on_new_random_request ();
+                break;
+            default:
+                critical ("Unhandled mode change request");
+                break;
+        }
+    }
+
+    public void prepare_quit () {
+warning ("quit - hold");
         if (solver != null) {
             solver.cancel ();
         }
         /* If in middle of generating no defined game to save */
         if (generator == null) {
-            save_game_state ();
+            app.hold ();
+            save_game_state.begin ((obj, res) => {
+                // Always quit for now
+                warning ("save game state end");
+        warning ("release");
+                app.release ();
+                app.quit ();
+            });
         } else {
             generator.cancel ();
+            app.quit ();
         }
-
-        quit_app ();
     }
 
     private void clear () {
@@ -193,8 +219,8 @@ public class Gnonograms.Controller : GLib.Object {
 
     private void new_game () {
         clear ();
-        app.game_state_changed (SETTING);
-        // game_state = GameState.SETTING;
+        // app.game_state_changed (SETTING);
+        game_state = GameState.SETTING;
         game_name = _(UNTITLED_NAME);
     }
 
@@ -207,9 +233,10 @@ public class Gnonograms.Controller : GLib.Object {
         generator = new SimpleRandomGameGenerator (dimensions, solver) {
             grade = generator_grade
         };
+
         game_name = _("Random pattern");
         view.game_grade = Difficulty.UNDEFINED;
-
+        game_state = GameState.GENERATING;
         view.show_working (cancellable, (_("Generating")));
         generator.generate.begin ((obj, res) => {
             var success = generator.generate.end (res);
@@ -229,24 +256,26 @@ public class Gnonograms.Controller : GLib.Object {
                 }
             }
 
-            app.game_state_changed (new_game_state);
             view.end_working ();
+            game_state = new_game_state;            // app.game_state_changed (new_game_state);
+
             generator = null;
         });
     }
 
-    private void save_game_state () {
+    private async void save_game_state () {
+warning ("save game state");
         if (temporary_game_path != null) {
             try {
                 var current_game_file = File.new_for_path (temporary_game_path);
                 current_game_file.@delete ();
             } catch (Error e) {
                 /* Error normally thrown on first run */
-                debug ("Error deleting temporary game file %s - %s", temporary_game_path, e.message);
+                warning ("Error deleting temporary game file %s - %s", temporary_game_path, e.message);
             } finally {
-                debug ("writing unsaved game to %s", temporary_game_path);
+                warning ("writing unsaved game to %s", temporary_game_path);
                 /* Save solution and current state */
-                write_game.begin (temporary_game_path, true);
+                yield write_game (temporary_game_path, true);
             }
         } else {
             warning ("No temporary game path");
@@ -256,6 +285,7 @@ public class Gnonograms.Controller : GLib.Object {
     private async bool restore_game () {
     warning ("restore game");
         if (temporary_game_path != null) {
+            warning ("restore temp");
             var current_game_file = File.new_for_path (temporary_game_path);
             return yield load_game_async (current_game_file);
         } else {
@@ -264,9 +294,10 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     private async string? write_game (string? path, bool save_state = false) {
+warning ("Controller: write game. game state %s", game_state.to_string ());
         Filewriter? file_writer = null;
-        var gs = game_state;
-        app.game_state_changed (LOAD_SAVE);
+
+        // app.game_state_changed (LOAD_SAVE);
         file_writer = new Filewriter (
             window,
             dimensions,
@@ -276,7 +307,7 @@ public class Gnonograms.Controller : GLib.Object {
             !model.solution_is_blank ()
         ) {
             difficulty = view.game_grade,
-            game_state = this.game_state,
+            state = game_state,
             working = model.copy_working_data ()
         };
 
@@ -285,10 +316,15 @@ public class Gnonograms.Controller : GLib.Object {
         }
 
         file_writer.is_readonly = is_readonly;
+        var gs = game_state;
+        game_state = LOAD_SAVE;
         try {
             if (save_state) {
+            warning ("saving state");
                 yield file_writer.write_position_file (saved_games_folder, path, game_name);
+                warning ("after write position file");
             } else {
+            warning ("saving game");
                 yield file_writer.write_game_file (
                     saved_games_folder,
                     path,
@@ -302,31 +338,38 @@ public class Gnonograms.Controller : GLib.Object {
                     _("Unable to save %s").printf (basename),
                     e.message
                 );
+            } else {
+            warning ("CANCELLED");
             }
 
             return null;
         } finally {
-            app.game_state_changed (gs);
+            game_state = gs;
         }
 
         return file_writer.game_path;
     }
 
     public void load_game (File? game) {
+warning ("Controller: load game");
         load_game_async.begin (game, (obj, res) => {
             if (!load_game_async.end (res)) {
                 warning ("Load game failed");
                 new_or_random_game ();
+            } else {
+                warning ("loaded game. State %s", game_state.to_string ());
             }
         });
     }
 
     private async bool load_game_async (File? game) {
+warning ("Controller: load game async");
         Filereader? reader = null;
-        var gs = game_state;
-        app.game_state_changed (LOAD_SAVE);
         clear_history ();
         reader = new Filereader ();
+        var gs = game_state;
+        game_state = LOAD_SAVE;
+        // app.game_state_changed (LOAD_SAVE);
         try {
             yield reader.read (
                 window,
@@ -350,15 +393,18 @@ public class Gnonograms.Controller : GLib.Object {
                 }
             }
 
+            game_state = gs;
             return false;
-        } finally {
-            app.game_state_changed (gs);
         }
 
         if (reader.valid && (yield load_common (reader))) {
+        warning ("Valid and loaded common");
             // if (reader.state != GameState.UNDEFINED) {
                 // game_state = reader.state;
-                app.game_state_changed (reader.state);
+            warning ("reader state %s", reader.state.to_string ());
+            // app.game_state_changed (reader.state);
+            // // } else {
+            game_state = reader.state;
             // } else {
             //     game_state = GameState.SOLVING;
             // }
@@ -515,15 +561,20 @@ public class Gnonograms.Controller : GLib.Object {
         }
     }
 
-    private bool on_view_deleted () {
-        quit ();
-        return Gdk.EVENT_PROPAGATE;
+    public bool on_delete_request () {
+        warning ("on delete request");
+        prepare_quit (); // Async
+        warning ("on view deleted returning true");
+        return true;
     }
 
     public async void save_game () {
+    warning ("Controller: save game");
         if (is_readonly || current_game_path == "") {
+            warning ("save game as");
             yield save_game_as ();
         } else {
+            warning ("write game");
             var path = yield write_game (current_game_path, false);
             if (path != null && path != "") {
                 current_game_path = path;
@@ -533,6 +584,7 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     public async void save_game_as () {
+    warning ("Controller: save game as");
         /* Filewriter will request save location, no solution saved as default */
         var path = yield write_game (null, false);
         if (path != null) {

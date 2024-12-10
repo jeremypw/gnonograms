@@ -9,7 +9,7 @@ public class Gnonograms.Filewriter : Object {
     public History? history { get; construct; }
     public Gtk.Window? parent { get; construct; }
     public Difficulty difficulty { get; set; default = Difficulty.UNDEFINED;}
-    public GameState game_state { get; set; }
+    public GameState state { get; set; }
     public My2DCellArray? solution { get; set; default = null;}
     public My2DCellArray? working { get; set; default = null;}
     public uint rows { get; construct; }
@@ -55,6 +55,7 @@ public class Gnonograms.Filewriter : Object {
         string? path = null,
         string? _name = null
     ) throws Error {
+    warning ("writer write game");
         if (_name != null) {
             name = _name;
         } else {
@@ -96,13 +97,17 @@ public class Gnonograms.Filewriter : Object {
             throw new IOError.CANCELLED ("File exists");
         }
 
+warning ("game path %s", game_path);
         /* @game_path is local path, not a uri */
         stream = FileStream.open (game_path, "w");
+warning ("opened stream");
         if (stream == null) {
+        warning ("stream is null");
             throw new IOError.FAILED ("Could not open filestream to %s".printf (game_path));
         }
 
         if (name == null || name.length == 0) {
+        warning ("No name");
             throw new IOError.NOT_INITIALIZED ("No name to save");
         }
 
@@ -118,6 +123,7 @@ public class Gnonograms.Filewriter : Object {
         }
 
         if (rows == 0 || cols == 0) {
+        warning ("no dimensions");
             throw new IOError.NOT_INITIALIZED ("No dimensions to save");
         }
 
@@ -126,10 +132,12 @@ public class Gnonograms.Filewriter : Object {
         stream.printf ("%u\n", cols);
 
         if (row_clues.length == 0 || col_clues.length == 0) {
+        warning ("no clues");
             throw new IOError.NOT_INITIALIZED ("No clues to save");
         }
 
         if (row_clues.length != rows || col_clues.length != cols) {
+        warning ("mismatch");
             throw new IOError.NOT_INITIALIZED ("Clues do not match dimensions");
         }
 
@@ -143,8 +151,11 @@ public class Gnonograms.Filewriter : Object {
             stream.printf ("%s\n", s);
         }
 
+warning ("flush");
         stream.flush ();
 
+warning ("solution is %s", solution != null ? "NOT null" : "null");
+warning ("save_solution is %s", save_solution.to_string ());
         if (solution != null && save_solution) {
             stream.printf ("[Solution grid]\n");
             stream.printf ("%s", solution.to_string ());
@@ -152,22 +163,27 @@ public class Gnonograms.Filewriter : Object {
 
         stream.printf ("[Locked]\n");
         stream.printf (is_readonly.to_string () + "\n");
+warning ("End of write game file");
     }
 
     /*** Writes complete information to reload game state ***/
-    public async void write_position_file (string? save_dir_path = null,
-                                     string? path = null,
-                                     string? name = null) throws Error {
+    public async void write_position_file (
+        string? save_dir_path = null,
+        string? path = null,
+        string? name = null
+    ) throws Error {
         if (working == null) {
+        warning ("No working grid");
             throw (new IOError.NOT_INITIALIZED ("No working grid to save"));
         }
-
+warning ("write position ");
         yield write_game_file (save_dir_path, path, name );
+warning ("after write game file");
         stream.printf ("[Working grid]\n");
         stream.printf (working.to_string ());
         stream.printf ("[State]\n");
-        stream.printf (game_state.to_string () + "\n");
-
+        stream.printf (state.to_string () + "\n");
+warning ("write state %s", state.to_string ());
         if (name != _(UNTITLED_NAME)) {
             stream.printf ("[Original path]\n");
             stream.printf (game_path.to_string () + "\n");
@@ -179,5 +195,6 @@ public class Gnonograms.Filewriter : Object {
         }
 
         stream.flush ();
+warning ("end of write position");
     }
 }
