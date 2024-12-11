@@ -95,9 +95,9 @@ public class Gnonograms.Controller : GLib.Object {
             Gnonograms.UNSAVED_FILENAME
         );
 
-        // saved_state.bind ("mode", this, "game-state", SettingsBindFlags.DEFAULT);
-        // saved_state.bind ("current-game-path", this, "current-game-path", SettingsBindFlags.DEFAULT);
-        // settings.bind ("grade", this, "generator-grade", SettingsBindFlags.DEFAULT);
+        saved_state.bind ("mode", this, "game-state", SettingsBindFlags.DEFAULT);
+        saved_state.bind ("current-game-path", this, "current-game-path", SettingsBindFlags.DEFAULT);
+        settings.bind ("grade", this, "generator-grade", SettingsBindFlags.DEFAULT);
         // settings.bind ("rows", this, "rows", SettingsBindFlags.DEFAULT);
         // settings.bind ("columns", this, "columns", SettingsBindFlags.DEFAULT);
 
@@ -156,7 +156,6 @@ public class Gnonograms.Controller : GLib.Object {
     private void restore_defaults () {
         rows = 10;
         columns = 15;
-        generator_grade = Difficulty.MODERATE;
         view.game_grade = Difficulty.UNDEFINED;
         game_state = GameState.SETTING;
 

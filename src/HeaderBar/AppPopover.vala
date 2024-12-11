@@ -71,12 +71,12 @@ public class Gnonograms.AppPopover : Gtk.Popover {
 
         child = settings_box;
 
-        settings.bind ("columns", column_setting, "value", DEFAULT);
-        settings.bind ("rows", row_setting, "value", DEFAULT);
+        controller.bind_property ("columns", column_setting, "value", BIDIRECTIONAL);
+        controller.bind_property ("rows", row_setting, "value", BIDIRECTIONAL);
 
-        grade_setting.selected = settings.get_enum ("grade");
+        grade_setting.selected = controller.generator_grade;
         grade_setting.notify["selected"].connect (() => {
-            settings.set_enum ("grade", (Difficulty)(grade_setting.selected));
+            controller.generator_grade = (Difficulty)(grade_setting.selected);
         });
     }
 }
