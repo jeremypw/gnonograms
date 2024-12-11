@@ -6,31 +6,31 @@
  */
 public class Gnonograms.Filewriter : Object {
     public DateTime date { get; construct; }
-    public History? history { get; construct; }
     public Gtk.Window? parent { get; construct; }
     public Difficulty difficulty { get; set; default = Difficulty.UNDEFINED;}
-    public GameState state { get; set; }
     public My2DCellArray? solution { get; set; default = null;}
-    public My2DCellArray? working { get; set; default = null;}
     public uint rows { get; construct; }
     public uint cols { get; construct; }
     public string name { get; set; }
     public string[] row_clues { get; construct; }
     public string[] col_clues { get; construct; }
-    public bool save_solution { get; construct; }
-    public string? game_path { get; private set; }
+    public string? game_path { get; set construct; }
+    public string? game_name { get; set construct; }
+    public string? save_dir_path { get; construct; }
     public string author { get; set; default = "";}
     public string license { get; set; default = "";}
-    public bool is_readonly { get; set; default = true;}
-
     private FileStream? stream;
 
-    public Filewriter (Gtk.Window? parent,
-                       Dimensions dimensions,
-                       string[] row_clues,
-                       string[] col_clues,
-                       History? history,
-                       bool save_solution) {
+    public Filewriter (
+        Gtk.Window? parent,
+        Dimensions dimensions,
+        string[] row_clues,
+        string[] col_clues,
+        Difficulty difficulty,
+        string? save_dir_path,
+        string? game_path,
+        string game_name
+    ) {
 
         Object (
             name: _(UNTITLED_NAME),
@@ -39,8 +39,10 @@ public class Gnonograms.Filewriter : Object {
             cols: dimensions.width,
             row_clues: row_clues,
             col_clues: col_clues,
-            history: history,
-            save_solution: save_solution
+            difficulty: difficulty,
+            save_dir_path: save_dir_path,
+            game_path: game_path,
+            game_name: game_name
         );
     }
 
@@ -49,31 +51,24 @@ public class Gnonograms.Filewriter : Object {
     }
 
     /*** Writes minimum information required for valid game file ***/
-    public async void write_game_file (
-        string? save_dir_path = null,
-        string? path = null,
-        string? _name = null
-    ) throws Error {
-        if (_name != null) {
-            name = _name;
-        } else {
-            name = _(UNTITLED_NAME);
+    public async void write_game_file (bool is_readonly) throws Error {
+        if (game_name == null) {
+           game_name = _(UNTITLED_NAME);
         }
 
-        if (path == null || path.length <= 4) {
-            var game_file = yield Utils.get_open_save_file (parent,
+        if (game_path == null || game_path.length <= 4) {
+            var game_file = yield Utils.get_open_save_file (
+                parent,
                 _("Name and save this puzzle"),
                 true,
                 save_dir_path,
-                name
+                game_name
             );
 
             if (game_file != null) {
                 game_path = game_file.get_path ();
             }
-        } else {
-            game_path = path;
-        }
+        } 
 
         if (game_path != null &&
             (game_path.length < 4 ||
@@ -107,7 +102,7 @@ public class Gnonograms.Filewriter : Object {
 
         stream.printf ("[Description]\n");
         stream.printf ("%s\n", name);
-        stream.printf ("%s\n", author);
+        stream.printf ("%s\n", author != "" ? author : "Gnonograms Generator");
         stream.printf ("%s\n", date.to_string ());
         stream.printf ("%u\n", difficulty);
 
@@ -144,7 +139,7 @@ public class Gnonograms.Filewriter : Object {
 
         stream.flush ();
 
-        if (solution != null && save_solution) {
+        if (solution != null) {
             stream.printf ("[Solution grid]\n");
             stream.printf ("%s", solution.to_string ());
         }
@@ -155,21 +150,19 @@ public class Gnonograms.Filewriter : Object {
 
     /*** Writes complete information to reload game state ***/
     public async void write_position_file (
-        string? save_dir_path = null,
-        string? path = null,
-        string? name = null
+        My2DCellArray working, 
+        GameState state, 
+        History history 
     ) throws Error {
-        if (working == null) {
-            throw (new IOError.NOT_INITIALIZED ("No working grid to save"));
-        }
+warning ("writing game file");
+        yield write_game_file ( false );
 
-        yield write_game_file (save_dir_path, path, name );
-
+warning ("Writing working grid");
         stream.printf ("[Working grid]\n");
         stream.printf (working.to_string ());
         stream.printf ("[State]\n");
         stream.printf (state.to_string () + "\n");
-        if (name != _(UNTITLED_NAME)) {
+        if (game_name != _(UNTITLED_NAME)) {
             stream.printf ("[Original path]\n");
             stream.printf (game_path.to_string () + "\n");
         }

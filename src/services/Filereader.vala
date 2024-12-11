@@ -282,13 +282,14 @@ public class Gnonograms.Filereader : Object {
 
     private bool get_gnonogram_state (string? body) {
         /* Default to SOLVING state to avoid inadvertently showing solution */
-        state = GameState.SOLVING;
+        has_state = false;
         if (body != null) {
             string[] s = Utils.remove_blank_lines (body.split ("\n"));
             if (s != null && s.length == 1) {
                 var state_string = s[0];
                 if (state_string.up ().contains ("SETTING")) {
                     state = GameState.SETTING;
+                    has_state = true;
                 }
             }
         }
