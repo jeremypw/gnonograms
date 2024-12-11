@@ -286,10 +286,12 @@ public class Gnonograms.Filereader : Object {
         if (body != null) {
             string[] s = Utils.remove_blank_lines (body.split ("\n"));
             if (s != null && s.length == 1) {
+                has_state = true;
                 var state_string = s[0];
                 if (state_string.up ().contains ("SETTING")) {
-                    state = GameState.SETTING;
-                    has_state = true;
+                    state = SETTING;
+                } else {
+                    state = SOLVING;
                 }
             }
         }

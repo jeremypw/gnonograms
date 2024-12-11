@@ -285,6 +285,7 @@ public class Gnonograms.Controller : GLib.Object {
     private async bool restore_game () {
         if (temporary_game_path != null) {
             var current_game_file = File.new_for_path (temporary_game_path);
+            warning ("restore game %s", current_game_file.get_path ());
             return yield load_game_async (current_game_file);
         } else {
             return false;
@@ -377,20 +378,24 @@ public class Gnonograms.Controller : GLib.Object {
             game_state = SOLVING; // Default to solving to hide solution
             return false;
         }
-
+warning ("reader read OK");
         if (reader.valid && (yield load_common (reader))) {
+warning ("load common OK");
             if (reader.has_working) {
+warning ("has working");
                 model.set_working_data_from_string_array (reader.working[0 : dimensions.height]);
             }
 
             if (reader.has_state) {
+warning ("has state %s", reader.state.to_string ());
                 game_state = reader.state;
                 history.from_string (reader.moves);
                 if (history.can_go_back) {
                     view.make_move (history.get_current_move ());
                 }
+            } else {
+                game_state = SOLVING;
             }
-
         } else {
             view.send_notification (_("Unable to load game. %s").printf (reader.err_msg));
             return false;
@@ -419,6 +424,7 @@ public class Gnonograms.Controller : GLib.Object {
 
         Idle.add (() => { // Need time for model to update dimensions through notify signal
             model.blank_working (); // Do not reveal solution on load
+            model.blank_solution (); // Do not reveal solution on load
 
             if (reader.has_solution) {
                 view.game_grade = reader.difficulty;
@@ -431,6 +437,7 @@ public class Gnonograms.Controller : GLib.Object {
             }
 
             if (reader.has_solution) {
+            warning ("has solution");
                 model.set_solution_data_from_string_array (reader.solution[0 : dimensions.height]);
                 view.update_clues_from_solution (); /* Ensure completeness correctly set */
             }
@@ -439,9 +446,11 @@ public class Gnonograms.Controller : GLib.Object {
                 game_name = reader.name;
             }
 
+            load_common.callback ();
             return Source.REMOVE;
         });
 
+        yield;
         is_readonly = reader.is_readonly;
         if (reader.original_path != null && reader.original_path != "") {
             current_game_path = reader.original_path;
@@ -449,6 +458,7 @@ public class Gnonograms.Controller : GLib.Object {
             current_game_path = reader.game_file.get_path ();
         }
 
+warning ("current game path now %s", current_game_path);
         return true;
     }
 
@@ -573,7 +583,7 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     public void open_game () {
-    warning ("Controller: open game");
+    warning ("Controller: open game (null)");
         load_game_async.begin (null); /* Filereader will request load location */
     }
 
