@@ -52,16 +52,13 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     public signal void debug_request (uint idx, bool is_column);
 #endif
 
-    // public Model model { get; construct; }
-    // public Controller controller { get; construct; }
-
     public SimpleActionGroup view_actions { get; construct; }
 
     public Cell? current_cell { get; set; }
     public Cell? previous_cell { get; set; }
     public Difficulty generator_grade { get; set; }
     public Difficulty game_grade { get; set; }
-    public string game_name { get { return controller.game_name; } }
+    // public string game_name { get { return controller.game_name; } }
     public bool readonly { get; set; default = false;}
     public bool restart_destructive { get; set; default = false;}
 
@@ -236,6 +233,9 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         );
 
         controller.notify["game-state"].connect (on_game_state_changed);
+        controller.notify["game-name"].connect (update_title);
+        controller.notify["current-game-path"].connect (update_title);
+        notify["game-grade"].connect (update_title);
 
         notify["current-cell"].connect (() => {
             highlight_labels (previous_cell, false);
@@ -327,8 +327,9 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         update_all_labels_completeness ();
     }
 
-    public void update_title (string title) {
-        headerbar_factory.update_title (game_name, title, game_grade);
+    public void update_title () {
+    warning ("View: update title %s", controller.game_name);
+        headerbar_factory.update_title (controller.game_name, controller.current_game_path, game_grade);
     }
 
     public void on_can_go_changed (bool forward, bool back) {

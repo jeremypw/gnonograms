@@ -140,10 +140,6 @@ public class Gnonograms.Controller : GLib.Object {
             BindingFlags.SYNC_CREATE
         );
 
-        notify["game-name"].connect (() => {
-            view.update_title (game_name);
-        });
-
         history.can_go_changed.connect ((forward, back) => {
             view.on_can_go_changed (forward, back);
         });
@@ -282,6 +278,33 @@ public class Gnonograms.Controller : GLib.Object {
         return saved_file_path != null;
     }
 
+    // Called by save action
+    public async void save_game () {
+    warning ("Controller: save game");
+        if (current_game_path == "") {
+            yield save_game_as ();
+        } else {
+            warning ("write game - no state");
+            var path = yield write_game (current_game_path, false);
+            if (path != null && path != "") {
+                current_game_path = path;
+                notify_saved (path);
+            }
+        }
+    }
+
+    // Called by save_as action
+    public async void save_game_as () {
+    warning ("Controller: save game as");
+        /* Filewriter will request save location, no solution saved as default */
+        var path = yield write_game (null, false);
+        if (path != null) {
+            current_game_path = path;
+            notify_saved (path);
+            is_readonly = false;
+        }
+    }
+
     private async bool restore_game () {
         if (temporary_game_path != null) {
             var current_game_file = File.new_for_path (temporary_game_path);
@@ -292,8 +315,12 @@ public class Gnonograms.Controller : GLib.Object {
         }
     }
 
-    private async string? write_game (string? path, bool save_state = false) requires (saved_games_folder != null) {
-    warning ("write game to %s, save state %s, save dir %s", path, save_state.to_string (), saved_games_folder);
+    private async string? write_game (
+        string? save_to_path,
+        bool save_state = false
+    ) requires (saved_games_folder != null) {
+
+    warning ("write game to %s, save state %s, save dir %s", save_to_path, save_state.to_string (), saved_games_folder);
         var file_writer = new Filewriter (
             window,
             dimensions,
@@ -301,8 +328,9 @@ public class Gnonograms.Controller : GLib.Object {
             view.get_clues (true),
             view.game_grade,
             saved_games_folder,
-            path,
-            game_name
+            current_game_path,
+            game_name,
+            save_to_path
 
         ) {
             solution = !model.solution_is_blank () ? model.copy_solution_data () : null
@@ -359,6 +387,7 @@ public class Gnonograms.Controller : GLib.Object {
                 game
             );
         } catch (GLib.Error e) {
+        warning ("error on reading file %s", e.message);
             if (!(e is IOError.CANCELLED)) {
                 var basename = game != null ? game.get_basename () : _("game");
                 var game_path = "";
@@ -405,6 +434,9 @@ warning ("has state %s", reader.state.to_string ());
     }
 
     private async bool load_common (Filereader reader) {
+        view.game_grade = reader.difficulty;
+        is_readonly = reader.is_readonly;
+
         if (reader.has_dimensions) {
             if (reader.rows > MAXSIZE || reader.cols > MAXSIZE) {
                 reader.err_msg = (_("Dimensions too large"));
@@ -413,6 +445,7 @@ warning ("has state %s", reader.state.to_string ());
                 reader.err_msg = (_("Dimensions too small"));
                 return false;
             } else {
+                // This will resize model and view as well
                 columns = reader.cols;
                 rows = reader.rows;
             }
@@ -421,20 +454,29 @@ warning ("has state %s", reader.state.to_string ());
             return false;
         }
 
+        if (reader.has_row_clues && reader.has_col_clues) {
+            view.update_clues_from_string_array (reader.row_clues, false);
+            view.update_clues_from_string_array (reader.col_clues, true);
+        } else {
+            reader.err_msg = (_("Clues missing"));
+            return false;
+        }
+
+        if (reader.name.length > 1 && reader.name != "") {
+            game_name = reader.name;
+        }
+
+
+        if (reader.original_path != null && reader.original_path != "") {
+            warning ("has original path %s", reader.original_path);
+            current_game_path = reader.original_path;
+        } else {
+            current_game_path = reader.game_file.get_path ();
+        }
 
         Idle.add (() => { // Need time for model to update dimensions through notify signal
             model.blank_working (); // Do not reveal solution on load
             model.blank_solution (); // Do not reveal solution on load
-
-            if (reader.has_solution) {
-                view.game_grade = reader.difficulty;
-            } else if (reader.has_row_clues && reader.has_col_clues) {
-                view.update_clues_from_string_array (reader.row_clues, false);
-                view.update_clues_from_string_array (reader.col_clues, true);
-            } else {
-                reader.err_msg = (_("Clues missing"));
-                return false;
-            }
 
             if (reader.has_solution) {
             warning ("has solution");
@@ -442,21 +484,12 @@ warning ("has state %s", reader.state.to_string ());
                 view.update_clues_from_solution (); /* Ensure completeness correctly set */
             }
 
-            if (reader.name.length > 1 && reader.name != "") {
-                game_name = reader.name;
-            }
-
             load_common.callback ();
             return Source.REMOVE;
         });
 
         yield;
-        is_readonly = reader.is_readonly;
-        if (reader.original_path != null && reader.original_path != "") {
-            current_game_path = reader.original_path;
-        } else {
-            current_game_path = reader.game_file.get_path ();
-        }
+
 
 warning ("current game path now %s", current_game_path);
         return true;
@@ -550,32 +583,6 @@ warning ("current game path now %s", current_game_path);
         prepare_quit (); // Async
         warning ("on view deleted returning true");
         return true;
-    }
-
-    public async void save_game () {
-    warning ("Controller: save game");
-        if (is_readonly || current_game_path == "") {
-            warning ("save game as");
-            yield save_game_as ();
-        } else {
-            warning ("write game - no state");
-            var path = yield write_game (current_game_path, false);
-            if (path != null && path != "") {
-                current_game_path = path;
-                notify_saved (path);
-            }
-        }
-    }
-
-    public async void save_game_as () {
-    warning ("Controller: save game as");
-        /* Filewriter will request save location, no solution saved as default */
-        var path = yield write_game (null, false);
-        if (path != null) {
-            current_game_path = path;
-            notify_saved (path);
-            is_readonly = false;
-        }
     }
 
     private void notify_saved (string path) {

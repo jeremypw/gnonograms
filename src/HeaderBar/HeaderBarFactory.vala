@@ -117,7 +117,7 @@ public class Gnonograms.HeaderBarFactory : Object {
         };
         progress_stack.add_named (progress_indicator, "Progress");
         progress_stack.add_named (title_label, "Title");
-        progress_stack.add_named (new Gtk.Label (""), "None");
+        // progress_stack.add_named (new Gtk.Label (""), "None");
         progress_stack.set_visible_child_name ("Title");
 
         header_bar = new Gtk.HeaderBar () {
@@ -180,11 +180,13 @@ public class Gnonograms.HeaderBarFactory : Object {
     public void update_title (string name, string path, Difficulty grade) {
         title_label.label = name;
         title_label.tooltip_text = path;
-        if (grade != UNDEFINED) {
+        // if (grade != UNDEFINED) {
+        //     warning ("show TITLE");
             progress_stack.set_visible_child_name ("Title");
-        } else {
-            progress_stack.set_visible_child_name ("None");
-        }
+        // } else {
+        //     warning ("show NONE");
+        //     progress_stack.set_visible_child_name ("None");
+        // }
     }
 
     public void show_working (string text) {
@@ -192,11 +194,11 @@ public class Gnonograms.HeaderBarFactory : Object {
     }
 
     public void hide_progress (Difficulty game_grade) {
-        if (game_grade != Difficulty.UNDEFINED) {
+        // if (game_grade != Difficulty.UNDEFINED) {
             progress_stack.set_visible_child_name ("Title");
-        } else {
-            progress_stack.set_visible_child_name ("None");
-        }
+        // } else {
+        //     progress_stack.set_visible_child_name ("None");
+        // }
     }
 
     public void show_progress (Cancellable? cancellable) {
