@@ -127,16 +127,19 @@ public class Gnonograms.HeaderBarManager : Object {
 
         progress_stack = new Gtk.Stack () {
             halign = Gtk.Align.CENTER,
+            hexpand = true
         };
         progress_stack.add_named (progress_indicator, "Progress");
         progress_stack.add_named (label_box, "Title");
         progress_stack.set_visible_child_name ("Title");
+        progress_stack.add_css_class ("title");
 
         header_bar = new Gtk.HeaderBar () {
             show_title_buttons = true,
             title_widget = progress_stack
         };
-        header_bar.add_css_class ("gnonograms-header");
+
+
         header_bar.pack_start (generate_button);
         header_bar.pack_start (hint_button);
         header_bar.pack_start (restart_button);
@@ -192,9 +195,8 @@ public class Gnonograms.HeaderBarManager : Object {
     }
 
     public void update_title (string path, Difficulty grade) {
-warning ("update title - grade %s", grade.to_string ());
         grade_label.label = grade.to_string ();
-        title_label.tooltip_text = path;
+        progress_stack.tooltip_text = path;
         progress_stack.set_visible_child_name ("Title");
     }
 
