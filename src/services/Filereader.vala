@@ -31,7 +31,6 @@ public class Gnonograms.Filereader : Object {
     public bool has_solution { get; private set; default = false;}
     public bool has_working { get; private set; default = false;}
     public bool has_state { get; private set; default = false;}
-    // public bool is_readonly { get; private set; default = true;}
 
     public bool valid {
         get {
@@ -173,10 +172,6 @@ public class Gnonograms.Filereader : Object {
                 case "DES":
                     in_error = !get_game_description (body);
                     break;
-
-                // case "LOC":
-                //     in_error = !get_readonly (body);
-                //     break;
 
                 case "ORI":
                     in_error = !get_original_game_path (body);
@@ -327,22 +322,6 @@ public class Gnonograms.Filereader : Object {
 
         return true;
     }
-
-    // private bool get_readonly (string? body) {
-    //     if (body == null) {
-    //         return true; /* Not mandatory */
-    //     }
-
-    //     string[] s = Utils.remove_blank_lines (body.split ("\n"));
-    //     bool result = true;
-    //     if (s.length >= 1) {
-    //         bool.try_parse (s[0].down (), out result);
-    //     }
-
-    //     // is_readonly = result;
-
-    //     return true;
-    // }
 
     private bool get_original_game_path (string? body) {
         string result = "";

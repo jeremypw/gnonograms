@@ -9,7 +9,7 @@
             Object (
                 action_name: action_name,
                 tooltip_markup: Granite.markup_accel_tooltip (
-                    ((App)(Application.get_default ())).get_accels_for_action (action_name), 
+                    ((App)(Application.get_default ())).get_accels_for_action (action_name),
                     text
                 ),
                 valign: Gtk.Align.CENTER

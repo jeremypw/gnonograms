@@ -11,7 +11,6 @@ public class Gnonograms.Filewriter : Object {
     public My2DCellArray? solution { get; set; default = null;}
     public uint rows { get; construct; }
     public uint cols { get; construct; }
-    // public string name { get; set; }
     public string[] row_clues { get; construct; }
     public string[] col_clues { get; construct; }
     public string? game_path { get; set construct; }
@@ -54,7 +53,6 @@ public class Gnonograms.Filewriter : Object {
 
     /*** Writes minimum information required for valid game file ***/
     public async void write_game_file (SaveFlags flags) throws Error {
-    warning ("write game name %s", game_name);
         if (game_name == null) {
            game_name = _(UNTITLED_NAME);
         }
@@ -87,7 +85,6 @@ public class Gnonograms.Filewriter : Object {
         var file = File.new_for_commandline_arg (save_to_path);
         if (CONFIRM_OVERWRITE in flags &&
             file.query_exists ()) {
-warning ("confirming overwrite");
             var overwrite = Utils.show_confirm_dialog (
                 _("Overwrite %s").printf (save_to_path),
                 _("This action will destroy contents of that file"),
@@ -104,10 +101,6 @@ warning ("confirming overwrite");
         if (stream == null) {
             throw new IOError.FAILED ("Could not open filestream to %s".printf (save_to_path));
         }
-
-        // if (name == null || name.length == 0) {
-        //     throw new IOError.NOT_INITIALIZED ("No name to save");
-        // }
 
         stream.printf ("[Description]\n");
         stream.printf ("%s\n", game_name);
@@ -152,9 +145,6 @@ warning ("confirming overwrite");
             stream.printf ("[Solution grid]\n");
             stream.printf ("%s", solution.to_string ());
         }
-
-        // stream.printf ("[Locked]\n");
-        // stream.printf (is_readonly.to_string () + "\n");
     }
 
     /*** Writes complete information to reload game state ***/

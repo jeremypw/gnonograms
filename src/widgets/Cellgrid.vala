@@ -65,8 +65,6 @@ public struct Gnonograms.Cell {
 public class Gnonograms.CellGrid : Gtk.DrawingArea {
     public signal void leave ();
 
-    // public unowned View view { get; construct; }
-    // public Model model { get; construct; }
     public Cell? current_cell { get; set; }
     public Cell? previous_cell { get; set; }
     public bool frozen { get; set; }
@@ -123,17 +121,9 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
             return model.display_data;
         }
     }
-    
+
     private Controller controller = Controller.get_default ();
     private Model model = Model.get_default ();
-
-    // private App app = ((App)(Application.get_default ()));
-
-    // public CellGrid (Model model) {
-    //     Object (
-    //         model: model
-    //     );
-    // }
 
     construct {
         hexpand = true;
@@ -156,8 +146,6 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         });
 
         controller.notify["game-state"].connect (on_game_state_changed);
-        // app.bind_property ("game-state", this, "game-state");
-        // app.game_state_changed.connect (on_game_state_changed);
         controller.dimensions_changed.connect (on_dimensions_changed);
 
         model.changed.connect (() => {
@@ -194,12 +182,10 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         });
     }
 
-    // private GameState gs;
     private void on_game_state_changed () {
-        // this.gs = gs;
         update_colors (controller.game_state);
     }
-    
+
     private void update_colors (GameState gs) {
         unknown_color = colors[(int)gs, (int)CellState.UNKNOWN];
         fill_color = colors[(int)gs, (int)CellState.FILLED];
@@ -243,12 +229,12 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
     }
 
     private void draw_func (
-        Gtk.DrawingArea drawing_area, 
-        Cairo.Context cr, 
-        int x, 
+        Gtk.DrawingArea drawing_area,
+        Cairo.Context cr,
+        int x,
         int y
     ) {
-    
+
         dirty = false;
         if (array != null) {
             /* Note, even tho' array holds CellStates, its iterator returns Cells */

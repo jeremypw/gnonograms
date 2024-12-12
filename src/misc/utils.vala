@@ -198,8 +198,8 @@ namespace Gnonograms.Utils {
         } else if (count_state == CellState.UNKNOWN) {
             sb.append ("?" + BLOCKSEPARATOR);
             blocks++;
-        } 
-        
+        }
+
         if (blocks == 0) {
             sb.append ("0");
         } else {
@@ -332,10 +332,4 @@ namespace Gnonograms.Utils {
         warning ("done");
         return result;
     }
-
-    // public Gdk.Rectangle get_monitor_area (Gdk.Surface surface) {
-    //     var display = Gdk.Display.get_default ();
-    //     var monitor = display.get_monitor_at_surface (surface);
-    //     return monitor.get_geometry ();
-    // }
 }

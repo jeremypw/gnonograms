@@ -9,12 +9,12 @@ public class Gnonograms.Model : GLib.Object {
         if (instance == null) {
             instance = new Model ();
         }
-        
+
         return instance;
     }
-    
+
     private static Model? instance;
-    
+
     public signal void changed ();
 
     public My2DCellArray display_data {

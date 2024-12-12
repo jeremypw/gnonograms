@@ -5,8 +5,6 @@
  * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
 public class Gnonograms.Move {
-    // public static Move null_move = new Move (NULL_CELL, CellState.UNDEFINED);
-
     public Cell cell;
     public CellState previous_state;
 
@@ -19,7 +17,7 @@ public class Gnonograms.Move {
 
         previous_state = _previous_state;
     }
-    
+
     public Move (uint _row, uint _col, CellState _state, CellState _previous_state) {
         cell = Cell () {
             row =_row,
@@ -38,7 +36,7 @@ public class Gnonograms.Move {
             previous_state < CellState.COMPLETED
         );
     }
-    
+
     public bool equal (Move? m) {
         return m != null && (m.cell.equal (cell) && m.previous_state == previous_state);
     }
@@ -47,19 +45,11 @@ public class Gnonograms.Move {
         return new Move.from_cell (this.cell.clone (), this.previous_state);
     }
 
-    // public bool is_null () {
-    //     return equal (Move.null_move);
-    // }
-
     public string to_string () {
         return "%u,%u,%u,%u".printf (cell.row, cell.col, cell.state, previous_state);
     }
 
     public static Move? from_string (string s) throws ConvertError {
-        // if (s == null) {
-        //     return Move.null_move;
-        // }
-
         var parts = s.split (",");
         if (parts == null || parts.length != 4) {
             // return Move.null_move;
@@ -70,16 +60,6 @@ public class Gnonograms.Move {
         var col = (uint)(int.parse (parts[1]));
         var state = (uint)(int.parse (parts[2]));
         var previous_state = (uint)(int.parse (parts[3]));
-
-        // if (row > MAXSIZE ||
-        //     col > MAXSIZE ||
-        //     state > CellState.COMPLETED ||
-        //     previous_state > CellState.COMPLETED) {
-
-        //     throw new ConvertError.FAILED ("Invalid location or state");
-        // }
-
-        // Cell c = {row, col, state};
         var mv = new Move (row, col, state, previous_state);
         if (mv.is_valid ()) {
             return mv;
