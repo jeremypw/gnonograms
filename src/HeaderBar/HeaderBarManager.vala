@@ -156,13 +156,13 @@ public class Gnonograms.HeaderBarManager : Object {
         header_bar.pack_end (auto_solve_button);
 
         controller.bind_property ("game-name", title_label, "text", BIDIRECTIONAL);
-        controller.bind_property ("current-game-path", progress_stack, "tooltip-text", DEFAULT);
+        controller.bind_property ("saved-path", progress_stack, "tooltip-text", DEFAULT);
         controller.bind_property ("game-grade", this, "game-grade", DEFAULT);
 
-        view.bind_property (
+        controller.bind_property (
             "restart-destructive",
             restart_button, "restart-destructive",
-            BindingFlags.SYNC_CREATE
+            DEFAULT
         );
 
     }

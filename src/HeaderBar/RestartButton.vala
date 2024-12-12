@@ -8,7 +8,6 @@
         public bool restart_destructive { get; set; }
 
         construct {
-            restart_destructive = false;
             notify["restart-destructive"].connect (() => {
                 if (restart_destructive) {
                     add_css_class ("warn");

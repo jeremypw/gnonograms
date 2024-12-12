@@ -41,14 +41,12 @@ public class Gnonograms.ClueBox : Gtk.Widget {
 
         if (holds_column_clues) {
             hexpand = false;
-            // view.controller.notify ["columns"].connect (add_remove_clues);
         } else {
             vexpand = false;
-            // view.controller.notify ["rows"].connect (add_remove_clues);
         }
 
         notify["cell-size"].connect (update_size_request);
-        controller.dimensions_changed.connect (on_dimensions_changed);
+        controller.notify["dimensions"].connect (on_dimensions_changed);
     }
 
     private void update_size_request () {
@@ -87,7 +85,10 @@ public class Gnonograms.ClueBox : Gtk.Widget {
             }
     }
 
-    public void on_dimensions_changed (uint rows, uint cols) {
+    public void on_dimensions_changed () {
+        var rows = controller.rows;
+        var cols = controller.columns;
+        
         var new_n_clues = holds_column_clues ? cols : rows;
         var new_n_cells = holds_column_clues ? rows : cols;
 

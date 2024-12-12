@@ -46,15 +46,15 @@ public class Gnonograms.Model : GLib.Object {
 
     construct {
         make_data_arrays ();
-        controller.dimensions_changed.connect (on_dimensions_changed);
+        controller.notify["dimensions"].connect (on_dimensions_changed);
         controller.notify["game-state"].connect (() => {
             changed ();
         });
     }
 
-    public void on_dimensions_changed (uint rows, uint cols) {
-        this.rows = rows;
-        this.cols = cols;
+    private void on_dimensions_changed () {
+        this.rows = controller.rows;
+        this.cols = controller.columns;
         make_data_arrays ();
     }
 

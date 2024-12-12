@@ -9,32 +9,6 @@ public class Gnonograms.PreferencesDialog : Granite.Dialog {
     construct {
         set_default_size (400, 100);
         resizable = false;
-        // var grade_setting = new Gtk.DropDown.from_strings ( Difficulty.all_human ());
-        // var grade_preference = new PreferenceRow (_("Degree of difficulty"), grade_setting);
-
-        // var row_setting = new Gtk.SpinButton (
-        //     new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),
-        //     5.0,
-        //     0
-        // ) {
-        //     snap_to_ticks = true,
-        //     orientation = Gtk.Orientation.HORIZONTAL,
-        //     width_chars = 3,
-        // };
-
-        // var row_preference = new PreferenceRow (_("Rows"), row_setting);
-
-        // var column_setting = new Gtk.SpinButton (
-        //     new Gtk.Adjustment (5.0, 5.0, 50.0, 5.0, 5.0, 5.0),
-        //     5.0,
-        //     0
-        // ) {
-        //     snap_to_ticks = true,
-        //     orientation = Gtk.Orientation.HORIZONTAL,
-        //     width_chars = 3
-        // };
-
-        // var column_preference = new PreferenceRow (_("Columns"), column_setting);
         // //TODO Add Clue help switch
 
         var empty_color_dialog = new Gtk.ColorDialog () {

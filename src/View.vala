@@ -56,10 +56,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
     public Cell? current_cell { get; set; }
     public Cell? previous_cell { get; set; }
-    // public Difficulty generator_grade { get; set; }
-    // public Difficulty game_grade { get; set; }
-    public bool readonly { get; set; default = false;}
-    public bool restart_destructive { get; set; default = false;}
+    // public bool restart_destructive { get; set; default = false;}
 
     private Controller controller = Controller.get_default ();
     private Model model = Model.get_default ();
@@ -232,8 +229,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         );
 
         controller.notify["game-state"].connect (on_game_state_changed);
-        // controller.notify["current-game-path"].connect (update_title);
-        // notify["game-grade"].connect (update_title);
 
         notify["current-cell"].connect (() => {
             highlight_labels (previous_cell, false);
@@ -262,7 +257,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private void on_game_state_changed () {
         var gs = controller.game_state;
         update_all_labels_completeness ();
-        restart_destructive = !model.is_blank (gs);
+        // restart_destructive = !model.is_blank (gs);
         headerbar_manager.on_game_state_changed (gs);
     }
 

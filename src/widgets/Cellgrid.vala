@@ -146,7 +146,7 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         });
 
         controller.notify["game-state"].connect (on_game_state_changed);
-        controller.dimensions_changed.connect (on_dimensions_changed);
+        controller.notify["dimensions"].connect (on_dimensions_changed);
 
         model.changed.connect (() => {
             if (!dirty) {
@@ -159,9 +159,9 @@ public class Gnonograms.CellGrid : Gtk.DrawingArea {
         settings.changed["empty-color"].connect (set_colors);
     }
 
-    public void on_dimensions_changed (uint rows, uint cols) {
-        this.rows = rows;
-        this.cols = cols;
+    public void on_dimensions_changed () {
+        this.rows = controller.rows;
+        this.cols = controller.columns;
         queue_allocate ();
     }
 

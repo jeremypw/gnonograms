@@ -26,22 +26,26 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     private static Controller? instance = null;
+    private static Gnonograms.App app = (Gnonograms.App) (Application.get_default ());
 
     public Gtk.Window window { get { return (Gtk.Window)view;}}
 
     // Settings
-    public string saved_path { get; private set; default = ""; } // Where saved (not temporary file)
+    public string saved_path { get;  set; } // Where saved (not temporary file)
     public Difficulty generator_grade { get; set; } // Target difficulty of generator. Set in AppPopover
 
     // Game details
     public GameState game_state { get; set; } // Whether solving or designing
-    public Difficulty game_grade { get; private set; default = UNDEFINED; } // Difficulty of the game, if known
-    public uint rows { get; set; } // Can be set be App Popover
-    public uint columns { get; set; } // Can be set be App Popover
-    public string game_name { get; set; default = _(UNTITLED_NAME); } // Can be set be App Popover
-    public string author { get; set; default = _("Unknown"); } //TODO Can be set be App Popover
+    public Difficulty game_grade { get; private set; } // Difficulty of the game, if known
+    public uint rows { get { return dimensions.height; } } // Can be set be App Popover
+    public uint columns { get { return dimensions.width; } } // Can be set be App Popover
+    public Dimensions dimensions { get; private set; }
+    public string game_name { get; set; } // Can be set be App Popover
+    public string author { get; set; } //TODO Can be set be App Popover
 
-
+    // Game states
+    public bool restart_destructive { get; set; }
+        
     public bool can_go_back {
         get {
             return history.can_go_back;
@@ -53,22 +57,20 @@ public class Gnonograms.Controller : GLib.Object {
         }
     }
 
+    // Private members
     private View view;
     private Model model;
     private Solver? solver;
     private SimpleRandomGameGenerator? generator;
     private Gnonograms.History history;
-    private string saved_games_folder;
+    private string saved_games_folder; // TODO Make user settable
     private string temporary_game_path;
-    private Gnonograms.App app = (Gnonograms.App) (Application.get_default ());
-    private Dimensions dimensions {
-        get {
-            return { columns, rows };
-        }
-    }
 
+
+
+    // Signals
     public signal void quit_app ();
-    public signal void dimensions_changed (uint rows, uint cols);
+    // public signal void dimensions_changed (uint rows, uint cols);
 
     private Controller () {}
     construct {
@@ -91,7 +93,6 @@ public class Gnonograms.Controller : GLib.Object {
 
         saved_games_folder = Environment.get_user_special_dir (UserDirectory.DOCUMENTS);
 
-        saved_path = "";
         temporary_game_path = Path.build_path (
             Path.DIR_SEPARATOR_S,
             data_home_folder_current,
@@ -99,17 +100,19 @@ public class Gnonograms.Controller : GLib.Object {
         );
 
         saved_state.bind ("mode", this, "game-state", SettingsBindFlags.DEFAULT);
-        saved_state.bind ("current-game-path", this, "current-game-path", SettingsBindFlags.DEFAULT);
+        saved_state.bind ("current-game-path", this, "saved-path", SettingsBindFlags.DEFAULT);
         settings.bind ("grade", this, "generator-grade", SettingsBindFlags.DEFAULT);
-        notify["rows"].connect (on_dimensions_changed);
-        notify["columns"].connect (on_dimensions_changed);
+        notify["dimensions"].connect (on_dimensions_changed);
     }
 
     protected void set_model_and_view () {
         // Needs to be done after Controller construction complete as they need a controller instance
         model = Model.get_default ();
+        model.changed.connect (() => {
+            restart_destructive = !model.is_blank (game_state);
+        });
+        
         view = View.get_default ();
-
         view.close_request.connect (() => {
             return on_delete_request ();
         });
@@ -131,6 +134,7 @@ public class Gnonograms.Controller : GLib.Object {
             view.on_can_go_changed (forward, back);
         });
 
+        restore_defaults ();
 
         restore_game.begin ((obj, res) => {
             if (!restore_game.end (res)) {
@@ -143,17 +147,23 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     private void restore_defaults () {
-        rows = 10;
-        columns = 15;
+        var r = settings.get_uint ("rows");
+        var c = settings.get_uint ("columns");
+        dimensions = { c, r };
         game_grade = Difficulty.UNDEFINED;
         game_state = GameState.SETTING;
+        saved_path = "";
+        game_name = _(UNTITLED_NAME);
+        author = _("Unknown");
 
     }
 
     private void on_dimensions_changed () {
         solver = new Solver (dimensions);
         game_name = _(UNTITLED_NAME);
-        dimensions_changed (rows, columns);
+        settings.set_uint ("rows", dimensions.height);
+        settings.set_uint ("columns", dimensions.width);
+        // dimensions_changed (rows, columns);
     }
 
     private void new_or_random_game () {
@@ -192,7 +202,6 @@ public class Gnonograms.Controller : GLib.Object {
                     critical ("Error saving game state");
                 }
                 // Always quit for now
-                warning ("quitting after save state");
                 app.release ();
                 app.quit ();
             });
@@ -417,8 +426,7 @@ public class Gnonograms.Controller : GLib.Object {
                 return false;
             } else {
                 // This will resize model and view as well
-                columns = reader.cols;
-                rows = reader.rows;
+                dimensions = { reader.cols, reader.rows };
             }
         } else {
             reader.err_msg = (_("Dimensions missing"));

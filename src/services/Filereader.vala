@@ -317,16 +317,12 @@ public class Gnonograms.Filereader : Object {
         }
 
         if (s.length >= 4) {
-        warning ("reading difficulty");
             var grade = s[3].strip ();
-            warning ("read %s", grade);
             if (grade.length == 1 && grade[0].isdigit ()) {
                 difficulty = (Difficulty)(int.parse (grade));
             } else {
                 difficulty = Difficulty.UNDEFINED;
             }
-
-            warning ("got %s", difficulty.to_string ());
         }
 
         return true;
