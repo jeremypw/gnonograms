@@ -68,7 +68,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     private ClueBox column_clue_box;
     private CellGrid cell_grid;
     private Gtk.MenuButton menu_button;
-    private HeaderBarFactory headerbar_factory;
+    private HeaderBarManager headerbar_manager;
     private Gtk.Grid main_grid;
     private Adw.ToastOverlay toast_overlay;
     private uint drawing_with_key = 0;
@@ -143,9 +143,9 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             app.set_accels_for_action (ACTION_PREFIX + action, accels_array);
         }
 
-        headerbar_factory = new HeaderBarFactory (this);
+        headerbar_manager = new HeaderBarManager (this);
 
-        set_titlebar (headerbar_factory.get_headerbar ());
+        set_titlebar (headerbar_manager.get_headerbar ());
 
         row_clue_box = new ClueBox (false);
         column_clue_box = new ClueBox (true);
@@ -265,7 +265,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         var gs = controller.game_state;
         update_all_labels_completeness ();
         restart_destructive = !model.is_blank (gs);
-        headerbar_factory.on_game_state_changed (gs);
+        headerbar_manager.on_game_state_changed (gs);
     }
 
 
@@ -312,7 +312,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     public void show_working (Cancellable cancellable, string text = "") {
         cell_grid.frozen = true; // Do not show model updates
         schedule_show_progress (cancellable);
-        headerbar_factory.show_working (text);
+        headerbar_manager.show_working (text);
     }
 
     public void end_working () {
@@ -322,18 +322,18 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             progress_timeout_id = 0;
         }
 
-        headerbar_factory.hide_progress (game_grade);
+        headerbar_manager.hide_progress (game_grade);
 
         update_all_labels_completeness ();
     }
 
     public void update_title () {
     warning ("View: update title %s", controller.game_name);
-        headerbar_factory.update_title (controller.game_name, controller.current_game_path, game_grade);
+        headerbar_manager.update_title (controller.game_name, controller.current_game_path, game_grade);
     }
 
     public void on_can_go_changed (bool forward, bool back) {
-        headerbar_factory.on_can_go_changed (forward, back);
+        headerbar_manager.on_can_go_changed (forward, back);
     }
 
     private void highlight_labels (Cell? c, bool is_highlight) {
@@ -417,7 +417,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             Priority.HIGH_IDLE,
             PROGRESS_DELAY_MSEC,
             () => {
-                headerbar_factory.show_progress (cancellable);
+                headerbar_manager.show_progress (cancellable);
                 progress_timeout_id = 0;
                 return false;
             }
@@ -450,7 +450,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     }
 
     private void action_preferences () {
-        headerbar_factory.popdown_menus ();
+        headerbar_manager.popdown_menus ();
         var dialog = new PreferencesDialog () {
             transient_for = this,
             title = _("Preferences")

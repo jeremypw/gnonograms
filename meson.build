@@ -43,7 +43,7 @@ executable (
     'src/View.vala',
     'src/Model.vala',
 
-    'src/HeaderBar/HeaderBarFactory.vala',
+    'src/HeaderBar/HeaderBarManager.vala',
     'src/HeaderBar/HeaderButton.vala',
     'src/HeaderBar/PopoverButton.vala',
     'src/HeaderBar/ProgressIndicator.vala',

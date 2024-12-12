@@ -5,7 +5,7 @@
  * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
 
-public class Gnonograms.HeaderBarFactory : Object {
+public class Gnonograms.HeaderBarManager : Object {
 
     public View view { get; construct; }
 
@@ -23,7 +23,7 @@ public class Gnonograms.HeaderBarFactory : Object {
     private Gtk.Button auto_solve_button;
     private Gtk.Button restart_button;
 
-    public HeaderBarFactory (Gnonograms.View view) {
+    public HeaderBarManager (Gnonograms.View view) {
         Object (
             view: view
         );
