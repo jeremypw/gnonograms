@@ -88,7 +88,7 @@ public class Gnonograms.ClueBox : Gtk.Widget {
     public void on_dimensions_changed () {
         var rows = controller.rows;
         var cols = controller.columns;
-        
+
         var new_n_clues = holds_column_clues ? cols : rows;
         var new_n_cells = holds_column_clues ? rows : cols;
 
@@ -108,6 +108,10 @@ public class Gnonograms.ClueBox : Gtk.Widget {
                 var clue = new Clue (holds_column_clues, this);
                 clues.add (clue);
                 clue.label.set_parent (this);
+            }
+        } else {
+            foreach (var clue in clues) {
+                clue.text = "0";
             }
         }
 

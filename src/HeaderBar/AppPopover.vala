@@ -71,13 +71,18 @@ public class Gnonograms.AppPopover : Gtk.Popover {
 
         child = settings_box;
 
-        // controller.bind_property ("columns", column_setting, "value", BIDIRECTIONAL);
-        // controller.bind_property ("rows", row_setting, "value", BIDIRECTIONAL);
-        // TODO Apply dumension settings on popdown
-        
         grade_setting.selected = controller.generator_grade;
         grade_setting.notify["selected"].connect (() => {
             controller.generator_grade = (Difficulty)(grade_setting.selected);
+        });
+
+        controller.notify["dimensions"].connect (() => {
+            row_setting.value = controller.rows;
+            column_setting.value = controller.columns;
+        });
+
+        closed.connect (() => {
+            controller.change_dimensions ((uint) row_setting.value, (uint) column_setting.value);
         });
     }
 }

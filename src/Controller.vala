@@ -31,7 +31,7 @@ public class Gnonograms.Controller : GLib.Object {
     public Gtk.Window window { get { return (Gtk.Window)view;}}
 
     // Settings
-    public string saved_path { get;  set; } // Where saved (not temporary file)
+    public string saved_path { get; set; } // Where saved (not temporary file)
     public Difficulty generator_grade { get; set; } // Target difficulty of generator. Set in AppPopover
 
     // Game details
@@ -45,7 +45,7 @@ public class Gnonograms.Controller : GLib.Object {
 
     // Game states
     public bool restart_destructive { get; set; }
-        
+
     public bool can_go_back {
         get {
             return history.can_go_back;
@@ -65,8 +65,6 @@ public class Gnonograms.Controller : GLib.Object {
     private Gnonograms.History history;
     private string saved_games_folder; // TODO Make user settable
     private string temporary_game_path;
-
-
 
     // Signals
     public signal void quit_app ();
@@ -111,7 +109,7 @@ public class Gnonograms.Controller : GLib.Object {
         model.changed.connect (() => {
             restart_destructive = !model.is_blank (game_state);
         });
-        
+
         view = View.get_default ();
         view.close_request.connect (() => {
             return on_delete_request ();
@@ -171,6 +169,13 @@ public class Gnonograms.Controller : GLib.Object {
             on_new_random_request ();
         } else {
             new_game ();
+        }
+    }
+
+    public void change_dimensions (uint r, uint c) {
+        //TODO Check whether OK to change
+        if (r != rows || c != columns) {
+            dimensions = { c, r };
         }
     }
 
