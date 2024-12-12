@@ -56,8 +56,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
     public Cell? current_cell { get; set; }
     public Cell? previous_cell { get; set; }
-    public Difficulty generator_grade { get; set; }
-    public Difficulty game_grade { get; set; }
+    // public Difficulty generator_grade { get; set; }
+    // public Difficulty game_grade { get; set; }
     public bool readonly { get; set; default = false;}
     public bool restart_destructive { get; set; default = false;}
 
@@ -232,8 +232,8 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         );
 
         controller.notify["game-state"].connect (on_game_state_changed);
-        controller.notify["current-game-path"].connect (update_title);
-        notify["game-grade"].connect (update_title);
+        // controller.notify["current-game-path"].connect (update_title);
+        // notify["game-grade"].connect (update_title);
 
         notify["current-cell"].connect (() => {
             highlight_labels (previous_cell, false);
@@ -320,14 +320,9 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
             progress_timeout_id = 0;
         }
 
-        headerbar_manager.hide_progress (game_grade);
+        headerbar_manager.hide_progress ();
 
         update_all_labels_completeness ();
-    }
-
-    public void update_title () {
-    warning ("View: update title %s", controller.game_name);
-        headerbar_manager.update_title (controller.current_game_path, game_grade);
     }
 
     public void on_can_go_changed (bool forward, bool back) {
@@ -430,9 +425,9 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     /** Action callbacks **/
     private void action_restart () {
         controller.restart ();
-        if (controller.game_state == GameState.SETTING) {
-            game_grade = Difficulty.UNDEFINED;
-        }
+        // if (controller.game_state == GameState.SETTING) {
+        //     game_grade = Difficulty.UNDEFINED;
+        // }
     }
 
     private void action_computer_solve () requires (controller.game_state == GameState.SETTING) {

@@ -23,6 +23,11 @@ public class Gnonograms.HeaderBarManager : Object {
     private AppPopover app_popover;
     private Gtk.Button auto_solve_button;
     private Gtk.Button restart_button;
+    public Difficulty game_grade {
+        set {
+            grade_label.label = value.to_string ();
+        }
+    }
 
     private Controller controller = Controller.get_default ();
 
@@ -150,7 +155,9 @@ public class Gnonograms.HeaderBarManager : Object {
         header_bar.pack_end (mode_switch);
         header_bar.pack_end (auto_solve_button);
 
-        title_label.bind_property ("text", controller, "game-name", BIDIRECTIONAL);
+        controller.bind_property ("game-name", title_label, "text", BIDIRECTIONAL);
+        controller.bind_property ("current-game-path", progress_stack, "tooltip-text", DEFAULT);
+        controller.bind_property ("game-grade", this, "game-grade", DEFAULT);
 
         view.bind_property (
             "restart-destructive",
@@ -204,7 +211,7 @@ public class Gnonograms.HeaderBarManager : Object {
         progress_indicator.text = text;
     }
 
-    public void hide_progress (Difficulty game_grade) {
+    public void hide_progress () {
         progress_stack.set_visible_child_name ("Title");
     }
 

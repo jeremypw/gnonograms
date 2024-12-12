@@ -28,13 +28,19 @@ public class Gnonograms.Controller : GLib.Object {
     private static Controller? instance = null;
 
     public Gtk.Window window { get { return (Gtk.Window)view;}}
-    public GameState game_state { get; set; } // Stored with game file
-    public Difficulty generator_grade { get; set; } // synced with settings
-    public uint rows { get; set; } // Stored with game file. Can be set be App Popover
-    public uint columns { get; set; } // Stored with game file. Can be set be App Popover
+
+    // Settings
+    public string saved_path { get; private set; default = ""; } // Where saved (not temporary file)
+    public Difficulty generator_grade { get; set; } // Target difficulty of generator. Set in AppPopover
+
+    // Game details
+    public GameState game_state { get; set; } // Whether solving or designing
+    public Difficulty game_grade { get; private set; default = UNDEFINED; } // Difficulty of the game, if known
+    public uint rows { get; set; } // Can be set be App Popover
+    public uint columns { get; set; } // Can be set be App Popover
     public string game_name { get; set; default = _(UNTITLED_NAME); } // Can be set be App Popover
-    public string author { get; set; default = _("Unknown"); } // Can be set be App Popover
-    public string current_game_path { get; set; default = ""; } // synced with settings
+    public string author { get; set; default = _("Unknown"); } //TODO Can be set be App Popover
+
 
     public bool can_go_back {
         get {
@@ -46,6 +52,7 @@ public class Gnonograms.Controller : GLib.Object {
             return history.can_go_forward;
         }
     }
+
     private View view;
     private Model model;
     private Solver? solver;
@@ -67,9 +74,6 @@ public class Gnonograms.Controller : GLib.Object {
     construct {
         history = new History ();
 
-        notify["rows"].connect (on_dimensions_changed);
-        notify["columns"].connect (on_dimensions_changed);
-
         var data_home_folder_current = Path.build_path (
             Path.DIR_SEPARATOR_S,
             Environment.get_user_config_dir (),
@@ -87,7 +91,7 @@ public class Gnonograms.Controller : GLib.Object {
 
         saved_games_folder = Environment.get_user_special_dir (UserDirectory.DOCUMENTS);
 
-        current_game_path = "";
+        saved_path = "";
         temporary_game_path = Path.build_path (
             Path.DIR_SEPARATOR_S,
             data_home_folder_current,
@@ -97,15 +101,8 @@ public class Gnonograms.Controller : GLib.Object {
         saved_state.bind ("mode", this, "game-state", SettingsBindFlags.DEFAULT);
         saved_state.bind ("current-game-path", this, "current-game-path", SettingsBindFlags.DEFAULT);
         settings.bind ("grade", this, "generator-grade", SettingsBindFlags.DEFAULT);
-
-        restore_game.begin ((obj, res) => {
-            if (!restore_game.end (res)) {
-                /* Error normally thrown if running without installing */
-                warning ("Restoring game failed");
-                restore_defaults ();
-                new_game ();
-            }
-        });
+        notify["rows"].connect (on_dimensions_changed);
+        notify["columns"].connect (on_dimensions_changed);
     }
 
     protected void set_model_and_view () {
@@ -130,26 +127,25 @@ public class Gnonograms.Controller : GLib.Object {
         saved_state.bind ("window-height", view, "default-height", SettingsBindFlags.SET);
         saved_state.bind ("window-width", view, "default-width", SettingsBindFlags.SET);
 
-        bind_property (
-            "generator-grade",
-            view, "generator-grade",
-            BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL
-        );
-        bind_property (
-            "is-readonly",
-            view, "readonly",
-            BindingFlags.SYNC_CREATE
-        );
-
         history.can_go_changed.connect ((forward, back) => {
             view.on_can_go_changed (forward, back);
+        });
+
+
+        restore_game.begin ((obj, res) => {
+            if (!restore_game.end (res)) {
+                /* Error normally thrown if running without installing */
+                warning ("Restoring game failed");
+                restore_defaults ();
+                new_game ();
+            }
         });
     }
 
     private void restore_defaults () {
         rows = 10;
         columns = 15;
-        view.game_grade = Difficulty.UNDEFINED;
+        game_grade = Difficulty.UNDEFINED;
         game_state = GameState.SETTING;
 
     }
@@ -216,16 +212,16 @@ public class Gnonograms.Controller : GLib.Object {
         clear ();
         game_state = GameState.SETTING;
         game_name = _(UNTITLED_NAME);
-        current_game_path = "";
+        saved_path = "";
     }
 
     private void on_new_random_request () {
         clear ();
         solver.cancel ();
         author = APP_NAME;
-        current_game_path = "";
+        saved_path = "";
         game_name = _("Random pattern");
-        view.game_grade = Difficulty.UNDEFINED;
+        game_grade = Difficulty.UNDEFINED;
         game_state = GameState.GENERATING;
 
         var cancellable = new Cancellable ();
@@ -242,7 +238,7 @@ public class Gnonograms.Controller : GLib.Object {
                 model.set_solution_from_array (generator.get_solution ());
                 new_game_state = GameState.SOLVING;
                 view.update_clues_from_solution ();
-                view.game_grade = generator.solution_grade;
+                game_grade = generator.solution_grade;
             } else {
                 clear ();
                 new_game_state = GameState.SETTING;
@@ -272,12 +268,12 @@ public class Gnonograms.Controller : GLib.Object {
 
     // Called by save action
     public async void save_game () {
-        if (current_game_path == "") {
+        if (saved_path == "") {
             yield save_game_as ();
         } else {
-            var path = yield write_game (current_game_path, SaveFlags.NONE);
+            var path = yield write_game (saved_path, SaveFlags.NONE);
             if (path != null && path != "") {
-                current_game_path = path;
+                saved_path = path;
                 notify_saved (path);
             }
         }
@@ -289,7 +285,7 @@ public class Gnonograms.Controller : GLib.Object {
         /* Filewriter will request save location, no solution saved as default */
         var path = yield write_game (null, SaveFlags.CONFIRM_OVERWRITE);
         if (path != null) {
-            current_game_path = path;
+            saved_path = path;
             notify_saved (path);
         }
     }
@@ -310,13 +306,13 @@ public class Gnonograms.Controller : GLib.Object {
             view.get_clues (false),
             view.get_clues (true),
             saved_games_folder,
-            current_game_path,
+            saved_path,
             save_to_path
         ) {
             solution = !model.solution_is_blank () ? model.copy_solution_data () : null,
             game_name = this.game_name,
             author = this.author,
-            difficulty = view.game_grade
+            difficulty = game_grade
         };
 
         var gs = game_state;
@@ -411,8 +407,7 @@ public class Gnonograms.Controller : GLib.Object {
     }
 
     private async bool load_common (Filereader reader) {
-        view.game_grade = reader.difficulty;
-warning ("load common: difficulty %s", reader.difficulty.to_string ());
+        game_grade = reader.difficulty;
         if (reader.has_dimensions) {
             if (reader.rows > MAXSIZE || reader.cols > MAXSIZE) {
                 reader.err_msg = (_("Dimensions too large"));
@@ -444,10 +439,9 @@ warning ("load common: difficulty %s", reader.difficulty.to_string ());
 
 
         if (reader.original_path != null && reader.original_path != "") {
-            warning ("has original path %s", reader.original_path);
-            current_game_path = reader.original_path;
+            saved_path = reader.original_path;
         } else {
-            current_game_path = reader.game_file.get_path ();
+            saved_path = reader.game_file.get_path ();
         }
 
         Idle.add (() => { // Need time for model to update dimensions through notify signal
@@ -630,7 +624,7 @@ warning ("load common: difficulty %s", reader.difficulty.to_string ());
             view.send_notification (msg);
         }
 
-        view.game_grade = diff;
+        game_grade = diff;
         view.end_working ();
         return state;
     }
