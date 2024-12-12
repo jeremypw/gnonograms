@@ -14,8 +14,6 @@ public class Gnonograms.AppPopover : Gtk.Popover {
             placeholder_text = _("Enter title of game here"),
             margin_top = 12,
         };
-        title_entry.bind_property ("text", controller, "game-name", BIDIRECTIONAL);
-
 
         var grade_setting = new Gtk.DropDown.from_strings ( Difficulty.all_human ());
         var grade_preference = new PreferenceRow (_("Degree of difficulty"), grade_setting);
@@ -71,18 +69,17 @@ public class Gnonograms.AppPopover : Gtk.Popover {
 
         child = settings_box;
 
-        grade_setting.selected = controller.generator_grade;
-        grade_setting.notify["selected"].connect (() => {
-            controller.generator_grade = (Difficulty)(grade_setting.selected);
-        });
-
-        controller.notify["dimensions"].connect (() => {
+        show.connect (() => {
+            title_entry.text = controller.game_name;
             row_setting.value = controller.rows;
             column_setting.value = controller.columns;
+            grade_setting.selected = controller.generator_grade;
         });
 
         closed.connect (() => {
+            controller.game_name = title_entry.text;
             controller.change_dimensions ((uint) row_setting.value, (uint) column_setting.value);
+            controller.generator_grade = (Difficulty)(grade_setting.selected);
         });
     }
 }
