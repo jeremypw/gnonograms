@@ -24,6 +24,8 @@ public class Gnonograms.HeaderBarManager : Object {
     private Gtk.Button auto_solve_button;
     private Gtk.Button restart_button;
 
+    private Controller controller = Controller.get_default ();
+
     public HeaderBarManager (Gnonograms.View view) {
         Object (
             view: view
@@ -145,6 +147,8 @@ public class Gnonograms.HeaderBarManager : Object {
         header_bar.pack_end (mode_switch);
         header_bar.pack_end (auto_solve_button);
 
+        title_label.bind_property ("text", controller, "game-name", BIDIRECTIONAL);
+
         view.bind_property (
             "restart-destructive",
             restart_button, "restart-destructive",
@@ -187,9 +191,8 @@ public class Gnonograms.HeaderBarManager : Object {
         redo_button.sensitive = forward;
     }
 
-    public void update_title (string name, string path, Difficulty grade) {
+    public void update_title (string path, Difficulty grade) {
 warning ("update title - grade %s", grade.to_string ());
-        title_label.text = name;
         grade_label.label = grade.to_string ();
         title_label.tooltip_text = path;
         progress_stack.set_visible_child_name ("Title");

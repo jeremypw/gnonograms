@@ -232,7 +232,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         );
 
         controller.notify["game-state"].connect (on_game_state_changed);
-        controller.notify["game-name"].connect (update_title);
         controller.notify["current-game-path"].connect (update_title);
         notify["game-grade"].connect (update_title);
 
@@ -328,7 +327,7 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
 
     public void update_title () {
     warning ("View: update title %s", controller.game_name);
-        headerbar_manager.update_title (controller.game_name, controller.current_game_path, game_grade);
+        headerbar_manager.update_title (controller.current_game_path, game_grade);
     }
 
     public void on_can_go_changed (bool forward, bool back) {
