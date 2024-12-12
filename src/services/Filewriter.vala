@@ -53,7 +53,7 @@ public class Gnonograms.Filewriter : Object {
     }
 
     /*** Writes minimum information required for valid game file ***/
-    public async void write_game_file (bool is_readonly) throws Error {
+    public async void write_game_file (SaveFlags flags) throws Error {
     warning ("write game name %s", game_name);
         if (game_name == null) {
            game_name = _(UNTITLED_NAME);
@@ -71,7 +71,7 @@ public class Gnonograms.Filewriter : Object {
             if (save_to_file != null) {
                 save_to_path = save_to_file.get_path ();
             }
-        } 
+        }
 
         if (save_to_path != null &&
             (save_to_path.length < 4 ||
@@ -85,12 +85,18 @@ public class Gnonograms.Filewriter : Object {
         }
 
         var file = File.new_for_commandline_arg (save_to_path);
-        if (file.query_exists () &&
-            !Utils.show_confirm_dialog (
+        if (CONFIRM_OVERWRITE in flags &&
+            file.query_exists ()) {
+warning ("confirming overwrite");
+            var overwrite = Utils.show_confirm_dialog (
                 _("Overwrite %s").printf (save_to_path),
-                _("This action will destroy contents of that file"))
-        ) {
-            throw new IOError.CANCELLED ("File exists");
+                _("This action will destroy contents of that file"),
+                parent
+            );
+
+            if (!overwrite) {
+                throw new IOError.CANCELLED ("File exists");
+            }
         }
 
         /* @game_path is local path, not a uri */
@@ -147,28 +153,24 @@ public class Gnonograms.Filewriter : Object {
             stream.printf ("%s", solution.to_string ());
         }
 
-        stream.printf ("[Locked]\n");
-        stream.printf (is_readonly.to_string () + "\n");
+        // stream.printf ("[Locked]\n");
+        // stream.printf (is_readonly.to_string () + "\n");
     }
 
     /*** Writes complete information to reload game state ***/
     public async void write_position_file (
-        My2DCellArray working, 
-        GameState state, 
-        History history 
+        My2DCellArray working,
+        GameState state,
+        History history
     ) throws Error {
-warning ("writing game file");
-        yield write_game_file ( false );
+        yield write_game_file (SaveFlags.NONE);
 
-warning ("Writing working grid");
         stream.printf ("[Working grid]\n");
         stream.printf (working.to_string ());
         stream.printf ("[State]\n");
         stream.printf (state.to_string () + "\n");
-        // if (game_name != _(UNTITLED_NAME)) {
         stream.printf ("[Original path]\n");
         stream.printf (game_path.to_string () + "\n");
-        // }
 
         if (history != null) {
             stream.printf ("[History]\n");

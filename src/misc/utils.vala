@@ -323,16 +323,13 @@ namespace Gnonograms.Utils {
 
         dialog.set_modal (true);
         File? result = null;
+        warning ("show dialog");
         if (save) {
             result = yield (dialog.save (parent, null));
         } else {
             result = yield (dialog.open (parent, null));
         }
-
-
-
-
-
+        warning ("done");
         return result;
     }
 

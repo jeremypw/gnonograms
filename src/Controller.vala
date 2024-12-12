@@ -8,6 +8,13 @@
 
 public const string UNTITLED_NAME = N_("Untitled");
 
+[Flags]
+public enum SaveFlags {
+    NONE,
+    SAVE_STATE,
+    CONFIRM_OVERWRITE
+}
+
 public class Gnonograms.Controller : GLib.Object {
 
     public static Controller get_default () {
@@ -32,9 +39,9 @@ public class Gnonograms.Controller : GLib.Object {
     public uint columns { get; set; } // Stored with game file. Can be set be App Popover
     public string game_name { get; set; default = _(UNTITLED_NAME); } // Can be set be App Popover
     public string current_game_path { get; set; default = ""; } // synced with settings
-    /* Any game that was not saved by this app is regarded as read only - any alterations
-     * must be "Saved As" - which by default is writable. */
-    public bool is_readonly { get; private set; default = false;} // Stored with game file.
+    // /* Any game that was not saved by this app is regarded as read only - any alterations
+    //  * must be "Saved As" - which by default is writable. */
+    // public bool is_readonly { get; private set; default = false;} // Stored with game file.
 
     public bool can_go_back {
         get {
@@ -209,7 +216,7 @@ public class Gnonograms.Controller : GLib.Object {
         model.clear ();
         view.update_clues_from_solution ();
         clear_history ();
-        is_readonly = false;
+        // is_readonly = false;
     }
 
     private void new_game () {
@@ -262,17 +269,16 @@ public class Gnonograms.Controller : GLib.Object {
     warning ("save game state");
         string? saved_file_path = null;
         if (temporary_game_path != null) {
-            try {
-                var current_game_file = File.new_for_path (temporary_game_path);
-                current_game_file.@delete ();
-            } catch (Error e) {
-                /* Error normally thrown on first run */
-                warning ("Error deleting temporary game file %s - %s", temporary_game_path, e.message);
-            } finally {
-                warning ("writing unsaved game to %s", temporary_game_path);
-                /* Save solution and current state */
-                saved_file_path = yield write_game (temporary_game_path, true);
-            }
+            // try {
+            //     var current_game_file = File.new_for_path (temporary_game_path);
+            //     current_game_file.@delete (); // Unnecessary?
+            // } catch (Error e) {
+            //     /* Error normally thrown on first run */
+            //     warning ("Error deleting temporary game file %s - %s", temporary_game_path, e.message);
+            // } finally {
+            //     /* Save solution and current state */
+                saved_file_path = yield write_game (temporary_game_path, SaveFlags.SAVE_STATE);
+            // }
         }
 
         return saved_file_path != null;
@@ -285,7 +291,7 @@ public class Gnonograms.Controller : GLib.Object {
             yield save_game_as ();
         } else {
             warning ("write game - no state");
-            var path = yield write_game (current_game_path, false);
+            var path = yield write_game (current_game_path, SaveFlags.NONE);
             if (path != null && path != "") {
                 current_game_path = path;
                 notify_saved (path);
@@ -297,11 +303,11 @@ public class Gnonograms.Controller : GLib.Object {
     public async void save_game_as () {
     warning ("Controller: save game as");
         /* Filewriter will request save location, no solution saved as default */
-        var path = yield write_game (null, false);
+        var path = yield write_game (null, SaveFlags.CONFIRM_OVERWRITE);
         if (path != null) {
             current_game_path = path;
             notify_saved (path);
-            is_readonly = false;
+            // is_readonly = false;
         }
     }
 
@@ -315,12 +321,7 @@ public class Gnonograms.Controller : GLib.Object {
         }
     }
 
-    private async string? write_game (
-        string? save_to_path,
-        bool save_state = false
-    ) requires (saved_games_folder != null) {
-
-    warning ("write game to %s, save state %s, save dir %s", save_to_path, save_state.to_string (), saved_games_folder);
+    private async string? write_game (string? save_to_path, SaveFlags flags) requires (saved_games_folder != null) {
         var file_writer = new Filewriter (
             window,
             dimensions,
@@ -339,16 +340,14 @@ public class Gnonograms.Controller : GLib.Object {
         var gs = game_state;
         game_state = LOAD_SAVE;
         try {
-            if (save_state) {
+            if (SAVE_STATE in flags) {
                 yield file_writer.write_position_file (
                     model.copy_working_data (),
                     gs,
                     history
                 );
             } else {
-                yield file_writer.write_game_file (
-                    is_readonly
-                );
+                yield file_writer.write_game_file (flags);
             }
         } catch (Error e) {
             if (!(e is IOError.CANCELLED)) {
@@ -435,7 +434,7 @@ warning ("has state %s", reader.state.to_string ());
 
     private async bool load_common (Filereader reader) {
         view.game_grade = reader.difficulty;
-        is_readonly = reader.is_readonly;
+        // is_readonly = reader.is_readonly;
 
         if (reader.has_dimensions) {
             if (reader.rows > MAXSIZE || reader.cols > MAXSIZE) {
