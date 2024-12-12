@@ -58,7 +58,6 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
     public Cell? previous_cell { get; set; }
     public Difficulty generator_grade { get; set; }
     public Difficulty game_grade { get; set; }
-    // public string game_name { get { return controller.game_name; } }
     public bool readonly { get; set; default = false;}
     public bool restart_destructive { get; set; default = false;}
 
@@ -576,11 +575,9 @@ public class Gnonograms.View : Gtk.ApplicationWindow {
         controller.change_mode (SETTING);
     }
     private void action_solving_mode () {
-        // controller.game_state = GameState.SOLVING;
         controller.change_mode (SOLVING);
     }
     private void action_generating_mode () {
-        // controller.game_state = GameState.GENERATING;
         controller.change_mode (GENERATING);
     }
 

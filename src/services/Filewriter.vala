@@ -7,18 +7,21 @@
 public class Gnonograms.Filewriter : Object {
     public DateTime date { get; construct; }
     public Gtk.Window? parent { get; construct; }
-    public Difficulty difficulty { get; set; default = Difficulty.UNDEFINED;}
-    public My2DCellArray? solution { get; set; default = null;}
+
     public uint rows { get; construct; }
     public uint cols { get; construct; }
     public string[] row_clues { get; construct; }
     public string[] col_clues { get; construct; }
     public string? game_path { get; set construct; }
     public string? save_to_path { get; set construct; }
-    public string? game_name { get; set construct; }
     public string? save_dir_path { get; construct; }
-    public string author { get; set; default = "";}
+
+    public My2DCellArray? solution { get; set; default = null;}
+    public string game_name { get; set; default = _(UNTITLED_NAME); }
+    public Difficulty difficulty { get; set; default = Difficulty.UNDEFINED;}
+    public string author { get; set; default = "Unknown";}
     public string license { get; set; default = "";}
+
     private FileStream? stream;
 
     public Filewriter (
@@ -26,10 +29,8 @@ public class Gnonograms.Filewriter : Object {
         Dimensions dimensions,
         string[] row_clues,
         string[] col_clues,
-        Difficulty difficulty,
         string? save_dir_path,
         string? game_path,
-        string game_name,
         string? save_to_path
     ) {
 
@@ -39,10 +40,8 @@ public class Gnonograms.Filewriter : Object {
             cols: dimensions.width,
             row_clues: row_clues,
             col_clues: col_clues,
-            difficulty: difficulty,
             save_dir_path: save_dir_path,
             game_path: game_path,
-            game_name: game_name,
             save_to_path: save_to_path
         );
     }
@@ -53,10 +52,6 @@ public class Gnonograms.Filewriter : Object {
 
     /*** Writes minimum information required for valid game file ***/
     public async void write_game_file (SaveFlags flags) throws Error {
-        if (game_name == null) {
-           game_name = _(UNTITLED_NAME);
-        }
-
         if (save_to_path == null || save_to_path.length <= 4) {
             var save_to_file = yield Utils.get_open_save_file (
                 parent,
@@ -104,7 +99,7 @@ public class Gnonograms.Filewriter : Object {
 
         stream.printf ("[Description]\n");
         stream.printf ("%s\n", game_name);
-        stream.printf ("%s\n", author != "" ? author : "Gnonograms Generator");
+        stream.printf ("%s\n", author);
         stream.printf ("%s\n", date.to_string ());
         stream.printf ("%u\n", difficulty);
 

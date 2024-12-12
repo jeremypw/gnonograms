@@ -10,7 +10,8 @@ public class Gnonograms.HeaderBarManager : Object {
     public View view { get; construct; }
 
     private Gtk.HeaderBar header_bar;
-    private Gtk.Label title_label;
+    private Gtk.EditableLabel title_label;
+    private Gtk.Label grade_label;
     private Gtk.Stack progress_stack;
     private ProgressIndicator progress_indicator;
     private Gtk.Button generate_button;
@@ -106,17 +107,27 @@ public class Gnonograms.HeaderBarManager : Object {
 
         progress_indicator = new ProgressIndicator ();
 
-        title_label = new Gtk.Label ("Gnonograms") {
-            use_markup = true,
+        title_label = new Gtk.EditableLabel ("Gnonograms") {
+            // use_markup = true,
             xalign = 0.5f
         };
-        title_label.add_css_class (Granite.STYLE_CLASS_H3_LABEL);
+        title_label.add_css_class (Granite.STYLE_CLASS_TITLE_LABEL);
+
+        grade_label = new Gtk.Label ("") {
+            xalign = 0.5f
+        };
+        grade_label.add_css_class (Granite.STYLE_CLASS_SMALL_LABEL);
+        grade_label.add_css_class (Granite.STYLE_CLASS_DIM_LABEL);
+
+        var label_box = new Gtk.Box (VERTICAL, 0);
+        label_box.append (title_label);
+        label_box.append (grade_label);
 
         progress_stack = new Gtk.Stack () {
             halign = Gtk.Align.CENTER,
         };
         progress_stack.add_named (progress_indicator, "Progress");
-        progress_stack.add_named (title_label, "Title");
+        progress_stack.add_named (label_box, "Title");
         progress_stack.set_visible_child_name ("Title");
 
         header_bar = new Gtk.HeaderBar () {
@@ -177,7 +188,9 @@ public class Gnonograms.HeaderBarManager : Object {
     }
 
     public void update_title (string name, string path, Difficulty grade) {
-        title_label.label = name;
+warning ("update title - grade %s", grade.to_string ());
+        title_label.text = name;
+        grade_label.label = grade.to_string ();
         title_label.tooltip_text = path;
         progress_stack.set_visible_child_name ("Title");
     }

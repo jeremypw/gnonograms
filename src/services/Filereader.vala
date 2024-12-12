@@ -19,6 +19,7 @@ public class Gnonograms.Filereader : Object {
     public string[] working { get; private set; }
 
     public string name { get; private set; default = "";}
+    public string author { get; private set; default = "";}
     public string date { get; private set; default = "";}
     public Difficulty difficulty { get; private set; default = Difficulty.UNDEFINED;}
     public string license { get; private set; default = "";}
@@ -308,16 +309,24 @@ public class Gnonograms.Filereader : Object {
         }
 
         if (s.length >= 2) {
-            date = s[1];
+            author = s[1];
         }
 
         if (s.length >= 3) {
-            var grade = s[2].strip ();
+            date = s[2];
+        }
+
+        if (s.length >= 4) {
+        warning ("reading difficulty");
+            var grade = s[3].strip ();
+            warning ("read %s", grade);
             if (grade.length == 1 && grade[0].isdigit ()) {
                 difficulty = (Difficulty)(int.parse (grade));
             } else {
                 difficulty = Difficulty.UNDEFINED;
             }
+
+            warning ("got %s", difficulty.to_string ());
         }
 
         return true;

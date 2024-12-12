@@ -33,6 +33,7 @@ public class Gnonograms.Controller : GLib.Object {
     public uint rows { get; set; } // Stored with game file. Can be set be App Popover
     public uint columns { get; set; } // Stored with game file. Can be set be App Popover
     public string game_name { get; set; default = _(UNTITLED_NAME); } // Can be set be App Popover
+    public string author { get; set; default = _("Unknown"); } // Can be set be App Popover
     public string current_game_path { get; set; default = ""; } // synced with settings
 
     public bool can_go_back {
@@ -215,11 +216,17 @@ public class Gnonograms.Controller : GLib.Object {
         clear ();
         game_state = GameState.SETTING;
         game_name = _(UNTITLED_NAME);
+        current_game_path = "";
     }
 
     private void on_new_random_request () {
         clear ();
         solver.cancel ();
+        author = APP_NAME;
+        current_game_path = "";
+        game_name = _("Random pattern");
+        view.game_grade = Difficulty.UNDEFINED;
+        game_state = GameState.GENERATING;
 
         var cancellable = new Cancellable ();
         solver.cancellable = cancellable;
@@ -227,9 +234,6 @@ public class Gnonograms.Controller : GLib.Object {
             grade = generator_grade
         };
 
-        game_name = _("Random pattern");
-        view.game_grade = Difficulty.UNDEFINED;
-        game_state = GameState.GENERATING;
         view.show_working (cancellable, (_("Generating")));
         generator.generate.begin ((obj, res) => {
             var success = generator.generate.end (res);
@@ -305,14 +309,14 @@ public class Gnonograms.Controller : GLib.Object {
             dimensions,
             view.get_clues (false),
             view.get_clues (true),
-            view.game_grade,
             saved_games_folder,
             current_game_path,
-            game_name,
             save_to_path
-
         ) {
-            solution = !model.solution_is_blank () ? model.copy_solution_data () : null
+            solution = !model.solution_is_blank () ? model.copy_solution_data () : null,
+            game_name = this.game_name,
+            author = this.author,
+            difficulty = view.game_grade
         };
 
         var gs = game_state;
@@ -408,7 +412,7 @@ public class Gnonograms.Controller : GLib.Object {
 
     private async bool load_common (Filereader reader) {
         view.game_grade = reader.difficulty;
-
+warning ("load common: difficulty %s", reader.difficulty.to_string ());
         if (reader.has_dimensions) {
             if (reader.rows > MAXSIZE || reader.cols > MAXSIZE) {
                 reader.err_msg = (_("Dimensions too large"));
