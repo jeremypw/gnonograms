@@ -1,56 +1,21 @@
-/* Label.vala
- * Copyright (C) 2010-2021  Jeremy Wootten
+/*
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * SPDX-FileCopyrightText: 2010-2024 Jeremy Wootten
  *
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- *  Author: Jeremy Wootten <jeremywootten@gmail.com>
+ * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
+class Gnonograms.Clue : Object {
+    public Gtk.Label label { get; construct; }
+    public unowned ClueBox cluebox { get; construct; }
 
-class Gnonograms.Clue : Gtk.Label {
-    private uint _n_cells;
-    public uint n_cells {
-        set {
-            _n_cells = value;
-            update_tooltip ();
-        }
-
-        private get {
-            return _n_cells;
-        }
-    }
-
-    private int _fontsize;
-    private int _cell_size;
-    public int cell_size {
+    private string _text; /* text of clue in horizontal form */
+    public string text {
         get {
-            return _cell_size;
-        }
-        set {
-            _cell_size = value;
-            _fontsize = (int)((double)value * 0.4);
-            update_markup ();
-        }
-    }
-
-    private string _clue; /* text of clue in horizontal form */
-    public string clue {
-        get {
-            return _clue;
+            return _text;
         }
 
         set {
-            _clue = value;
+            _text = value;
             clue_blocks = Utils.block_struct_array_from_clue (value);
             update_markup ();
         }
@@ -58,52 +23,50 @@ class Gnonograms.Clue : Gtk.Label {
 
     public bool vertical_text { get; construct; }
 
-    private Gee.List<Block> clue_blocks;
-    private Gee.List<Block> grid_blocks;
+    private Gee.List<Block> clue_blocks; // List of blocks based on clue
 
-    public Clue (bool _vertical_text) {
+    public Clue (bool _vertical_text, ClueBox cluebox) {
         Object (
             vertical_text: _vertical_text,
-            xalign: _vertical_text ? (float)0.5 : (float)1.0,
-            yalign: _vertical_text ? (float)1.0 : (float)0.5,
-            clue: "0",
-            has_tooltip: true,
-            use_markup: true,
-            margin: 0,
-            expand: true
+            cluebox: cluebox
         );
     }
 
     construct {
-        realize.connect_after (() => {
-            update_markup ();
-        });
+        label = new Gtk.Label ("") {
+            xalign = _vertical_text ? (float)0.5 : (float)1.0,
+            yalign = vertical_text ? (float)1.0 : (float)0.5,
+            has_tooltip = true,
+            use_markup = true,
+        };
+
+        text = "0";
+
+        label.realize.connect_after (update_markup);
+        cluebox.notify["cell-size"].connect (update_markup);
     }
 
     public void highlight (bool is_highlight) {
         if (is_highlight) {
-            get_style_context ().add_class (Granite.STYLE_CLASS_ACCENT);
+            label.add_css_class (Granite.STYLE_CLASS_ACCENT);
         } else {
-            get_style_context ().remove_class (Granite.STYLE_CLASS_ACCENT);
+            label.remove_css_class (Granite.STYLE_CLASS_ACCENT);
         }
     }
 
     public void clear_formatting () {
-        var sc = get_style_context ();
-        sc.remove_class ("warn");
-        sc.remove_class ("dim");
+        label.remove_css_class ("warn");
+        label.remove_css_class ("dim");
     }
 
-    public void update_complete (Gee.List<Block> _grid_blocks) {
-        grid_blocks = _grid_blocks;
+    public void update_complete (Gee.List<Block> grid_blocks) {
         foreach (Block block in clue_blocks) {
             block.is_complete = false;
             block.is_error = false;
         }
 
-        var sc = get_style_context ();
-        sc.remove_class ("warn");
-        sc.remove_class ("dim");
+        label.remove_css_class ("warn");
+        label.remove_css_class ("dim");
 
         uint complete = 0;
         uint errors = 0;
@@ -149,12 +112,12 @@ class Gnonograms.Clue : Gtk.Label {
             }
 
             if (errors > 0) {
-                sc.add_class ("warn");
+                label.add_css_class ("warn");
             }
 
             if (complete == clue_blocks.size && errors == 0 && grid_null == 0) {
                 update_markup ();
-                sc.add_class ("dim");
+                label.add_css_class ("dim");
                 return;
             }
 
@@ -214,25 +177,25 @@ class Gnonograms.Clue : Gtk.Label {
                     }
                 }
             }
-        } else if (clue != "0") { /* Zero grid blocks should only occur if cellstates all "empty" */
+        } else if (text != "0") { /* Zero grid blocks should only occur if cellstates all "empty" */
             errors++;
         }
 
         if (errors > 0) {
-            sc.add_class ("warn");
+            label.add_css_class ("warn");
         }
 
         update_markup ();
     }
 
     private void update_markup () {
-        set_markup ("<span font='%i'>".printf (_fontsize) + get_markup () + "</span>");
+        label.set_markup ("<span font_desc='%s'>".printf (cluebox.font_desc.to_string ()) + get_markup () + "</span>");
         update_tooltip ();
     }
 
     private void update_tooltip () {
-        set_tooltip_markup ("<span font='%i'>".printf (_fontsize) +
-            _("Freedom = %u").printf (n_cells - Utils.blockextent_from_clue (_clue)) +
+        label.set_tooltip_markup ("<span font_desc='%s'>".printf (cluebox.font_desc.to_string ()) +
+            _("Freedom = %u").printf (cluebox.n_cells - Utils.blockextent_from_clue (_text)) +
             "</span>"
         );
     }
@@ -241,7 +204,7 @@ class Gnonograms.Clue : Gtk.Label {
         string attrib = "";
         string weight = "bold";
         string strikethrough = "false";
-        bool warn = get_style_context ().has_class ("warn");
+        bool warn = label.has_css_class ("warn");
         StringBuilder sb = new StringBuilder ("");
 
         foreach (Block clue_block in clue_blocks) {
@@ -257,7 +220,12 @@ class Gnonograms.Clue : Gtk.Label {
 
             attrib = "<span weight='%s' strikethrough='%s'>".printf (weight, strikethrough);
             sb.append (attrib);
-            sb.append (clue_block.length.to_string ());
+            if (vertical_text) {
+                sb.append (" " + clue_block.length.to_string () + " ");
+            } else {
+                sb.append (clue_block.length.to_string ());
+            }
+
             sb.append ("</span>");
             if (vertical_text) {
                 sb.append ("\n");

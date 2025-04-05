@@ -1,23 +1,52 @@
-/* Application.vala
- * Copyright (C) 2010-2021  Jeremy Wootten
+/*
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * SPDX-FileCopyrightText: 2010-2024 Jeremy Wootten
  *
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- *  Author: Jeremy Wootten <jeremywootten@gmail.com>
+ * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
+namespace Gnonograms {
+    public enum GameState {
+        SETTING,
+        SOLVING,
+        GENERATING,
+        LOAD_SAVE;
+    }
 
-public class Gnonograms.App : Gtk.Application {
+    public const string ACTION_GROUP = "win";
+    public const string ACTION_PREFIX = ACTION_GROUP + ".";
+    public const string ACTION_UNDO = "action-undo";
+    public const string ACTION_REDO = "action-redo";
+    public const string ACTION_CURSOR_UP = "action-cursor_up";
+    public const string ACTION_CURSOR_DOWN = "action-cursor_down";
+    public const string ACTION_CURSOR_LEFT = "action-cursor_left";
+    public const string ACTION_CURSOR_RIGHT = "action-cursor_right";
+    public const string ACTION_SETTING_MODE = "action-setting-mode";
+    public const string ACTION_SOLVING_MODE = "action-solving-mode";
+    public const string ACTION_GENERATING_MODE = "action-generating-mode";
+    public const string ACTION_OPEN = "action-open";
+    public const string ACTION_SAVE = "action-save";
+    public const string ACTION_SAVE_AS = "action-save-as";
+    public const string ACTION_CHECK_ERRORS = "action-check-errors";
+    public const string ACTION_RESTART = "action-restart";
+    public const string ACTION_COMPUTER_SOLVE = "action-solve";
+    public const string ACTION_HINT = "action-hint";
+    public const string ACTION_OPTIONS = "action-options";
+    public const string ACTION_OPTIONS_ACCEL = "";
+    public const string ACTION_ZOOM_SMALLER = "action-zoom-smaller";
+    public const string ACTION_ZOOM_DEFAULT = "action-zoom-default";
+    public const string ACTION_ZOOM_LARGER = "action-zoom-larger";
+    public const string ACTION_SHORTCUT_WINDOW = "action-shortcut-window";
+    public const string ACTION_ABOUT_WINDOW = "action-about-dialog";
+    public const string ACTION_PREFERENCES = "action-preferences";
+
+#if WITH_DEBUGGING
+    public const string ACTION_DEBUG_ROW = "action-debug-row";
+    public const string ACTION_DEBUG_COL = "action-debug-col";
+#endif
+    public GLib.Settings saved_state;
+    public GLib.Settings settings;
+
+    public class App : Gtk.Application {
     private Controller controller;
 
     public App () {
@@ -33,24 +62,19 @@ public class Gnonograms.App : Gtk.Application {
         GLib.Intl.bind_textdomain_codeset (Config.GETTEXT_PACKAGE, "UTF-8");
         GLib.Intl.textdomain (Config.GETTEXT_PACKAGE);
 
+        saved_state = new GLib.Settings (Config.APP_ID + ".saved-state");
+        settings = new GLib.Settings (Config.APP_ID + ".settings");
+
         SimpleAction quit_action = new SimpleAction ("quit", null);
         quit_action.activate.connect (() => {
+        warning ("quit action");
             if (controller != null) {
-                controller.quit (); /* Will save state */
+                controller.on_delete_request (); /* Will save state */
             }
         });
 
         add_action (quit_action);
         set_accels_for_action ("app.quit", {"<Ctrl>q"});
-
-        var granite_settings = Granite.Settings.get_default ();
-        var gtk_settings = Gtk.Settings.get_default ();
-
-        gtk_settings.gtk_application_prefer_dark_theme = granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
-
-        granite_settings.notify["prefers-color-scheme"].connect (() => {
-            gtk_settings.gtk_application_prefer_dark_theme = granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
-        });
     }
 
     public override void open (File[] files, string hint) {
@@ -64,8 +88,7 @@ public class Gnonograms.App : Gtk.Application {
 
     public override void activate () {
         if (controller == null) {
-            controller = new Controller ();
-            controller.quit_app.connect (quit);
+            controller = Controller.get_default ();
             add_window (controller.window);
         } else {
             controller.window.present ();
@@ -85,7 +108,6 @@ public static int main (string[] args) {
         var opt_context = new OptionContext (N_("[Gnonogram Puzzle File (.gno)]"));
         opt_context.set_translation_domain (Config.APP_ID);
         opt_context.add_main_entries (OPTIONS, Config.APP_ID);
-        opt_context.add_group (Gtk.get_option_group (true));
         opt_context.parse (ref args);
     } catch (OptionError e) {
         printerr ("error: %s\n", e.message);
@@ -100,4 +122,5 @@ public static int main (string[] args) {
 
     var app = new Gnonograms.App ();
     return app.run (args);
+}
 }

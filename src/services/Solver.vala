@@ -1,22 +1,9 @@
-/* Solver.vala
- * Copyright (C) 2010-2021  Jeremy Wootten
+/*
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * SPDX-FileCopyrightText: 2010-2024 Jeremy Wootten
  *
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- *  Author: Jeremy Wootten <jeremywootten@gmail.com>
+ * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
-
  public class Gnonograms.Solver : Object {
     public SolverState state { get; set; }
     public My2DCellArray grid { get; protected set; } // Shared with Regions which can update the contents
@@ -87,7 +74,6 @@
 
         assert (row_clues.length == rows && col_clues.length == cols);
         should_check_solution = solution_grid != null;
-
         if (should_check_solution) {
             solution.copy (solution_grid);
         }
@@ -112,10 +98,6 @@
         return valid ();
     }
 
-    /** Initiate solving, specifying whether or not to use the advanced
-      * procedures. Also specify whether in debugging mode and whether to solve one step
-      * at a time (used for hinting if implemented).
-    **/
     public async Difficulty solve_clues (string[] row_clues,
                                          string[] col_clues,
                                          My2DCellArray? start_grid = null,
@@ -184,6 +166,7 @@
             case Difficulty.MODERATE:
             case Difficulty.HARD:
             case Difficulty.CHALLENGING:
+            case Difficulty.UNDEFINED:
 
                 break;
             case Difficulty.ADVANCED:
@@ -204,8 +187,6 @@
                 human_only = false;
 
                 break;
-            default:
-                assert_not_reached ();
         }
     }
 
@@ -230,9 +211,13 @@
     }
 
 #if WITH_DEBUGGING
-    public Gee.ArrayQueue<Move> debug (uint idx, bool is_column, string[] row_clues,
-                                       string[] col_clues, My2DCellArray working) {
-
+    public Gee.ArrayQueue<Move> debug (
+        uint idx,
+        bool is_column,
+        string[] row_clues,
+        string[] col_clues,
+        My2DCellArray working
+    ) {
         initialize (row_clues, col_clues, working, null);
 
         var moves = new Gee.ArrayQueue<Move> ();
@@ -263,9 +248,12 @@
     }
 #endif
 
-    public Gee.ArrayQueue<Move> hint (string[] row_clues, string[] col_clues, My2DCellArray working) {
+    public Gee.ArrayQueue<Move> hint (
+        string[] row_clues,
+        string[] col_clues,
+        My2DCellArray working
+    ) {
         initialize (row_clues, col_clues, working, null);
-
         bool changed = false;
         uint count = 0;
         var moves = new Gee.ArrayQueue<Move> ();
@@ -280,15 +268,15 @@
                     var row = r.is_column ? i : r.index;
                     var col = r.is_column ? r.index : i;
                     Cell c = {row, col, r_state};
-                    moves.add (new Move (c, csa[i]));
+                    moves.add (new Move.from_cell (c, csa[i]));
                     changed = true;
                 }
             }
         }
 
         while (!changed && count < 2 &&
-               state != SolverState.ERROR) { /* May require two passes before a state changes */
-
+               state != SolverState.ERROR
+        ) { /* May require two passes before a state changes */
             changed = false;
             count++;
             foreach (Region r in regions) {
@@ -312,7 +300,7 @@
                             var row = r.is_column ? i : r.index;
                             var col = r.is_column ? r.index : i;
                             Cell c = {row, col, r_state};
-                            moves.add (new Move (c, csa[i]));
+                            moves.add (new Move.from_cell (c, csa[i]));
                             break;
                         }
                     }
@@ -385,20 +373,19 @@
         int empty = 0;
         int min_empty_cells = int.MAX;
         int changed_count = 0;
-        Cell best_guess = NULL_CELL;
+        Cell? best_guess = null;
         state = SolverState.UNDEFINED;
 
         while (state == SolverState.UNDEFINED) {
             changed_count++;
-
             if (!guesser.next_guess ()) {
                 state = SolverState.NO_SOLUTION;
-                if (best_guess.equal (NULL_CELL)) { // No improvement from last round
+                if (best_guess == null) { // No improvement from last round
                     break;
                 } else {
                     grid.set_data_from_cell (best_guess);
                     guesser = new Guesser (grid, false);
-                    best_guess = NULL_CELL;
+                    best_guess = null;
                     changed_count = 0;
                     if (!guesser.next_guess ()) {
                         warning ("No next guess");
@@ -409,7 +396,6 @@
 
             result = yield simple_solver ();
             initial_state = state;
-
             if (initial_state == SolverState.NO_SOLUTION) {
                 empty = solution.count_state (CellState.EMPTY);
                 if (empty < min_empty_cells) {
@@ -426,7 +412,6 @@
             }
 
             contra = result;
-
             /* Try opposite to check whether ambiguous or unique */
             guesser.invert_previous_guess ();
             result = yield simple_solver ();
@@ -480,7 +465,7 @@
                             result = yield simple_solver ();
                             state = SolverState.AMBIGUOUS;
                         }
-                    } else if (initial_state == SolverState.ERROR) { // already checked for too may passes to contradiction.
+                    } else if (initial_state == SolverState.ERROR) {
                         guesser.initialize ();
                         /* Continue from this position */
                         state = SolverState.UNDEFINED;
@@ -539,7 +524,6 @@
     /** Only call if simple solver used **/
     private Difficulty passes_to_grade (uint passes) {
         Difficulty result;
-
         if (passes == 0) {
             result = Difficulty.UNDEFINED;
         } else if (state == SolverState.ADVANCED) {
@@ -670,7 +654,7 @@
                     c++;
                     cdir = 0;
                     rdir = -1;
-                     r--;
+                    r--;
                 } else if (rdir == -1 && r <= turn) { //back across bottom lh edge reached
                     r++;
                     turn++;

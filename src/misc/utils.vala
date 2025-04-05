@@ -1,20 +1,8 @@
-/* utils.vala
- * Copyright (C) 2010-2021  Jeremy Wootten
+/*
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * SPDX-FileCopyrightText: 2010-2024 Jeremy Wootten
  *
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- *  Author: Jeremy Wootten <jeremywootten@gmail.com>
+ * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
 namespace Gnonograms.Utils {
     public static string[] remove_blank_lines (string[] sa) {
@@ -157,7 +145,7 @@ namespace Gnonograms.Utils {
 
     public string block_string_from_cellstate_array (CellState[] cellstates) {
         StringBuilder sb = new StringBuilder ("");
-        CellState count_state = CellState.UNDEFINED;
+        CellState count_state = CellState.INVALID;
         int count = 0, blocks = 0;
         bool counting = false;
         foreach (var state in cellstates) {
@@ -168,16 +156,15 @@ namespace Gnonograms.Utils {
                         blocks++;
                     } else if (count_state == CellState.UNKNOWN) {
                         sb.append ("?" + BLOCKSEPARATOR);
-
                     }
 
                     counting = false;
-                    count_state = CellState.UNDEFINED;
+                    count_state = CellState.INVALID;
                     count = 0;
 
                     break;
                 case CellState.FILLED:
-                    if (count_state == CellState.UNDEFINED) {
+                    if (count_state == CellState.INVALID) {
                         count = 0;
                         counting = true;
                     } else if (count_state == CellState.UNKNOWN) {
@@ -190,7 +177,7 @@ namespace Gnonograms.Utils {
 
                     break;
                 case CellState.UNKNOWN:
-                    if (count_state == CellState.UNDEFINED) {
+                    if (count_state == CellState.INVALID) {
                         counting = true;
                     } else if (count_state == CellState.FILLED) {
                         sb.append (count.to_string () + BLOCKSEPARATOR);
@@ -211,7 +198,9 @@ namespace Gnonograms.Utils {
         } else if (count_state == CellState.UNKNOWN) {
             sb.append ("?" + BLOCKSEPARATOR);
             blocks++;
-        } if (blocks == 0) {
+        }
+
+        if (blocks == 0) {
             sb.append ("0");
         } else {
             sb.truncate (sb.len - BLOCKSEPARATOR.length); // remove trailing seperator
@@ -224,7 +213,7 @@ namespace Gnonograms.Utils {
         CellState[] cs = {};
         string[] blocks = remove_blank_lines (s.split_set (BLOCKSEPARATOR));
         foreach (var block in blocks) {
-            cs += (CellState)(int.parse (block)).clamp (0, CellState.UNDEFINED);
+            cs += (CellState)(int.parse (block)).clamp (0, CellState.INVALID);
         }
 
         return cs;
@@ -240,11 +229,12 @@ namespace Gnonograms.Utils {
         return sb.str;
     }
 
-    public static int show_dlg (string primary_text,
-                                Gtk.MessageType type,
-                                string? secondary_text,
-                                Gtk.Window? parent) {
-
+    private static int show_dlg (
+        string primary_text,
+        Gtk.MessageType type,
+        string? secondary_text,
+        Gtk.Window? parent
+    ) {
         string icon_name = "";
         var buttons = Gtk.ButtonsType.CLOSE;
         switch (type) {
@@ -269,9 +259,11 @@ namespace Gnonograms.Utils {
                 assert_not_reached ();
         }
 
-        var dialog = new Granite.MessageDialog.with_image_from_icon_name (primary_text,
-                                                                          secondary_text ?? "",
-                                                                          icon_name, buttons);
+        var dialog = new Granite.MessageDialog.with_image_from_icon_name (
+            primary_text,
+            secondary_text ?? "",
+            icon_name, buttons
+        );
 
         dialog.set_transient_for (parent);
         if (type == Gtk.MessageType.QUESTION) {
@@ -280,23 +272,29 @@ namespace Gnonograms.Utils {
             dialog.set_default_response (Gtk.ResponseType.NO);
         }
 
-        dialog.set_position (Gtk.WindowPosition.MOUSE);
-        int response = dialog.run ();
-        dialog.destroy ();
+        Gtk.ResponseType response = Gtk.ResponseType.NO;
+        dialog.response.connect ((resp) => {
+            dialog.destroy ();
+            response = (Gtk.ResponseType)resp;
+        });
+
+        dialog.show ();
         return response;
     }
 
-    public static void show_error_dialog (string primary_text,
-                                          string? secondary_text = null,
-                                          Gtk.Window? parent = null) {
-
+    public static void show_error_dialog (
+        string primary_text,
+        string? secondary_text = null,
+        Gtk.Window? parent = null
+    ) {
         show_dlg (primary_text, Gtk.MessageType.ERROR, secondary_text, parent);
     }
 
-    public static bool show_confirm_dialog (string primary_text,
-                                            string? secondary_text = null,
-                                            Gtk.Window? parent = null) {
-
+    public static bool show_confirm_dialog (
+        string primary_text,
+        string? secondary_text = null,
+        Gtk.Window? parent = null
+    ) {
         var response = show_dlg (
             primary_text,
             Gtk.MessageType.QUESTION,
@@ -306,53 +304,32 @@ namespace Gnonograms.Utils {
         return response == Gtk.ResponseType.YES;
     }
 
-    public static string? get_open_save_path (Gtk.Window? parent,
-                                             string dialogname,
-                                             bool save,
-                                             string start_path,
-                                             string basename) {
-        string? file_path = null;
-        string button_label = save ? _("Save") : _("Open");
-        var gtk_action = save ? Gtk.FileChooserAction.SAVE : Gtk.FileChooserAction.OPEN;
-        var dialog = new Gtk.FileChooserNative (
-            dialogname,
-            parent,
-            gtk_action,
-            button_label,
-            _("Cancel")
-        );
+    public static async File? get_open_save_file (
+        Gtk.Window? parent,
+        string dialogname,
+        bool save,
+        string start_folder_path,
+        string basename
+    ) throws Error {
+        var button_label = save ? _("Save") : _("Open");
+        var dialog = new Gtk.FileDialog () {
+            title = dialogname,
+            accept_label = button_label,
+            initial_folder = File.new_for_path (start_folder_path),
+            initial_name = basename,
+            modal = true
+
+        };
 
         dialog.set_modal (true);
-        try {
-            if (save) {
-                dialog.set_current_folder_file (File.new_for_path (start_path));
-                if (basename != null) {
-                    dialog.set_current_name (basename);
-                }
-            } else {
-                try {
-                    dialog.set_current_folder_file (File.new_for_path (start_path));
-                } catch (Error e) {
-                    warning ("Error setting current folder: %s", e.message);
-                }
-            }
-        } catch (Error e) {
-            warning ("Error configuring FileChooser dialog: %s", e.message);
+        File? result = null;
+        warning ("show dialog");
+        if (save) {
+            result = yield (dialog.save (parent, null));
+        } else {
+            result = yield (dialog.open (parent, null));
         }
-
-        var response = dialog.run ();
-        if (response == Gtk.ResponseType.ACCEPT) {
-            file_path = dialog.get_filename ();
-        }
-
-        dialog.destroy ();
-
-        return file_path;
-    }
-
-    public Gdk.Rectangle get_monitor_area (Gdk.Screen screen, Gdk.Window window) {
-        var display = Gdk.Display.get_default ();
-        var monitor = display.get_monitor_at_window (window);
-        return monitor.get_geometry ();
+        warning ("done");
+        return result;
     }
 }

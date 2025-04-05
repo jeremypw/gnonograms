@@ -1,28 +1,14 @@
-/* Filereader.vala
- * Copyright (C) 2010-2021  Jeremy Wootten
+/*
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * SPDX-FileCopyrightText: 2010-2024 Jeremy Wootten
  *
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License along
-    with this program; if not, write to the Free Software Foundation, Inc.,
-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- *  Author: Jeremy Wootten  < jeremwootten@gmail.com >
+ * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
-
 public class Gnonograms.Filereader : Object {
     public string err_msg = "";
 
     public File? game_file { get; set; default = null;}
-    public GameState state { get; private set; default = GameState.UNDEFINED;}
+    public GameState state { get; private set; }
 
     public int rows { get; private set; default = 0;}
     public int cols { get; private set; default = 0;}
@@ -33,6 +19,7 @@ public class Gnonograms.Filereader : Object {
     public string[] working { get; private set; }
 
     public string name { get; private set; default = "";}
+    public string author { get; private set; default = "";}
     public string date { get; private set; default = "";}
     public Difficulty difficulty { get; private set; default = Difficulty.UNDEFINED;}
     public string license { get; private set; default = "";}
@@ -45,7 +32,6 @@ public class Gnonograms.Filereader : Object {
     public bool has_solution { get; private set; default = false;}
     public bool has_working { get; private set; default = false;}
     public bool has_state { get; private set; default = false;}
-    public bool is_readonly { get; private set; default = true;}
 
     public bool valid {
         get {
@@ -53,11 +39,15 @@ public class Gnonograms.Filereader : Object {
         }
     }
 
-    public Filereader (Gtk.Window? parent, string? load_dir_path, File? game) throws GLib.IOError {
-        Object (game_file: game);
-
+    public async void read (
+        Gtk.Window? parent,
+        string? load_dir_path,
+        File? game
+    ) throws Error {
         if (game == null) {
-            game_file = get_load_game_file (parent, load_dir_path);
+            game_file = yield get_load_game_file (parent, load_dir_path);
+        } else {
+            game_file = game;
         }
 
         if (game_file == null) {
@@ -73,23 +63,19 @@ public class Gnonograms.Filereader : Object {
         }
 
         parse_gnonogram_game_file (stream);
-
     }
 
-    private File? get_load_game_file (Gtk.Window? parent, string? load_dir_path) {
-        string? path = Utils.get_open_save_path (
+    private async File? get_load_game_file (
+        Gtk.Window? parent,
+        string? load_dir_path
+    ) throws Error {
+        return yield Utils.get_open_save_file (
             parent,
             _("Choose a puzzle"),
             false,
             load_dir_path,
             ""
         );
-
-        if (path == null || path == "") {
-            return null;
-        } else {
-            return File.new_for_path (path);
-        }
     }
 
     private void parse_gnonogram_game_file (DataInputStream stream) throws GLib.IOError {
@@ -186,10 +172,6 @@ public class Gnonograms.Filereader : Object {
 
                 case "DES":
                     in_error = !get_game_description (body);
-                    break;
-
-                case "LOC":
-                    in_error = !get_readonly (body);
                     break;
 
                 case "ORI":
@@ -296,13 +278,16 @@ public class Gnonograms.Filereader : Object {
 
     private bool get_gnonogram_state (string? body) {
         /* Default to SOLVING state to avoid inadvertently showing solution */
-        state = GameState.SOLVING;
+        has_state = false;
         if (body != null) {
             string[] s = Utils.remove_blank_lines (body.split ("\n"));
             if (s != null && s.length == 1) {
+                has_state = true;
                 var state_string = s[0];
                 if (state_string.up ().contains ("SETTING")) {
-                    state = GameState.SETTING;
+                    state = SETTING;
+                } else {
+                    state = SOLVING;
                 }
             }
         }
@@ -310,7 +295,7 @@ public class Gnonograms.Filereader : Object {
         return true;
     }
 
-    /** First four lines of description must be in order @name, @date, @score (difficulty or grade).
+    /** First four lines of description must be in order @name, @date, @score
       * Missing data must be represented by blank lines.
     **/
     private bool get_game_description (string? body) {
@@ -324,33 +309,21 @@ public class Gnonograms.Filereader : Object {
         }
 
         if (s.length >= 2) {
-            date = s[1];
+            author = s[1];
         }
 
         if (s.length >= 3) {
-            var grade = s[2].strip ();
+            date = s[2];
+        }
+
+        if (s.length >= 4) {
+            var grade = s[3].strip ();
             if (grade.length == 1 && grade[0].isdigit ()) {
                 difficulty = (Difficulty)(int.parse (grade));
             } else {
                 difficulty = Difficulty.UNDEFINED;
             }
         }
-
-        return true;
-    }
-
-    private bool get_readonly (string? body) {
-        if (body == null) {
-            return true; /* Not mandatory */
-        }
-
-        string[] s = Utils.remove_blank_lines (body.split ("\n"));
-        bool result = true;
-        if (s.length >= 1) {
-            bool.try_parse (s[0].down (), out result);
-        }
-
-        is_readonly = result;
 
         return true;
     }

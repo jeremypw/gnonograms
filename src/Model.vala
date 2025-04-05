@@ -1,22 +1,20 @@
-/* Model.vala
- * Copyright (C) 2010-2021  Jeremy Wootten
+/*
+ * SPDX-License-Identifier: LGPL-2.1-or-later
+ * SPDX-FileCopyrightText: 2010-2024 Jeremy Wootten
  *
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- *  Author: Jeremy Wootten <jeremywootten@gmail.com>
+ * Authored by: Jeremy Wootten <jeremywootten@gmail.com>
  */
 public class Gnonograms.Model : GLib.Object {
+    public static Model get_default () {
+        if (instance == null) {
+            instance = new Model ();
+        }
+
+        return instance;
+    }
+
+    private static Model? instance;
+
     public signal void changed ();
 
     public My2DCellArray display_data {
@@ -31,31 +29,38 @@ public class Gnonograms.Model : GLib.Object {
         }
     }
 
-    public Controller controller { get; construct; }
+    private Controller controller = Controller.get_default ();
+
     private My2DCellArray solution_data { get; set; }
     private My2DCellArray working_data { get; set; }
 
-    private uint rows = 0;
-    private uint cols = 0;
-
-    public Model (Controller controller) {
-        Object (
-            controller: controller
-        );
+    private uint rows = 5;
+    private uint cols = 5;
+    private Dimensions dimensions {
+        get {
+            return { cols, rows };
+        }
     }
 
-    construct {
-        controller.notify["dimensions"].connect (() => {
-            rows = controller.dimensions.height;
-            cols = controller.dimensions.width;
-            solution_data = new My2DCellArray (controller.dimensions, CellState.EMPTY);
-            working_data = new My2DCellArray (controller.dimensions, CellState.UNKNOWN);
-            changed ();
-        });
+    private Model () {}
 
+    construct {
+        make_data_arrays ();
+        controller.notify["dimensions"].connect (on_dimensions_changed);
         controller.notify["game-state"].connect (() => {
             changed ();
         });
+    }
+
+    private void on_dimensions_changed () {
+        this.rows = controller.rows;
+        this.cols = controller.columns;
+        make_data_arrays ();
+    }
+
+    private void make_data_arrays () {
+        solution_data = new My2DCellArray (dimensions, CellState.EMPTY);
+        working_data = new My2DCellArray (dimensions, CellState.UNKNOWN);
     }
 
     public int count_errors () {
@@ -64,7 +69,9 @@ public class Gnonograms.Model : GLib.Object {
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
                 cs = working_data.get_data_from_rc (r, c);
-                if (cs != CellState.UNKNOWN && cs != solution_data.get_data_from_rc (r, c)) {
+                if (cs != CellState.UNKNOWN &&
+                    cs != solution_data.get_data_from_rc (r, c)
+                ) {
                     count++;
                 }
             }
@@ -99,7 +106,10 @@ public class Gnonograms.Model : GLib.Object {
 
     public bool is_blank (GameState state) {
         if (state == GameState.SOLVING) {
-            return count_state (state, CellState.EMPTY) + count_state (state, CellState.FILLED) == 0;
+            var non_blank = count_state (state, CellState.EMPTY) +
+                            count_state (state, CellState.FILLED);
+
+            return non_blank == 0;
         } else {
             return count_state (state, CellState.FILLED) == 0;
         }
@@ -155,7 +165,10 @@ public class Gnonograms.Model : GLib.Object {
         return working_data.data2text (idx, length, is_column);
     }
 
-    public Gee.ArrayList<Block> get_complete_blocks_from_working (uint index, bool is_column) {
+    public Gee.ArrayList<Block> get_complete_blocks_from_working (
+        uint index,
+        bool is_column
+    ) {
         var csa = new CellState[is_column ? rows : cols];
         working_data.get_array (index, is_column, ref csa);
         return Utils.complete_block_array_from_cellstate_array (csa);
@@ -201,7 +214,10 @@ public class Gnonograms.Model : GLib.Object {
         return display_data.get_data_from_rc (r, c);
     }
 
-    private void set_row_data_from_string_array (string[] row_data_strings, My2DCellArray array) {
+    private void set_row_data_from_string_array (
+        string[] row_data_strings,
+        My2DCellArray array
+    ) {
         assert (row_data_strings.length == rows);
         int row = 0;
         foreach (var row_string in row_data_strings) {
@@ -231,13 +247,13 @@ public class Gnonograms.Model : GLib.Object {
     }
 
     public My2DCellArray copy_working_data () {
-        var grid = new My2DCellArray (controller.dimensions, CellState.UNKNOWN);
+        var grid = new My2DCellArray (dimensions, CellState.UNKNOWN);
         grid.copy (working_data);
         return grid;
     }
 
     public My2DCellArray copy_solution_data () {
-        var grid = new My2DCellArray (controller.dimensions, CellState.UNKNOWN);
+        var grid = new My2DCellArray (dimensions, CellState.UNKNOWN);
         grid.copy (solution_data);
         return grid;
     }
